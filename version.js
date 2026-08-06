@@ -1,6 +1,17 @@
-export const version = '1.2.0';
+export const version = '1.3.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.3.0',
+    date: '2026-08-06',
+    changes: [
+      'Canvas, grid & rulers (section 03): replaced the static "warm grid" description with how it actually works — the grid is derived from the sheet, not a fixed 40px CSS pattern',
+      'Documented the division formula round(max(canvasW, canvasH) / 60) clamped to 4-30, so grid lines always land on the paper edges and continue to the window edges',
+      'Documented the size readout: bottom and right rulers pinned to the sheet, a tick per division but only the two ends labelled, in millimetres',
+      'Recorded that the Y axis is inverted (paperH - mm) so the origin is bottom-left, matching the plotter bed',
+      'Added a demo showing an A1 square sheet at 594 x 594 mm with its grid and both rulers',
+    ],
+  },
   {
     version: '1.2.0',
     date: '2026-08-06',

@@ -1,0 +1,13 @@
+{
+  "name": "targz-design-system",
+  "version": "1.2.0",
+  "description": "The targz visual language — tokens, components and practices shared by Targz Launchpad and the Portrait generative apps",
+  "main": "index.html",
+  "scripts": {
+    "dev": "live-server . --host=localhost --port=2860 --open=/",
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

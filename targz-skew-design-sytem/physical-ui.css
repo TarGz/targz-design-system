@@ -556,6 +556,11 @@ h2 span{ color:#3d4149; }
   width:20px; height:22px; flex:0 0 20px; border-radius:4px;
   display:flex; align-items:center; justify-content:center;
   border:0; padding:0; cursor:pointer; color:#aeb4be;
+  /* POSITIONED, like every other control with a chamfer. Without it the
+     .chev.open::after ring resolved against .row — a 2px chamfer drawn around
+     the whole row and then clipped away by its overflow, so the one control
+     the rule names by name was the one control not getting it. */
+  position:relative;
   background-image:repeating-linear-gradient(72deg, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,.16) 1px 3px);
   background-color:#202226;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.6), 0 1px 1px rgba(0,0,0,.5);
@@ -1337,6 +1342,73 @@ input:focus-visible{ outline-offset:3px; }
   box-shadow:0 0 5px var(--led), 0 0 10px rgba(255,106,0,.55), 0 1px 0 rgba(0,0,0,.8);
 }
 
+/* ── THE CENTRE-DETENT SCALE ──────────────────────────────────────────────
+   A trim fader's zero is a PLACE, so it is marked like one: a full-height
+   tick at the middle where the others are stubs, and the cap notches into it.
+   The quarter marks stay, because the scale still has to say how far. */
+.fader.bi .fticks::before{
+  content:''; position:absolute; left:50%; top:-1px; width:1px; height:5px;
+  margin-left:-.5px; background:#000; box-shadow:1px 0 0 rgba(255,255,255,.07);
+}
+
+/* ── THE SAME FADER, STOOD UP ─────────────────────────────────────────────
+   Everything that was horizontal turns: the slot, the groove's lighting (a
+   vertical cut is lit on one WALL, not on its top edge), the scale, the
+   cap's waist and its knurl, and the indicator line, which has to stay
+   across the travel to point at a value. Column-reverse puts the readout at
+   the top and the legend at the foot, which is where a mixer has always put
+   them: you read the number while your hand is on the cap, and the channel
+   name is under the strip. */
+.fader.vert{ flex-direction:column-reverse; align-items:center; gap:7px; }
+.fader.vert .flab{ flex:0 0 auto; text-align:center; }
+.fader.vert .fslot{ flex:0 0 auto; width:34px; height:136px; }
+.fader.vert .ftrack{
+  left:12px; right:auto; top:0; bottom:0; width:9px; height:auto;
+  background:linear-gradient(90deg,#060708 0%,#0d0f11 55%,#191c20 100%);
+  box-shadow:
+    inset 2px 0 4px rgba(0,0,0,.98),
+    inset -1px 0 0 rgba(255,255,255,.09),
+    inset 0 2px 3px -2px rgba(0,0,0,.9),
+    inset 0 -2px 3px -2px rgba(0,0,0,.9),
+    1px 0 0 rgba(255,255,255,.07);
+}
+.fader.vert .fticks{
+  left:auto; right:1px; top:0; bottom:0; width:4px; height:auto;
+  background-image:linear-gradient(180deg, #000 0 1px, transparent 1px);
+  background-size:3px calc(25% - .25px); background-repeat:repeat-y;
+  box-shadow:1px 0 0 rgba(255,255,255,.05);
+}
+.fader.vert .fticks::after{ right:auto; left:0; bottom:0; top:auto; width:3px; height:1px; }
+.fader.vert.bi .fticks::before{
+  left:0; top:50%; width:5px; height:1px; margin:-.5px 0 0;
+  box-shadow:0 1px 0 rgba(255,255,255,.07);
+}
+.fader.vert .ffill{ left:2px; right:2px; top:auto; bottom:2px; }
+.fader.vert .fcap{
+  top:auto; left:50%; width:24px; height:17px; margin:-8.5px 0 0 -12px;
+  background:linear-gradient(90deg,#585d66 0%,#3a3e45 16%,#22252a 46%,#1a1c20 54%,#33373d 86%,#4c5158 100%);
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,.45),
+    inset -1px 0 0 rgba(255,255,255,.22),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 6px rgba(0,0,0,.9),
+    0 0 0 1px rgba(0,0,0,.65);
+}
+.fader.vert .fcap::before{
+  inset:3px 2px;
+  background-image:repeating-linear-gradient(90deg,
+    rgba(255,255,255,.13) 0 1px, rgba(0,0,0,.30) 1px 2.5px);
+  -webkit-mask:linear-gradient(90deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+          mask:linear-gradient(90deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+}
+.fader.vert .fcap::after{
+  left:50%; right:auto; top:2px; bottom:2px; height:auto; width:2px; margin:0 0 0 -1px;
+}
+/* a bank: the reason vertical exists at all is that the caps line up into a
+   profile you read across, so the sample has to be more than one */
+.fbank{ display:flex; gap:10px; align-items:flex-end; }
+
 /* ── the ROTARY SELECTOR: a dropdown with detents ────────────────────────
    A <select> is a list that hides. A selector switch shows every position at
    once and points at the one you are on.
@@ -1507,6 +1579,31 @@ input:focus-visible{ outline-offset:3px; }
 }
 .rot-lab:hover{ color:#c2c7cf; }
 .rot-lab.on{ color:#FFD9BC; text-shadow:0 0 8px rgba(255,140,60,.6); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   .eng — THE ENGRAVED ICON, and it is the primitive this language was missing.
+
+   There was engraved TYPE (.demo-etch) and nothing engraved that is a SHAPE,
+   so every icon in the document is a flat monoline glyph laid ON the metal.
+   That is the sticker failure the file already names about a centred
+   highlight, and it is worse for icons because there are more of them.
+
+   Same recipe as the etched legend, moved from text-shadow to drop-shadow
+   because the subject is a stroke rather than a glyph: the line is the
+   PANEL'S SHADOW COLOUR, not a grey, and one 1px light line sits under it —
+   the lit far wall of the cut. Nothing in here is white, and nothing in here
+   is currentColor: an engraving does not change colour when its row is
+   selected, because it is a hole.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.eng{
+  width:14px; height:14px; flex:0 0 14px; display:block;
+  fill:none; stroke:#0d0f12; stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.11));
+}
+/* Cut into a recess floor rather than the faceplate: less light reaches the
+   far wall down there, so the highlight drops with it. */
+.hb-deep .eng{ stroke:#08090b; filter:drop-shadow(0 1px 0 rgba(255,255,255,.055)); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PANEL BODIES — the editor and the viewport share one chassis
@@ -1695,6 +1792,362 @@ input:focus-visible{ outline-offset:3px; }
 .palette .pkey svg{ width:14px; height:14px; margin-right:8px; stroke:currentColor; fill:none; stroke-width:1.7; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   .plate — THE FLOATING PLATE, and it is the language's first one.
+
+   Everything else in this document is bolted into a chassis. This is the first
+   surface that OPENS: it positions itself against the thing that summoned it,
+   sits above the panel, and goes away. The answer has to be reusable, because
+   menus, tooltips and the rotary's own popup all want it.
+
+   A plate is the same metal as a .box with two differences, and both are about
+   elevation. The cast shadow is HARDER and SHORTER — a plate 8mm off the panel
+   throws a tighter shadow than a panel 40mm off the desk — and there is a
+   1px black line all the way round, because a lifted edge has a dark side no
+   matter where the lamp is. Nothing else changes: same gradient, same grain,
+   same edge highlight. It is a piece of the same machine, held up.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.plate{
+  position:fixed; z-index:80; padding:3px; border-radius:12px;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    0 18px 30px -10px rgba(0,0,0,.92),
+    0 5px 10px -3px rgba(0,0,0,.8),
+    0 0 0 1px rgba(0,0,0,.9),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -1px 0 rgba(0,0,0,.9);
+  user-select:none;
+}
+.plate::before{
+  content:''; position:absolute; inset:0; border-radius:12px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.020) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+.plate-body{ padding:10px; position:relative; z-index:2; display:flex; flex-direction:column; gap:9px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   .picker — A COLOUR PICKER MADE OF THE SAME STUFF AS EVERYTHING ELSE.
+
+   input[type=color] renders its popup in browser chrome and no CSS reaches
+   it, so the one moment you touch a colour, a dark machined panel produced a
+   bright OS sheet. Every primitive in this language exists to avoid exactly
+   that. This is not "theme the popup" — it cannot be themed — it is replace
+   it, keeping a hidden native input as the form value so nothing downstream
+   has to change.
+
+   DARK BY DEFAULT, and here that is not a style preference: a picker is the
+   one place the panel must DISAPPEAR so the colour can be judged. Neutral
+   metal, no coloured light spilling out of the chassis, no tint in the bezel.
+   The only saturated thing inside is the colour being picked.
+
+   NOT WANTED, and left out on purpose: alpha, HSL/LAB tabs, palette
+   management. A plotter pen is opaque and has one colour.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.picker{ width:236px; }
+
+/* the field is behind glass, like every other display in the language */
+.pk-field{
+  position:relative; height:132px; border-radius:6px; cursor:crosshair;
+  background:
+    linear-gradient(0deg, #000, transparent),
+    linear-gradient(90deg, #fff, hsl(var(--pk-h,20) 100% 50%));
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.07);
+  touch-action:none;
+}
+.pk-field::after{
+  content:''; position:absolute; inset:0; border-radius:6px; pointer-events:none;
+  background:
+    linear-gradient(148deg, rgba(255,255,255,.13) 0%, rgba(255,255,255,.02) 24%, transparent 44%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 1px, transparent 1px 3px);
+}
+/* the crosshair reads as something UNDER the glass: a dark ring with a light
+   one inside it, so it survives on white and on black without inverting */
+.pk-cross{
+  position:absolute; width:13px; height:13px; margin:-6.5px 0 0 -6.5px;
+  border-radius:50%; pointer-events:none; z-index:1;
+  box-shadow:0 0 0 1.5px rgba(0,0,0,.85), inset 0 0 0 1.5px rgba(255,255,255,.9),
+             0 1px 3px rgba(0,0,0,.6);
+}
+
+/* HUE IS A FADER — a value with a range like every other value with a range,
+   so it gets the slot, the knurled cap and the engraved scale. What changes
+   is what is IN the slot and that there is no lit trace: the track is already
+   the answer, and a fill over it would be a second reading of the same thing. */
+.pk-hue{ padding:0; }
+.pk-hue .flab, .pk-hue .kval{ display:none; }
+.pk-hue .ftrack{
+  background:linear-gradient(90deg,#f00 0,#ff0 16.66%,#0f0 33.33%,#0ff 50%,#00f 66.66%,#f0f 83.33%,#f00 100%);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.7), inset 0 -1px 0 rgba(255,255,255,.12),
+             0 1px 0 rgba(255,255,255,.07);
+}
+.pk-hue .ffill{ display:none; }
+/* six primaries, not four quarters — the scale counts what the track holds */
+.pk-hue .fticks{ background-size:calc(16.666% - .25px) 3px; }
+
+.pk-row{ display:flex; align-items:center; gap:8px; }
+.pk-row .key{ width:28px; height:28px; flex:0 0 28px; border-radius:7px; }
+.pk-row .key svg{ width:14px; height:14px; }
+.pk-hue{ flex:1; min-width:0; }
+
+/* the readout is ONE LIT WINDOW, not three white boxes borrowed from a form */
+.pk-lcd{ gap:0; padding:0 6px; height:28px; }
+.pk-lcd input{
+  width:30px; border:0; background:none; padding:0 2px; text-align:center;
+  font-family:var(--font); font-size:10.5px; letter-spacing:.06em;
+  color:inherit; text-shadow:inherit; font-variant-numeric:tabular-nums;
+}
+.pk-lcd input.hex{ width:62px; text-align:left; letter-spacing:.09em; }
+.pk-lcd input:focus{ outline:none; background:rgba(124,255,176,.10); border-radius:3px; }
+.pk-lcd .pk-sep{ opacity:.4; }
+/* the label strip under the window, engraved on the case */
+.pk-legend{
+  display:flex; padding:0 6px; margin-top:-4px;
+  font-family:var(--font); font-size:7.5px; letter-spacing:.14em; color:#4b5058;
+  text-shadow:0 1px 0 rgba(255,255,255,.07);
+}
+.pk-legend span{ width:34px; text-align:center; }
+
+/* recents are pen caps in a well — the SAME object the ink rail uses, at the
+   size a rail of eight needs. One primitive, two places. */
+.pk-well{
+  display:flex; align-items:flex-end; gap:5px; height:34px; padding:4px 6px 3px;
+  border-radius:7px;
+  background:linear-gradient(180deg,#131519,#191c20);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.04);
+}
+/* the recents are the same tube at a smaller size — the clip-path is in
+   percentages, so the silhouette comes along for free */
+.pk-well{ height:34px; align-items:center; }
+.pk-well .pencap{ width:17px; height:17px; flex:0 0 17px; border-radius:6px; --ring-r:8px; }
+.pk-well .pencap::before{ content:none; }
+.pk-well .pencap.on{ transform:translateY(2px); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE HATCH BAY — the first COMPOUND control in the language.
+
+   Everything built so far is one control on one row, and a row of five of
+   them is mute: same shape, same green number at the end, nothing saying
+   which one you turn to change how the drawing looks. Hatching is the one
+   place where the parameters are PHYSICAL OBJECTS — a pen has a nib width you
+   can hold, spacing is a distance on paper, angle is an angle — so it is the
+   block that should prove the language, and it needs a chassis idea the
+   language did not have: a bay whose members feed a display INSIDE it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.box.hatchbay{ width:520px; flex:0 0 520px; }
+.hb-body{ display:flex; flex-direction:column; gap:11px; }
+
+/* ── THE SPECIMEN — the readout, and it is not decoration ─────────────────
+   The refs both put the display in among the controls that feed it: the
+   EQ-200 draws the curve its ten faders make, the K.O.II keeps a lit strip
+   over the pads. You judge 0,6 by seeing how dense 0,6 IS, not by reading the
+   number — which is the whole argument for showing material instead of value,
+   and the reason every other control in this bay is an input to this picture. */
+.hb-spec{ padding:8px; }
+/* THE GROUND IS PAPER, and it has to be.
+
+   It was near-black, which worked for exactly as long as the ink was orange.
+   The pen case has BLACK in it — every plotter case does, it is the pen you
+   own most of — and black ink on a black field is nothing at all. Grey is
+   worse, because it looks like it is working.
+
+   That is the same argument the colour picker makes about its own panel: the
+   surface a colour is judged against cannot compete with it. So the specimen
+   is paper under the bay's glass — a lit display showing a document, which is
+   what it is — and every pen in the case reads on it, which is the entire
+   point of a specimen.
+
+   AND THE STOCK IS TONED, because the case has a WHITE pen in it. White on
+   cream is not a subtle result, it is no result — the specimen would show an
+   empty sheet and look broken rather than look like white ink. Toned stock is
+   what you actually reach for when you plot white, and it is the one ground
+   where black, grey and white all read at once. */
+.hb-field{
+  --paper:#BEB5A3;
+  /* TALL ENOUGH FOR A SUBJECT. A 118px strip could only ever hold an even
+     field of hatch, which shows the spacing and hides the thing hatching is
+     actually for. A ball needs room to be a ball, and its shadow needs room
+     to leave it. */
+  height:248px; border-radius:4px; position:relative; overflow:hidden;
+  background:var(--paper);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 8px rgba(0,0,0,.4);
+}
+/* Real millimetres: the viewBox is measured from the element and converted at
+   96/25.4, so one user unit is one mm and the hatch on screen is the hatch
+   that plots. A 0.20 nib is a sub-pixel line and looks like one — that is not
+   a bug to tune away, it is what 0.20 is, and the density is still exact. */
+.hb-field svg{ display:block; width:100%; height:100%; }
+/* THE FLOOD STILL NEEDS NO CODE. Strokes are drawn at the nib width, spacing
+   apart; take spacing under the nib and they overlap into solid ink on their
+   own. Below the nib there is no hatch, there is ink. */
+.hatchbay.off .hb-field{ background:#20242a; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), inset 0 2px 8px rgba(0,0,0,.7); }
+.hatchbay.off .hb-field svg{ visibility:hidden; }
+.hatchbay.off .hb-scale{ color:#3c4149; }
+
+.hb-scale{
+  display:flex; justify-content:space-between; align-items:center; margin-top:7px;
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c;
+}
+
+/* ── the two columns under it: the turret, and the three straight controls ── */
+.hb-row{ display:flex; align-items:flex-start; gap:4px; }
+.hb-stack{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.hb-stack .kwrap.inline .kval{ min-width:52px; }
+/* Every caption in this bay carries its engraving, so the captions are rows
+   rather than words. The icon leads: on a real panel the symbol is what you
+   find first and the word is what confirms it. */
+.hatchbay .flab,
+.hatchbay .klab{ display:flex; align-items:center; gap:7px; }
+.hatchbay .fader .flab{ flex:0 0 96px; }
+.hatchbay .kwrap.inline .klab{ flex:0 0 82px; }
+
+/* ── THE TYPE SELECTOR ────────────────────────────────────────────────────
+   Four ways to fill an area, on the switch rather than on a bar of keys. A
+   row of keys shows four labels and makes you infer that they are one choice;
+   a selector switch has ONE lever pointing at ONE detent, so the fact that
+   these are alternatives is in the object rather than in the reading. The
+   names are long — "Hand hatched" is not shortenable without lying about what
+   it is — so the column is wider than the dial needs. */
+.hb-turret{ flex:0 0 178px; display:flex; flex-direction:column; gap:6px; }
+.hb-sel.rotary{ flex:1 1 auto; height:132px; }
+
+/* ── THE NIB DOT — the pen at its true relative size ──────────────────────
+   Nib widths are six objects in a case: 0.20 … 1.00, and the number alone is
+   abstract. The dot beside the label is that nib magnified ×4 — the ratios
+   are exact, the scale is not, and at 1:1 a 0.20 dot would be invisible. */
+.nibdot{
+  display:inline-block; vertical-align:middle; flex:0 0 auto; border-radius:50%;
+  width:calc(var(--nib) * 4); height:calc(var(--nib) * 4);
+  background:#9aa1ab;
+  box-shadow:0 0 0 1px rgba(0,0,0,.55), inset 0 -1px 1px rgba(0,0,0,.35);
+}
+/* PEN IS A DETENTED FADER: continuous travel, six stops. The scale has five
+   intervals rather than the default four, because it is counting pens. */
+.hb-knobs{ justify-content:space-between; gap:4px; padding:2px 0 4px; }
+.hb-knobs .kwrap{ flex:1 1 0; min-width:0; align-items:center; gap:5px; }
+.hb-knobs .klab{ justify-content:center; font-size:8px; letter-spacing:.12em; }
+.hb-knobs .kval{ min-width:0; width:100%; text-align:center; }
+.hb-knobs .kval.wide{ min-width:0; font-size:9.5px; letter-spacing:.02em; }
+
+/* SPACING UNDER THE NIB IS NOT AN ERROR AND NOTHING REPORTS IT. The strokes
+   overlap and the sheet fills solid, which is a fill — something you ask for.
+   An earlier build lit a red legend and turned the spacing arc red, framing a
+   legitimate result as a fault. The specimen already shows exactly what
+   happens, and that is the whole job of a specimen. */
+
+/* ── THE INK SWATCH — a cap whose face is the colour ──────────────────────
+   THREE OBJECTS WERE TRIED AND ALL THREE WERE THE SAME MISTAKE. A pen cap, a
+   nib, a glass pipette: each got better at being a picture of a thing on the
+   desk, and none of them got better at being a CONTROL. A rail of little
+   drawings is an illustration; you cannot tell at a glance which one is
+   selected, the colour is fighting a silhouette for attention, and at 17px
+   the object it is a picture of is unreadable anyway.
+
+   So the swatch stops depicting the pen and starts behaving like everything
+   else on this panel: a cap with a coloured face, seated in the case, that
+   goes DOWN when it is the one in use. The colour gets the whole face instead
+   of a stem, the state is the same up/down the switches and the piano keys
+   use, and it is legible at any size because a rounded square has no detail
+   to lose.
+
+   MODELLED, NOT FLAT — which is the only thing separating this from the soft
+   pastel swatch it is shaped like. Light from above left at 158° like the rest
+   of the document, a hairline of light on the top edge, a dark one under it,
+   and the specular OFF CENTRE because a centred highlight reads as a sticker.
+   ─────────────────────────────────────────────────────────────────────────── */
+.pens{ display:flex; align-items:center; justify-content:space-between;
+       gap:4px; padding:6px 0 4px; height:46px; }
+.pencap{
+  --ink:#FF6A00;
+  --ring-r:11px;
+  width:28px; height:28px; flex:0 0 28px;
+  border:0; padding:0; cursor:pointer; position:relative;
+  border-radius:9px;
+  background:
+    radial-gradient(115% 85% at 30% 16%, rgba(255,255,255,.36), transparent 60%),
+    linear-gradient(158deg,
+      color-mix(in srgb,var(--ink) 74%,#fff) 0%,
+      var(--ink) 46%,
+      color-mix(in srgb,var(--ink) 84%,#000) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -1px 0 rgba(0,0,0,.55),
+    0 3px 0 #0c0d0f,
+    0 5px 9px rgba(0,0,0,.72);
+  transition:transform .1s cubic-bezier(.3,1.4,.5,1), box-shadow .1s;
+}
+.pencap:hover{ transform:translateY(-1px); }
+/* IN USE IS IN, exactly as a latching key is in. The cap keeps its own colour
+   and drops into the recess — nothing is tinted, so the swatch you press and
+   the swatch that is held down are recognisably the same object in two
+   positions. That is the rule the key learned three times. */
+.pencap.on{
+  transform:translateY(3px);
+  box-shadow:var(--recess), inset 0 1px 0 rgba(255,255,255,.12);
+}
+/* the broken edge of the cutout, same chamfer every seated control gets */
+.pencap.on::after{
+  content:''; position:absolute; inset:-2px; border-radius:var(--ring-r);
+  pointer-events:none; padding:1.6px; background:var(--chamfer);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  filter:blur(.5px);
+}
+/* A REFILLABLE ONE SAYS SO — a fine engraved notch in the bottom-right corner
+   of the face, the way a machined part carries its own mark. Not a badge laid
+   on top: it is cut, so it is dark with a light line under it. */
+.pencap.pick::before{
+  content:''; position:absolute; right:4px; bottom:4px; width:7px; height:1.5px;
+  border-radius:1px; background:rgba(0,0,0,.5);
+  box-shadow:0 1px 0 rgba(255,255,255,.32);
+}
+/* the native input is the value, never the surface — the cap is what you see */
+.ink-src{
+  position:absolute; inset:0; width:100%; height:100%;
+  opacity:0; border:0; padding:0; pointer-events:none; cursor:pointer;
+}
+
+/* ── AN EMPTY SLOT IS A HOLE ──────────────────────────────────────────────
+   The same footprint with no cap in it: the milled well the cap sits in, on
+   its own. Deeper than it is wide-looking, with the two hairlines every other
+   recess in this language has, and no colour at all because it has none yet. */
+.pencap.empty{
+  border-radius:9px;
+  background:linear-gradient(180deg,#101317,#181b20);
+  box-shadow:inset 0 3px 6px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.055);
+}
+/* the invitation: the well lights its own rim rather than lifting, because a
+   hole cannot come towards you */
+.pencap.empty:hover{
+  transform:none;
+  box-shadow:inset 0 3px 6px rgba(0,0,0,.9), inset 0 0 0 1px rgba(255,255,255,.15),
+             0 1px 0 rgba(255,255,255,.055);
+}
+.pencap.empty::before{ content:none; }
+
+/* ── THE RECESS BELOW THE FOLD ────────────────────────────────────────────
+   Min stroke and Join reach are cleanup thresholds — set once for a plotter
+   and never touched again. Five identical rows is itself most of why the
+   current panel is sad, so the two that do not belong in the rhythm of the
+   four that matter go down a step, into their own well. */
+.hb-deep{
+  margin-top:2px; padding:7px 9px 9px; border-radius:8px;
+  background:linear-gradient(180deg,#131519,#191c20);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.88), inset 0 -1px 0 rgba(255,255,255,.045),
+             0 1px 0 rgba(255,255,255,.05);
+}
+.hb-deep .fader{ padding:1px 0; }
+.hb-deep .fader .flab{ flex:0 0 74px; color:#4e535b; }
+.hb-deep .bay-cap{ margin-bottom:5px; }
+
+/* the bay's own lamp: lit only when this layer is actually hatching, so a bay
+   full of settings that are doing nothing looks like it */
+.hatchbay.off .jewel{ filter:grayscale(1) brightness(.4);
+  box-shadow:inset 0 -1px 2px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
    MATERIALS — the primitives, so this is a language and not one drawing
    ═══════════════════════════════════════════════════════════════════════════ */
 .mats{ display:grid; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)); gap:16px; margin-top:26px; }
@@ -1724,6 +2177,18 @@ input:focus-visible{ outline-offset:3px; }
    on the lit one the sun's rays ran into the walls: the orange stopped being
    a legend and became the button's colour. The nav bar's ratio is 16 in 34;
    this is the same ratio at this size. */
+/* A FADER IS A WIDE CONTROL and cannot be sampled in a 232px column: label,
+   slot and readout would leave the track about 90px, which is not a length,
+   it is a stub. Its tile takes two columns and the row runs the full width,
+   which is also how it sits in the editor. */
+.mats .mat.wide{ grid-column:span 2; }
+.mats .mat.tall .mat-stage{ height:206px; }
+.mats .mat.wide .mat-stage{ padding:0 18px; }
+.mats .mat.wide .fader{ width:100%; }
+/* The small controls are sampled at the size the row uses them — same 5px gap,
+   no scaling. The chevron's knurl is tuned against an 11px glyph; blow it up
+   and the tile shows a material that is nowhere in the document. */
+.mat-row{ display:flex; align-items:center; gap:5px; }
 .mat-keys{ display:flex; gap:11px; }
 .mat-keys .key{ width:38px; height:38px; border-radius:9px; }
 .mat-keys .key svg{ width:18px; height:18px; }
@@ -1736,6 +2201,63 @@ input:focus-visible{ outline-offset:3px; }
              0 1px 0 rgba(255,255,255,.055); }
 .demo-etch{ font-family:var(--font); font-size:15px; font-weight:700; letter-spacing:.18em; color:#5d626b;
   text-shadow:0 1px 0 rgba(255,255,255,.12), 0 -1px 0 rgba(0,0,0,.7); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   08 · THE SPHERE TEST — three hands, side by side
+
+   The bay next door is a compound CONTROL: a specimen with four controls
+   pointing at it. This one is a compound SPECIMEN and has no controls at all
+   beyond re-rolling the seed, because there is nothing here to set — the three
+   hands are three answers to one question and what is being asked is which of
+   them is right. Putting a knob on it would invite tuning before judging.
+
+   The columns are the hands and the rows are the tests, which is the only way
+   round that works: reading DOWN a column tells you what one hand does to two
+   different problems, and reading ACROSS a row compares three hands on the
+   same one. Stack it the other way and neither comparison is adjacent.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.box.handbay{ width:auto; flex:0 0 auto; }
+.hh-body{ flex-direction:row; align-items:flex-start; gap:10px; }
+/* A FIXED CELL, not a flexible one, and the reason is the millimetre: the
+   specimen's viewBox is measured off the element, so a cell that stretches
+   with the window silently changes the size of the drawing being judged.
+   236px is 62.4mm — a 42mm ball, which is about as small as a 0.25 nib has
+   anything to say. */
+.hh-cell{ flex:0 0 236px; display:flex; flex-direction:column; gap:7px; }
+.hh-roll{ padding:0 11px; height:23px; font-family:var(--font); font-size:8.5px;
+          letter-spacing:.16em; color:#8b919b; }
+.hh-cell .bay-cap{ margin-bottom:1px; }
+.hh-spec{ padding:8px; }
+/* THE GLASS KEEPS ITS REFLECTION AND LOSES ITS SCANLINES, which is the one
+   place this block departs from `.screen` and it is not a preference. The haze
+   is a 1-in-3px horizontal rule; the thing behind it is a fill made of rules a
+   few tenths apart. Those two beat against each other, and the moire lands
+   exactly on the property being judged. A display that adds a texture to the
+   specimen is not a display, it is a filter. */
+.hh-spec::after{ background:linear-gradient(148deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.02) 26%, transparent 46%); }
+/* THE SAME TONED STOCK AS THE BAY'S SPECIMEN, and for the bay's own reason:
+   the surface a mark is judged against cannot compete with it. There is only
+   one pen in this block — a hatch that is being read for its HAND has no
+   business also being read for its colour — and black on #BEB5A3 is 8.7:1,
+   which is a drawing rather than a diagram. */
+.hh-field{
+  --paper:#BEB5A3;
+  border-radius:4px; position:relative; overflow:hidden;
+  background:var(--paper); aspect-ratio:24 / 25;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 8px rgba(0,0,0,.4);
+}
+/* the fill test is the same sheet, cropped — a flat shape needs no headroom
+   for a cast shadow, and giving it any would make the two specimens look like
+   two different papers */
+.hh-field.flat{ aspect-ratio:24 / 16; }
+.hh-field svg{ display:block; width:100%; height:100%; }
+.hh-scale{
+  display:flex; justify-content:space-between; align-items:center; margin-top:7px;
+  font-family:var(--font); font-size:8px; letter-spacing:.10em; color:#3f7a5c;
+}
+.hh-scale span:last-child{ color:#2f5f47; letter-spacing:.16em; }
+.handbay .bay-cap{ font-size:8px; letter-spacing:.12em; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE BILL — what the language costs. Read this before adopting anything.
@@ -1755,299 +2277,3 @@ input:focus-visible{ outline-offset:3px; }
 
 footer{ margin-top:80px; padding-top:22px; border-top:1px solid #1c1e22;
         font-family:var(--font); font-size:10.5px; color:#4a4e56; letter-spacing:.06em; }
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE BRIGHT SKIN
-   ───────────────────────────────────────────────────────────────────────────
-   The same panel in a different material: pale anodised aluminium instead of
-   black. Every principle from the dark build carries over — a cap is a body
-   with a skirt, pressed is that cap lower with four sharp walls, the chamfer
-   is concave, the legend is the state, glow only for things that emit.
-
-   WHAT DOES NOT CARRY OVER IS THE NUMBERS, which is why this is a written skin
-   and not a computed inversion:
-
-   1. INVERSION BREAKS THE FORM. In the dark build a raised cap is lighter than
-      the case and a well is darker. Invert those and the cap goes dark and the
-      well goes light — the panel turns inside out. The ORDERING has to be kept
-      and only the level moved, which no filter will do for you.
-
-   2. ON PALE MATERIAL THE SHADOW DOES ALL THE WORK. Black at .9 on a #f4f1ec
-      face is not a shadow, it is a hole; the recess drops to about a fifth of
-      its dark-skin alpha and still reads deeper, because there is more room
-      above it to fall into. The white highlights go the other way — a lit rim
-      at .28 is a bright edge on black and nothing at all on cream — so most of
-      them go and shade carries the form alone.
-
-   3. THE DISPLAYS STAY BLACK. An LED window is smoked glass; it does not turn
-      cream because the case did. It is also the only strong value contrast
-      left on the panel, which is exactly where you want it: on the numbers.
-
-   4. THE ACCENT IS UNCHANGED — but it stops being a LAMP and becomes PAINT,
-      because nothing glows convincingly against a light surface. The lit
-      legend keeps its pigment and loses its bloom.
-
-   AND ONE RULE LEARNED THE HARD WAY, THREE TIMES, IN THIS FILE:
-   A SKIN MAY SET THE MATERIAL, NEVER THE STATE. [data-skin=light] .sw is more
-   specific than .sw.on, so every material rule that also set a shadow or a
-   colour silently un-pressed and un-lit the whole panel. Anything a state owns
-   is either scoped away with :not(), or restated at skin specificity.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-[data-skin="light"]{
-  --room:#c9c5be; --case:#eeebe5; --case-lo:#ded9d1; --case-hi:#ffffff;
-  --bay:#d5d0c8; --plate:#f4f2ee; --plate-hi:#ffffff; --groove:#b3ada3;
-  --rim:rgba(255,255,255,.95); --rim-lo:rgba(0,0,0,.22);
-  --txt:#2c2823; --txt-dim:#7d766c; --txt-etch:#b0a99e;
-
-  --recess:
-    inset 0 0 0 1px rgba(0,0,0,.16),
-    inset 0 2.4px 1.2px rgba(0,0,0,.19),
-    inset 0 3.6px 4.8px -1.2px rgba(0,0,0,.13),
-    inset 3.6px 0 3.6px -2.4px rgba(0,0,0,.12),
-    inset -3.6px 0 3.6px -2.4px rgba(0,0,0,.12),
-    inset 0 -3.6px 4.8px -2.4px rgba(0,0,0,.07),
-    inset 0 -1px 0 rgba(255,255,255,.85),
-    0 1px 0 rgba(255,255,255,.7),
-    0 1px 1px rgba(0,0,0,.06);
-  --chamfer: linear-gradient(152deg,
-    rgba(0,0,0,.17) 0%, rgba(0,0,0,.07) 24%,
-    rgba(255,255,255,0) 50%, rgba(255,255,255,.95) 100%);
-}
-
-/* ── the room and the type ──────────────────────────────────────────────── */
-[data-skin="light"] body{
-  background:radial-gradient(120% 90% at 50% -10%, #ffffff 0%, var(--room) 68%), var(--room);
-  color:var(--txt); }
-[data-skin="light"] body::after{ opacity:.05; mix-blend-mode:multiply; }
-[data-skin="light"] h1{ color:#1d1a16; }
-[data-skin="light"] .lede{ color:#5f584f; }
-[data-skin="light"] .lede b{ color:#2c2823; }
-[data-skin="light"] h2{ color:#8a8377; border-bottom-color:#c8c2b8; }
-[data-skin="light"] h2 span{ color:#bdb6aa; }
-[data-skin="light"] .sub{ color:#6b6459; }
-[data-skin="light"] .warn{ background:linear-gradient(180deg,rgba(255,106,0,.10),rgba(255,106,0,.03));
-  border-color:rgba(255,106,0,.35); color:#5c5248; }
-[data-skin="light"] footer{ color:#9a9388; border-top-color:#c8c2b8; }
-[data-skin="light"] .stage{
-  background:radial-gradient(70% 60% at 28% 0%, #fff, transparent 62%),
-             linear-gradient(180deg,#e6e2db,#d6d1c9);
-  border-color:#c6c0b6; }
-[data-skin="light"] .stage-note{ color:#a49d92; }
-[data-skin="light"] .mat, [data-skin="light"] .card{
-  background:linear-gradient(180deg,#f0ede8,#e6e2db); border-color:#cbc5bb; }
-[data-skin="light"] .mat-stage{
-  background:radial-gradient(70% 80% at 30% 10%, #fff, transparent 62%), #e9e5de;
-  border-bottom-color:#d3cec5; }
-[data-skin="light"] .mat-t{ color:#2c2823; }
-[data-skin="light"] .mat-d, [data-skin="light"] .card li{ color:#6b6459; }
-[data-skin="light"] .mat-d code{ background:#dcd7cf; color:#4a443b; }
-[data-skin="light"] .card li b{ color:#2c2823; }
-[data-skin="light"] .card.good{ border-color:rgba(20,140,80,.35); }
-[data-skin="light"] .card.good h3{ color:#177a48; }
-[data-skin="light"] .card.bad{ border-color:rgba(190,40,40,.3); }
-[data-skin="light"] .card.bad h3{ color:#b03030; }
-[data-skin="light"] .demo-etch{ color:#a9a297; text-shadow:0 1px 0 #fff, 0 -1px 0 rgba(0,0,0,.16); }
-[data-skin="light"] .demo-plate{ background:linear-gradient(176deg,#fbfaf8,#e6e2db);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.14), 0 6px 12px -4px rgba(0,0,0,.22); }
-[data-skin="light"] .demo-well{ background:linear-gradient(180deg,#cfcac2,#ded9d2);
-  box-shadow:inset 0 3px 7px rgba(0,0,0,.2), 0 1px 0 #fff; }
-
-/* ── the chassis ────────────────────────────────────────────────────────── */
-[data-skin="light"] .dock,
-[data-skin="light"] .box,
-[data-skin="light"] .strip,
-[data-skin="light"] .palette{
-  background:linear-gradient(176deg,#fbfaf8 0%,#efece7 26%,#e4e0d9 78%,#eae7e1 100%);
-  box-shadow:0 42px 60px -24px rgba(0,0,0,.35), 0 8px 14px -6px rgba(0,0,0,.2),
-             inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0,0,0,.16),
-             inset 0 -18px 26px -20px rgba(0,0,0,.10); }
-[data-skin="light"] .box.bulge{
-  background-image:
-    radial-gradient(circle 46px at 44px var(--boss-y,50%), rgba(255,255,255,.75), transparent 74%),
-    radial-gradient(circle 46px at 54px calc(var(--boss-y,50%) + 12px), rgba(0,0,0,.07), transparent 68%),
-    linear-gradient(176deg,#fbfaf8 0%,#efece7 26%,#e4e0d9 78%,#eae7e1 100%);
-  box-shadow:inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0,0,0,.16),
-             inset 0 -18px 26px -20px rgba(0,0,0,.10); }
-[data-skin="light"] .bulge-wrap{
-  filter:drop-shadow(0 26px 30px rgba(0,0,0,.28)) drop-shadow(0 6px 8px rgba(0,0,0,.16)); }
-[data-skin="light"] .dock::before, [data-skin="light"] .box::before,
-[data-skin="light"] .strip::before, [data-skin="light"] .palette::before{
-  opacity:.35; mix-blend-mode:multiply; }
-[data-skin="light"] .dock::after{
-  background:linear-gradient(158deg, rgba(255,255,255,.9) 0%, rgba(255,255,255,.25) 42%, transparent 70%); }
-[data-skin="light"] .screw{
-  background:radial-gradient(circle at 34% 28%, #ffffff 0%, #cdc7bd 42%, #9a938a 100%);
-  box-shadow:inset 0 -1px 1px rgba(0,0,0,.35), inset 0 1px 1px #fff, 0 1px 2px rgba(0,0,0,.25); }
-[data-skin="light"] .screw::after{ background:linear-gradient(var(--a,20deg), transparent 44%,
-  rgba(0,0,0,.42) 44%, rgba(0,0,0,.42) 56%, transparent 56%); box-shadow:inset 0 1px 0 #fff; }
-
-/* ── the wells ──────────────────────────────────────────────────────────── */
-[data-skin="light"] .bay{ background:linear-gradient(180deg,#d3cec6,#dedad3);
-  box-shadow:inset 0 3px 7px rgba(0,0,0,.16), inset 0 -1px 0 #fff, 0 1px 0 #fff; }
-[data-skin="light"] .strokes{ background:linear-gradient(180deg,#d8d3cb,#e2ded7);
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.13), 0 1px 0 #fff,
-             -3px 0 8px -4px color-mix(in srgb, var(--lyr) 45%, transparent); }
-[data-skin="light"] .strokes.allstrip{ border-left-color:#b7b0a6;
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.13), 0 1px 0 #fff; }
-[data-skin="light"] .screen, [data-skin="light"] .gizmo{
-  box-shadow:inset 0 3px 7px rgba(0,0,0,.2), inset 0 -1px 0 #fff, 0 1px 0 #fff; }
-[data-skin="light"] .knob-collar{
-  background:radial-gradient(circle at 50% 50%, #cdc8c0 56%, #f2efe9 57%, #dcd7cf 100%);
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.18), inset 0 -1px 0 #fff, 0 1px 0 #fff; }
-[data-skin="light"] .rot-seat{
-  background:radial-gradient(circle, #cfcac2 60%, #f4f1ec 62%, #ddd8d0 100%);
-  box-shadow:inset 0 2px 7px rgba(0,0,0,.2), 0 1px 0 #fff; }
-[data-skin="light"] .ftrack{
-  background:linear-gradient(180deg,#c9c4bb 0%,#d6d1c9 55%,#e7e3dc 100%);
-  box-shadow:inset 0 2px 4px rgba(0,0,0,.22), inset 0 -1px 0 #fff, 0 1px 0 #fff; }
-[data-skin="light"] .fticks{ background-image:linear-gradient(90deg,#a9a298 0 1px, transparent 1px);
-  box-shadow:0 1px 0 #fff; }
-[data-skin="light"] .fticks::after{ background:#a9a298; box-shadow:1px 0 0 #fff; }
-[data-skin="light"] .gizmo{ background:radial-gradient(circle at 38% 26%, #fff 0%, transparent 44%),
-  radial-gradient(circle at 50% 60%, #ddd8d1 0%, #c6c0b7 78%); }
-
-/* ── the rows ───────────────────────────────────────────────────────────── */
-[data-skin="light"] .row{ background:linear-gradient(180deg,#fdfcfa,#f2efea 60%,#eae6e0);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.14), 0 1px 2px rgba(0,0,0,.12); }
-[data-skin="light"] .row:hover{ background:linear-gradient(180deg,#fff,#f8f6f3 60%,#f1eeea); }
-[data-skin="light"] .row.all{
-  background:repeating-linear-gradient(96deg, rgba(0,0,0,.022) 0 1px, transparent 1px 2px),
-             linear-gradient(180deg,#eae6df,#ded9d1 55%,#d6d1c9);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.16), 0 2px 4px rgba(0,0,0,.14); }
-[data-skin="light"] .row.sel{ background:linear-gradient(180deg,#fff,#f6f3ef 60%,#efebe5);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.14),
-             0 0 0 1px color-mix(in srgb, var(--lyr) 55%, transparent), 0 2px 5px rgba(0,0,0,.14); }
-[data-skin="light"] .name, [data-skin="light"] .mod-name,
-[data-skin="light"] .box-head .nm{ color:#2c2823; text-shadow:0 1px 0 #fff; }
-[data-skin="light"] .sum, [data-skin="light"] .klab, [data-skin="light"] .flab,
-[data-skin="light"] .bay-cap, [data-skin="light"] .pal-cap, [data-skin="light"] .rot-lab,
-[data-skin="light"] .head .t{ color:#8a8377; text-shadow:0 1px 0 #fff; }
-[data-skin="light"] .sep{ background:#b9b2a8; box-shadow:1px 0 0 #fff; }
-[data-skin="light"] .divider{ background:#c9c3b9; box-shadow:0 1px 0 #fff; }
-[data-skin="light"] .chan{ background:#b3ada3; box-shadow:1px 0 0 #fff; }
-[data-skin="light"] .box-head, [data-skin="light"] .head{
-  border-bottom-color:rgba(0,0,0,.14); box-shadow:0 1px 0 #fff; }
-
-/* ── every cap: the FILL is for all states … ────────────────────────────── */
-[data-skin="light"] .sw,
-[data-skin="light"] .key,
-[data-skin="light"] .pkey,
-[data-skin="light"] .chip,
-[data-skin="light"] .chev{
-  color:#6c655b;
-  background:
-    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.9), transparent 62%),
-    linear-gradient(180deg,#fdfcfa 0%,#f4f1ec 36%,#e9e5de 68%,#ddd8d0 100%); }
-[data-skin="light"] .sw:hover, [data-skin="light"] .key:hover,
-[data-skin="light"] .pkey:hover, [data-skin="light"] .chip:hover,
-[data-skin="light"] .chev:hover{ color:#2c2823;
-  background:radial-gradient(125% 95% at 32% 16%, #fff, transparent 62%),
-             linear-gradient(180deg,#fff 0%,#fbf9f6 36%,#f2efe9 68%,#e6e1da 100%); }
-
-/* … and the SKIRT only while the cap is up */
-[data-skin="light"] .sw:not(.on):not(.mixed):not(:active),
-[data-skin="light"] .chip:not(.is-down):not(:active),
-[data-skin="light"] .chev:not(.open){
-  box-shadow:inset 0 1px 0 #ffffff, inset 0 -2px 3px rgba(0,0,0,.10),
-             inset 0 0 0 1px rgba(0,0,0,.10), 0 2px 0 #c2bcb2,
-             0 3px 6px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.06); }
-[data-skin="light"] .key.skirt:not(.is-down):not(:active){
-  box-shadow:inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(0,0,0,.12),
-             0 3px 0 #c2bcb2, 0 5px 8px rgba(0,0,0,.2); }
-[data-skin="light"] .pkey:not(.is-down):not(:active),
-[data-skin="light"] .keypad .pkey:not(.is-down):not(:active),
-[data-skin="light"] .piano.sm .pkey:not(.is-down):not(:active){
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.12),
-             0 4px 0 #c2bcb2, 0 6px 10px rgba(0,0,0,.2); }
-[data-skin="light"] .piano{ background:linear-gradient(180deg,#d3cec6,#e0dbd4);
-  box-shadow:inset 0 3px 8px rgba(0,0,0,.16), inset 0 -1px 0 #fff, 0 1px 0 #fff; }
-[data-skin="light"] .sw::before{ opacity:.05; mix-blend-mode:multiply; }
-[data-skin="light"] .micro{ color:#8a8377; background:linear-gradient(180deg,#e2ded7,#eeebe6);
-  box-shadow:inset 0 1px 2px rgba(0,0,0,.14), inset 0 -1px 0 #fff; }
-[data-skin="light"] .micro:hover{ color:#2c2823;
-  box-shadow:inset 0 1px 2px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.12); }
-[data-skin="light"] .chev{ background-color:#efece7;
-  background-image:repeating-linear-gradient(72deg, rgba(255,255,255,.9) 0 1px, rgba(0,0,0,.06) 1px 3px); }
-[data-skin="light"] .chev svg{ filter:drop-shadow(0 1px 0 #fff); }
-
-/* ── THE STATES, RESTATED AT SKIN SPECIFICITY ───────────────────────────── */
-[data-skin="light"] .sw.on,
-[data-skin="light"] .sw.mixed,
-[data-skin="light"] .sw:active,
-[data-skin="light"] .key.skirt.is-down,
-[data-skin="light"] .key.skirt:active,
-[data-skin="light"] .pkey.is-down,
-[data-skin="light"] .pkey:active,
-[data-skin="light"] .keypad .pkey.is-down,
-[data-skin="light"] .piano.sm .pkey.is-down,
-[data-skin="light"] .chip.is-down,
-[data-skin="light"] .chip:active,
-[data-skin="light"] .chev.open{ box-shadow:var(--recess); }
-
-[data-skin="light"] .sw.on,
-[data-skin="light"] .key.is-down,
-[data-skin="light"] .pkey.is-down,
-[data-skin="light"] .chip.is-down,
-[data-skin="light"] .chev.open,
-[data-skin="light"] .act.is-down{ color:var(--led); }
-[data-skin="light"] .sw.mixed{ color:#2c2823; }
-[data-skin="light"] .sw.on:hover,
-[data-skin="light"] .key.is-down:hover{ color:#e05d00; }
-
-/* the lit legend keeps its pigment and loses its bloom — nothing glows on cream */
-[data-skin="light"] .sw.on svg,
-[data-skin="light"] .key.is-down svg,
-[data-skin="light"] .chev.open svg{ filter:none; }
-[data-skin="light"] .pkey.is-down, [data-skin="light"] .chip.is-down{ text-shadow:none; }
-[data-skin="light"] .act.aux{ color:#6c655b; }
-
-/* ── the displays stay black glass ──────────────────────────────────────── */
-[data-skin="light"] .readout, [data-skin="light"] .lcd,
-[data-skin="light"] .kval, [data-skin="light"] .port{
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.5), inset 0 -1px 0 rgba(255,255,255,.12), 0 1px 0 #fff; }
-[data-skin="light"] .slot{ background:linear-gradient(180deg,#d9d4cc,#e6e2db);
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.16), inset 0 -1px 0 #fff, 0 1px 0 #fff; }
-[data-skin="light"] .slot input{ color:#2c2823; text-shadow:none; }
-[data-skin="light"] .slot input::placeholder{ color:#a49d92; }
-[data-skin="light"] .slot svg{ stroke:#8a8377; }
-
-/* ── knobs, faders, the teardrop ────────────────────────────────────────── */
-[data-skin="light"] .knob-cap{
-  background:radial-gradient(circle at 36% 26%, #ffffff 0%, transparent 46%),
-    conic-gradient(#f6f3ee 0deg, #ddd8d0 3deg, #f6f3ee 6deg, #ddd8d0 9deg),
-    radial-gradient(circle at 50% 50%, #f2efe9 55%, #d3cec6 100%);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -2px 4px rgba(0,0,0,.16), 0 2px 4px rgba(0,0,0,.22); }
-[data-skin="light"] .knob-cap::after{ background:#6f6961; box-shadow:0 0 0 1px rgba(255,255,255,.9); }
-[data-skin="light"] .kr-track{ stroke:rgba(0,0,0,.13); }
-[data-skin="light"] .knob.bi .knob-collar::after{ background:#8a8377; box-shadow:0 1px 0 #fff; }
-[data-skin="light"] .fcap{
-  background:linear-gradient(180deg,#ffffff 0%,#f0ede8 16%,#ddd8d0 46%,#d5d0c8 54%,#eeebe6 86%,#fbfaf8 100%);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(255,255,255,.7), inset 1px 0 0 #fff,
-             inset -1px 0 0 rgba(0,0,0,.14), 0 3px 6px rgba(0,0,0,.28), 0 0 0 1px rgba(0,0,0,.14); }
-[data-skin="light"] .fcap::before{ background-image:repeating-linear-gradient(0deg,
-  rgba(0,0,0,.10) 0 1px, rgba(255,255,255,.9) 1px 2.5px); }
-[data-skin="light"] .kwrap.inline{ background:linear-gradient(180deg,#f6f3ee,#eae6e0);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.1); }
-[data-skin="light"] .rot-lead{ stroke:#a9a298; }
-[data-skin="light"] .tear{ filter:drop-shadow(0 4px 7px rgba(0,0,0,.35)); }
-
-/* ── launchpad ──────────────────────────────────────────────────────────── */
-[data-skin="light"] .console{ background:linear-gradient(176deg,#efece7,#e3dfd8 60%,#e8e4de);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.16), 0 26px 44px -22px rgba(0,0,0,.3); }
-[data-skin="light"] .module{ background:linear-gradient(178deg,#fdfcfa,#f3f0eb 55%,#ece8e2);
-  box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0,0,0,.14), 0 3px 6px rgba(0,0,0,.14); }
-[data-skin="light"] .module::before{ background:#cfc9c0; box-shadow:inset -1px 0 2px rgba(0,0,0,.2); }
-[data-skin="light"] .module::after{ opacity:.05; mix-blend-mode:multiply; }
-[data-skin="light"] .mod-desc{ color:#6b6459; }
-[data-skin="light"] .pilot{ background:radial-gradient(circle at 34% 28%, #cfcac2, #b0a99f 70%);
-  box-shadow:inset 0 -1px 1px rgba(0,0,0,.2), 0 0 0 1px rgba(0,0,0,.12); }
-[data-skin="light"] .tagcut{ color:#7d766c; background:linear-gradient(180deg,#e4e0d9,#eeebe6);
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.14), 0 1px 0 #fff; text-shadow:0 1px 0 #fff; }
-[data-skin="light"] .grip{ background-image:radial-gradient(circle, rgba(0,0,0,.28) 1px, transparent 1.2px); }
-[data-skin="light"] .empty{ color:#a49d92; background:linear-gradient(180deg,#d9d4cc,#e4e0d9);
-  box-shadow:inset 0 3px 7px rgba(0,0,0,.14), 0 1px 0 #fff; text-shadow:0 1px 0 #fff; }
-
-/* ── the skin switch ────────────────────────────────────────────────────── */
-.skin-switch{ position:fixed; top:16px; right:16px; z-index:120; }
-.skin-switch .pkey{ height:30px; min-width:0; padding:0 14px; font-size:9.5px; }

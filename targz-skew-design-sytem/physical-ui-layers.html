@@ -8,7 +8,6 @@
 </head>
 <body>
 
-<div id="skin" class="piano skin-switch"></div>
 
 <div class="wrap">
 
@@ -104,7 +103,6 @@
   <div class="stage">
     <div class="stage-note">rotary · 270° · shift = fine</div>
     <div class="bulge-wrap"><div id="editor" class="box"></div></div>
-    <div id="mini-knobs" class="box" style="align-self:center"></div>
   </div>
 
   <h2>05 <span>/</span> The viewport <span>·</span> gizmo, keypad, three knobs</h2>
@@ -136,14 +134,91 @@
   </p>
   <div class="console" id="console"></div>
 
-  <h2>07 <span>/</span> Materials</h2>
+  <h2>07 <span>/</span> The hatch bay <span>·</span> a compound control</h2>
   <p class="sub">
-    Nine primitives carry all six components. Every control on this page is one of them
-    at a size — which is what makes it a language rather than six hand-drawn pictures.
+    Five bare rows — <b>Spacing</b>, <b>Pen</b>, <b>Min stroke</b>, <b>Join reach</b>,
+    <b>Colour</b> — every one the same shape with a green number at the end, so nothing on
+    screen said which one you turn to change how the drawing looks. Hatching is the one place
+    where the parameters are <em>physical objects</em>, so the bay is built round a
+    <b>specimen</b>: a lit sphere on its own shadow, drawn at <b>1:1 mm</b> on paper with real
+    spacing, real stroke, real angle and real ink. It is a ball rather than a swatch because a
+    rectangle of even hatch shows the <em>spacing</em> and hides everything else — and what
+    hatching is for is <em>tone</em>: the same pen and the same angle making light and dark by
+    how much paper it leaves. Everything else here is an input to that one picture.
+    <br><br>
+    <b>The type is a selector switch</b> — <b>parallel</b> lifts the pen at the end of every
+    pass, <b>serpentine</b> does not and is one continuous stroke, <b>crossed</b> is a second
+    pass at 90°, <b>hand hatched</b> breaks the register so the fill has no direction you can
+    read. Four positions on one dial, all visible at once with the lever on the one you are
+    on. They are four different <em>paths</em>, not four textures, which is why the specimen
+    draws geometry and clips it to the sheet: a serpentine <em>is</em> its turnarounds, and on
+    an over-sized grid every turnaround falls off the paper.
+    <br><br>
+    <b>Then three knobs</b>, because this page's own rule says a quantity is a knob and only a
+    length keeps a track — and pen, spacing and angle are three single quantities. <b>Pen</b>
+    turns over the kit, six stops, so it cannot land on 0.43; the dot beside its label is that
+    nib at true relative size. <b>Spacing</b> is a distance in millimetres and <b>angle</b>
+    detents at 0 / 45 / 90 / 135. The three are <em>independent</em> — no control here quietly
+    edits another, so a value you set by hand stays the value you set. Take spacing under the
+    nib and the strokes overlap into solid ink: not a fault, and not reported as one. It is a
+    fill, it is something you might want, and the specimen shows it the way it shows
+    everything else.
+    <b>Colour is a pen cap</b>, not a swatch: black, grey and white are the three you own
+    whatever you draw, and two slots you refill — click a refillable cap twice and it opens the
+    picker, which is a plate made of the same metal as everything else. The two cleanup
+    thresholds are in a recess below the fold, because they are set once and never touched
+    again.
+  </p>
+  <div class="stage">
+    <div class="stage-note">tonal specimen · 1:1 mm · 4 types · 3 knobs</div>
+    <div id="hatch" class="box hatchbay"></div>
+  </div>
+
+  <h2>08 <span>/</span> Hand hatching <span>·</span> three hands, one ball</h2>
+  <p class="sub">
+    The bay's four types are <em>machine</em> fills and say so: a plotter draws paths, and
+    parallel / crossed / serpentine are three paths. This is the opposite job — a fill that
+    comes off the same machine and does not look like it. Its <b>Hand hatched</b> position is
+    not the answer, which is why these three are new work and not a tuning of it: breaking the
+    register makes a fill look <em>noisy</em>, and noisy is not the same thing as hand-made.
+    <br><br>
+    <b>What a hand actually does</b> is a short list, and every item is a thing a loop does not
+    do. It <b>does not space evenly</b> — an unvarying pitch is a louder tell than straightness
+    ever was. It <b>does not come back at the same angle</b>. It <b>does not stop on the line</b>:
+    a stroke runs past the boundary or pulls up short, and never by the same amount twice. It
+    <b>re-grips</b>, so past about 16mm there are no edge-to-edge strokes at all. And it
+    <b>builds tone by going back over</b> — four passes, each confined to what is already darker
+    than the last, which is why every threshold is dithered. A clean one draws a contour map of
+    the lighting, and that is the one thing that never happens by hand.
+    <br><br>
+    <b>Two specimens each, and neither is optional.</b> The <b>ball</b> is the tone test: the
+    one shape whose correct answer everybody already knows, so a hand that cannot make it round
+    is caught on sight — form-following strokes, the terminator darker than the silhouette, the
+    table's bounce light lifting the lower rim, and a cast shadow that is the only thing saying
+    "table". The <b>shape</b> carries no shading at all, one density edge to edge, because a
+    circle has no corner and no neck: a fill can be perfect on a ball and come apart the first
+    time it meets a real outline.
+    <br><br>
+    <b>It is geometry, in millimetres, at 1:1.</b> No filter, no blur, no fill anywhere in the
+    block — every mark is a stroked path at the nib's own width, so what is on screen is what a
+    pen puts on paper and the same paths go out to an SVG and onto the plotter with no rescale.
+    That is the only condition under which a specimen is worth looking at.
+  </p>
+  <div class="stage">
+    <div class="stage-note">1:1 mm · 0.25 nib · seeded · black on toned stock</div>
+    <div id="handhatch" class="box handbay"></div>
+  </div>
+
+  <h2>09 <span>/</span> Materials</h2>
+  <p class="sub">
+    <span id="mat-count">These</span> primitives carry all six components. Every control on this page is
+    one of them at a size — which is what makes it a language rather than six hand-drawn
+    pictures. The count is written by the tiles themselves, because the sentence said
+    <em>nine</em> for three versions after the tenth was built.
   </p>
   <div class="mats" id="mats"></div>
 
-  <h2>08 <span>/</span> The bill</h2>
+  <h2>10 <span>/</span> The bill</h2>
   <p class="sub">
     What it buys, and what it costs. Both lists are about this component specifically,
     not about skeuomorphism in general.
@@ -226,7 +301,46 @@ const ICON = {
   copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/>'),
   trash: svg('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'),
   chev: svg('<polyline points="9 6 15 12 9 18"/>'),
+  dropper: svg('<path d="M15.5 3.5a2.12 2.12 0 0 1 3 3L9 16l-4 1 1-4z"/><line x1="13.5" y1="5.5" x2="16.5" y2="8.5"/>'),
   clear: svg('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><line x1="10" y1="11" x2="14" y2="15"/><line x1="14" y1="11" x2="10" y2="15"/>'),
+};
+
+/* ENGRAVED icons — the same set drawn for .eng rather than for a key cap.
+   They are separate from ICON on purpose: an engraving is a CUT, so it takes
+   the panel's shadow colour and never currentColor, and the shapes have to be
+   open enough that a 1px light line under them still reads. A filled glyph
+   engraves as a blob. Each one is the PARAMETER, not a metaphor for it:
+   spacing is literally two rules with a gap measured between them. */
+const eng = d => `<svg class="eng" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ENG = {
+  // two parallel rules with the gap arrow between them
+  spacing: eng('<line x1="3" y1="5" x2="21" y2="5"/><line x1="3" y1="19" x2="21" y2="19"/>' +
+               '<line x1="12" y1="8" x2="12" y2="16"/>' +
+               '<polyline points="9.5 10.5 12 8 14.5 10.5"/><polyline points="9.5 13.5 12 16 14.5 13.5"/>'),
+  // a pen tip in section — the barrel tapering to the nib, with the slit
+  nib: eng('<path d="M9 3h6l-1 9-2 9-2-9-1-9z"/><line x1="12" y1="8" x2="12" y2="17"/>' +
+           '<line x1="9.4" y1="12" x2="14.6" y2="12"/>'),
+  // a short dash with end caps: the shortest mark that survives
+  minstroke: eng('<line x1="8" y1="12" x2="16" y2="12"/>' +
+                 '<line x1="8" y1="8.5" x2="8" y2="15.5"/><line x1="16" y1="8.5" x2="16" y2="15.5"/>'),
+  // two dashes and the arc that bridges them
+  joinreach: eng('<line x1="2.5" y1="15" x2="8.5" y2="15"/><line x1="15.5" y1="15" x2="21.5" y2="15"/>' +
+                 '<path d="M8.5 15A3.5 3.5 0 0 1 12 11.5 3.5 3.5 0 0 1 15.5 15"/>'),
+  // a protractor quadrant: the baseline, the arm, and the arc between them
+  angle: eng('<line x1="4" y1="18" x2="20" y2="18"/><line x1="4" y1="18" x2="17" y2="7"/>' +
+             '<path d="M12 18A8 8 0 0 0 14.2 12.5"/>'),
+  // the pen cap, for the colour row
+  ink: eng('<path d="M8.5 21V8.5C8.5 5 10 3 12 3s3.5 2 3.5 5.5V21z"/><line x1="8.5" y1="17" x2="15.5" y2="17"/>'),
+  // THE THREE HANDS, and each one is its own marks rather than a picture of
+  // them: strokes that bend, strokes that cross, strokes that agree on nothing
+  hhand: eng('<path d="M4 16.5C7 9.5 11 6 17 5"/><path d="M7 19C10 12 14 8.5 20 7.5"/>' +
+             '<path d="M3.5 11.5C6 7.5 8.5 5.5 12.5 4.5"/>'),
+  hcross: eng('<path d="M3.5 14C7 8 11 5 17 4"/><path d="M6.5 19.5C10 13.5 14 10.5 20.5 9.5"/>' +
+              '<path d="M7 3.5C9 9 12.5 15 17.5 20"/><path d="M3 8.5C5 13 8 17.5 11.5 21"/>'),
+  hrand: eng('<line x1="3.5" y1="7" x2="7" y2="4.5"/><line x1="10" y1="5.5" x2="12" y2="9.5"/>' +
+             '<line x1="16" y1="4" x2="19.5" y2="6.5"/><line x1="5" y1="13" x2="8.5" y2="11"/>' +
+             '<line x1="12.5" y1="14.5" x2="15" y2="11.5"/><line x1="18" y1="13.5" x2="20.5" y2="16"/>' +
+             '<line x1="4" y1="19.5" x2="6" y2="16.5"/><line x1="10" y1="20" x2="14" y2="18.5"/>'),
 };
 
 const STROKES = [
@@ -550,7 +664,7 @@ Object.assign(ICON, {
 const RING_R = 43;                       // in the 0–100 viewBox
 const RING_C = 2 * Math.PI * RING_R;     // 270.18
 function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
-                layout = 'stack', size, bipolar = false, onChange }) {
+                layout = 'stack', size, bipolar = false, detents = null, onChange }) {
   const row = layout === 'row';
   if (size == null) size = row ? 40 : 46;
   const wrap = el('div', 'kwrap' + (row ? ' inline' : ''));
@@ -589,9 +703,19 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
     k.setAttribute('aria-valuenow', v);
     k.setAttribute('aria-valuetext', val.textContent);
   };
+  /* DETENTS, the same idea the centre fader already has and for the same
+     reason: an angle of 45° is not a value you approach, it is a place, and a
+     real panel cuts a notch in the track so the finger finds it without the
+     eye. Within 2% of the sweep the cap falls in — wide enough to catch, tight
+     enough that the numbers between the notches are still reachable. */
+  const NOTCH = .02 * (max - min);
   const set = (nv) => {
     const q = Math.round(nv / step) * step;
     v = +Math.min(max, Math.max(min, q)).toFixed(6);
+    if (detents) {
+      const near = detents.find(d => Math.abs(v - d) < NOTCH);
+      if (near != null) v = near;
+    }
     paint(); onChange && onChange(v);
   };
 
@@ -715,6 +839,295 @@ function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
   paint();
   row.append(el('div', 'flab', label), slot, out);
   return row;
+}
+
+/* ── ONE CAP: the plain fader, and its two variations ─────────────────────
+   The range fader above is the exception, not the type. The type is a single
+   cap in a slot, and the refs are unanimous about it: the EQ-200, the TX-6,
+   the K.O.II and the Sidekick are all banks of one-cap faders. Three forms,
+   one factory, because they differ in two things only — where the lit fill
+   starts, and which way the slot runs.
+
+     LEVEL    fill runs from the end of the slot to the cap. The value is how
+              much of the track is lit, which is why this is the right control
+              for anything that has a floor and a ceiling and no natural
+              middle.
+
+     CENTRE   fill runs from the middle out to the cap, in whichever
+              direction. A trim is not "how much", it is "how far off", and a
+              fill that always starts at the left cannot say that. The scale
+              gets a long tick at zero and the cap DETENTS there: inside 3% of
+              the middle it snaps, the way a real centre-detent pot has a
+              notch cut in its track. Zero is a place you can find without
+              looking, which is the entire point of the part.
+
+     VERTICAL the same control stood up. Not a style choice: a bank of them
+              is readable across at a glance because the caps make a profile,
+              which is why every mixer on earth is built this way and why the
+              EQ-200's twelve bands are legible as a curve.
+
+   The cap is 17px along its travel in both orientations, so all three share
+   the same geometry as the range fader: a cap CENTRE at t sits at
+   `t*100% - (t-.5)*CAP_W`, which keeps the cap inside the slot at both ends
+   without the value lying about where it is. */
+function fader({ label, min, max, step = 0.01, value, fmt, mode = 'level',
+                 vert = false, onChange } = {}) {
+  const row = el('div', `fader${vert ? ' vert' : ''}${mode === 'center' ? ' bi' : ''}`);
+  const slot = el('div', 'fslot');
+  const track = el('div', 'ftrack');
+  const fill = el('div', 'ffill');
+  const cap = el('div', 'fcap');
+  const out = el('div', 'kval');
+  track.append(fill, cap);
+  slot.append(track, el('div', 'fticks'));
+  let v = value;
+
+  // the neutral point a centre fader measures FROM: real zero if the range
+  // crosses it, the middle of the range otherwise
+  const zero = (mode === 'center') ? ((min < 0 && max > 0) ? (0 - min) / (max - min) : .5) : 0;
+  const DETENT = .03;
+
+  const q = x => +Math.min(max, Math.max(min, Math.round(x / step) * step)).toFixed(6);
+  const norm = x => (x - min) / (max - min);
+  const cx = t => `calc(${t * 100}% - ${(t - .5) * CAP_W}px)`;
+  const span = d => `calc(${d * 100}% - ${d * CAP_W}px)`;
+
+  const paint = () => {
+    const t = norm(v);
+    cap.style[vert ? 'top' : 'left'] = cx(vert ? 1 - t : t);
+    if (mode === 'center') {
+      const lo = Math.min(zero, t), hi = Math.max(zero, t);
+      fill.style[vert ? 'top' : 'left'] = cx(vert ? 1 - hi : lo);
+      fill.style[vert ? 'height' : 'width'] = span(hi - lo);
+    } else if (vert) {
+      fill.style.top = cx(1 - t); fill.style.bottom = '2px'; fill.style.height = 'auto';
+    } else {
+      fill.style.left = '2px'; fill.style.width = `calc(${cx(t)} - 2px)`;
+    }
+    out.textContent = fmt ? fmt(v) : v;
+    cap.setAttribute('aria-valuenow', v);
+    cap.setAttribute('aria-valuetext', out.textContent);
+  };
+  const set = x => {
+    v = q(x);
+    // the notch: inside 3% of the middle the cap falls into zero
+    if (mode === 'center' && Math.abs(norm(v) - zero) < DETENT) v = q(min + zero * (max - min));
+    paint(); onChange && onChange(v);
+  };
+
+  // same as the range fader: the TRACK takes every pointer event, so you
+  // click the line rather than aiming at the cap
+  const fromXY = e => {
+    const r = track.getBoundingClientRect();
+    const usable = (vert ? r.height : r.width) - CAP_W;
+    const at = vert ? (r.bottom - e.clientY - CAP_W / 2) : (e.clientX - r.left - CAP_W / 2);
+    set(min + Math.min(1, Math.max(0, at / usable)) * (max - min));
+  };
+  track.addEventListener('pointerdown', e => {
+    track.setPointerCapture(e.pointerId); track.dataset.on = '1'; fromXY(e);
+  });
+  track.addEventListener('pointermove', e => { if (track.dataset.on) fromXY(e); });
+  track.addEventListener('pointerup', () => delete track.dataset.on);
+  track.addEventListener('wheel', e => {
+    e.preventDefault(); set(v - Math.sign(e.deltaY) * (e.shiftKey ? step : (max - min) / 40));
+  }, { passive: false });
+
+  cap.tabIndex = 0;
+  cap.setAttribute('role', 'slider');
+  cap.setAttribute('aria-label', label);
+  cap.setAttribute('aria-valuemin', min);
+  cap.setAttribute('aria-valuemax', max);
+  cap.addEventListener('keydown', e => {
+    const d = e.shiftKey ? step : (max - min) / 20;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); set(v + d); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); set(v - d); }
+  });
+
+  paint();
+  row.append(el('div', 'flab', label), slot, out);
+  row.set = set;                       // same handle knob() exposes, same reason
+  return row;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE COLOUR PICKER — a plate that happens to return a colour.
+
+   It is a PRIMITIVE, not a part of any one panel: openPicker() takes an
+   anchor and a callback, and anything with a colour on it can call it. The
+   hatch bay's refillable pens were the first caller and are not the only
+   possible one, which is the whole reason it lives up here with the faders
+   and the keys rather than down inside that bay.
+
+   Colour maths in one place: hex is what the outside world speaks, HSV is
+   what a field-and-hue picker is FOR (the two axes of the square are S and V
+   and the slot is H), so the widget holds HSV and converts at the edges.
+   ══════════════════════════════════════════════════════════════════════════ */
+const hex2rgb = h => {
+  const m = /^#?([\da-f]{6})$/i.exec(h.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [n >> 16 & 255, n >> 8 & 255, n & 255];
+};
+const rgb2hex = ([r, g, b]) =>
+  '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+const rgb2hsv = ([r, g, b]) => {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let h = 0;
+  if (d) {
+    if (mx === r) h = ((g - b) / d + 6) % 6;
+    else if (mx === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+  }
+  return [h, mx ? d / mx : 0, mx];
+};
+const hsv2rgb = ([h, s, v]) => {
+  const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+  const t = [[c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x]][Math.floor((h % 360) / 60)];
+  return t.map(u => (u + m) * 255);
+};
+
+/* Recents are shared across every picker on the page, because a recent colour
+   is a fact about the person, not about the swatch they last touched. */
+const PK_RECENT = ['#16181C', '#5E646D', '#FFFFFF', '#FF6A00', '#2C6BFF'];
+
+function openPicker(anchor, value, onChange) {
+  document.querySelector('.picker')?.remove();      // one at a time
+  let [h, s, v] = rgb2hsv(hex2rgb(value) || [255, 106, 0]);
+
+  const plate = el('div', 'plate picker');
+  const bodyEl = el('div', 'plate-body');
+
+  const fieldEl = el('div', 'pk-field');
+  const cross = el('div', 'pk-cross');
+  fieldEl.append(cross);
+
+  const drop = key(ICON.dropper, { title: 'Sample a colour from the screen' });
+  const hue = fader({
+    label: 'Hue', min: 0, max: 360, step: 1, value: h,
+    onChange: x => { h = x; push(); },
+  });
+  hue.classList.add('pk-hue');
+  const row = el('div', 'pk-row');
+  row.append(drop, hue);
+
+  const lcd = el('div', 'lcd pk-lcd');
+  const mk = (cls, w) => {
+    const i = el('input', cls);
+    i.type = 'text'; i.spellcheck = false; i.setAttribute('aria-label', w);
+    return i;
+  };
+  const rI = mk('', 'Red'), gI = mk('', 'Green'), bI = mk('', 'Blue'), xI = mk('hex', 'Hex');
+  lcd.append(rI, el('span', 'pk-sep', '·'), gI, el('span', 'pk-sep', '·'), bI,
+             el('span', 'pk-sep', '·'), xI);
+  const legend = el('div', 'pk-legend', '<span>R</span><span>G</span><span>B</span>');
+
+  const well = el('div', 'pk-well');
+  const drawWell = () => {
+    well.textContent = '';
+    PK_RECENT.forEach(c => {
+      const p = el('button', 'pencap');
+      p.type = 'button'; p.style.setProperty('--ink', c); p.title = c.toUpperCase();
+      p.setAttribute('aria-label', `Recent ${c}`);
+      p.addEventListener('click', () => {
+        [h, s, v] = rgb2hsv(hex2rgb(c)); push();
+      });
+      well.append(p);
+    });
+  };
+  drawWell();
+
+  bodyEl.append(fieldEl, row, lcd, legend, well);
+  plate.append(bodyEl);
+  document.body.append(plate);
+
+  /* ANCHORED TO THE THING THAT SUMMONED IT, and flipped rather than clipped:
+     a plate that opens off the bottom of the window is a plate you cannot
+     use. Measured after it is in the DOM, because its height depends on
+     whether the dropper is there. */
+  const place = () => {
+    const a = anchor.getBoundingClientRect(), p = plate.getBoundingClientRect();
+    let x = a.left + a.width / 2 - p.width / 2;
+    let y = a.bottom + 9;
+    if (y + p.height > innerHeight - 8) y = Math.max(8, a.top - p.height - 9);
+    plate.style.left = Math.max(8, Math.min(x, innerWidth - p.width - 8)) + 'px';
+    plate.style.top = y + 'px';
+  };
+  place();
+
+  const hexNow = () => rgb2hex(hsv2rgb([h, s, v]));
+  let typing = null;
+  function push(silent) {
+    const rgb = hsv2rgb([h, s, v]).map(Math.round), hx = rgb2hex(rgb);
+    fieldEl.style.setProperty('--pk-h', h.toFixed(1));
+    cross.style.left = (s * 100) + '%';
+    cross.style.top = ((1 - v) * 100) + '%';
+    cross.style.background = hx;
+    if (typing !== 'rgb') { rI.value = rgb[0]; gI.value = rgb[1]; bI.value = rgb[2]; }
+    if (typing !== 'hex') xI.value = hx.toUpperCase();
+    if (!silent) onChange(hx);
+  }
+
+  // the field: S across, V up. Pointer capture so a drag that leaves the
+  // square keeps working, same as every other control here.
+  const fromXY = e => {
+    const r = fieldEl.getBoundingClientRect();
+    s = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    v = 1 - Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+    push();
+  };
+  fieldEl.addEventListener('pointerdown', e => {
+    fieldEl.setPointerCapture(e.pointerId); fieldEl.dataset.on = '1'; fromXY(e);
+  });
+  fieldEl.addEventListener('pointermove', e => { if (fieldEl.dataset.on) fromXY(e); });
+  fieldEl.addEventListener('pointerup', () => delete fieldEl.dataset.on);
+
+  // EDITABLE IN PLACE. `typing` stops the field writing over the box you are
+  // in the middle of typing into — the classic two-way-binding cursor jump.
+  const readRGB = () => {
+    const n = [rI, gI, bI].map(i => parseInt(i.value, 10));
+    if (n.some(x => Number.isNaN(x))) return;
+    typing = 'rgb'; [h, s, v] = rgb2hsv(n.map(x => Math.max(0, Math.min(255, x))));
+    push(); typing = null;
+  };
+  [rI, gI, bI].forEach(i => i.addEventListener('input', readRGB));
+  xI.addEventListener('input', () => {
+    const rgb = hex2rgb(xI.value);
+    if (!rgb) return;
+    typing = 'hex'; [h, s, v] = rgb2hsv(rgb); push(); typing = null;
+  });
+
+  /* THE EYEDROPPER IS A KEY, and it is HIDDEN rather than dead-styled where
+     the API does not exist. A control that is present and cannot work is worse
+     than one that was never offered. */
+  if (window.EyeDropper) {
+    drop.addEventListener('click', async () => {
+      try {
+        const r = await new EyeDropper().open();
+        [h, s, v] = rgb2hsv(hex2rgb(r.sRGBHex)); push();
+      } catch { /* cancelled — nothing to report */ }
+    });
+  } else {
+    drop.remove();
+  }
+
+  const close = () => {
+    const hx = hexNow();
+    if (!PK_RECENT.includes(hx)) { PK_RECENT.unshift(hx); PK_RECENT.length = 8; }
+    plate.remove();
+    document.removeEventListener('pointerdown', outside, true);
+    document.removeEventListener('keydown', onKey, true);
+  };
+  const outside = e => { if (!plate.contains(e.target) && !anchor.contains(e.target)) close(); };
+  const onKey = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  // deferred, or the click that opened it closes it again in the same tick
+  setTimeout(() => document.addEventListener('pointerdown', outside, true));
+  document.addEventListener('keydown', onKey, true);
+
+  push(true);
+  place();
+  return plate;
 }
 
 /* ── the rotary selector: a teardrop lever on a ring of marks ─────────────── */
@@ -885,7 +1298,7 @@ function panelShape(w, h, cy, { L = 52, R = 44, f = 12, r = 14, cxOff = -8 } = {
 
    Only if it actually ended up IN. Flipping a switch off is a circuit opening;
    there is nothing to surge. */
-const ENGAGE_ROOTS = '#dock, #editor, #viewport, #tools, #navbar, #console, #pages';
+const ENGAGE_ROOTS = '#dock, #editor, #viewport, #tools, #navbar, #console, #pages, #hatch, #handhatch';
 function engage(btn, run, cls) {
   const root = btn.closest(ENGAGE_ROOTS) || document.body;
   const sel = '.' + btn.className.trim().split(/\s+/)[0];
@@ -1088,56 +1501,6 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     });
   };
   draw();
-})();
-
-/* ── the A/B: the same control, shipped and physical ──────────────────────── */
-(function sliderVsKnob() {
-  const box = document.getElementById('mini-knobs');
-  box.style.flex = '0 0 268px'; box.style.width = '268px';
-  const head = el('div', 'box-head');
-  head.append(el('span', 'nm', 'SLIDER → KNOB'));
-  const body = el('div', 'box-body');
-
-  const shipped = el('div');
-  shipped.style.cssText = 'background:hsla(0,0%,94%,.95);border-radius:10px;padding:12px 13px;color:#2a2622';
-  shipped.innerHTML = `
-    <div style="font-size:9px;letter-spacing:.14em;color:#96908a;margin-bottom:9px">AS SHIPPED</div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:12px;flex:0 0 46px;color:#4a453f">Count</span>
-      <span style="flex:1;height:4px;border-radius:2px;background:#d9d4cd;position:relative">
-        <span id="ab-fill" style="position:absolute;left:0;top:0;bottom:0;width:23.5%;background:#FF6A00;border-radius:2px"></span>
-        <span id="ab-cap" style="position:absolute;left:23.5%;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#FF6A00"></span>
-      </span>
-      <span id="ab-num" style="font-size:11px;font-variant-numeric:tabular-nums;background:#fff;border-radius:5px;padding:3px 8px;color:#2a2622">470</span>
-    </div>`;
-  body.append(shipped);
-
-  const note = el('div', 'klab', '↓  same value, same range');
-  note.style.textAlign = 'center';
-  body.append(note);
-
-  // The two halves are ONE value. Turning the knob moves the slider above it —
-  // a comparison that drifts apart the moment you touch it is not a comparison,
-  // and this card's whole claim is "same value, same range".
-  const fill = shipped.querySelector('#ab-fill');
-  const capd = shipped.querySelector('#ab-cap');
-  const num  = shipped.querySelector('#ab-num');
-  const wrap = el('div', 'knobcol');
-  wrap.append(knob({
-    label: 'Count', min: 0, max: 2000, step: 10, value: 470, layout: 'row', size: 44,
-    onChange: v => {
-      const pc = (v / 2000 * 100).toFixed(1) + '%';
-      fill.style.width = pc; capd.style.left = pc; num.textContent = v;
-    },
-  }));
-  body.append(wrap);
-
-  const why = el('p', 'mat-d',
-    'The arc is the part that does the work: <b style="color:#c6cad1">470 of 2000</b> is a shape you judge without reading, and the pointer angle survives being glanced at. What is lost is the drag-anywhere-along-a-line gesture — a knob needs a grab point, so it is worse on touch and worse when you want to slam a value to the end.');
-  why.style.marginTop = '2px';
-  body.append(why);
-
-  box.append(head, body);
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1351,25 +1714,963 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
    One material, one set of numbers. */
 
 /* ══════════════════════════════════════════════════════════════════════════
-   THE SKIN SWITCH — two positions, and it is one of the panel's own keys
+   07 · THE HATCH BAY — the first compound control
 
-   The material lives in physical-ui.css now, with the bright build as a
-   [data-skin="light"] block over the same rules, so the switch does nothing
-   but set an attribute on <html> and let the cascade do the rest.
+   Built once and never rebuilt. Every other panel here redraws wholesale on a
+   click, which is fine when the panel is a list; this one is a specimen with
+   four controls pointing at it, and tearing the turret down mid-drag to
+   redraw a gradient would be absurd. So the controls own their own state and
+   paint() only touches the two custom properties the specimen reads.
    ══════════════════════════════════════════════════════════════════════════ */
-(function skin() {
-  const bar = document.getElementById('skin');
-  const SKINS = [['DARK', 'dark'], ['LIGHT', 'light']];
-  let at = 0;
-  const draw = () => {
-    bar.textContent = '';
-    SKINS.forEach(([label, val], i) => bar.append(pkey(label, {
-      down: i === at, title: label.toLowerCase() + ' skin',
-      onClick: () => { at = i; document.documentElement.dataset.skin = val; draw(); },
-    })));
+(function hatchBay() {
+  const box = document.getElementById('hatch');
+
+  /* A KIT, NOT A RANGE. These are the nibs that exist. */
+  const NIBS = [0.20, 0.25, 0.35, 0.50, 0.70, 1.00];
+  /* THE CASE — three pens that are not a choice, and two slots that are.
+
+     Black, grey and white are the ones you own whatever you draw; a fixed rail
+     of five brand colours is a palette someone else picked, which is the thing
+     a plotter case never is. So the coloured pens are two EMPTY SLOTS you fill
+     — which is also the only honest way to say "any colour" without printing
+     seven of them and still being wrong. */
+  const INKS = [
+    { c: '#16181C', n: 'Black' },
+    { c: '#5E646D', n: 'Grey'  },
+    { c: '#FFFFFF', n: 'White' },
+    ...Array.from({ length: 6 }, (_, k) => ({ c: null, n: `Slot ${k + 1}`, pick: true })),
+  ];
+  /* FOUR WAYS TO FILL AN AREA, and they are four different paths, not four
+     textures. That is why the specimen draws geometry: PARALLEL lifts the pen
+     at the end of every pass, SERPENTINE does not and is one continuous
+     stroke, CROSSED is two passes at right angles, HAND HATCHED breaks the
+     register so the fill has no readable direction. Only the first and the
+     last-but-one look alike, and the difference between them is the whole of
+     what a plotter does.
+
+     THE SELECTOR IS THE ROTARY, not a bar of keys. Four named positions that
+     are all visible at once with the lever pointing at the one you are on —
+     which is what a switch is for, and what a row of keys only imitates.
+     `kind` is the generator; the order on the dial is the order you would
+     reach for them. */
+  const TYPES = [
+    { n: 'Parallel',     kind: 0 },
+    { n: 'Crossed',      kind: 2 },
+    { n: 'Hand hatched', kind: 3 },
+    { n: 'Serpentine',   kind: 1 },
+  ];
+  const hb = { on: true, nib: 2, spacing: 1.05, angle: 45, ink: 0, type: 0 };
+  /* PEN AND SPACING ARE ONE SETTING WITH TWO HANDLES. What a hatch looks like
+     is spacing MEASURED IN NIBS — 3 nibs apart is the same drawing whether the
+     pen is 0.25 or 1.00 — so the turret carries the ratio with it and the mm
+     follow. Drag spacing and you are choosing a new ratio; turn the turret and
+     you keep the one you chose. Both readouts say so. */
+  const MM = 96 / 25.4;
+  const nibMM = () => NIBS[hb.nib];
+
+  /* SCANLINES, CLIPPED TO THE SHEET — and the clipping is the point.
+
+     The obvious build is an over-sized axis-aligned grid rotated as a group,
+     which is right for three of these types and silently wrong for the fourth:
+     a serpentine's whole identity is the TURNAROUND at the end of each pass,
+     and on an over-sized grid every turnaround is off the edge of the paper.
+     It would have rendered as LINES with a different name on the key.
+
+     So the lines are generated in world space and each one is clipped to the
+     sheet (Liang–Barsky, two axes), which puts every endpoint ON the boundary
+     — where a real fill puts them, and where you can see the pen turn. */
+  function scanlines(w, h, s, angDeg, m = 1.4) {
+    const a = angDeg * Math.PI / 180;
+    const ux = Math.cos(a), uy = Math.sin(a), nx = -uy, ny = ux;
+    const x0 = m, y0 = m, x1 = w - m, y1 = h - m;
+    const cx = w / 2, cy = h / 2;
+    let tmin = Infinity, tmax = -Infinity;
+    [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].forEach(([px, py]) => {
+      const t = (px - cx) * nx + (py - cy) * ny;
+      if (t < tmin) tmin = t;
+      if (t > tmax) tmax = t;
+    });
+    const out = [];
+    for (let t = Math.ceil(tmin / s) * s; t <= tmax; t += s) {
+      const px = cx + nx * t, py = cy + ny * t;
+      let lo = -Infinity, hi = Infinity, ok = true;
+      const clip = (p, d, mn, mx) => {
+        if (Math.abs(d) < 1e-9) return p >= mn && p <= mx;
+        const A = (mn - p) / d, B = (mx - p) / d;
+        lo = Math.max(lo, Math.min(A, B));
+        hi = Math.min(hi, Math.max(A, B));
+        return true;
+      };
+      if (!clip(px, ux, x0, x1)) ok = false;
+      if (ok && !clip(py, uy, y0, y1)) ok = false;
+      if (!ok || hi - lo < 0.15) continue;
+      out.push([px + ux * lo, py + uy * lo, px + ux * hi, py + uy * hi]);
+    }
+    return out;
+  }
+
+  /* ── THE SUBJECT — a sphere, because a flat swatch proves nothing ────────
+     A rectangle of even hatch shows the SPACING and hides everything else.
+     What hatching is actually for is TONE: the same pen and the same angle
+     making light and dark by how much of the paper it leaves. So the specimen
+     draws the thing every hatching exercise starts with — a ball, lit from
+     above left like the rest of this document, sitting on its own shadow.
+
+     tone() is the whole drawing: 0 is bare paper, 1 is solid ink. Everything
+     below just decides where to put strokes so that the average darkness comes
+     out at tone(). */
+  function subject(w, h) {
+    const R = h * 0.38;
+    const cx = w * 0.42, cy = h * 0.45;
+    // the room light, same corner the panel is lit from
+    const L = [-0.50, -0.60, 0.62];
+    const sx0 = cx + R * 0.62, sy0 = cy + R * 1.02;
+    return (x, y) => {
+      const dx = (x - cx) / R, dy = (y - cy) / R, r2 = dx * dx + dy * dy;
+      if (r2 <= 1) {
+        const nz = Math.sqrt(1 - r2);
+        const lam = Math.max(0, dx * L[0] + dy * L[1] + nz * L[2]);
+        /* BOUNCE. A ball on a sheet is never black at the bottom — light comes
+           back off the paper and lifts the lower edge away from the shadow.
+           Without it the sphere reads as a disc with a dark rim. */
+        const bounce = Math.max(0, dx * 0.34 + dy * 0.74 + nz * 0.18) * 0.34;
+        let t = Math.max(0, 1 - lam - bounce);
+        // a little contrast through the terminator, and a hint of core shadow
+        t = Math.pow(t, 1.45) * 1.12;
+        /* A FLOOR ON THE LIT SIDE. At zero the highlight gets no strokes at
+           all, so the ball has no edge where it is brightest and dissolves
+           into the paper. A few sparse passes across the light is what a
+           hand does, and it is what makes the silhouette read. */
+        return Math.min(1, Math.max(t, 0.085));
+      }
+      const ex = (x - sx0) / (R * 1.10), ey = (y - sy0) / (R * 0.24);
+      const e = ex * ex + ey * ey;
+      return e <= 1 ? 0.52 * (1 - e * 0.72) : 0;
+    };
+  }
+
+  /* ── THE FOUR TYPES, all built from those segments ───────────────────────
+     Tone comes out of WHICH SCANLINES REACH A POINT, not out of pressure: each
+     pass carries a threshold, and it only puts ink down where the drawing is
+     darker than that. Light areas are reached by a few passes, dark areas by
+     all of them. The thresholds walk the golden ratio rather than a cycle, so
+     the passes interleave instead of banding into four visible tiers — which
+     is the one thing that gives away a hatch generated by a machine. */
+  const GOLD = 0.6180339887;
+  function hatchPath(kind, w, h, s, ang, seed, pass) {
+    const n = v => v.toFixed(2);
+    const T = subject(w, h);
+    const segs = scanlines(w, h, s, ang);
+    if (!segs.length) return [];
+    let r = seed;
+    const rnd = () => (r = (r * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+    const step = Math.max(0.28, s * 0.45);
+    const out = [];
+
+    segs.forEach(([ax, ay, bx, by], k) => {
+      const len = Math.hypot(bx - ax, by - ay);
+      if (len < step) return;
+      const ux = (bx - ax) / len, uy = (by - ay) / len;
+      /* THE SECOND PASS OF A CROSS ONLY WORKS IN THE DARKS. That is what
+         cross-hatching IS — you go back over the parts that are still not dark
+         enough — so its thresholds live in the top half of the range. */
+      let thr = ((k + 1) * GOLD) % 1;
+      if (pass) thr = 0.5 + thr * 0.5;
+      // hand hatching wanders: the threshold drifts and the line sits off its
+      // own track, so no two passes agree about where the edge of a tone is
+      const jit = kind === 3 ? (rnd() - 0.5) * 0.13 : 0;
+      const ox = kind === 3 ? -uy * (rnd() - 0.5) * s * 0.75 : 0;
+      const oy = kind === 3 ? ux * (rnd() - 0.5) * s * 0.75 : 0;
+
+      const runs = [];
+      let on = false, x0 = 0, y0 = 0;
+      for (let d = 0; d <= len; d += step) {
+        const x = ax + ux * d, y = ay + uy * d;
+        const ink = T(x, y) > thr + jit;
+        if (ink && !on) { on = true; x0 = x; y0 = y; }
+        else if (!ink && on) {
+          on = false;
+          if (Math.hypot(x - x0, y - y0) > step * 0.9) runs.push([x0, y0, x, y]);
+        }
+      }
+      if (on && Math.hypot(bx - x0, by - y0) > step * 0.9) runs.push([x0, y0, bx, by]);
+      if (!runs.length) return;
+
+      if (kind === 1) {
+        /* SERPENTINE — the pen does not lift, so the runs on one pass are one
+           path and the connector between them is drawn. That is the whole
+           difference from PARALLEL, and on a shaded subject it is the reason a
+           serpentine fill cannot make a clean highlight: the meander has to
+           cross the light to get to the next dark. */
+        const line = k % 2 ? runs.slice().reverse() : runs;
+        let d = '';
+        line.forEach(([rx, ry, qx, qy], i) => {
+          const [px, py, ex2, ey2] = k % 2 ? [qx, qy, rx, ry] : [rx, ry, qx, qy];
+          d += (i ? `L${n(px)} ${n(py)}` : `M${n(px)} ${n(py)}`) + `L${n(ex2)} ${n(ey2)}`;
+        });
+        out.push(d);
+        return;
+      }
+      // PARALLEL, each pass of CROSSED, and HAND HATCHED: the pen lifts
+      out.push(runs.map(([rx, ry, qx, qy]) =>
+        `M${n(rx + ox)} ${n(ry + oy)}L${n(qx + ox)} ${n(qy + oy)}`).join(''));
+    });
+    return out;
+  }
+
+  /* ── the head: the bay's own lamp, lit only when it is actually hatching ── */
+  const head = el('div', 'box-head');
+  const jewel = el('span', 'jewel');
+  head.append(jewel, el('span', 'nm', 'HATCH'));
+  const power = swBtn(hb.on, 'hatching', ICON.cells, null, () => {
+    hb.on = !hb.on; power.classList.toggle('on', hb.on); paint();
+  });
+  power.style.marginLeft = 'auto';
+  head.append(power);
+
+  const body = el('div', 'box-body hb-body');
+
+  /* ── THE SPECIMEN ─────────────────────────────────────────────────────── */
+  const spec = el('div', 'screen hb-spec');
+  const field = el('div', 'hb-field');
+  const scale = el('div', 'hb-scale',
+    '<span>1:1 mm · what plots</span>');
+  spec.append(field, scale);
+
+
+  /* ── the turret, and the three straight controls beside it ────────────── */
+  const row = el('div', 'hb-row');
+
+  const turret = rotary({
+    options: TYPES.map(t => t.n),
+    index: hb.type,
+    onChange: (_, i) => { hb.type = i; paint(); },
+  });
+  turret.classList.add('hb-sel');
+  const turretCol = el('div', 'hb-turret');
+  turretCol.append(el('div', 'bay-cap', `${ENG.spacing}<span>TYPE</span>`), turret);
+
+  const stack = el('div', 'hb-stack');
+
+  /* THREE KNOBS, WHICH IS WHAT THIS DOCUMENT'S OWN RULE ALREADY SAID.
+     "Every slider that sets a QUANTITY became a knob; a length stays a fader."
+     Pen, spacing and angle are three single quantities — none of them is a
+     span with two ends you compare — so all three were faders in defiance of
+     the rule the page states twice. Three 46px knobs in one row also cost a
+     third of the height three param strips did, and the bay is a bay because
+     its members sit together where you can see them against the specimen. */
+  const knobs = el('div', 'knobrow hb-knobs');
+
+  /* PEN TURNS OVER THE KIT, not over millimetres: six stops, one per pen in
+     the case, so it cannot land on 0.43. The readout says the millimetres and
+     the dot beside the label is that nib at its true relative size, so the
+     number has an object next to it.
+
+     PEN AND SPACING ARE INDEPENDENT. An earlier build had the pen drag the
+     spacing along to hold a nib ratio, which is a tidy idea and the wrong one:
+     it means one control silently edits another, so a value you set by hand
+     stops being the value you set. They are two settings. */
+  const nibDot = el('span', 'nibdot');
+  nibDot.style.setProperty('--nib', NIBS[hb.nib] + 'mm');
+  const pen = knob({
+    label: 'Pen', min: 0, max: NIBS.length - 1, step: 1, value: hb.nib, size: 44,
+    fmt: i => NIBS[i].toFixed(2),
+    onChange: i => {
+      hb.nib = i;
+      nibDot.style.setProperty('--nib', NIBS[i] + 'mm');
+      paint();
+    },
+  });
+  const penLab = pen.querySelector('.klab');
+  penLab.prepend(el('span', null, ENG.nib).firstElementChild);
+  penLab.append(nibDot);
+
+  const spacing = knob({
+    label: 'Spacing', min: 0.1, max: 4, step: 0.05, value: hb.spacing, size: 44,
+    fmt: v => v.toFixed(2),
+    onChange: v => { hb.spacing = v; paint(); },
+  });
+  spacing.querySelector('.klab').prepend(el('span', null, ENG.spacing).firstElementChild);
+
+  const angleKnob = knob({
+    label: 'Angle', min: 0, max: 180, step: 1, value: hb.angle, size: 44,
+    detents: [0, 45, 90, 135, 180],
+    fmt: v => v + '°',
+    onChange: v => { hb.angle = v; paint(); },
+  });
+  angleKnob.querySelector('.klab').prepend(el('span', null, ENG.angle).firstElementChild);
+
+  knobs.append(pen, spacing, angleKnob);
+
+  /* THE RAIL IS A CASE, SO IT IS FULL OF SLOTS — including the ones with no
+     pen in them yet. A rail that stops after the pens you happen to own reads
+     as a list that ran out; a case reads as a case, and an empty slot is an
+     invitation rather than an absence. Three of them are filled with the pens
+     you own whatever you draw and the rest are holes, which is also the honest
+     way to say "any colour": you put one in. */
+  const pens = el('div', 'pens');
+  const select = i => {
+    hb.ink = i;
+    pens.querySelectorAll('.pencap').forEach((q, n) => {
+      q.classList.toggle('on', n === i);
+      q.setAttribute('aria-pressed', String(n === i));
+    });
+    paint();
   };
-  document.documentElement.dataset.skin = 'dark';
-  draw();
+  const drawPens = () => {
+    pens.textContent = '';
+    INKS.forEach((ink, i) => {
+      const empty = ink.pick && !ink.c;
+      const p = el('button', 'pencap'
+        + (ink.pick ? ' pick' : '') + (empty ? ' empty' : '') + (i === hb.ink ? ' on' : ''));
+      p.type = 'button';
+      if (!empty) p.style.setProperty('--ink', ink.c);
+      p.title = empty ? 'Empty slot — click to put a pen in it'
+              : ink.pick ? `${ink.n} — click again to change its ink`
+              : `${ink.n} pen`;
+      p.setAttribute('aria-label', p.title);
+      p.setAttribute('aria-pressed', String(i === hb.ink));
+
+      if (ink.pick) {
+        /* THE NATIVE INPUT IS KEPT AS THE VALUE AND NEVER AS THE SURFACE. It
+           is what a form would read and what a real app would post; the picker
+           is what a person touches. Swapping one for the other later changes
+           this file and nothing downstream, which is the point of keeping it.
+
+           An EMPTY slot opens the picker on the first click, because there is
+           no pen to choose yet — filling it IS choosing it. A FILLED one
+           selects first and refills on the second click: a click that both
+           chooses a pen and opens a plate makes choosing a pen expensive. */
+        const inp = el('input', 'ink-src');
+        inp.type = 'color';
+        inp.value = ink.c || '#FF6A00';
+        inp.tabIndex = -1;
+        inp.setAttribute('aria-hidden', 'true');
+        p.append(inp);
+        p.addEventListener('click', () => {
+          if (!empty && hb.ink !== i) return select(i);
+          openPicker(p, ink.c || '#FF6A00', hx => {
+            const first = !ink.c;
+            ink.c = hx; inp.value = hx;
+            p.classList.remove('empty');
+            p.style.setProperty('--ink', hx);
+            p.title = `${ink.n} — click again to change its ink`;
+            if (first) { drawPens(); select(i); } else paint();
+          });
+        });
+      } else {
+        p.addEventListener('click', () => select(i));
+      }
+      pens.append(p);
+    });
+  };
+  drawPens();
+
+  stack.append(knobs, el('div', 'bay-cap', `${ENG.ink}<span>INK</span>`), pens);
+  row.append(turretCol, stack);
+
+  /* ── SET ONCE: the two thresholds that are not part of the rhythm ─────── */
+  const deep = el('div', 'hb-deep');
+  deep.append(el('div', 'bay-cap', '<span>SET ONCE · PER PLOTTER</span>'));
+  const minStroke = fader({
+    label: 'Min stroke', min: 0, max: 2, step: 0.05, value: 0.4, fmt: v => v.toFixed(2),
+  });
+  minStroke.querySelector('.flab').prepend(el('span', null, ENG.minstroke).firstElementChild);
+  const join = fader({
+    label: 'Join reach', min: 0, max: 5, step: 0.1, value: 1.6, fmt: v => v.toFixed(1) + '×',
+  });
+  join.querySelector('.flab').prepend(el('span', null, ENG.joinreach).firstElementChild);
+  deep.append(minStroke, join);
+
+  body.append(spec, row, deep);
+  box.append(head, body);
+
+  /* ── paint ────────────────────────────────────────────────────────────── */
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  let mmW = 0, mmH = 0;
+
+  /* COALESCED ON A FRAME. A tone-driven hatch is thousands of samples, and a
+     knob drag fires far more often than the screen refreshes — so the state
+     lands immediately and the drawing is rebuilt once per frame. */
+  let queued = false;
+  function paint() {
+    /* SPACING UNDER THE NIB IS NOT AN ERROR, so nothing reports it. The
+       strokes overlap and the sheet fills solid — which is a fill, and a fill
+       is something you ask for. An earlier build lit a red legend and turned
+       the spacing arc red, which framed a legitimate result as a fault; the
+       specimen already shows exactly what happens, and that is the whole job
+       of a specimen. */
+    const ink = INKS[hb.ink].c;
+    jewel.style.setProperty('--lyr', ink);
+    box.classList.toggle('off', !hb.on);
+    if (!mmW || queued) return;
+    queued = true;
+    requestAnimationFrame(render);
+  }
+
+  function render() {
+    queued = false;
+    const s = Math.max(0.02, hb.spacing);
+    const g = document.createElementNS(SVGNS, 'g');
+    g.setAttribute('stroke', INKS[hb.ink].c);
+    g.setAttribute('stroke-width', nibMM());
+    g.setAttribute('stroke-linecap', 'round');
+    g.setAttribute('fill', 'none');
+    // CROSSED is the same generator run twice, 90° apart — a second pass,
+    // which is exactly what it is on the plotter
+    const kind = TYPES[hb.type].kind;
+    const passes = kind === 2 ? [[hb.angle, 0], [hb.angle + 90, 1]] : [[hb.angle, 0]];
+    passes.forEach(([a, pass]) => {
+      hatchPath(kind, mmW, mmH, s, a, 9973 + pass * 7919, pass).forEach(d => {
+        if (!d) return;
+        const p = document.createElementNS(SVGNS, 'path');
+        p.setAttribute('d', d);
+        g.append(p);
+      });
+    });
+    const svgEl = field.querySelector('svg');
+    svgEl.textContent = '';
+    svgEl.append(g);
+  }
+
+  /* MEASURED, NOT GUESSED — the same reason the boss measures its own centre.
+     The viewBox is the field's real size in millimetres, so one user unit is
+     one millimetre and the specimen is 1:1 with paper. */
+  const svgEl = document.createElementNS(SVGNS, 'svg');
+  field.append(svgEl);
+  requestAnimationFrame(() => {
+    const r = field.getBoundingClientRect();
+    mmW = r.width / MM; mmH = r.height / MM;
+    svgEl.setAttribute('viewBox', `0 0 ${mmW.toFixed(3)} ${mmH.toFixed(3)}`);
+    paint();
+  });
+  paint();
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   08 · THE SPHERE TEST — three hands, one ball
+
+   Every other fill in this document is a MACHINE fill and says so proudly: the
+   hatch bay's whole argument is that a plotter draws paths, and the four types
+   on its dial are four paths. This block is the opposite job. What is wanted
+   here is a fill that came off the same machine and does not look like it —
+   and "looks hand-made" is not a texture you can add at the end, it is a list
+   of things a hand does that a loop does not:
+
+     · IT DOES NOT SPACE EVENLY.  The loudest machine tell in a fill is not
+       straightness, it is a pitch that never varies. Every family here is
+       jittered by a third of its own spacing before anything else happens.
+     · IT DOES NOT COME BACK AT THE SAME ANGLE.  Each pass is a couple of
+       degrees off the last, because nobody returns to a fill at the angle they
+       left it.
+     · IT DOES NOT STOP ON THE LINE.  A stroke runs past the boundary or pulls
+       up short by a couple of tenths, and which one it does is not decided in
+       advance.
+     · IT RE-GRIPS.  Past about 16mm the wrist runs out of travel, so a long
+       fill has no edge-to-edge strokes in it at all.
+     · IT BUILDS TONE BY GOING BACK OVER, not by drawing a grey. Four passes,
+       each confined to what is already darker than the last — which is why
+       every threshold has to be dithered, or the fill draws a contour map of
+       the lighting instead of a tone.
+
+   ALL OF IT IS GEOMETRY IN MILLIMETRES, generated the way a plotter would
+   receive it, and the viewBox is measured off the element at 96/25.4 so one
+   user unit is one millimetre. There is no filter, no blur and no fill in the
+   whole block: what is on screen is what a pen would put on paper, at size.
+   That is the only reason a specimen is worth looking at.
+   ══════════════════════════════════════════════════════════════════════════ */
+(function sphereTest() {
+  const box = document.getElementById('handhatch');
+
+  const rng = s => { let r = (s >>> 0) || 1; return () => (r = (r * 1664525 + 1013904223) >>> 0) / 4294967296; };
+  const noise = s => {
+    const g = [], rr = rng(s);
+    for (let i = 0; i < 512; i++) g[i] = rr() * 2 - 1;
+    return x => {
+      const i = Math.floor(x), f = x - i, t = f * f * (3 - 2 * f);
+      return g[i & 511] + (g[(i + 1) & 511] - g[i & 511]) * t;
+    };
+  };
+  const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const norm = v => { const m = Math.hypot(v[0], v[1], v[2]); return [v[0] / m, v[1] / m, v[2] / m]; };
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const plen = p => { let t = 0; for (let i = 1; i < p.length; i++) t += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]); return t; };
+
+  /* ── the scene: one ball, one table, one lamp ─────────────────────────── */
+  function scene(w, h) {
+    const R = Math.min(w * 0.34, h * 0.295);
+    const cx = w * 0.45, cy = h * 0.42;
+    const gy = cy + R;                                   // the contact point
+    const L = norm([-0.52, -0.60, 0.53]);                // the lamp: up, left, front
+    const B = norm([0.42, 0.70, 0.28]);                  // the table's bounce: low, right
+    const sx = cx + R * 0.55, sy = gy + R * 0.09, srx = R * 1.08, sry = R * 0.30;
+
+    /* THE BALL. 1 - n·L is the whole of it and it is not enough: that draws a
+       shaded disc, which is what a flat fill looks like. What makes a sphere a
+       sphere is the BOUNCE — the table throwing light back at the underside, so
+       the darkest band is not the edge but the terminator, and there is a rim of
+       paper INSIDE the shadow side. Take that away and the ball goes flat even
+       though every other number is right. */
+    const ball = (x, y) => {
+      const dx = (x - cx) / R, dy = (y - cy) / R, d2 = dx * dx + dy * dy;
+      if (d2 > 1) return -1;
+      const nz = Math.sqrt(1 - d2);
+      const lam = dx * L[0] + dy * L[1] + nz * L[2];
+      const lit = clamp01((lam - 0.02) / 0.86);
+      let t = 1 - Math.pow(lit, 0.72);
+      /* THE DARKEST PLACE IS NOT THE EDGE, it is the band just past the
+         terminator. Miss that and every tone still reads as a gradient — which
+         is what a shaded disc is. */
+      t += 0.16 * Math.exp(-Math.pow((lam + 0.10) / 0.20, 2));
+      const bo = Math.max(0, dx * B[0] + dy * B[1] + nz * B[2]);
+      /* the bounce is blocked where the ball meets the table, which is why the
+         contact stays black while the rim beside it lifts */
+      const occ = clamp01((Math.hypot(dx, (dy - 1) * 1.10) - 0.26) / 0.46);
+      t -= Math.pow(bo, 4.2) * 0.36 * occ * (1 - lit);
+      return clamp01(t) * 0.98;
+    };
+
+    /* THE CAST SHADOW is the only thing that says "table". No horizon line: the
+       refs have none either, and a drawn line would be a second object competing
+       with the one being tested. */
+    const shadow = (x, y) => {
+      const dx = (x - cx) / R, dy = (y - cy) / R;
+      if (dx * dx + dy * dy < 1.0) return -1;            // the ball is in front of it
+      const u = (x - sx) / srx, v = (y - sy) / sry, d = Math.hypot(u, v);
+      if (d > 1) return -1;
+      let t = (1 - Math.pow(d, 1.35)) * 0.90;
+      const c = Math.hypot((x - cx) / (R * 0.58), (y - gy) / (R * 0.26));
+      t = Math.max(t, 1.05 - c * 0.85);                  // the contact, which is near solid
+      return clamp01(t);
+    };
+    return { R, cx, cy, gy, sx, sy, srx, sry, ball, shadow };
+  }
+
+  /* ── the strokes follow the form ───────────────────────────────────────── */
+  function latitudes(A, phi0, dphi, cx, cy, R, step, phi1 = Math.PI, jit = () => 0) {
+    const t0 = Math.abs(A[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0];
+    const U = norm(cross(A, t0)), V = cross(A, U);
+    const tHide = Math.atan2(V[2], U[2]) + Math.PI;      // start on the far side
+    const out = [];
+    for (let base = phi0; base < phi1; base += dphi) {
+      /* NOBODY SPACES BY EYE AND GETS IT RIGHT. A perfectly even pitch is the
+         single loudest machine tell in a fill — louder than straightness, which
+         is why the wobble alone was never enough. */
+      const phi = base + jit() * dphi * 0.34;
+      const ca = Math.cos(phi), sa = Math.sin(phi), rad = R * sa;
+      if (rad < step) continue;
+      const dt = step / rad;
+      let run = [];
+      for (let k = 0; k <= Math.PI * 2 / dt + 1; k++) {
+        const t = tHide + k * dt, c = Math.cos(t), s = Math.sin(t);
+        const z = ca * A[2] + sa * (c * U[2] + s * V[2]);
+        if (z > 0.015) {
+          run.push([cx + R * (ca * A[0] + sa * (c * U[0] + s * V[0])),
+                    cy + R * (ca * A[1] + sa * (c * U[1] + s * V[1]))]);
+        } else if (run.length) { out.push(run); run = []; }
+      }
+      if (run.length) out.push(run);
+    }
+    return out;
+  }
+
+  function parallels(x0, y0, x1, y1, ang, s, off, step, jit = () => 0) {
+    const a = ang * Math.PI / 180, ux = Math.cos(a), uy = Math.sin(a), nx = -uy, ny = ux;
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    let tmin = Infinity, tmax = -Infinity;
+    [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].forEach(([px, py]) => {
+      const t = (px - cx) * nx + (py - cy) * ny;
+      if (t < tmin) tmin = t; if (t > tmax) tmax = t;
+    });
+    const L = Math.hypot(x1 - x0, y1 - y0);
+    const out = [];
+    for (let b = Math.ceil(tmin / s) * s + off; b <= tmax; b += s) {
+      const t = b + jit() * s * 0.34;
+      const px = cx + nx * t, py = cy + ny * t, run = [];
+      for (let u = -L / 2; u <= L / 2; u += step) run.push([px + ux * u, py + uy * u]);
+      out.push(run);
+    }
+    return out;
+  }
+
+  /* ── carve a family of lines down to the part that is dark enough ──────── */
+  function carve(runs, tone, tau, dither, minLen) {
+    const out = [];
+    runs.forEach(pts => {
+      let cur = [];
+      for (const p of pts) {
+        if (tone(p[0], p[1]) >= tau + dither(p[0], p[1])) cur.push(p);
+        else { if (cur.length > 1) out.push(cur); cur = []; }
+      }
+      if (cur.length > 1) out.push(cur);
+    });
+    return out.filter(r => plen(r) >= minLen);
+  }
+
+  /* ── the hand ──────────────────────────────────────────────────────────── */
+  function handify(pts, rnd, n1, amp, endMax) {
+    const L = [0];
+    for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    const tot = L[L.length - 1];
+    if (tot < 0.12) return null;
+    const ph = rnd() * 600, wl = 3.0 + rnd() * 4.5, bow = (rnd() - 0.5) * amp * 3.4;
+    const o = pts.map((p, i) => {
+      const s = L[i], u = s / tot;
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+      let tx = b[0] - a[0], ty = b[1] - a[1];
+      const m = Math.hypot(tx, ty) || 1; tx /= m; ty /= m;
+      const w = n1(ph + s / wl) * amp + bow * Math.sin(Math.PI * u);
+      return [p[0] - ty * w, p[1] + tx * w, tx, ty];
+    });
+    const e0 = rnd() * endMax - endMax * 0.4, e1 = rnd() * endMax - endMax * 0.4;
+    const A = o[0], Z = o[o.length - 1];
+    const out = o.map(p => [p[0], p[1]]);
+    out[0] = [A[0] - A[2] * e0, A[1] - A[3] * e0];
+    out[out.length - 1] = [Z[0] + Z[2] * e1, Z[1] + Z[3] * e1];
+    return out;
+  }
+
+  const f = v => (Math.round(v * 100) / 100);
+  function toPath(p) {
+    if (!p || p.length < 2) return '';
+    let d = `M${f(p[0][0])} ${f(p[0][1])}`;
+    if (p.length === 2) return d + `L${f(p[1][0])} ${f(p[1][1])}`;
+    for (let i = 0; i < p.length - 1; i++) {
+      const p0 = p[Math.max(0, i - 1)], p1 = p[i], p2 = p[i + 1], p3 = p[Math.min(p.length - 1, i + 2)];
+      d += `C${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)},` +
+           `${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)},` +
+           `${f(p2[0])} ${f(p2[1])}`;
+    }
+    return d;
+  }
+  const thin = (p, n) => {
+    if (p.length <= 3) return p;
+    const o = [];
+    for (let i = 0; i < p.length; i += n) o.push(p[i]);
+    if (o[o.length - 1] !== p[p.length - 1]) o.push(p[p.length - 1]);
+    return o;
+  };
+
+  /* ── the three hands ───────────────────────────────────────────────────── */
+  const AXIS = (aDeg, bDeg) => {
+    const a = aDeg * Math.PI / 180, b = bDeg * Math.PI / 180;
+    return norm([Math.cos(b) * Math.cos(a), Math.cos(b) * Math.sin(a), -Math.sin(b)]);
+  };
+
+  function draw(kind, w, h, seed, opt = {}) {
+    const S = scene(w, h);
+    const rnd = rng(seed), n1 = noise(seed ^ 0x9e37), n2 = noise(seed ^ 0x51ed);
+    const dither = (x, y) => (n1(x * 0.62 + y * 0.21) + n2(y * 0.55 - x * 0.18)) * 0.085;
+    const nib = opt.nib || 0.25;
+    const jit = () => rnd() - 0.5;
+    const amp = 0.085, out = [];
+    const ink = pts => { const g = handify(thin(pts, 3), rnd, n1, amp, 0.5); if (g) out.push(toPath(g)); };
+    /* A HAND RE-GRIPS. Past about 16mm the wrist runs out of travel and the
+       stroke is two strokes with a hairline break in it — which is the reason a
+       long hand-drawn fill never has a single edge-to-edge line in it. */
+    const push = pts => {
+      const L = plen(pts);
+      if (L < 17 || pts.length < 8) return ink(pts);
+      const k = Math.round(pts.length * (0.38 + rnd() * 0.24));
+      const g = Math.max(1, Math.round(pts.length * (0.02 + rnd() * 0.03)));
+      ink(pts.slice(0, k)); ink(pts.slice(k + g));
+    };
+
+    if (kind === 'random') {
+      /* NO REGISTER AT ALL. Density is the only tone control, so the marks have
+         to be short and the direction has to come from somewhere other than the
+         dice: a hand scribbling shares a direction with the marks it just made,
+         and pure uniform angles read as static rather than as shading. */
+      const dens = 4.6, N = Math.round(w * h * dens);
+      for (let k = 0; k < N; k++) {
+        const x = rnd() * w, y = rnd() * h;
+        const t = Math.max(S.ball(x, y), S.shadow(x, y));
+        if (t <= 0.03 || rnd() > Math.pow(t, 1.3)) continue;
+        const base = (n1(x * 0.10 + y * 0.07) * 1.6 + n1(y * 0.31 - x * 0.19 + 90) * 0.5) * Math.PI;
+        const a = base + (rnd() - 0.5) * 1.1;
+        const dx = Math.cos(a), dy = Math.sin(a);
+        const len = (0.30 + rnd() * 0.55) * (0.55 + t * 0.6);
+        const n = rnd() < 0.06 ? 2 : 1;
+        const gap = 0.26 + rnd() * 0.14, half = len / 2, pts = [];
+        for (let i = 0; i < n; i++) {
+          const off = (i - (n - 1) / 2) * gap;
+          const a0 = i % 2 ? half : -half, a1 = i % 2 ? -half : half;
+          const steps = Math.max(2, Math.round(len / 0.3));
+          for (let j = i ? 1 : 0; j <= steps; j++) {
+            const u = a0 + (a1 - a0) * (j / steps);
+            pts.push([x + dx * u - dy * off, y + dy * u + dx * off]);
+          }
+        }
+        const g = handify(pts, rnd, n1, 0.05, 0.18);
+        if (g) out.push(toPath(g));
+      }
+      /* the edge is made of the marks, so the contour is made of marks too */
+      for (let k = 0; k < 320; k++) {
+        const a = rnd() * Math.PI * 2;
+        const t = S.ball(S.cx + S.R * 0.94 * Math.cos(a), S.cy + S.R * 0.94 * Math.sin(a));
+        if (rnd() > 0.14 + Math.max(0, t) * 0.66) continue;
+        const r0 = S.R * (0.985 + (rnd() - 0.5) * 0.02), d = (0.10 + rnd() * 0.22);
+        const pts = [];
+        for (let j = 0; j <= 4; j++) {
+          const u = a - d / 2 + d * j / 4;
+          pts.push([S.cx + r0 * Math.cos(u), S.cy + r0 * Math.sin(u)]);
+        }
+        const g = handify(pts, rnd, n1, 0.06, 0.2);
+        if (g) out.push(toPath(g));
+      }
+      return { paths: out, nib, S };
+    }
+
+    /* PARALLEL AND CROSSED. Both are the same build: pass after pass, each one
+       confined to what is already darker than the last. That is how a hand does
+       it — you do not draw a grey, you go back over the part that is not dark
+       enough yet — and it is why the boundaries have to be dithered: a clean
+       threshold draws a CONTOUR MAP of the lighting, which is the one thing that
+       never happens by hand. */
+    /* THE AXIS IS AIMED AT THE HIGHLIGHT, and that is not decoration.
+
+       Every axis has one pole on the front of the ball and one place where the
+       latitude circles shrink to a point — put either of them in the middle of
+       the shading and the fill has a visible whirlpool in it. They cannot be
+       removed, only placed: at 40° behind the screen plane both land 0.77R from
+       the centre, and the light's own screen direction puts the highlight at
+       0.79R. Aim the axis down the light and the two coincide — so the blank
+       cap round the pole IS the highlight, and the blank cap opposite it IS the
+       reflected-light rim. Both are places a hand leaves paper anyway. */
+    const AX = 49, BX = 20, cap = 17 * Math.PI / 180;
+    const form = (angDrift, tau, off, pitch) => {
+      const A = AXIS(AX + angDrift, BX);
+      const dphi = pitch / S.R, phi0 = BX * Math.PI / 180 + cap + dphi * off;
+      const runs = latitudes(A, phi0, dphi, S.cx, S.cy, S.R, 0.42, Math.PI - cap, jit);
+      carve(runs, S.ball, tau, dither, 1.2).forEach(r => { if (rnd() > 0.035) push(r); });
+    };
+    /* A FLOOD IS NOT A DARK. Four interleaved passes at pitch s land the darkest
+       tone at s/4, so s has to be four nibs clear of it or the terminator turns
+       into a solid black disc — the same crossing the hatch bay marks in red on
+       its spacing knob, and it is the first thing that goes wrong here. */
+    if (kind === 'cross') {
+      /* THE FIRST LAYER WRAPS, THE REST CROSS IT — which is what a hand does:
+         you find the form once and then you stop thinking about it and just get
+         it dark. Later layers are straight, and being straight is what makes
+         them read as a second pass rather than as more of the first. */
+      form(0, 0.12, 0, 1.50);
+      [[-14, 0.36, 1.25], [56, 0.56, 1.10], [22, 0.76, 0.95]].forEach(([ang, tau, pitch]) => {
+        const runs = parallels(S.cx - S.R - 1, S.cy - S.R - 1, S.cx + S.R + 1, S.cy + S.R + 1, ang, pitch, 0, 0.42, jit);
+        carve(runs, S.ball, tau, dither, 1.2).forEach(r => { if (rnd() > 0.04) push(r); });
+      });
+    } else {
+      /* ONE DIRECTION, FOUR TIMES — and the drift is the hand. Nobody comes back
+         to a fill at the angle they left it, so each pass is a couple of degrees
+         off the last; that tiny disagreement is most of what separates a hand
+         from a machine running the same generator. */
+      [[0, 0.12, 0], [3, 0.36, 0.5], [-3, 0.56, 0.25], [1.5, 0.76, 0.75]]
+        .forEach(([d, tau, off]) => form(d, tau, off, 1.55));
+    }
+
+    /* the table is flat, so its strokes are flat — the shadow does not wrap */
+    const box = [S.sx - S.srx - 1, S.sy - S.sry - 1, S.sx + S.srx + 1, S.sy + S.sry + 1];
+    const sp = 1.15;
+    const spasses = kind === 'cross'
+      ? [{ ang: -4, tau: 0.12, off: 0 }, { ang: 24, tau: 0.44, off: 0 }, { ang: -4, tau: 0.72, off: sp / 2 }]
+      : [{ ang: -4, tau: 0.12, off: 0 }, { ang: -6, tau: 0.44, off: sp / 2 }, { ang: -2, tau: 0.72, off: sp / 4 }];
+    spasses.forEach(p => {
+      const runs = parallels(box[0], box[1], box[2], box[3], p.ang, sp, p.off, 0.42, jit);
+      carve(runs, S.shadow, p.tau, dither, 0.7).forEach(r => { if (rnd() > 0.04) push(r); });
+    });
+
+    /* THE CONTOUR, and a hand never closes one. Two arcs with a gap where the
+       light is, doubled on the shadow side because that is where the pen goes
+       back over it. */
+    const arcs = kind === 'cross'
+      ? [[-0.30, 2.05], [2.35, 4.15], [2.6, 3.9]]
+      : [[-0.28, 2.10], [2.30, 4.20]];
+    arcs.forEach(([a0, a1]) => {
+      const pts = [];
+      for (let a = a0; a <= a1; a += 0.06) {
+        const r0 = S.R * (1 + (n1(a * 2.1 + 40) * 0.006));
+        pts.push([S.cx + r0 * Math.cos(a), S.cy + r0 * Math.sin(a)]);
+      }
+      const g = handify(thin(pts, 2), rnd, n1, 0.055, 0.5);
+      if (g) out.push(toPath(g));
+    });
+    return { paths: out, nib, S };
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     THE SECOND TEST — a flat shape
+
+     The ball tests TONE and nothing else: a circle has no corners, no neck and
+     no concave anything, so a fill can look perfect on it and fall apart the
+     first time it meets a real silhouette. This one carries no shading at all —
+     one density, edge to edge — because what is being read here is the BOUNDARY:
+     where the strokes stop, whether they stop in a line (a machine) or over a
+     couple of tenths (a hand), and what happens in a notch too narrow to fit a
+     stroke in.
+     ══════════════════════════════════════════════════════════════════════════ */
+  function blob(w, h, seed) {
+    const rnd = rng(seed);
+    const base = Math.min(w * 0.32, h * 0.37);
+    const cx = w / 2, cy = h / 2;
+    const H = [[2, 0.25], [3, 0.20], [5, 0.13], [7, 0.07]].map(([k, a]) => [k, a, rnd() * Math.PI * 2]);
+    const rad = th => base * (1 + H.reduce((s, [k, a, p]) => s + a * Math.sin(k * th + p), 0));
+    return {
+      cx, cy, rad,
+      /* the same signature as the ball's tone, so it drops into the same carve */
+      tone: (x, y) => (Math.hypot(x - cx, y - cy) < rad(Math.atan2(y - cy, x - cx)) ? 1 : -1),
+      outline: step => {
+        const p = [], d = step / base;
+        for (let th = 0; th <= Math.PI * 2 + d; th += d) {
+          const r = rad(th);
+          p.push([cx + r * Math.cos(th), cy + r * Math.sin(th)]);
+        }
+        return p;
+      },
+    };
+  }
+
+  function drawShape(kind, w, h, seed, opt = {}) {
+    const S = blob(w, h, seed);
+    const rnd = rng(seed ^ 0x2f1b), n1 = noise(seed ^ 0x77a3), n2 = noise(seed ^ 0x1c05);
+    const dither = () => 0;                      // no tone here, so nothing to dither
+    const nib = opt.nib || 0.25;
+    const jit = () => rnd() - 0.5;
+    const out = [];
+    /* THE ENDS ARE THE TEST. A fill that stops dead on the outline is a clip
+       path; a hand runs past it and pulls up short by turns, and the amount is
+       about a third of the pitch — enough to see, not enough to read as a fringe. */
+    const ink = pts => { const g = handify(thin(pts, 3), rnd, n1, 0.085, 0.85); if (g) out.push(toPath(g)); };
+    const push = pts => {
+      const L = plen(pts);
+      if (L < 17 || pts.length < 8) return ink(pts);
+      const k = Math.round(pts.length * (0.38 + rnd() * 0.24));
+      const g = Math.max(1, Math.round(pts.length * (0.02 + rnd() * 0.03)));
+      ink(pts.slice(0, k)); ink(pts.slice(k + g));
+    };
+    const lay = (ang, pitch, off) => {
+      const runs = parallels(0, 0, w, h, ang, pitch, off, 0.42, jit);
+      carve(runs, S.tone, 0.5, dither, 0.45).forEach(r => { if (rnd() > 0.03) push(r); });
+    };
+
+    if (kind === 'random') {
+      const dens = 4.6, N = Math.round(w * h * dens);
+      for (let k = 0; k < N; k++) {
+        const x = rnd() * w, y = rnd() * h;
+        if (S.tone(x, y) < 0) continue;
+        const base = (n1(x * 0.10 + y * 0.07) * 1.6 + n2(y * 0.31 - x * 0.19) * 0.5) * Math.PI;
+        const a = base + (rnd() - 0.5) * 1.1;
+        const dx = Math.cos(a), dy = Math.sin(a), len = 0.42 + rnd() * 0.62, half = len / 2;
+        const pts = [];
+        const steps = Math.max(2, Math.round(len / 0.3));
+        for (let j = 0; j <= steps; j++) {
+          const u = -half + len * (j / steps);
+          pts.push([x + dx * u, y + dy * u]);
+        }
+        const g = handify(pts, rnd, n1, 0.05, 0.18);
+        if (g) out.push(toPath(g));
+      }
+    } else if (kind === 'cross') {
+      lay(-34, 1.15, 0); lay(52, 1.15, 0);
+    } else {
+      lay(-34, 1.4, 0); lay(-30, 1.4, 0.7);
+    }
+
+    /* THE OUTLINE IS PART OF THE TEST, not a frame round it: a hand-drawn edge
+       is where you see whether the wobble has a wavelength or is just noise. */
+    const o = S.outline(0.45), n = o.length;
+    if (kind === 'random') {
+      for (let k = 0; k < 260; k++) {
+        const i = Math.floor(rnd() * n), m = 3 + Math.floor(rnd() * 4);
+        ink(o.slice(i, i + m).map(p => p.slice()));
+      }
+    } else {
+      /* two arcs and a gap, and the gap is not in the same place twice */
+      const c0 = Math.floor(rnd() * n), c1 = (c0 + Math.floor(n * (0.42 + rnd() * 0.16))) % n;
+      const seg = (a, b) => { const p = []; for (let i = a; i !== b; i = (i + 1) % n) p.push(o[i]); return p; };
+      [seg(c0, c1), seg(c1, c0)].forEach(p => { if (p.length > 4) ink(p); });
+    }
+    return { paths: out, nib, S };
+  }
+
+  /* ── the rig ────────────────────────────────────────────────────────────
+     TWO SPECIMENS PER HAND, and neither one is optional.
+
+     The BALL is the tone test: it is the only shape whose correct answer
+     everybody already knows, so a hand that cannot make it round is caught
+     immediately. But a circle has no corner, no neck and no concave anything —
+     a fill can be perfect on it and come apart the first time it meets a real
+     silhouette. So the SHAPE carries no shading at all, one density edge to
+     edge, and what is read there is the boundary: where the strokes stop, and
+     whether they stop in a line. */
+  const TESTS = [
+    { k: 'hand',   nm: 'Hand hatching',       eng: ENG.hhand,  a: 'tone · one direction, four passes', b: 'fill · two passes, drifted' },
+    { k: 'cross',  nm: 'Hand cross hatching', eng: ENG.hcross, a: 'tone · wrapped once, crossed thrice', b: 'fill · two passes, 86° apart' },
+    { k: 'random', nm: 'Hand random lines',   eng: ENG.hrand,  a: 'tone · density only, no register',   b: 'fill · density only, no register' },
+  ];
+
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'HAND HATCH'));
+  const roll = key('NEW SHEET', {
+    cls: 'hh-roll',
+    title: 'Re-roll every seed — the same three hands, drawn again',
+    onClick: () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; paint(); },
+  });
+  roll.style.marginLeft = 'auto';
+  head.append(roll);
+
+  const body = el('div', 'box-body hh-body');
+  const cells = TESTS.map(t => {
+    const cell = el('div', 'hh-cell');
+    cell.append(el('div', 'bay-cap', `${t.eng}<span>${t.nm}</span>`));
+    const mk = (cls, note) => {
+      const spec = el('div', 'screen hh-spec');
+      const field = el('div', 'hh-field' + cls);
+      spec.append(field, el('div', 'hh-scale', `<span>${note}</span><span>1:1 mm</span>`));
+      cell.append(spec);
+      return field;
+    };
+    return { t, cell, ball: mk('', t.a), flat: mk(' flat', t.b) };
+  });
+  cells.forEach(c => body.append(c.cell));
+  box.append(head, body);
+
+  /* MEASURED, NOT GUESSED, exactly as the hatch bay measures its own field:
+     the viewBox is the element's real size converted at 96/25.4, so one user
+     unit is one millimetre and a 0.25 nib on screen is a 0.25 nib on paper.
+     Everything above works in mm for that one reason — the geometry can go
+     straight out to an SVG file and onto the plotter with no rescale. */
+  let seed = 20260815;
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const MM = 96 / 25.4;
+
+  function render(field, fn, i) {
+    const r = field.getBoundingClientRect();
+    if (!r.width) return;
+    const w = r.width / MM, h = r.height / MM;
+    const out = fn(w, h, (seed + i * 7919) >>> 0);
+    let svg = field.querySelector('svg');
+    if (!svg) { svg = document.createElementNS(SVGNS, 'svg'); field.append(svg); }
+    svg.setAttribute('viewBox', `0 0 ${w.toFixed(3)} ${h.toFixed(3)}`);
+    svg.textContent = '';
+    /* one path element per specimen, not one per stroke. A plotter reads the
+       moveto commands, not the DOM — and the random hand emits five thousand
+       of them, which is five thousand elements the browser does not need. */
+    const p = document.createElementNS(SVGNS, 'path');
+    p.setAttribute('d', out.paths.join(''));
+    p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', '#16181C');
+    p.setAttribute('stroke-width', out.nib);
+    p.setAttribute('stroke-linecap', 'round');
+    p.setAttribute('stroke-linejoin', 'round');
+    svg.append(p);
+  }
+
+  function paint() {
+    cells.forEach((c, i) => {
+      render(c.ball, (w, h, s) => draw(c.t.k, w, h, s), i);
+      render(c.flat, (w, h, s) => drawShape(c.t.k, w, h, s ^ 0x5bd1), i + 3);
+    });
+  }
+  requestAnimationFrame(paint);
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1396,24 +2697,74 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     ['Engraving',
      '<span class="demo-etch">LAYERS</span>',
      'Cut into the metal: the glyph is <em>darker</em> than the surface with a 1px light line under it — the lit far wall of the cut. Never white text on grey.'],
+    ['Readout',
+     '<span class="lcd">3 RUNNING</span><span class="lcd dim">0 SHOWN</span>',
+     'A lit window, not a label — and the answer to every place a number wanted to be text. The glass is cut into the case: a deep <code>inset</code> from the top and a 1px light OUTSIDE the bottom edge, so it sits below the panel the way the well does. Digits are phosphor — colour plus a 6px glow, tabular so nothing shifts when the count changes. Its off state is <code>.dim</code>: the same green with the glow taken away, because a display reading zero is powered, not dark.'],
     ['Rotary knob',
      '<span id="mat-knob"></span>',
-     '270° of travel, a lit arc for the value and a pointer you read at a glance. Replaces every slider that sets a <em>quantity</em>. Drag, wheel, arrows; <code>shift</code> for fine.'],
+     '270° of travel, a lit arc for the value and a pointer you read at a glance. Replaces every slider that sets a <em>quantity</em>. Drag, wheel, arrows; <code>shift</code> for fine. <em>Where a knob is wrong:</em> a range with two ends you compare still wants a track, because "from here to there" is a LENGTH and a length is a straight thing. Those stay faders — the four tiles under this one.'],
+    ['Fader · one cap',
+     '<span id="mat-fader1"></span>',
+     'The plain form, and the one the refs are full of. The lit fill runs from the end of the slot to the cap, so the value is <em>how much of the track is on</em> — readable without the number. Drag the line, wheel it, or tab to the cap and use the arrows.',
+     'wide'],
+    ['Fader · centre detent',
+     '<span id="mat-faderbi"></span>',
+     'A trim is not "how much", it is "how far off", so the fill starts at the middle and runs out to whichever side. The scale carries a full-height tick at zero and the cap <em>notches</em> into it: inside 3% of centre it snaps, the way a real centre-detent pot has a notch cut in its track. Zero is a place you can find without looking.',
+     'wide'],
+    ['Fader · vertical bank',
+     '<span id="mat-fbank"></span>',
+     'The same control stood up, which is not a style choice: a bank of caps makes a <em>profile</em> you read across at a glance, which is why every mixer is built this way and why an EQ reads as a curve. Legend at the foot, readout on top, because your hand covers the middle.',
+     'tall'],
+    ['Range fader',
+     '<span id="mat-fader"></span>',
+     'What a knob cannot say: a <em>span</em>. Two caps in one slot with the band lit between them, so the value is a distance you can see rather than two numbers you have to compare. The caps cannot cross, and the track takes every pointer event and hands it to whichever end is nearer — you click the line, you do not aim at a 17px thumb. Every slider that set a quantity became a knob; a length stays here.',
+     'wide'],
+    ['Colour picker',
+     '<span id="mat-pick"></span>',
+     'The one surface the OS used to draw. <code>input[type=color]</code> renders its popup in browser chrome and no CSS reaches it, so touching a colour produced a bright system sheet on a machined panel — the exact moment every other primitive here exists to avoid. So it is not themed, it is <em>replaced</em>: a floating <em>plate</em> in the panel\'s own metal, the field behind the same glass as any display, hue on a real fader with the knurled cap and a scale at the six primaries, and one lit <code>.lcd</code> window instead of three white boxes borrowed from a form. The native input stays as the <em>value</em> and never as the surface. Dark on purpose — a picker is the one place the panel must disappear so the colour can be judged, so the only saturated thing inside is the colour you are picking. Click the cap.',
+     'wide'],
     ['Momentary vs latching',
      '<span id="mat-keys"></span>',
      'Left springs back and pulses — it <em>did</em> something. Right is held down by the mechanism with its lamp on — it <em>is</em> something. Flat UI has no way to say this. Both are live: press them.'],
+    ['Micro key',
+     '<span id="mat-micro"></span>',
+     'Duplicate and delete, at 22px and <em>recessed</em> rather than raised: they are destructive or duplicative and must not invite the thumb the way a switch does. The well\'s two hairlines, sunk instead of proud. Delete is the only control in the document that goes red, and only under the pointer — a warning you meet on the way to it, not a colour it wears while sitting still. Hover both.'],
+    ['Knurled chevron',
+     '<span id="mat-chev"></span>',
+     'Grip texture, because this is the thing you <em>flick</em>, not a thing you press — a thumbwheel edge rather than a cap. Shown at its real 20px, since the size <em>is</em> the difficulty: a 3px knurl and an 11px glyph are the same spatial frequency and the eye loses one in the other, so the grip stays a whisper at <code>.05</code> and the glyph carries a dark halo to hold it off the metal. Open, it turns 90°, drops into the recess with its chamfer ring, and the glyph goes to the lamp colour with the drop shadow turned into a glow. To its left, <code>.sep</code> — a 1px cut and its lit far wall, doing the separating a gap cannot. Click it.'],
     ['Illuminated key',
      `<span class="key skirt act go" style="height:32px;padding:0 13px;gap:8px;font-family:var(--font);font-size:10.5px;font-weight:700"><span class="lens"></span>${ICON.play}<span>LAUNCH</span></span>`,
      'The lamp lens is <em>inside</em> the cap, left of the label, the way a real illuminated pushbutton is built — so the state is in the button, not next to it.'],
   ];
-  box.innerHTML = tiles.map(([t, demo, d]) => `
-    <div class="mat">
+  box.innerHTML = tiles.map(([t, demo, d, cls = '']) => `
+    <div class="mat ${cls}">
       <div class="mat-stage">${demo}</div>
       <div class="mat-body"><p class="mat-t">${t}</p><p class="mat-d">${d}</p></div>
     </div>`).join('');
   // the knob tile gets a live one
   document.getElementById('mat-knob')
           .replaceWith(knob({ label: '', min: 0, max: 100, value: 62, size: 58 }));
+
+  /* AND SO DOES THE FADER TILE. It is the editor's own Zone row, same
+     factory, same numbers: a sample of a control that cannot be dragged is a
+     photograph of one. */
+  document.getElementById('mat-fader1').replaceWith(fader({
+    label: 'Level', min: 0, max: 100, step: 1, value: 62, fmt: v => String(v),
+  }));
+  document.getElementById('mat-faderbi').replaceWith(fader({
+    label: 'Trim', min: -50, max: 50, step: 1, value: 18, mode: 'center',
+    fmt: v => (v > 0 ? '+' : '') + v,
+  }));
+  const bank = el('div', 'fbank');
+  [['Low', 34], ['Mid', 71], ['High', 52]].forEach(([l, v]) => bank.append(fader({
+    label: l, min: 0, max: 100, step: 1, value: v, vert: true, fmt: x => String(x),
+  })));
+  document.getElementById('mat-fbank').replaceWith(bank);
+
+  document.getElementById('mat-fader').replaceWith(rangeFader({
+    label: 'Zone', min: 0, max: 1, from: 0.24, to: 0.72,
+    fmt: v => v.toFixed(2),
+  }));
 
   /* AND SO DOES THE MOMENTARY / LATCHING TILE. It was two <span>s wearing the
      key classes, under a caption promising that one springs back and the
@@ -1431,6 +2782,66 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     }),
   );
   document.getElementById('mat-keys').replaceWith(keys);
+
+  /* THE PICKER TILE IS A LIVE PEN CAP, because a picker that cannot be opened
+     is a screenshot of one — and the thing being demonstrated is a surface
+     that OPENS. Same cap object the ink rail uses, same openPicker() the
+     hatch bay calls: the tile proves it is a primitive by being a second,
+     unrelated caller of it. */
+  const swatch = el('span', 'mat-row');
+  let matInk = '#FF6A00';
+  const cap = el('button', 'pencap pick on');
+  cap.type = 'button';
+  cap.style.setProperty('--ink', matInk);
+  cap.title = 'Open the picker';
+  cap.setAttribute('aria-label', 'Open the colour picker');
+  cap.addEventListener('click', () => openPicker(cap, matInk, hx => {
+    matInk = hx;
+    cap.style.setProperty('--ink', hx);
+    lamp.style.setProperty('--lyr', hx);
+    read.textContent = hx.toUpperCase();
+  }));
+  const lamp = el('span', 'jewel');
+  lamp.style.setProperty('--lyr', matInk);
+  const read = el('span', 'lcd', matInk.toUpperCase());
+  swatch.append(cap, lamp, read);
+  document.getElementById('mat-pick').replaceWith(swatch);
+
+  /* AND SO DO THE MICRO KEYS AND THE CHEVRON. Both are controls whose entire
+     content is a state change — the micro key's is the hover, the chevron's is
+     the flick — so a static one shows the half that does not matter. Same
+     factory as the layer rows', same 20/22px, deliberately not scaled up: the
+     chevron's knurl is tuned against an 11px glyph and enlarging it would show
+     a texture this document does not have. */
+  const micro = el('span', 'mat-row');
+  ['copy', 'trash'].forEach((ic, n) => {
+    const b = el('button', 'micro' + (n ? ' del' : ''), ICON[ic]);
+    b.type = 'button';
+    b.title = n ? 'Delete — red on hover only' : 'Duplicate';
+    b.setAttribute('aria-label', b.title);
+    micro.append(b);
+  });
+  document.getElementById('mat-micro').replaceWith(micro);
+
+  const chevRow = el('span', 'mat-row');
+  const chev = chevBtn(false, 'this sample', () => {
+    chev.classList.toggle('open');
+    const open = chev.classList.contains('open');
+    chev.setAttribute('aria-expanded', String(open));
+    chev.title = open ? 'Close' : 'Open';
+  });
+  chev.title = 'Open';
+  chevRow.append(el('span', 'sep'), chev);
+  document.getElementById('mat-chev').replaceWith(chevRow);
+
+  /* THE COUNT WRITES ITSELF. The lede said "nine primitives" while the grid
+     held ten, then thirteen — a claim about completeness that nobody thinks to
+     re-count when they add a tile. Now adding one to the array above is the
+     only edit there is. */
+  const WORDS = ['no', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight',
+                 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen',
+                 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty'];
+  document.getElementById('mat-count').textContent = WORDS[tiles.length] || tiles.length;
 })();
 </script>
 </body>

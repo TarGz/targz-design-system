@@ -250,9 +250,16 @@ h2 span{ color:#3d4149; }
   position:relative; z-index:2;
   margin:11px 9px; padding:8px 7px;
   border-radius:9px;
-  background:linear-gradient(180deg,#0b0c0e,#121316);
+  /* THE WELL CAME UP IN VALUE WITH THE CAPS. It was near-black, which was
+     fine when the switches were near-black too — now they are grey, and a grey
+     cap on a black floor is a cut-out sitting on nothing. A recess is not a
+     hole into space; it is the same case seen deeper, so it is the case's
+     colour minus some light, not minus all of it. The inset shadow is what
+     makes it read as below the surface; the fill only has to be darker than
+     the surface, not black. */
+  background:linear-gradient(180deg,#17191d,#1e2126);
   box-shadow:
-    inset 0 3px 7px rgba(0,0,0,.9),
+    inset 0 3px 7px rgba(0,0,0,.85),
     inset 0 -1px 0 rgba(255,255,255,.05),
     0 1px 0 rgba(255,255,255,.055);
   display:flex; flex-direction:column; gap:5px;
@@ -265,7 +272,7 @@ h2 span{ color:#3d4149; }
   height:40px; padding:0 8px 0 0; width:100%;
   border:0; border-radius:7px; cursor:pointer; text-align:left;
   font-family:inherit; position:relative; overflow:hidden;
-  background:linear-gradient(180deg,#282b30,#1d1f23 60%,#191b1e);
+  background:linear-gradient(180deg,#31353b,#25282d 60%,#202328);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.10),
     inset 0 -1px 0 rgba(0,0,0,.7),
@@ -276,7 +283,7 @@ h2 span{ color:#3d4149; }
   content:''; position:absolute; inset:0; pointer-events:none;
   background-image:var(--grain); background-size:140px; opacity:.05; mix-blend-mode:overlay;
 }
-.row:hover{ background:linear-gradient(180deg,#31353b,#232629 60%,#1d1f22); }
+.row:hover{ background:linear-gradient(180deg,#3a3f46,#2c3036 60%,#26292f); }
 .row:active{ transform:translateY(1px); }
 .row:focus-visible{ outline:2px solid var(--led); outline-offset:-2px; }
 
@@ -328,16 +335,22 @@ h2 span{ color:#3d4149; }
   display:flex; align-items:center; justify-content:center;
   border:0; padding:0; cursor:pointer; position:relative;
   color:#a3aab4;                             /* a printed legend, not a dimmed one */
+  /* A GREY CAP, NOT A BLACK ONE. Shadow is a difference, and the cap was
+     already so dark that a hole cut into it had almost nowhere to go — the
+     recess could only be drawn by taking away light that was not there. Lift
+     the unpressed face into real grey and the same shadow suddenly has two
+     stops of room to fall through. This is the one change that makes the
+     pressed state read, and it is a change to the UNPRESSED one. */
   background:
-    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.11), transparent 62%),
-    linear-gradient(180deg,#343941 0%,#282c33 38%,#1e2226 68%,#171a1e 100%);
+    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.14), transparent 62%),
+    linear-gradient(180deg,#474d57 0%,#3a3f48 36%,#2c3138 68%,#22262c 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 1px 0 rgba(255,255,255,.28),
     inset 0 -2px 3px rgba(0,0,0,.6),
-    inset 0 0 0 1px rgba(0,0,0,.5),
-    0 2px 0 #0f1114,
-    0 3px 5px rgba(0,0,0,.65),
-    0 0 0 1px rgba(0,0,0,.4);
+    inset 0 0 0 1px rgba(0,0,0,.55),
+    0 2px 0 #101317,
+    0 3px 6px rgba(0,0,0,.7),
+    0 0 0 1px rgba(0,0,0,.45);
   transition:color .12s, box-shadow .1s, background .12s, transform .1s;
 }
 .sw::before{
@@ -345,57 +358,120 @@ h2 span{ color:#3d4149; }
   background-image:var(--grain); background-size:90px; opacity:.09; mix-blend-mode:overlay;
 }
 .sw svg{ position:relative; width:14px; height:14px; stroke:currentColor; fill:none;
-         stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
-.sw:hover{ color:#e3e7ec;
+         stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;
+         transform-origin:50% 50%; transition:transform .1s; }
+.sw:hover{ color:#eef1f5;
   background:
-    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.14), transparent 62%),
-    linear-gradient(180deg,#3c424b 0%,#2f343b 38%,#23272c 68%,#1b1e22 100%); }
+    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.18), transparent 62%),
+    linear-gradient(180deg,#525965 0%,#434955 36%,#343a42 68%,#282d33 100%); }
 .sw:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 /* pressed by a finger: the cap drops onto its own skirt */
+/* ── A SUNK CAP IS A CAP IN SHADOW, and at 24px that has to be overdrawn.
+
+   The recess was there in the geometry and almost invisible in the paint: one
+   soft 4px inset spread across a 24px face is a suggestion, and a suggestion
+   at this size is nothing. What sells a hole is CONTRAST ACROSS A SHORT
+   DISTANCE, so the shadow is now two layers doing two jobs — a tight, nearly
+   black 2px line immediately under the top edge (the wall of the cutout, hard
+   because it is close), and a wider soft one below it (the light that does get
+   in, falling off). Then the opposite wall: a bright lip along the bottom,
+   where the well bounces light back up into the cap.
+
+   Top almost black, bottom lit, a hard dark ring round the whole thing. Big
+   keys can be subtle about this because they have room for a gradient to
+   describe the fall-off; a 24px cap has about six pixels to say "deep" in. */
+/* SHADOW ON ALL FOUR WALLS — SHARP, NOT HEAVY.
+
+   The walls were right and the rendering of them was not: 6–12px of blur at
+   near-full black is a cap sitting in fog, and it swallowed the grey it was
+   supposed to be sitting on. A recess this small has HARD edges — the wall is
+   two or three pixels from the face, so the shade it throws cannot have
+   softened over that distance. Blur radii are 1–4px now and the alphas are
+   roughly half what they were. Less ink, placed more exactly, and the cap
+   stays visibly grey underneath it.
+
+   ALSO ONLY 1px OF TRAVEL.
+
+   Two corrections that go together. The recess only had a top wall, so it read
+   as a cap with a dark stripe rather than a cap down a hole — a hole has
+   sides, and at 24px the sides are most of what you see of it. There are four
+   inner shadows now: the top hard and near-black, the two sides tight against
+   the edge, the bottom softer, because that is the wall light actually
+   reaches. The lit lip stays under it so the bottom does not just go muddy.
+
+   And the drop came back to 1px. 2px was a third of the gap between rows —
+   enough that toggling a switch looked like the row twitched. With the walls
+   drawn properly the depth no longer needs the travel to carry it, so the
+   movement can be the small confirming one it should have been. */
+/* DOWN IS THE SAME CAP. It declares no fill of its own — it inherits the
+   raised cap's, so the two cannot drift apart when that one is tuned. All that
+   changes is the box-shadow: the skirt goes (it is resting on it now) and the
+   four walls of the recess come on. Plus 1px of travel, and the legend lights.
+   Three declarations, one object. */
 .sw:active{
-  transform:translateY(2px);
-  box-shadow:
-    inset 0 2px 4px rgba(0,0,0,.85),
-    inset 0 -1px 0 rgba(255,255,255,.08),
-    inset 0 0 0 1px rgba(0,0,0,.5),
-    0 0 0 #0f1114,
-    0 1px 2px rgba(0,0,0,.5),
-    0 0 0 1px rgba(0,0,0,.4);
-}
-/* held down by the mechanism: the same position, and the legend lit */
-.sw.on{
-  color:var(--led);
-  transform:translateY(2px);
-  background:
-    radial-gradient(120% 95% at 34% 88%, rgba(255,255,255,.07), transparent 60%),
-    linear-gradient(180deg,#15171a 0%,#1b1e22 34%,#232830 62%,#2e333b 100%);
-  box-shadow:
-    inset 0 2px 4px rgba(0,0,0,.88),
-    inset 0 -1px 0 rgba(255,255,255,.10),
-    inset 0 0 0 1px rgba(0,0,0,.5),
-    0 0 0 #0f1114,
-    0 1px 2px rgba(0,0,0,.5),
-    0 0 0 1px rgba(0,0,0,.4);
-}
-.sw.on svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
-.sw.on:hover{ color:var(--led-hot);
-  background:
-    radial-gradient(120% 95% at 34% 88%, rgba(255,255,255,.09), transparent 60%),
-    linear-gradient(180deg,#181b1f 0%,#1f2328 34%,#282e36 62%,#343941 100%); }
-/* half-pressed: one pixel down, half a skirt, a dimmer legend, and the ring
-   that keeps the third state readable at 24px and in greyscale */
-.sw.mixed{
-  color:#C8681F;
   transform:translateY(1px);
-  background:linear-gradient(180deg,#23272d 0%,#212529 50%,#23272d 100%);
   box-shadow:
-    inset 0 1px 2px rgba(0,0,0,.6),
-    inset 0 0 0 1px rgba(255,106,0,.30),
-    0 1px 0 #0f1114,
-    0 2px 3px rgba(0,0,0,.5);
+    inset 0 0 0 1px rgba(0,0,0,.68),
+    inset 0 2px 1px rgba(0,0,0,.79),
+    inset 0 3px 4px -1px rgba(0,0,0,.46),
+    inset 3px 0 3px -2px rgba(0,0,0,.53),
+    inset -3px 0 3px -2px rgba(0,0,0,.53),
+    inset 0 -3px 4px -2px rgba(0,0,0,.31),
+    inset 0 -1px 0 rgba(255,255,255,.14),
+    0 1px 0 #101317,
+    0 1px 1px rgba(0,0,0,.4);
 }
-.sw.mixed svg{ filter:drop-shadow(0 0 2px rgba(255,130,30,.4)); }
-.sw.mixed:hover{ color:var(--led-hot); background:linear-gradient(180deg,#282d34 0%,#262a30 50%,#282d34 100%); }
+/* ── DOWN IS ONE STATE. THE LEGEND SAYS WHICH KIND OF DOWN. ─────────────
+   ON and MIXED are the same cap in the same position with the same recess,
+   and they differ only in the colour of what is printed on it:
+
+     up   + grey legend     nothing is on
+     down + WHITE legend    some of them are
+     down + ORANGE legend   all of them are
+
+   That is the honest reading of a master over eight switches. A master whose
+   column is half on is NOT half-pressed — the thing it commands is genuinely
+   engaged, just not everywhere — so parking it at its own intermediate height
+   was inventing a mechanical position to stand for a logical one. Down means
+   "this is happening"; the colour says how completely. And white against
+   orange is a difference you can still see with no colour vision at all,
+   because it is a difference in brightness, which the old dim-orange was not. */
+.sw.on,
+.sw.mixed{
+  transform:translateY(1px);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.73),
+    inset 0 2px 1px rgba(0,0,0,.86),
+    inset 0 3px 4px -1px rgba(0,0,0,.51),
+    inset 3px 0 3px -2px rgba(0,0,0,.57),
+    inset -3px 0 3px -2px rgba(0,0,0,.57),
+    inset 0 -3px 4px -2px rgba(0,0,0,.31),
+    inset 0 -1px 0 rgba(255,255,255,.15),
+    0 1px 0 #101317,
+    0 1px 1px rgba(0,0,0,.4);
+}
+/* NO FILL ON EITHER, DELIBERATELY. Every attempt at a separate pressed colour
+   was a way of drawing shade with paint, and it kept killing the shadow: a
+   darker cap has nothing left for a shadow to take away. The moulding is one
+   piece of grey plastic in two positions, so it gets ONE fill — the raised
+   cap's, inherited — and the recess is drawn entirely by the walls above.
+   A knock-on worth having: tune .sw's background and every state follows. */
+.sw.on{ color:var(--led); }
+.sw.mixed{ color:#eef1f5; }
+.sw.on:hover{ color:var(--led-hot); }
+.sw.mixed:hover{ color:#fff; }
+
+/* THE LEGEND SHRINKS WITH THE CAP. A face that has dropped into the panel is
+   a face further from the eye, so what is printed on it subtends a smaller
+   angle — 10% at this depth. Too small to notice as a change, which is the
+   point: one more thing agreeing with the others, so the state reads as an
+   object that moved rather than as a colour swap. */
+.sw.on svg,
+.sw.mixed svg,
+.sw:active svg{ transform:scale(.9); }
+.sw.on svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
+/* white is a legend, not a lamp — it gets no bloom */
+.sw.mixed svg{ filter:none; }
 
 /* ── the jewel LED: the layer's colour as a lens ─────────────────────────── */
 .jewel{
@@ -473,10 +549,17 @@ h2 span{ color:#3d4149; }
 .chev:hover{ color:#fff; }
 .chev:focus-visible{ outline:2px solid var(--led); outline-offset:1px; }
 .chev.open{
-  transform:rotate(90deg); color:var(--led); background-color:#1a1c20;
-  box-shadow:inset 0 2px 4px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.07);
+  transform:rotate(90deg); color:var(--led);
+  background:linear-gradient(180deg,#0e1013,#1f242b 60%,#2b3038);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.66),
+    inset 0 2px 1px rgba(0,0,0,.77),
+    inset 0 3px 4px -1px rgba(0,0,0,.44),
+    inset 2px 0 3px -2px rgba(0,0,0,.5),
+    inset -2px 0 3px -2px rgba(0,0,0,.5),
+    inset 0 -1px 0 rgba(255,255,255,.12);
 }
-.chev.open svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.65)); }
+.chev.open svg{ transform:scale(.9); filter:drop-shadow(0 0 3px rgba(255,130,30,.65)); }
 
 /* ── the ALL row is a BUS BAR — a different material, once ───────────────── */
 .row.all{
@@ -511,11 +594,11 @@ h2 span{ color:#3d4149; }
   margin:4px 8px 2px 22px; padding:6px 8px;
   border-radius:6px;
   border-left:2px solid var(--lyr);
-  background:linear-gradient(180deg,#0a0b0d,#131519);
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.05),
+  background:linear-gradient(180deg,#191c20,#22262b);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.055),
              -3px 0 8px -4px color-mix(in srgb, var(--lyr) 60%, transparent);
 }
-.strokes.allstrip{ margin-left:16px; border-left-color:#4a4e56; box-shadow:inset 0 2px 5px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.05); }
+.strokes.allstrip{ margin-left:16px; border-left-color:#4a4e56; box-shadow:inset 0 2px 5px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.055); }
 .gap{ width:8px; flex:0 0 8px; height:16px;
       background:linear-gradient(90deg,transparent,#000,transparent); opacity:.6; }
 
@@ -2822,7 +2905,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
      'The same two hairlines, swapped. A deep <code>inset</code> shadow from the top edge and a 1px light OUTSIDE the bottom. Everything that holds other controls is a well.'],
     ['Backlit key',
      `<span class="sw on">${ICON.eye}</span><span class="sw">${ICON.eyeOff}</span><span class="sw mixed">${ICON.cells}</span>`,
-     'On, off, and mixed. Three states with three <em>shapes</em>, not three shades: lit face, dead face, hairline ring. Colour alone fails at 24px.'],
+     'On, off, mixed. The cap is <em>up</em> or <em>down</em> — that is the state — and the legend says which kind of down: white for some, orange for all. A brightness difference, so it survives with no colour vision.'],
     ['Jewel LED',
      '<span class="jewel" style="--lyr:#FF6A00"></span><span class="jewel" style="--lyr:#2C6BFF"></span><span class="jewel" style="--lyr:#4CE04C"></span>',
      'A lens, not a dot: off-centre white specular at 34%/28%, the colour at mid-radius, a dark rim, and two glow rings outside.'],

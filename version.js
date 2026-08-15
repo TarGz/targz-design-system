@@ -1,6 +1,23 @@
-export const version = '1.4.0';
+export const version = '1.4.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.4.1',
+    date: '2026-08-15',
+    changes: [
+      'Physical UI exploration: the pressed switch rebuilt. It declares no fill of its own — it inherits the raised cap\'s, so up and down cannot drift apart, and the recess is drawn entirely by inset walls. Every earlier attempt at a separate pressed colour was drawing shade with paint, and a darker cap has nothing left for a shadow to take away',
+      'Raised the cap into real grey. Shadow is a difference, and a near-black face left the recess nowhere to fall — the change that makes the pressed state read is a change to the unpressed one',
+      'Shadow on all four walls, not just the top: a hole has sides, and at 24px the sides are most of what you see of it',
+      'Sharpened it — blur radii 6-12px down to 1-4px. A wall two pixels from the face cannot throw a shade that has softened over that distance; 12px of blur at full black is a cap sitting in fog',
+      'Travel down to 1px. Two was a third of the row gap, enough that toggling looked like the row twitched',
+      'The legend scales to 0.9 when the cap is down — a face further from the eye subtends a smaller angle. Too small to notice as a change, which is the point',
+      'One legend per switch: the plain drawing at normal weight, never struck through or greyed. The cap position already says on or off, and a slashed grey icon reads as disabled',
+      'MIXED is now the pressed state with a WHITE legend, not an intermediate height. A master whose column is half on is not half-pressed — the thing it commands is engaged, just not everywhere. Down means it is happening; the colour says how completely, and white against orange is a brightness difference that survives with no colour vision',
+      'Brightened the bay, the stroke strip and the row faces to match. A recess is the case seen deeper, not a hole into space — darker than the surface, not black, with the inset shadow doing the work',
+      'Rotary selector: removed the detent tick marks entirely. The tip already says where the switch is, and a second mark a few pixels away is another thing to read at the moment you are reading the tip',
+      'Knobs and the selector now turn clockwise on a downward drag, and the wheel follows; arrow keys stay conventional so the ARIA slider contract holds',
+    ],
+  },
   {
     version: '1.4.0',
     date: '2026-08-15',

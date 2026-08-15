@@ -1919,9 +1919,9 @@ input:focus-visible{ outline-offset:3px; }
 /* the recents are the same tube at a smaller size — the clip-path is in
    percentages, so the silhouette comes along for free */
 .pk-well{ height:34px; align-items:center; }
+.pk-well[hidden]{ display:none; }
 .pk-well .pencap{ width:17px; height:17px; flex:0 0 17px; border-radius:6px; --ring-r:8px; }
-.pk-well .pencap::before{ content:none; }
-.pk-well .pencap.on{ transform:translateY(2px); }
+.pk-well .pencap.on{ transform:none; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE HATCH BAY — the first COMPOUND control in the language.
@@ -2011,18 +2011,7 @@ input:focus-visible{ outline-offset:3px; }
 .hb-turret{ flex:0 0 178px; display:flex; flex-direction:column; gap:6px; }
 .hb-sel.rotary{ flex:1 1 auto; height:132px; }
 
-/* ── THE NIB DOT — the pen at its true relative size ──────────────────────
-   Nib widths are six objects in a case: 0.20 … 1.00, and the number alone is
-   abstract. The dot beside the label is that nib magnified ×4 — the ratios
-   are exact, the scale is not, and at 1:1 a 0.20 dot would be invisible. */
-.nibdot{
-  display:inline-block; vertical-align:middle; flex:0 0 auto; border-radius:50%;
-  width:calc(var(--nib) * 4); height:calc(var(--nib) * 4);
-  background:#9aa1ab;
-  box-shadow:0 0 0 1px rgba(0,0,0,.55), inset 0 -1px 1px rgba(0,0,0,.35);
-}
-/* PEN IS A DETENTED FADER: continuous travel, six stops. The scale has five
-   intervals rather than the default four, because it is counting pens. */
+/* the three knobs share one row */
 .hb-knobs{ justify-content:space-between; gap:4px; padding:2px 0 4px; }
 .hb-knobs .kwrap{ flex:1 1 0; min-width:0; align-items:center; gap:5px; }
 .hb-knobs .klab{ justify-content:center; font-size:8px; letter-spacing:.12em; }
@@ -2076,14 +2065,55 @@ input:focus-visible{ outline-offset:3px; }
     0 5px 9px rgba(0,0,0,.72);
   transition:transform .1s cubic-bezier(.3,1.4,.5,1), box-shadow .1s;
 }
-.pencap:hover{ transform:translateY(-1px); }
-/* IN USE IS IN, exactly as a latching key is in. The cap keeps its own colour
-   and drops into the recess — nothing is tinted, so the swatch you press and
-   the swatch that is held down are recognisably the same object in two
-   positions. That is the rule the key learned three times. */
+/* Hover moves nothing either — it lights a rim, the way every key on this
+   panel changes colour under the pointer rather than position. */
+.pencap:hover{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -1px 0 rgba(0,0,0,.55),
+    0 0 0 1px rgba(255,255,255,.18),
+    0 3px 0 #0c0d0f,
+    0 5px 9px rgba(0,0,0,.72);
+}
+/* IN USE IS IN — AND IT DOES NOT FALL. Same decision the small piano keys
+   made: at 28px there is no room for the drop to be legible as a drop, so the
+   movement goes and the state stays. The recess and the chamfer say pressed.
+
+   And the pressed recipe is the key's own, applied to a coloured face: the cap
+   KEEPS ITS OWN COLOUR and the gradient INVERTS — dark at the top, light at
+   the bottom, because the bezel is now shading the top of a face that has
+   dropped below it and what light reaches it bounces up off the well. Nothing
+   is tinted, so the swatch you press and the swatch that is held down are
+   recognisably the same object in two positions.
+
+   The shorthand is restated in full on purpose: `background` resets
+   background-image, and half a declaration here would take the specular off
+   the face — the same trap that once erased a knurl. */
 .pencap.on{
-  transform:translateY(3px);
-  box-shadow:var(--recess), inset 0 1px 0 rgba(255,255,255,.12);
+  transform:none;
+  background:
+    radial-gradient(115% 85% at 32% 88%, rgba(255,255,255,.22), transparent 62%),
+    linear-gradient(158deg,
+      color-mix(in srgb,var(--ink) 80%,#000) 0%,
+      var(--ink) 52%,
+      color-mix(in srgb,var(--ink) 78%,#fff) 100%);
+  /* AND THE LAMP, which is the other half of latched. The file's rule is that
+     down AND lit is what separates "held by a finger" from "held by the
+     mechanism" — and every other latching control here says it with a warm
+     GLYPH. A colour swatch has no glyph: the face is the legend, and tinting
+     it orange would be lying about the ink. So the lamp goes into the WELL
+     instead — a tight warm line at the cutout and a short bloom off it, which
+     is light escaping round a seated cap.
+
+     It is the panel's lamp colour, not the ink's, and deliberately: an
+     indicator that changed colour with the thing it indicates stops being an
+     indicator. Kept to the source's own limit for a latched control — "a
+     little light in the well, not a bloom on the chassis". */
+  box-shadow:
+    var(--recess),
+    0 0 0 1px rgba(255,106,0,.42),
+    0 0 6px rgba(255,106,0,.34),
+    0 0 13px rgba(255,106,0,.16);
 }
 /* the broken edge of the cutout, same chamfer every seated control gets */
 .pencap.on::after{
@@ -2093,14 +2123,6 @@ input:focus-visible{ outline-offset:3px; }
           mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor; mask-composite:exclude;
   filter:blur(.5px);
-}
-/* A REFILLABLE ONE SAYS SO — a fine engraved notch in the bottom-right corner
-   of the face, the way a machined part carries its own mark. Not a badge laid
-   on top: it is cut, so it is dark with a light line under it. */
-.pencap.pick::before{
-  content:''; position:absolute; right:4px; bottom:4px; width:7px; height:1.5px;
-  border-radius:1px; background:rgba(0,0,0,.5);
-  box-shadow:0 1px 0 rgba(255,255,255,.32);
 }
 /* the native input is the value, never the surface — the cap is what you see */
 .ink-src{
@@ -2125,7 +2147,6 @@ input:focus-visible{ outline-offset:3px; }
   box-shadow:inset 0 3px 6px rgba(0,0,0,.9), inset 0 0 0 1px rgba(255,255,255,.15),
              0 1px 0 rgba(255,255,255,.055);
 }
-.pencap.empty::before{ content:none; }
 
 /* ── THE RECESS BELOW THE FOLD ────────────────────────────────────────────
    Min stroke and Join reach are cleanup thresholds — set once for a plotter
@@ -2204,30 +2225,28 @@ input:focus-visible{ outline-offset:3px; }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   08 · THE SPHERE TEST — three hands, side by side
+   08 · FILLING — the specimen rig
 
    The bay next door is a compound CONTROL: a specimen with four controls
-   pointing at it. This one is a compound SPECIMEN and has no controls at all
-   beyond re-rolling the seed, because there is nothing here to set — the three
-   hands are three answers to one question and what is being asked is which of
-   them is right. Putting a knob on it would invite tuning before judging.
+   pointing at it. This is a compound SPECIMEN, and the only control on either
+   panel re-rolls the seed — because there is nothing here to set. The fills
+   are answers to one question and what is being asked is which of them is
+   right; a knob would invite tuning before judging.
 
-   The columns are the hands and the rows are the tests, which is the only way
-   round that works: reading DOWN a column tells you what one hand does to two
-   different problems, and reading ACROSS a row compares three hands on the
-   same one. Stack it the other way and neither comparison is adjacent.
+   ONE ROW PER FILL, AND ONE SHEET PER ROW. It was a grid of separate screens,
+   which is one display per drawing — and that is the wrong unit, because the
+   question a row asks is what ONE hand does to two different problems. So the
+   two answers sit on the same sheet, side by side, with a gap: same paper,
+   same pen, same run, and the gap is the whole of the separation. Reading DOWN
+   the balls compares the hands on tone; down the shapes compares them on
+   boundary; across a row is one hand answering both.
    ═══════════════════════════════════════════════════════════════════════════ */
 .box.handbay{ width:auto; flex:0 0 auto; }
-.hh-body{ flex-direction:row; align-items:flex-start; gap:10px; }
-/* A FIXED CELL, not a flexible one, and the reason is the millimetre: the
-   specimen's viewBox is measured off the element, so a cell that stretches
-   with the window silently changes the size of the drawing being judged.
-   236px is 62.4mm — a 42mm ball, which is about as small as a 0.25 nib has
-   anything to say. */
-.hh-cell{ flex:0 0 236px; display:flex; flex-direction:column; gap:7px; }
-.hh-roll{ padding:0 11px; height:23px; font-family:var(--font); font-size:8.5px;
-          letter-spacing:.16em; color:#8b919b; }
+.hh-body{ flex-direction:column; align-items:flex-start; gap:14px; }
+.hh-cell{ display:flex; flex-direction:column; gap:6px; }
 .hh-cell .bay-cap{ margin-bottom:1px; }
+.hh-cell .bay-cap em{ font-style:normal; color:#4a4f57; letter-spacing:.10em; }
+.hh-cell .bay-cap::after{ order:9; }
 .hh-spec{ padding:8px; }
 /* THE GLASS KEEPS ITS REFLECTION AND LOSES ITS SCANLINES, which is the one
    place this block departs from `.screen` and it is not a preference. The haze
@@ -2236,28 +2255,59 @@ input:focus-visible{ outline-offset:3px; }
    exactly on the property being judged. A display that adds a texture to the
    specimen is not a display, it is a filter. */
 .hh-spec::after{ background:linear-gradient(148deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.02) 26%, transparent 46%); }
+/* FIXED SIZES, NEVER FLUID, and the reason is the millimetre: each specimen's
+   viewBox is measured off its own element, so a field that stretched with the
+   window would silently change the size of the drawing being judged. 260px is
+   68.8mm, which puts a 42mm ball on the tone sheet; 320px is 84.7mm, and the
+   flat shape is sized off its own sheet so no seed can run over the edge. */
+.hh-pair{ display:flex; gap:9px; }
 /* THE SAME TONED STOCK AS THE BAY'S SPECIMEN, and for the bay's own reason:
    the surface a mark is judged against cannot compete with it. There is only
-   one pen in this block — a hatch that is being read for its HAND has no
-   business also being read for its colour — and black on #BEB5A3 is 8.7:1,
-   which is a drawing rather than a diagram. */
+   one pen in this block — a hatch being read for its HAND has no business also
+   being read for its colour — and black on #BEB5A3 is 8.7:1, which is a
+   drawing rather than a diagram. */
 .hh-field{
   --paper:#BEB5A3;
+  flex:0 0 260px; height:270px;
   border-radius:4px; position:relative; overflow:hidden;
-  background:var(--paper); aspect-ratio:24 / 25;
+  background:var(--paper);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 8px rgba(0,0,0,.4);
 }
-/* the fill test is the same sheet, cropped — a flat shape needs no headroom
-   for a cast shadow, and giving it any would make the two specimens look like
-   two different papers */
-.hh-field.flat{ aspect-ratio:24 / 16; }
+/* the fill test is wider and shorter — a flat shape needs no headroom for a
+   cast shadow, and giving it any would make the two look like two papers */
+/* AND IT IS `hh-shape`, NOT `flat`, because `.flat` was already taken — it is
+   the pale comparison panel in 01, and it carries a 1px WHITE border and a
+   16px radius. `.hh-field` overrode its background and its shadow by source
+   order and had no reason to mention `border`, so the shape sheet came out
+   wearing a white edge the tone sheet next to it did not have. Two rules that
+   never met, agreeing on everything except the one property neither declared.
+   This is the file's own recorded lesson — check what the stylesheet already
+   says about a name before reusing it — and the fix is not more specificity,
+   it is not taking someone else's word. */
+.hh-field.hh-shape{ flex:0 0 320px; }
 .hh-field svg{ display:block; width:100%; height:100%; }
 .hh-scale{
-  display:flex; justify-content:space-between; align-items:center; margin-top:7px;
+  display:flex; align-items:center; margin-top:7px;
   font-family:var(--font); font-size:8px; letter-spacing:.10em; color:#3f7a5c;
 }
-.hh-scale span:last-child{ color:#2f5f47; letter-spacing:.16em; }
+/* each caption sits under the drawing it is about, which is what the two
+   fixed widths are for — a shared row of text under a pair of drawings makes
+   you work out which half belongs to which */
+.hh-scale .hh-a{ flex:0 0 260px; }
+.hh-scale .hh-b{ flex:0 0 320px; margin-left:9px; }
+.hh-scale .hh-a, .hh-scale .hh-b{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.hh-scale .hh-a > span:last-child, .hh-scale .hh-b > span:last-child{ color:#2f5f47; letter-spacing:.16em; }
 .handbay .bay-cap{ font-size:8px; letter-spacing:.12em; }
+.hh-roll{ padding:0 11px; height:23px; font-family:var(--font); font-size:8.5px;
+          letter-spacing:.16em; color:#8b919b; }
+.hh-note{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
+          text-shadow:0 1px 0 rgba(255,255,255,.08); }
+/* THE READOUT IS THE RESULT of the machine half, not a caption on it — so it
+   is the language's lit window at the smallest size it survives, sitting in
+   the scale row where the mm note sits everywhere else. DIM is the control
+   row: the .lcd's off state is powered rather than dark, which is exactly
+   right for a number that is correct and is not the one being argued for. */
+.hh-scale .lcd{ height:17px; padding:0 7px; margin:0; font-size:8.5px; letter-spacing:.12em; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE BILL — what the language costs. Read this before adopting anything.

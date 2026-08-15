@@ -156,16 +156,19 @@
     <br><br>
     <b>Then three knobs</b>, because this page's own rule says a quantity is a knob and only a
     length keeps a track — and pen, spacing and angle are three single quantities. <b>Pen</b>
-    turns over the kit, six stops, so it cannot land on 0.43; the dot beside its label is that
-    nib at true relative size. <b>Spacing</b> is a distance in millimetres and <b>angle</b>
+    runs free from <b>0.1 to 3 mm</b>: what is being set is a stroke width, and a stroke width
+    is a quantity you dial until it looks right against the specimen in front of you.
+    <b>Spacing</b> is a distance in millimetres and <b>angle</b>
     detents at 0 / 45 / 90 / 135. The three are <em>independent</em> — no control here quietly
     edits another, so a value you set by hand stays the value you set. Take spacing under the
     nib and the strokes overlap into solid ink: not a fault, and not reported as one. It is a
     fill, it is something you might want, and the specimen shows it the way it shows
     everything else.
-    <b>Colour is a pen cap</b>, not a swatch: black, grey and white are the three you own
-    whatever you draw, and two slots you refill — click a refillable cap twice and it opens the
-    picker, which is a plate made of the same metal as everything else. The two cleanup
+    <b>Colour is a cap whose face is the ink</b>: the case ships with
+    black, grey and white and six empty slots, and <em>every one of them</em> can be refilled —
+    a swatch you cannot change is a swatch lying about being a pen. Click a full one twice, or
+    an empty one once, and it opens the picker: a plate made of the same metal as everything
+    else. The two cleanup
     thresholds are in a recess below the fold, because they are set once and never touched
     again.
   </p>
@@ -174,7 +177,13 @@
     <div id="hatch" class="box hatchbay"></div>
   </div>
 
-  <h2>08 <span>/</span> Hand hatching <span>·</span> three hands, one ball</h2>
+  <h2>08 <span>/</span> Filling <span>·</span> by hand, and by machine</h2>
+  <p class="sub">
+    One section, two halves, and they want opposite things from the same job. <b>Above</b>: three
+    fills that must not look like they came off a machine. <b>Below</b>: the fill only a machine
+    can draw. They share a rig — the same ball, the same lamp, the same blob with the same hole in
+    it — because that is the only way the two arguments can be read against each other.
+  </p>
   <p class="sub">
     The bay's four types are <em>machine</em> fills and say so: a plotter draws paths, and
     parallel / crossed / serpentine are three paths. This is the opposite job — a fill that
@@ -204,9 +213,60 @@
     pen puts on paper and the same paths go out to an SVG and onto the plotter with no rescale.
     That is the only condition under which a specimen is worth looking at.
   </p>
+  <p class="sub">
+    <b>The second half, and it wants the opposite thing.</b> The three above want a fill nobody
+    can tell came off a machine; this one wants the fill only a machine can draw. No wobble, no
+    jitter, no drift — exact pitch, straight lines, the machine's side taken completely.
+    <br><br>
+    <b>What it optimises is not the picture, it is the pen lift.</b> A plotter's real cost is not
+    line length: the head moves at the same speed whether the pen is down or up. It is the number
+    of times the pen has to come out of the paper, aim, and come back down — and every one of
+    those is a chance to blot, to miss by a tenth, and to leave the little comma a felt tip makes
+    when it lands. A parallel fill pays that once per pass.
+    <br><br>
+    <b>3D printers solved this first</b>, and the answer is the same in two dimensions: at the end
+    of a pass, do not lift — <em>turn</em>. Run the next pass backwards so its start is where the
+    last one ended, and the two are one stroke with a corner in it. Across a whole region, a fill
+    that was two hundred strokes is one. The turnaround is the entire visible difference, which is
+    why the bay clips its lines to the sheet: on an over-sized grid every turnaround falls off the
+    paper and a serpentine renders as a parallel fill with a different name on the dial.
+    <br><br>
+    <b>Shading is where it gets interesting.</b> A uniform region is easy — the passes are full
+    chords, they all touch, one stroke does the lot. Carve those same passes by <em>tone</em> and
+    the region breaks into islands, and now the question is whether the pen may travel from one to
+    the next. It may, if the gap is short enough, and if the line it would draw on the way stays
+    inside the region it is filling. Skip that second test and the fill grows whiskers across the
+    white paper between its islands, which is worse than the lift it saved. The first number is
+    <b>Join reach</b>, already sitting in the hatch bay's set-once recess — this is what it does.
+    <br><br>
+    <b>And then it stops, deliberately.</b> There is a version of this that gets the flat shape
+    down to <em>one</em> stroke: route the pen along the outline where the straight cut runs out,
+    and finish by carrying on round the perimeter. It works, the readout says 1, it was built, and
+    it is gone — because <b>the count is not the drawing</b>. Every one of those tricks buys a lift
+    with a line, and a line is permanent: the wall gets inked twice where the pen retraces it, and
+    the last join reaches from wherever the fill happened to stop to wherever the perimeter happened
+    to start, which is a stroke straight across the middle of the shape that nothing asked for. One
+    of those ruins a plot. Sixty pen lifts do not. So the rule here is the conservative one — turn
+    where the next pass is genuinely next to you, lift otherwise. <b>A serpentine is a fill that
+    does not lift when it does not have to, not a fill that never lifts</b>, and chasing the second
+    is how you draw the first line you cannot erase.
+    <br><br>
+    <b>So the section is a control and a result.</b> Left column lifts at the end of every pass.
+    Right column turns instead, and joins across islands wherever the reach allows — and nowhere
+    else. Same tone
+    model, same pitch, same nib, same drawing — and a lit readout under each saying how many times
+    the pen went down. That number is the only argument being made here.
+    <br><br>
+    <b>And it proves the first half's claim for free.</b> Nothing down here is dithered — a machine has
+    no hand, so there is nothing to disagree with — and the four thresholds are therefore visible
+    as <em>bands</em> on the ball, each one a clean edge where a pass starts. That is the contour
+    map of the lighting that the hands above spend a paragraph avoiding. Both balls are correct;
+    only one of them looks drawn.
+  </p>
   <div class="stage">
-    <div class="stage-note">1:1 mm · 0.25 nib · seeded · black on toned stock</div>
+    <div class="stage-note">1:1 mm · 0.35 nib · seeded · hand above, machine below</div>
     <div id="handhatch" class="box handbay"></div>
+    <div id="serp" class="box handbay"></div>
   </div>
 
   <h2>09 <span>/</span> Materials</h2>
@@ -337,6 +397,8 @@ const ENG = {
              '<path d="M3.5 11.5C6 7.5 8.5 5.5 12.5 4.5"/>'),
   hcross: eng('<path d="M3.5 14C7 8 11 5 17 4"/><path d="M6.5 19.5C10 13.5 14 10.5 20.5 9.5"/>' +
               '<path d="M7 3.5C9 9 12.5 15 17.5 20"/><path d="M3 8.5C5 13 8 17.5 11.5 21"/>'),
+  // the serpentine: three passes and the two turns that make them one stroke
+  serp: eng('<path d="M4 5h13a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h13"/>'),
   hrand: eng('<line x1="3.5" y1="7" x2="7" y2="4.5"/><line x1="10" y1="5.5" x2="12" y2="9.5"/>' +
              '<line x1="16" y1="4" x2="19.5" y2="6.5"/><line x1="5" y1="13" x2="8.5" y2="11"/>' +
              '<line x1="12.5" y1="14.5" x2="15" y2="11.5"/><line x1="18" y1="13.5" x2="20.5" y2="16"/>' +
@@ -988,11 +1050,20 @@ const hsv2rgb = ([h, s, v]) => {
   return t.map(u => (u + m) * 255);
 };
 
-/* Recents are shared across every picker on the page, because a recent colour
-   is a fact about the person, not about the swatch they last touched. */
-const PK_RECENT = ['#16181C', '#5E646D', '#FFFFFF', '#FF6A00', '#2C6BFF'];
+/* THE WELL SHOWS THE CASE, NOT A GUESS AT ONE.
 
-function openPicker(anchor, value, onChange) {
+   It was seeded with five hard-coded colours, which was the worst of both: they
+   look like they mean something and they mean nothing, and the moment the rail
+   changed they were five stale duplicates of a palette that no longer existed.
+
+   So the caller says what belongs in the well. A picker opened from a rail
+   passes THAT RAIL — the other pens in the case, which is the set you actually
+   reach for, and which is live by definition. A picker opened from nowhere in
+   particular falls back to what has genuinely been picked before, starting
+   empty rather than starting wrong. */
+const PK_RECENT = [];
+
+function openPicker(anchor, value, onChange, swatches) {
   document.querySelector('.picker')?.remove();      // one at a time
   let [h, s, v] = rgb2hsv(hex2rgb(value) || [255, 106, 0]);
 
@@ -1025,18 +1096,23 @@ function openPicker(anchor, value, onChange) {
 
   const well = el('div', 'pk-well');
   const drawWell = () => {
+    const list = (typeof swatches === 'function' ? swatches() : swatches) || PK_RECENT;
+    const now = hexNow().toUpperCase();
     well.textContent = '';
-    PK_RECENT.forEach(c => {
-      const p = el('button', 'pencap');
+    list.forEach(c => {
+      /* THE ONE YOU ARE EDITING IS SEATED, exactly as it is in the rail. Two
+         rails of the same object showing the same state the same way is the
+         whole reason it is the same object. */
+      const p = el('button', 'pencap' + (c.toUpperCase() === now ? ' on' : ''));
       p.type = 'button'; p.style.setProperty('--ink', c); p.title = c.toUpperCase();
-      p.setAttribute('aria-label', `Recent ${c}`);
+      p.setAttribute('aria-label', c.toUpperCase());
       p.addEventListener('click', () => {
         [h, s, v] = rgb2hsv(hex2rgb(c)); push();
       });
       well.append(p);
     });
+    well.hidden = !list.length;
   };
-  drawWell();
 
   bodyEl.append(fieldEl, row, lcd, legend, well);
   plate.append(bodyEl);
@@ -1067,6 +1143,7 @@ function openPicker(anchor, value, onChange) {
     if (typing !== 'rgb') { rI.value = rgb[0]; gI.value = rgb[1]; bI.value = rgb[2]; }
     if (typing !== 'hex') xI.value = hx.toUpperCase();
     if (!silent) onChange(hx);
+    drawWell();          // the seated swatch follows the value, and so does the rail
   }
 
   // the field: S across, V up. Pointer capture so a drag that leaves the
@@ -1298,7 +1375,7 @@ function panelShape(w, h, cy, { L = 52, R = 44, f = 12, r = 14, cxOff = -8 } = {
 
    Only if it actually ended up IN. Flipping a switch off is a circuit opening;
    there is nothing to surge. */
-const ENGAGE_ROOTS = '#dock, #editor, #viewport, #tools, #navbar, #console, #pages, #hatch, #handhatch';
+const ENGAGE_ROOTS = '#dock, #editor, #viewport, #tools, #navbar, #console, #pages, #hatch, #handhatch, #serp';
 function engage(btn, run, cls) {
   const root = btn.closest(ENGAGE_ROOTS) || document.body;
   const sel = '.' + btn.className.trim().split(/\s+/)[0];
@@ -1725,8 +1802,6 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 (function hatchBay() {
   const box = document.getElementById('hatch');
 
-  /* A KIT, NOT A RANGE. These are the nibs that exist. */
-  const NIBS = [0.20, 0.25, 0.35, 0.50, 0.70, 1.00];
   /* THE CASE — three pens that are not a choice, and two slots that are.
 
      Black, grey and white are the ones you own whatever you draw; a fixed rail
@@ -1738,7 +1813,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     { c: '#16181C', n: 'Black' },
     { c: '#5E646D', n: 'Grey'  },
     { c: '#FFFFFF', n: 'White' },
-    ...Array.from({ length: 6 }, (_, k) => ({ c: null, n: `Slot ${k + 1}`, pick: true })),
+    ...Array.from({ length: 6 }, (_, k) => ({ c: null, n: `Slot ${k + 1}` })),
   ];
   /* FOUR WAYS TO FILL AN AREA, and they are four different paths, not four
      textures. That is why the specimen draws geometry: PARALLEL lifts the pen
@@ -1759,14 +1834,9 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     { n: 'Hand hatched', kind: 3 },
     { n: 'Serpentine',   kind: 1 },
   ];
-  const hb = { on: true, nib: 2, spacing: 1.05, angle: 45, ink: 0, type: 0 };
-  /* PEN AND SPACING ARE ONE SETTING WITH TWO HANDLES. What a hatch looks like
-     is spacing MEASURED IN NIBS — 3 nibs apart is the same drawing whether the
-     pen is 0.25 or 1.00 — so the turret carries the ratio with it and the mm
-     follow. Drag spacing and you are choosing a new ratio; turn the turret and
-     you keep the one you chose. Both readouts say so. */
+  const hb = { on: true, nib: 0.35, spacing: 1.05, angle: 45, ink: 0, type: 0 };
   const MM = 96 / 25.4;
-  const nibMM = () => NIBS[hb.nib];
+  const nibMM = () => hb.nib;
 
   /* SCANLINES, CLIPPED TO THE SHEET — and the clipping is the point.
 
@@ -1962,28 +2032,25 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   const knobs = el('div', 'knobrow hb-knobs');
 
   /* PEN TURNS OVER THE KIT, not over millimetres: six stops, one per pen in
-     the case, so it cannot land on 0.43. The readout says the millimetres and
-     the dot beside the label is that nib at its true relative size, so the
-     number has an object next to it.
+  /* PEN IS CONTINUOUS, 0.1 to 3 mm. It was six detented stops on the argument
+     that a nib is one of six objects in a case — which is true of a technical
+     pen and false of this panel, because what is being set here is a STROKE
+     WIDTH, and a stroke width is a quantity like any other. A kit is the right
+     model for choosing a pen off a shelf and the wrong one for dialling a line
+     until it looks right, which is what a specimen in front of you is for.
 
-     PEN AND SPACING ARE INDEPENDENT. An earlier build had the pen drag the
-     spacing along to hold a nib ratio, which is a tidy idea and the wrong one:
-     it means one control silently edits another, so a value you set by hand
-     stops being the value you set. They are two settings. */
-  const nibDot = el('span', 'nibdot');
-  nibDot.style.setProperty('--nib', NIBS[hb.nib] + 'mm');
+     The dot that showed the nib at true relative size went with it: at 0.1mm
+     it was a speck and at 3mm it no longer fits a label row, and a scale that
+     only works across one octave is not a scale.
+
+     PEN AND SPACING STAY INDEPENDENT. Neither silently edits the other, so a
+     value you set by hand stays the value you set. */
   const pen = knob({
-    label: 'Pen', min: 0, max: NIBS.length - 1, step: 1, value: hb.nib, size: 44,
-    fmt: i => NIBS[i].toFixed(2),
-    onChange: i => {
-      hb.nib = i;
-      nibDot.style.setProperty('--nib', NIBS[i] + 'mm');
-      paint();
-    },
+    label: 'Pen', min: 0.1, max: 3, step: 0.01, value: hb.nib, size: 44,
+    fmt: v => v.toFixed(2),
+    onChange: v => { hb.nib = v; paint(); },
   });
-  const penLab = pen.querySelector('.klab');
-  penLab.prepend(el('span', null, ENG.nib).firstElementChild);
-  penLab.append(nibDot);
+  pen.querySelector('.klab').prepend(el('span', null, ENG.nib).firstElementChild);
 
   const spacing = knob({
     label: 'Spacing', min: 0.1, max: 4, step: 0.05, value: hb.spacing, size: 44,
@@ -2020,47 +2087,64 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   const drawPens = () => {
     pens.textContent = '';
     INKS.forEach((ink, i) => {
-      const empty = ink.pick && !ink.c;
-      const p = el('button', 'pencap'
-        + (ink.pick ? ' pick' : '') + (empty ? ' empty' : '') + (i === hb.ink ? ' on' : ''));
+      /* EVERY SLOT IS REFILLABLE, INCLUDING THE THREE THAT SHIP FULL. Black,
+         grey and white are what a case comes with, not what it is stuck with —
+         and a swatch you cannot change is a swatch that is lying about being a
+         pen. So the fixed/refillable distinction is gone, and with it the
+         engraved notch that marked it: a mark that is on everything marks
+         nothing. What still separates a slot from a pen is whether there is
+         anything IN it, which the well says by itself. */
+      const empty = !ink.c;
+      const p = el('button', 'pencap' + (empty ? ' empty' : '') + (i === hb.ink ? ' on' : ''));
       p.type = 'button';
       if (!empty) p.style.setProperty('--ink', ink.c);
       p.title = empty ? 'Empty slot — click to put a pen in it'
-              : ink.pick ? `${ink.n} — click again to change its ink`
-              : `${ink.n} pen`;
+                      : `${ink.n} — click again to change its ink`;
       p.setAttribute('aria-label', p.title);
       p.setAttribute('aria-pressed', String(i === hb.ink));
 
-      if (ink.pick) {
-        /* THE NATIVE INPUT IS KEPT AS THE VALUE AND NEVER AS THE SURFACE. It
-           is what a form would read and what a real app would post; the picker
-           is what a person touches. Swapping one for the other later changes
-           this file and nothing downstream, which is the point of keeping it.
+      /* THE NATIVE INPUT IS KEPT AS THE VALUE AND NEVER AS THE SURFACE. It is
+         what a form would read and what a real app would post; the picker is
+         what a person touches. Swapping one for the other later changes this
+         file and nothing downstream, which is the point of keeping it.
 
-           An EMPTY slot opens the picker on the first click, because there is
-           no pen to choose yet — filling it IS choosing it. A FILLED one
-           selects first and refills on the second click: a click that both
-           chooses a pen and opens a plate makes choosing a pen expensive. */
-        const inp = el('input', 'ink-src');
-        inp.type = 'color';
-        inp.value = ink.c || '#FF6A00';
-        inp.tabIndex = -1;
-        inp.setAttribute('aria-hidden', 'true');
-        p.append(inp);
-        p.addEventListener('click', () => {
-          if (!empty && hb.ink !== i) return select(i);
-          openPicker(p, ink.c || '#FF6A00', hx => {
-            const first = !ink.c;
-            ink.c = hx; inp.value = hx;
-            p.classList.remove('empty');
-            p.style.setProperty('--ink', hx);
-            p.title = `${ink.n} — click again to change its ink`;
-            if (first) { drawPens(); select(i); } else paint();
-          });
-        });
-      } else {
-        p.addEventListener('click', () => select(i));
-      }
+         An EMPTY slot opens the picker on the first click, because there is no
+         pen to choose yet — filling it IS choosing it. A FILLED one selects
+         first and refills on the second: a click that both chooses a pen and
+         opens a plate makes choosing a pen expensive. */
+      const inp = el('input', 'ink-src');
+      inp.type = 'color';
+      inp.value = ink.c || '#FF6A00';
+      inp.tabIndex = -1;
+      inp.setAttribute('aria-hidden', 'true');
+      p.append(inp);
+      /* `empty` IS A SNAPSHOT AND THE HANDLER OUTLIVES IT. Fill a slot and the
+         captured value is still true, so the next click would reopen the
+         picker instead of selecting. Read the state, not the photograph. */
+      p.addEventListener('click', () => {
+        if (ink.c && hb.ink !== i) return select(i);
+        openPicker(p, ink.c || '#FF6A00', hx => {
+          const first = !ink.c;
+          ink.c = hx; inp.value = hx;
+          p.classList.remove('empty');
+          p.style.setProperty('--ink', hx);
+          p.title = `${ink.n} — click again to change its ink`;
+          p.setAttribute('aria-label', p.title);
+          /* NEVER REBUILD THE RAIL FROM INSIDE THE PICKER.
+             This called drawPens() on the first colour a new slot received,
+             which threw away every button and made new ones — including THIS
+             one, the element the open picker's callback still points at. Every
+             later drag then wrote --ink to a node that had been detached, so
+             the specimen and the well kept up (they read the data) and the
+             swatch under your cursor froze at whatever it was when the rebuild
+             happened. The rail never needed rebuilding: filling a slot is a
+             class and a custom property on a button that is already correct. */
+          if (first) select(i); else paint();
+        /* THE WELL IS THIS CASE — the other pens you have, live, rather than a
+           list of colours somebody seeded. Passed as a function so it re-reads
+           the rail every repaint instead of freezing a copy at open time. */
+        }, () => INKS.filter(k => k.c).map(k => k.c));
+      });
       pens.append(p);
     });
   };
@@ -2092,6 +2176,17 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   /* COALESCED ON A FRAME. A tone-driven hatch is thousands of samples, and a
      knob drag fires far more often than the screen refreshes — so the state
      lands immediately and the drawing is rebuilt once per frame. */
+  /* COALESCED ON A FRAME, AND THAT IS ALL. A tone-driven hatch is tens of
+     thousands of samples, and a knob drag fires far more often than the screen
+     refreshes — so the state lands immediately and the drawing is rebuilt once
+     per frame.
+
+     It was briefly latched to redraw only on RELEASE, and that was wrong. A
+     specimen that does not move while you turn the knob is not a specimen, it
+     is a picture you get afterwards: the whole reason the ball is on the panel
+     is to be watched WHILE the value changes, because that is when you can see
+     which way it is going. Dropping frames is a cost worth paying for that;
+     dropping the feedback is not, because it is the feature. */
   let queued = false;
   function paint() {
     /* SPACING UNDER THE NIB IS NOT AN ERROR, so nothing reports it. The
@@ -2148,40 +2243,21 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════
-   08 · THE SPHERE TEST — three hands, one ball
+   THE SPECIMEN KIT — the rig every fill in this document is judged on
 
-   Every other fill in this document is a MACHINE fill and says so proudly: the
-   hatch bay's whole argument is that a plotter draws paths, and the four types
-   on its dial are four paths. This block is the opposite job. What is wanted
-   here is a fill that came off the same machine and does not look like it —
-   and "looks hand-made" is not a texture you can add at the end, it is a list
-   of things a hand does that a loop does not:
+   Two sections draw fills now and they agree about almost nothing: 08 wants a
+   fill that looks hand-made, 09 wants one the pen never comes out of. What
+   they must not disagree about is THE THING BEING DRAWN. Light the ball
+   differently, or put a different neck in the blob, and the two sections stop
+   being comparable — which is the only reason either of them is worth having.
 
-     · IT DOES NOT SPACE EVENLY.  The loudest machine tell in a fill is not
-       straightness, it is a pitch that never varies. Every family here is
-       jittered by a third of its own spacing before anything else happens.
-     · IT DOES NOT COME BACK AT THE SAME ANGLE.  Each pass is a couple of
-       degrees off the last, because nobody returns to a fill at the angle they
-       left it.
-     · IT DOES NOT STOP ON THE LINE.  A stroke runs past the boundary or pulls
-       up short by a couple of tenths, and which one it does is not decided in
-       advance.
-     · IT RE-GRIPS.  Past about 16mm the wrist runs out of travel, so a long
-       fill has no edge-to-edge strokes in it at all.
-     · IT BUILDS TONE BY GOING BACK OVER, not by drawing a grey. Four passes,
-       each confined to what is already darker than the last — which is why
-       every threshold has to be dithered, or the fill draws a contour map of
-       the lighting instead of a tone.
-
-   ALL OF IT IS GEOMETRY IN MILLIMETRES, generated the way a plotter would
-   receive it, and the viewBox is measured off the element at 96/25.4 so one
-   user unit is one millimetre. There is no filter, no blur and no fill in the
-   whole block: what is on screen is what a pen would put on paper, at size.
-   That is the only reason a specimen is worth looking at.
+   So the scene, the tone model, the two line families and the carve live here,
+   and each section owns nothing but its own hand. `scene()` is the ball, the
+   table and the lamp; `blob()` is the flat shape; `latitudes()` follows the
+   form and `parallels()` deliberately does not; `carve()` is what turns a
+   family of lines into the part of it that is dark enough to draw.
    ══════════════════════════════════════════════════════════════════════════ */
-(function sphereTest() {
-  const box = document.getElementById('handhatch');
-
+const KIT = (function specimenKit() {
   const rng = s => { let r = (s >>> 0) || 1; return () => (r = (r * 1664525 + 1013904223) >>> 0) / 4294967296; };
   const noise = s => {
     const g = [], rr = rng(s);
@@ -2307,6 +2383,157 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     return out.filter(r => plen(r) >= minLen);
   }
 
+  const f = v => (Math.round(v * 100) / 100);
+  function toPath(p) {
+    if (!p || p.length < 2) return '';
+    let d = `M${f(p[0][0])} ${f(p[0][1])}`;
+    if (p.length === 2) return d + `L${f(p[1][0])} ${f(p[1][1])}`;
+    for (let i = 0; i < p.length - 1; i++) {
+      const p0 = p[Math.max(0, i - 1)], p1 = p[i], p2 = p[i + 1], p3 = p[Math.min(p.length - 1, i + 2)];
+      d += `C${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)},` +
+           `${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)},` +
+           `${f(p2[0])} ${f(p2[1])}`;
+    }
+    return d;
+  }
+  const thin = (p, n) => {
+    if (p.length <= 3) return p;
+    const o = [];
+    for (let i = 0; i < p.length; i += n) o.push(p[i]);
+    if (o[o.length - 1] !== p[p.length - 1]) o.push(p[p.length - 1]);
+    return o;
+  };
+
+  const AXIS = (aDeg, bDeg) => {
+    const a = aDeg * Math.PI / 180, b = bDeg * Math.PI / 180;
+    return norm([Math.cos(b) * Math.cos(a), Math.cos(b) * Math.sin(a), -Math.sin(b)]);
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     THE SECOND TEST — a flat shape
+
+     The ball tests TONE and nothing else: a circle has no corners, no neck and
+     no concave anything, so a fill can look perfect on it and fall apart the
+     first time it meets a real silhouette. This one carries no shading at all —
+     one density, edge to edge — because what is being read here is the BOUNDARY:
+     where the strokes stop, whether they stop in a line (a machine) or over a
+     couple of tenths (a hand), and what happens in a notch too narrow to fit a
+     stroke in.
+     ══════════════════════════════════════════════════════════════════════════ */
+  function blob(w, h, seed) {
+    const rnd = rng(seed);
+    /* THE RADIUS IS DERIVED, not chosen. The four harmonics sum to 0.65, so the
+       blob's widest point is 1.65 × base — pick base as a fraction of the sheet
+       and one seed in ten runs off the edge of it. Sized from the worst case
+       instead, with 2.5mm of margin, the shape fits on every seed there is. */
+    const base = (Math.min(w, h) / 2 - 2.5) / 1.65;
+    const cx = w / 2, cy = h / 2;
+    const ph = () => rnd() * Math.PI * 2;
+    const ring = b => {
+      const H = [[2, 0.25], [3, 0.20], [5, 0.13], [7, 0.07]].map(([k, a]) => [k, a, ph()]);
+      return th => b * (1 + H.reduce((s, [k, a, p]) => s + a * Math.sin(k * th + p), 0));
+    };
+    const rad = ring(base);
+
+    /* AND A HOLE IN IT, because a fill that has never met one has not been
+       tested. Every hard thing about a boundary happens twice as often once
+       the region has an inside edge: passes break in the MIDDLE instead of at
+       the ends, the two halves of a broken pass stop being neighbours, and any
+       join that reaches across the gap draws a line straight through the one
+       place on the sheet that is supposed to stay paper. A fill is not proved
+       by the shape it fills, it is proved by the shape it refuses to.
+
+       IT HAS TO FIT, and roughly right is not fitting: an inner edge that
+       breaks the outer one has quietly made a different shape and not said so.
+       So it is placed, checked the whole way round against the outer radius
+       with a margin wide enough for the fill to live in, and shrunk until it
+       clears. */
+    const hrad0 = ring(1);
+    const ha = ph(), off = 0.20 + rnd() * 0.20;
+    const fits = (x, y, k) => {
+      for (let t = 0; t < Math.PI * 2; t += 0.05) {
+        const px = x + hrad0(t) * k * Math.cos(t), py = y + hrad0(t) * k * Math.sin(t);
+        if (Math.hypot(px - cx, py - cy) > rad(Math.atan2(py - cy, px - cx)) - 2.6) return false;
+      }
+      return true;
+    };
+    /* SHRINKING ALONE IS NOT A PLACEMENT. Shrink-until-it-fits terminates every
+       time and sometimes terminates at a hole a third of a millimetre across,
+       which is not a hole — it is a dot the fill steps over without ever being
+       asked a question. So the offset walks back toward the centre and the
+       best of the attempts wins: a hole has to be big enough to break a pass
+       in half or it is not testing anything. */
+    let hx = cx, hy = cy, hb = 0;
+    for (let a = 0; a < 7; a++) {
+      const d = base * off * (1 - a / 8);
+      const x = cx + Math.cos(ha) * d, y = cy + Math.sin(ha) * d;
+      let k = base * 0.34;
+      for (let i = 0; i < 18 && !fits(x, y, k); i++) k *= 0.9;
+      if (!fits(x, y, k)) continue;
+      if (k > hb) { hb = k; hx = x; hy = y; }
+      if (hb > base * 0.24) break;
+    }
+    const hrad = t => hrad0(t) * hb;
+    const inHole = (x, y) => Math.hypot(x - hx, y - hy) < hrad(Math.atan2(y - hy, x - hx));
+
+    const poly = (ox, oy, f, b, step) => {
+      const p = [], d = step / b;
+      for (let th = 0; th <= Math.PI * 2 + d; th += d) p.push([ox + f(th) * Math.cos(th), oy + f(th) * Math.sin(th)]);
+      return p;
+    };
+    return {
+      cx, cy, rad,
+      /* the same signature as the ball's tone, so it drops into the same carve */
+      tone: (x, y) => (Math.hypot(x - cx, y - cy) < rad(Math.atan2(y - cy, x - cx)) && !inHole(x, y) ? 1 : -1),
+      /* BOTH EDGES, outer first. An inner edge is an edge — anything that
+         draws the boundary draws two of them or it is drawing a lie. */
+      rings: step => [poly(cx, cy, rad, base, step), poly(hx, hy, hrad, hb, step)],
+    };
+  }
+
+  return { rng, noise, clamp01, norm, cross, plen, scene, blob,
+           latitudes, parallels, carve, toPath, thin, AXIS };
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   08a · BY HAND — three hands, one ball
+
+   Every other fill in this document is a MACHINE fill and says so proudly: the
+   hatch bay's whole argument is that a plotter draws paths, and the four types
+   on its dial are four paths. This block is the opposite job. What is wanted
+   here is a fill that came off the same machine and does not look like it —
+   and "looks hand-made" is not a texture you can add at the end, it is a list
+   of things a hand does that a loop does not:
+
+     · IT DOES NOT SPACE EVENLY.  The loudest machine tell in a fill is not
+       straightness, it is a pitch that never varies. Every family here is
+       jittered by a third of its own spacing before anything else happens.
+     · IT DOES NOT COME BACK AT THE SAME ANGLE.  Each pass is a couple of
+       degrees off the last, because nobody returns to a fill at the angle they
+       left it.
+     · IT DOES NOT STOP ON THE LINE.  A stroke runs past the boundary or pulls
+       up short by a couple of tenths, and which one it does is not decided in
+       advance.
+     · IT RE-GRIPS.  Past about 16mm the wrist runs out of travel, so a long
+       fill has no edge-to-edge strokes in it at all.
+     · IT BUILDS TONE BY GOING BACK OVER, not by drawing a grey. Four passes,
+       each confined to what is already darker than the last — which is why
+       every threshold has to be dithered, or the fill draws a contour map of
+       the lighting instead of a tone.
+
+   ALL OF IT IS GEOMETRY IN MILLIMETRES, generated the way a plotter would
+   receive it, and the viewBox is measured off the element at 96/25.4 so one
+   user unit is one millimetre. There is no filter, no blur and no fill in the
+   whole block: what is on screen is what a pen would put on paper, at size.
+   That is the only reason a specimen is worth looking at.
+   ══════════════════════════════════════════════════════════════════════════ */
+(function sphereTest() {
+  const box = document.getElementById('handhatch');
+  /* the rig is shared; only the HAND below belongs to this section */
+  const { rng, noise, plen, scene, blob, latitudes, parallels,
+          carve, toPath, thin, AXIS } = KIT;
+
+
   /* ── the hand ──────────────────────────────────────────────────────────── */
   function handify(pts, rnd, n1, amp, endMax) {
     const L = [0];
@@ -2330,40 +2557,16 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     return out;
   }
 
-  const f = v => (Math.round(v * 100) / 100);
-  function toPath(p) {
-    if (!p || p.length < 2) return '';
-    let d = `M${f(p[0][0])} ${f(p[0][1])}`;
-    if (p.length === 2) return d + `L${f(p[1][0])} ${f(p[1][1])}`;
-    for (let i = 0; i < p.length - 1; i++) {
-      const p0 = p[Math.max(0, i - 1)], p1 = p[i], p2 = p[i + 1], p3 = p[Math.min(p.length - 1, i + 2)];
-      d += `C${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)},` +
-           `${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)},` +
-           `${f(p2[0])} ${f(p2[1])}`;
-    }
-    return d;
-  }
-  const thin = (p, n) => {
-    if (p.length <= 3) return p;
-    const o = [];
-    for (let i = 0; i < p.length; i += n) o.push(p[i]);
-    if (o[o.length - 1] !== p[p.length - 1]) o.push(p[p.length - 1]);
-    return o;
-  };
 
   /* ── the three hands ───────────────────────────────────────────────────── */
-  const AXIS = (aDeg, bDeg) => {
-    const a = aDeg * Math.PI / 180, b = bDeg * Math.PI / 180;
-    return norm([Math.cos(b) * Math.cos(a), Math.cos(b) * Math.sin(a), -Math.sin(b)]);
-  };
 
   function draw(kind, w, h, seed, opt = {}) {
     const S = scene(w, h);
     const rnd = rng(seed), n1 = noise(seed ^ 0x9e37), n2 = noise(seed ^ 0x51ed);
     const dither = (x, y) => (n1(x * 0.62 + y * 0.21) + n2(y * 0.55 - x * 0.18)) * 0.085;
-    const nib = opt.nib || 0.25;
+    const nib = opt.nib || 0.35;
     const jit = () => rnd() - 0.5;
-    const amp = 0.085, out = [];
+    const amp = 0.11, out = [];
     const ink = pts => { const g = handify(thin(pts, 3), rnd, n1, amp, 0.5); if (g) out.push(toPath(g)); };
     /* A HAND RE-GRIPS. Past about 16mm the wrist runs out of travel and the
        stroke is two strokes with a hairline break in it — which is the reason a
@@ -2381,7 +2584,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
          to be short and the direction has to come from somewhere other than the
          dice: a hand scribbling shares a direction with the marks it just made,
          and pure uniform angles read as static rather than as shading. */
-      const dens = 4.6, N = Math.round(w * h * dens);
+      const dens = 2.7, N = Math.round(w * h * dens);
       for (let k = 0; k < N; k++) {
         const x = rnd() * w, y = rnd() * h;
         const t = Math.max(S.ball(x, y), S.shadow(x, y));
@@ -2389,7 +2592,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         const base = (n1(x * 0.10 + y * 0.07) * 1.6 + n1(y * 0.31 - x * 0.19 + 90) * 0.5) * Math.PI;
         const a = base + (rnd() - 0.5) * 1.1;
         const dx = Math.cos(a), dy = Math.sin(a);
-        const len = (0.30 + rnd() * 0.55) * (0.55 + t * 0.6);
+        const len = (0.38 + rnd() * 0.68) * (0.55 + t * 0.6);
         const n = rnd() < 0.06 ? 2 : 1;
         const gap = 0.26 + rnd() * 0.14, half = len / 2, pts = [];
         for (let i = 0; i < n; i++) {
@@ -2401,7 +2604,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
             pts.push([x + dx * u - dy * off, y + dy * u + dx * off]);
           }
         }
-        const g = handify(pts, rnd, n1, 0.05, 0.18);
+        const g = handify(pts, rnd, n1, 0.07, 0.22);
         if (g) out.push(toPath(g));
       }
       /* the edge is made of the marks, so the contour is made of marks too */
@@ -2415,7 +2618,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
           const u = a - d / 2 + d * j / 4;
           pts.push([S.cx + r0 * Math.cos(u), S.cy + r0 * Math.sin(u)]);
         }
-        const g = handify(pts, rnd, n1, 0.06, 0.2);
+        const g = handify(pts, rnd, n1, 0.08, 0.25);
         if (g) out.push(toPath(g));
       }
       return { paths: out, nib, S };
@@ -2442,7 +2645,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       const A = AXIS(AX + angDrift, BX);
       const dphi = pitch / S.R, phi0 = BX * Math.PI / 180 + cap + dphi * off;
       const runs = latitudes(A, phi0, dphi, S.cx, S.cy, S.R, 0.42, Math.PI - cap, jit);
-      carve(runs, S.ball, tau, dither, 1.2).forEach(r => { if (rnd() > 0.035) push(r); });
+      carve(runs, S.ball, tau, dither, 1.68).forEach(r => { if (rnd() > 0.035) push(r); });
     };
     /* A FLOOD IS NOT A DARK. Four interleaved passes at pitch s land the darkest
        tone at s/4, so s has to be four nibs clear of it or the terminator turns
@@ -2453,10 +2656,10 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
          you find the form once and then you stop thinking about it and just get
          it dark. Later layers are straight, and being straight is what makes
          them read as a second pass rather than as more of the first. */
-      form(0, 0.12, 0, 1.50);
-      [[-14, 0.36, 1.25], [56, 0.56, 1.10], [22, 0.76, 0.95]].forEach(([ang, tau, pitch]) => {
+      form(0, 0.12, 0, 2.10);
+      [[-14, 0.36, 1.75], [56, 0.56, 1.54], [22, 0.76, 1.33]].forEach(([ang, tau, pitch]) => {
         const runs = parallels(S.cx - S.R - 1, S.cy - S.R - 1, S.cx + S.R + 1, S.cy + S.R + 1, ang, pitch, 0, 0.42, jit);
-        carve(runs, S.ball, tau, dither, 1.2).forEach(r => { if (rnd() > 0.04) push(r); });
+        carve(runs, S.ball, tau, dither, 1.68).forEach(r => { if (rnd() > 0.04) push(r); });
       });
     } else {
       /* ONE DIRECTION, FOUR TIMES — and the drift is the hand. Nobody comes back
@@ -2464,18 +2667,18 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
          off the last; that tiny disagreement is most of what separates a hand
          from a machine running the same generator. */
       [[0, 0.12, 0], [3, 0.36, 0.5], [-3, 0.56, 0.25], [1.5, 0.76, 0.75]]
-        .forEach(([d, tau, off]) => form(d, tau, off, 1.55));
+        .forEach(([d, tau, off]) => form(d, tau, off, 2.17));
     }
 
     /* the table is flat, so its strokes are flat — the shadow does not wrap */
     const box = [S.sx - S.srx - 1, S.sy - S.sry - 1, S.sx + S.srx + 1, S.sy + S.sry + 1];
-    const sp = 1.15;
+    const sp = 1.61;
     const spasses = kind === 'cross'
       ? [{ ang: -4, tau: 0.12, off: 0 }, { ang: 24, tau: 0.44, off: 0 }, { ang: -4, tau: 0.72, off: sp / 2 }]
       : [{ ang: -4, tau: 0.12, off: 0 }, { ang: -6, tau: 0.44, off: sp / 2 }, { ang: -2, tau: 0.72, off: sp / 4 }];
     spasses.forEach(p => {
       const runs = parallels(box[0], box[1], box[2], box[3], p.ang, sp, p.off, 0.42, jit);
-      carve(runs, S.shadow, p.tau, dither, 0.7).forEach(r => { if (rnd() > 0.04) push(r); });
+      carve(runs, S.shadow, p.tau, dither, 0.98).forEach(r => { if (rnd() > 0.04) push(r); });
     });
 
     /* THE CONTOUR, and a hand never closes one. Two arcs with a gap where the
@@ -2490,55 +2693,24 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         const r0 = S.R * (1 + (n1(a * 2.1 + 40) * 0.006));
         pts.push([S.cx + r0 * Math.cos(a), S.cy + r0 * Math.sin(a)]);
       }
-      const g = handify(thin(pts, 2), rnd, n1, 0.055, 0.5);
+      const g = handify(thin(pts, 2), rnd, n1, 0.075, 0.62);
       if (g) out.push(toPath(g));
     });
     return { paths: out, nib, S };
   }
 
-  /* ══════════════════════════════════════════════════════════════════════════
-     THE SECOND TEST — a flat shape
-
-     The ball tests TONE and nothing else: a circle has no corners, no neck and
-     no concave anything, so a fill can look perfect on it and fall apart the
-     first time it meets a real silhouette. This one carries no shading at all —
-     one density, edge to edge — because what is being read here is the BOUNDARY:
-     where the strokes stop, whether they stop in a line (a machine) or over a
-     couple of tenths (a hand), and what happens in a notch too narrow to fit a
-     stroke in.
-     ══════════════════════════════════════════════════════════════════════════ */
-  function blob(w, h, seed) {
-    const rnd = rng(seed);
-    const base = Math.min(w * 0.32, h * 0.37);
-    const cx = w / 2, cy = h / 2;
-    const H = [[2, 0.25], [3, 0.20], [5, 0.13], [7, 0.07]].map(([k, a]) => [k, a, rnd() * Math.PI * 2]);
-    const rad = th => base * (1 + H.reduce((s, [k, a, p]) => s + a * Math.sin(k * th + p), 0));
-    return {
-      cx, cy, rad,
-      /* the same signature as the ball's tone, so it drops into the same carve */
-      tone: (x, y) => (Math.hypot(x - cx, y - cy) < rad(Math.atan2(y - cy, x - cx)) ? 1 : -1),
-      outline: step => {
-        const p = [], d = step / base;
-        for (let th = 0; th <= Math.PI * 2 + d; th += d) {
-          const r = rad(th);
-          p.push([cx + r * Math.cos(th), cy + r * Math.sin(th)]);
-        }
-        return p;
-      },
-    };
-  }
 
   function drawShape(kind, w, h, seed, opt = {}) {
     const S = blob(w, h, seed);
     const rnd = rng(seed ^ 0x2f1b), n1 = noise(seed ^ 0x77a3), n2 = noise(seed ^ 0x1c05);
     const dither = () => 0;                      // no tone here, so nothing to dither
-    const nib = opt.nib || 0.25;
+    const nib = opt.nib || 0.35;
     const jit = () => rnd() - 0.5;
     const out = [];
     /* THE ENDS ARE THE TEST. A fill that stops dead on the outline is a clip
        path; a hand runs past it and pulls up short by turns, and the amount is
        about a third of the pitch — enough to see, not enough to read as a fringe. */
-    const ink = pts => { const g = handify(thin(pts, 3), rnd, n1, 0.085, 0.85); if (g) out.push(toPath(g)); };
+    const ink = pts => { const g = handify(thin(pts, 3), rnd, n1, 0.11, 1.05); if (g) out.push(toPath(g)); };
     const push = pts => {
       const L = plen(pts);
       if (L < 17 || pts.length < 8) return ink(pts);
@@ -2548,46 +2720,48 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     };
     const lay = (ang, pitch, off) => {
       const runs = parallels(0, 0, w, h, ang, pitch, off, 0.42, jit);
-      carve(runs, S.tone, 0.5, dither, 0.45).forEach(r => { if (rnd() > 0.03) push(r); });
+      carve(runs, S.tone, 0.5, dither, 0.63).forEach(r => { if (rnd() > 0.03) push(r); });
     };
 
     if (kind === 'random') {
-      const dens = 4.6, N = Math.round(w * h * dens);
+      const dens = 2.7, N = Math.round(w * h * dens);
       for (let k = 0; k < N; k++) {
         const x = rnd() * w, y = rnd() * h;
         if (S.tone(x, y) < 0) continue;
         const base = (n1(x * 0.10 + y * 0.07) * 1.6 + n2(y * 0.31 - x * 0.19) * 0.5) * Math.PI;
         const a = base + (rnd() - 0.5) * 1.1;
-        const dx = Math.cos(a), dy = Math.sin(a), len = 0.42 + rnd() * 0.62, half = len / 2;
+        const dx = Math.cos(a), dy = Math.sin(a), len = 0.52 + rnd() * 0.78, half = len / 2;
         const pts = [];
         const steps = Math.max(2, Math.round(len / 0.3));
         for (let j = 0; j <= steps; j++) {
           const u = -half + len * (j / steps);
           pts.push([x + dx * u, y + dy * u]);
         }
-        const g = handify(pts, rnd, n1, 0.05, 0.18);
+        const g = handify(pts, rnd, n1, 0.07, 0.22);
         if (g) out.push(toPath(g));
       }
     } else if (kind === 'cross') {
-      lay(-34, 1.15, 0); lay(52, 1.15, 0);
+      lay(-34, 1.61, 0); lay(52, 1.61, 0);
     } else {
-      lay(-34, 1.4, 0); lay(-30, 1.4, 0.7);
+      lay(-34, 1.96, 0); lay(-30, 1.96, 0.98);
     }
 
     /* THE OUTLINE IS PART OF THE TEST, not a frame round it: a hand-drawn edge
        is where you see whether the wobble has a wavelength or is just noise. */
-    const o = S.outline(0.45), n = o.length;
-    if (kind === 'random') {
-      for (let k = 0; k < 260; k++) {
-        const i = Math.floor(rnd() * n), m = 3 + Math.floor(rnd() * 4);
-        ink(o.slice(i, i + m).map(p => p.slice()));
+    S.rings(0.45).forEach(o => {
+      const n = o.length;
+      if (kind === 'random') {
+        for (let k = 0; k < Math.round(n * 1.2); k++) {
+          const i = Math.floor(rnd() * n), m = 3 + Math.floor(rnd() * 4);
+          ink(o.slice(i, i + m).map(p => p.slice()));
+        }
+      } else {
+        /* two arcs and a gap, and the gap is not in the same place twice */
+        const c0 = Math.floor(rnd() * n), c1 = (c0 + Math.floor(n * (0.42 + rnd() * 0.16))) % n;
+        const seg = (a, b) => { const p = []; for (let i = a; i !== b; i = (i + 1) % n) p.push(o[i]); return p; };
+        [seg(c0, c1), seg(c1, c0)].forEach(p => { if (p.length > 4) ink(p); });
       }
-    } else {
-      /* two arcs and a gap, and the gap is not in the same place twice */
-      const c0 = Math.floor(rnd() * n), c1 = (c0 + Math.floor(n * (0.42 + rnd() * 0.16))) % n;
-      const seg = (a, b) => { const p = []; for (let i = a; i !== b; i = (i + 1) % n) p.push(o[i]); return p; };
-      [seg(c0, c1), seg(c1, c0)].forEach(p => { if (p.length > 4) ink(p); });
-    }
+    });
     return { paths: out, nib, S };
   }
 
@@ -2618,24 +2792,30 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   head.append(roll);
 
   const body = el('div', 'box-body hh-body');
+  /* ONE SHEET PER HAND, and both specimens on it. They were two screens
+     stacked, which is two displays showing one thing each — and the question
+     being asked is what ONE hand does to two different problems, so the two
+     answers belong on the same piece of paper, side by side, with a gap. The
+     gap is the whole of the separation: same sheet, same pen, same run. */
   const cells = TESTS.map(t => {
     const cell = el('div', 'hh-cell');
     cell.append(el('div', 'bay-cap', `${t.eng}<span>${t.nm}</span>`));
-    const mk = (cls, note) => {
-      const spec = el('div', 'screen hh-spec');
-      const field = el('div', 'hh-field' + cls);
-      spec.append(field, el('div', 'hh-scale', `<span>${note}</span><span>1:1 mm</span>`));
-      cell.append(spec);
-      return field;
-    };
-    return { t, cell, ball: mk('', t.a), flat: mk(' flat', t.b) };
+    const spec = el('div', 'screen hh-spec');
+    const pair = el('div', 'hh-pair');
+    const ball = el('div', 'hh-field'), flat = el('div', 'hh-field hh-shape');
+    pair.append(ball, flat);
+    spec.append(pair, el('div', 'hh-scale',
+      `<span class="hh-a"><span>${t.a}</span><span>1:1 mm</span></span>` +
+      `<span class="hh-b"><span>${t.b}</span><span>1:1 mm</span></span>`));
+    cell.append(spec);
+    return { t, cell, ball, flat };
   });
   cells.forEach(c => body.append(c.cell));
   box.append(head, body);
 
   /* MEASURED, NOT GUESSED, exactly as the hatch bay measures its own field:
      the viewBox is the element's real size converted at 96/25.4, so one user
-     unit is one millimetre and a 0.25 nib on screen is a 0.25 nib on paper.
+     unit is one millimetre and a 0.35 nib on screen is a 0.35 nib on paper.
      Everything above works in mm for that one reason — the geometry can go
      straight out to an SVG file and onto the plotter with no rescale. */
   let seed = 20260815;
@@ -2668,6 +2848,275 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     cells.forEach((c, i) => {
       render(c.ball, (w, h, s) => draw(c.t.k, w, h, s), i);
       render(c.flat, (w, h, s) => drawShape(c.t.k, w, h, s ^ 0x5bd1), i + 3);
+    });
+  }
+  requestAnimationFrame(paint);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   08b · BY MACHINE — the serpentine, and the count that proves it
+
+   This is the opposite section to 08 and it is here for the opposite reason.
+   That block wants a fill nobody can tell came off a machine; this one wants
+   the fill only a machine can draw, and takes the machine's side completely:
+   no wobble, no jitter, no drift, exact pitch, straight lines.
+
+   WHAT IT IS OPTIMISING IS NOT THE PICTURE, IT IS THE PEN LIFT. A plotter's
+   real cost is not line length — the head moves at the same speed whether the
+   pen is down or up — it is the number of times the pen has to come out of the
+   paper, aim, and come back down. Every one of those is a chance to blot, to
+   miss the mark by a tenth, and to leave the little comma a felt tip makes
+   when it lands. A parallel fill pays that price once per pass.
+
+   3D PRINTERS SOLVED THIS FIRST, and the answer is the same in two dimensions:
+   do not lift at the end of a pass, TURN. Run the next pass backwards so its
+   start is where the last one ended, and the two are one stroke with a corner
+   in it. Do it across a whole region and a fill that was two hundred strokes
+   is one. That is all a serpentine is, and the turnaround is the entire
+   visible difference — which is why the hatch bay clips its lines to the sheet
+   rather than drawing them on an over-sized grid: on an over-sized grid every
+   turnaround falls off the paper and a serpentine renders as a parallel fill
+   with a different name on the dial.
+
+   WHERE IT GETS INTERESTING IS THE SHADING. A uniform region is easy: the
+   passes are full chords, they all touch, one stroke does the lot. Carve those
+   same passes by TONE and the region breaks into islands — a pass becomes two
+   or five runs with paper between them — and now the question is whether the
+   pen may travel from one to the next. It may, if the gap is short enough and
+   if the line it would draw on the way stays inside the region it is filling.
+   Both conditions are already named on the panel next door: JOIN REACH, in the
+   hatch bay's set-once recess, is that first number and this is what it does.
+
+   SO THE SECTION IS A CONTROL AND A RESULT. Left column lifts at the end of
+   every pass; right column turns instead, and joins across islands wherever
+   the reach allows. Same tone model, same pitch, same nib, same drawing — and
+   a readout under each that says how many times the pen went down. That number
+   is the only argument being made here.
+   ══════════════════════════════════════════════════════════════════════════ */
+(function serpentineTest() {
+  const box = document.getElementById('serp');
+  const { scene, blob, parallels, carve } = KIT;
+
+  const NIB = 0.35;          // the same pen as the hand half, so the two compare
+  const ANG = -34;           // and the same angle
+  const PITCH = 2.17;
+  const REACH = 1.6;         // × pitch — the hatch bay's own default join reach
+  const TAUS = [0.12, 0.36, 0.56, 0.76];
+  const flat = () => 0;      // a machine has no hand, so there is nothing to dither
+
+  /* EXACT POLYLINES, NOT SMOOTHED ONES. 08 runs its strokes through a spline
+     because a hand's line has no straight in it; here the straight IS the
+     point, so a chord is its two endpoints and nothing between them. It also
+     makes the file about forty times smaller, which is the honest reason a
+     plotter file is small. */
+  const f = v => Math.round(v * 100) / 100;
+  const toPoly = p => 'M' + p.map(q => `${f(q[0])} ${f(q[1])}`).join('L');
+  const ends = r => [r[0], r[r.length - 1]];
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+  /* ── THE CHAIN ──────────────────────────────────────────────────────────
+     Greedy nearest-end, which is what a slicer does and produces the
+     serpentine for free: the nearest unused end to where you just stopped is
+     the near end of the next pass, so every other pass comes out reversed
+     without anybody asking for it.
+
+     WHAT IT CANNOT DO IS DECIDE FOR ITSELF WHETHER THE TRAVEL IS LEGAL, and
+     that is the whole of the interesting part, so it is handed in as a BRIDGE:
+     a function that either returns the line the pen draws on the way or says
+     no. Two regions in this section answer that question differently, and the
+     difference is the finding. */
+  function stitch(runs, bridge) {
+    const free = runs.map(ends), used = new Array(free.length).fill(false);
+    const out = [];
+    for (let n = 0; n < free.length; n++) {
+      if (used[n]) continue;
+      used[n] = true;
+      const cur = free[n].slice();
+      for (;;) {
+        const p = cur[cur.length - 1];
+        const cand = [];
+        for (let j = 0; j < free.length; j++) {
+          if (used[j]) continue;
+          cand.push([dist(p, free[j][0]), j, 0], [dist(p, free[j][1]), j, 1]);
+        }
+        cand.sort((a, b) => a[0] - b[0]);
+        let hit = null, br = null;
+        for (const c of cand) {
+          br = bridge(p, free[c[1]][c[2]]);
+          if (br) { hit = c; break; }
+        }
+        if (!hit) break;
+        used[hit[1]] = true;
+        cur.push(...br, free[hit[1]][1 - hit[2]]);
+      }
+      out.push(cur);
+    }
+    return out;
+  }
+
+  /* THE CONNECTOR IS A LINE THE PEN ACTUALLY DRAWS, so "is the gap short
+     enough" is only half the test. It also has to stay inside the region being
+     filled — skip that and the fill grows whiskers across the white paper
+     between its islands, which is worse than the lift it saved. */
+  const cut = (reach, inside) => (a, b) => {
+    if (dist(a, b) > reach) return null;
+    for (let i = 1; i < 5; i++) {
+      const u = i / 5;
+      if (!inside(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u)) return null;
+    }
+    return [b];
+  };
+
+  /* ── AND THE LIMIT, WHICH IS THE PART WORTH WRITING DOWN ────────────────
+     There is a version of this that gets the flat shape down to ONE stroke.
+     Where the straight cut runs out — and it runs out at the SHALLOW boundary,
+     not at the tight corners, because two passes a pitch apart meet a
+     near-parallel edge tens of millimetres apart — you can route the pen along
+     the outline instead, and finish by carrying on round the perimeter. It
+     works. The count says 1. It was built, and it is gone.
+
+     IT IS GONE BECAUSE THE COUNT IS NOT THE DRAWING. Every one of those tricks
+     buys a lift with a line, and a line is permanent: the wall gets drawn
+     twice where the pen retraces it, and the last join — the one that reaches
+     from wherever the fill happened to stop to wherever the perimeter happened
+     to start — is a stroke straight across the middle of the shape that no
+     part of the drawing asked for. One of those ruins a plot. Sixty pen lifts
+     do not.
+
+     SO THE RULE IS THE CONSERVATIVE ONE: turn where the next pass is genuinely
+     next to you, and lift otherwise. A serpentine is a fill that does not lift
+     when it does not have to — it is not a fill that never lifts, and chasing
+     the second thing is how you end up drawing the first line you cannot
+     erase. Lifting is free. Ink is not. */
+
+  const band = (x0, y0, x1, y1, tone, tau, off, bridge, join) => {
+    const runs = carve(parallels(x0, y0, x1, y1, ANG, PITCH, off, 0.5), tone, tau, flat, 0.84);
+    return join ? stitch(runs, bridge) : runs.map(ends);
+  };
+
+  function ballDraw(w, h, join) {
+    const S = scene(w, h);
+    const paths = [];
+    let downs = 0;
+    const add = ch => { downs += ch.length; ch.forEach(r => paths.push(toPoly(r))); };
+    TAUS.forEach((tau, i) => add(band(
+      S.cx - S.R - 1, S.cy - S.R - 1, S.cx + S.R + 1, S.cy + S.R + 1,
+      S.ball, tau, PITCH * i / 4, cut(REACH * PITCH, (x, y) => S.ball(x, y) >= tau), join)));
+    [0.12, 0.44, 0.72].forEach((tau, i) => add(band(
+      S.sx - S.srx - 1, S.sy - S.sry - 1, S.sx + S.srx + 1, S.sy + S.sry + 1,
+      S.shadow, tau, PITCH * i / 3, cut(REACH * PITCH, (x, y) => S.shadow(x, y) >= tau), join)));
+    const c = [];
+    for (let a = 0; a <= Math.PI * 2 + 0.05; a += 0.05) c.push([S.cx + S.R * Math.cos(a), S.cy + S.R * Math.sin(a)]);
+    return { paths, edge: toPoly(c), downs: downs + 1, nib: NIB };
+  }
+
+  function shapeDraw(w, h, join) {
+    const S = blob(w, h, seed);
+    const paths = [];
+    const ch = band(0, 0, w, h, S.tone, 0.5, 0,
+      cut(REACH * PITCH, (x, y) => S.tone(x, y) > 0), join);
+    ch.forEach(r => paths.push(toPoly(r)));
+    /* THE EDGES LIFT, and they are the lifts this section refuses to argue
+       about. Carrying the fill on round a perimeter costs a line from where
+       the pen stopped to where the perimeter starts, and that line goes across
+       the middle of the shape. */
+    const rings = S.rings(0.5);
+    return { paths, edge: rings.map(toPoly).join(''), downs: ch.length + rings.length, nib: NIB };
+  }
+
+  /* ── the rig: a control and a result, on the same two specimens ───────── */
+  const COLS = [
+    { nm: 'Parallel', join: false, note: 'lifts at the end of every pass' },
+    { nm: 'Serpentine', join: true, note: `turns instead, and joins across islands under ${REACH}×` },
+  ];
+
+  let seed = 4242;
+
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'SERPENTINE'));
+  const note = el('span', 'hh-note', `${PITCH.toFixed(2)} mm pitch · ${NIB} nib · ${ANG}°`);
+  note.style.marginLeft = 'auto';
+  const roll = key('NEW SHEET', {
+    cls: 'hh-roll',
+    title: 'Re-roll the shape — a new outline and a new hole to fail on',
+    onClick: () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; paint(); },
+  });
+  head.append(note, roll);
+
+  const body = el('div', 'box-body hh-body');
+  /* THE RULE MOVED UP INTO THE CAPTION and the readouts came down under the
+     drawings they belong to. The two numbers ARE the comparison, and a
+     comparison has to be readable in one glance — which it is not when the two
+     halves of it are on two separate screens. */
+  const cells = COLS.map(c => {
+    const cell = el('div', 'hh-cell');
+    cell.append(el('div', 'bay-cap',
+      `${c.join ? ENG.serp : ENG.hhand}<span>${c.nm}</span><em>${c.note}</em>`));
+    const spec = el('div', 'screen hh-spec');
+    const pair = el('div', 'hh-pair');
+    const ballF = el('div', 'hh-field'), flatF = el('div', 'hh-field hh-shape');
+    pair.append(ballF, flatF);
+    const scale = el('div', 'hh-scale');
+    const seg = (nm, cls) => {
+      const w = el('span', cls, `<span>${nm}</span>`);
+      const lcd = el('span', 'lcd');
+      w.append(lcd);
+      scale.append(w);
+      return lcd;
+    };
+    const ball = { field: ballF, lcd: seg('ball', 'hh-a') };
+    const flat = { field: flatF, lcd: seg('flat shape', 'hh-b') };
+    spec.append(pair, scale);
+    cell.append(spec);
+    return { c, cell, ball, flat };
+  });
+  cells.forEach(c => body.append(c.cell));
+  box.append(head, body);
+
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const MM = 96 / 25.4;
+
+  function render(slot, fn, join) {
+    const r = slot.field.getBoundingClientRect();
+    if (!r.width) return;
+    const w = r.width / MM, h = r.height / MM;
+    const out = fn(w, h, join);
+    let svg = slot.field.querySelector('svg');
+    if (!svg) { svg = document.createElementNS(SVGNS, 'svg'); slot.field.append(svg); }
+    svg.setAttribute('viewBox', `0 0 ${w.toFixed(3)} ${h.toFixed(3)}`);
+    svg.textContent = '';
+    const p = document.createElementNS(SVGNS, 'path');
+    p.setAttribute('d', out.paths.join(''));
+    p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', '#16181C');
+    p.setAttribute('stroke-width', out.nib);
+    p.setAttribute('stroke-linecap', 'round');
+    p.setAttribute('stroke-linejoin', 'round');
+    svg.append(p);
+    /* THE EDGE IS A HAIRLINE, and it is the only line in either section drawn
+       at a width that is not a pen. It is here to say where the region IS so
+       the fill can be read against it — and at the nib's own width it is the
+       heaviest mark on the sheet and takes the eye every time, which is the
+       one thing a specimen must not do. What plots is the nib; this is the
+       specimen's own annotation, and it is thin so that it says so. */
+    const e = document.createElementNS(SVGNS, 'path');
+    e.setAttribute('d', out.edge);
+    e.setAttribute('fill', 'none');
+    e.setAttribute('stroke', '#16181C');
+    e.setAttribute('stroke-width', '0.11');
+    svg.append(e);
+    /* THE READOUT IS THE RESULT, so it is a lit window and not a caption. It
+       counts PEN DOWNS rather than lifts because a fill that is one stroke
+       reads as 1 and not as 0 — and the edges are counted, hairline or not,
+       because a thin line is still a line the pen went down to draw. */
+    slot.lcd.textContent = out.downs === 1 ? '1 PEN DOWN' : `${out.downs} PEN DOWNS`;
+    slot.lcd.classList.toggle('dim', !join);
+  }
+
+  function paint() {
+    cells.forEach(c => {
+      render(c.ball, ballDraw, c.c.join);
+      render(c.flat, shapeDraw, c.c.join);
     });
   }
   requestAnimationFrame(paint);
@@ -2790,7 +3239,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
      unrelated caller of it. */
   const swatch = el('span', 'mat-row');
   let matInk = '#FF6A00';
-  const cap = el('button', 'pencap pick on');
+  const cap = el('button', 'pencap on');
   cap.type = 'button';
   cap.style.setProperty('--ink', matInk);
   cap.title = 'Open the picker';

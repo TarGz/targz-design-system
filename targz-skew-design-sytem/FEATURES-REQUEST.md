@@ -27,8 +27,33 @@ future adoption pays for them again.
 
 ## Open
 
+### `[design system]` The machine half of 08 — built; one decision left
+The serpentine is in as the second half of section 08: parallel as a control, serpentine as the
+result, on the same ball and the same holed blob, with a pen-down count under each. Read the two
+numbers off the panel — they move whenever the pitch or the nib does.
+
+**Do not re-open the one that looks obvious.** A wall-walking join — route the pen along the
+outline where the straight cut runs out, then carry on round the perimeter — takes the flat shape
+to a single stroke. It was built, it works, and it was removed, because every trick of that kind
+buys a lift with a *line*: the wall inks twice where the pen retraces it, and the closing join is
+a stroke straight across the middle of the shape. **The count is not the drawing.** A serpentine
+is a fill that does not lift when it does not have to, not a fill that never lifts.
+
+**What is genuinely open:** chaining is per pass and never across passes, so the pen lifts at
+least three times on the ball before anything else. Joining across thresholds means drawing a
+connector in a region that is not the one it belongs to — the same objection as above, one step
+smaller. **Decide whether it is the same mistake or an acceptable one**, because the answer also
+settles how far any future optimiser is allowed to go.
+
+**Not gaps, and worth not re-opening either:** nothing on the machine half is dithered and the
+thresholds therefore band — that is the demonstration of why the hand half dithers. And the edge
+is a hairline rather than a nib width, because an outline at pen weight is the heaviest mark on
+the sheet and a specimen must not have its own annotation shouting over the thing being judged.
+
+---
+
 ### `[design system]` The three hands — built; three decisions left
-Section 08 (v1.10.0) draws **hand hatching**, **hand cross hatching** and **hand random
+The hand half of section 08 (v1.10.0) draws **hand hatching**, **hand cross hatching** and **hand random
 lines**, each on two specimens: the ball (tone) and a flat blob (boundary). All of it is
 geometry in millimetres at 1:1 and goes straight out to SVG. What is left is not build work —
 it is three decisions, and each one is cheap to make and expensive to make twice.

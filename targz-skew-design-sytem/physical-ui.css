@@ -1968,7 +1968,7 @@ input:focus-visible{ outline-offset:3px; }
      field of hatch, which shows the spacing and hides the thing hatching is
      actually for. A ball needs room to be a ball, and its shadow needs room
      to leave it. */
-  height:248px; border-radius:4px; position:relative; overflow:hidden;
+  height:196px; border-radius:4px; position:relative; overflow:hidden;
   background:var(--paper);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 8px rgba(0,0,0,.4);
 }
@@ -1977,6 +1977,11 @@ input:focus-visible{ outline-offset:3px; }
    that plots. A 0.20 nib is a sub-pixel line and looks like one — that is not
    a bug to tune away, it is what 0.20 is, and the density is still exact. */
 .hb-field svg{ display:block; width:100%; height:100%; }
+/* TWO SHEETS ON ONE DISPLAY. Not two displays: they are one answer read two
+   ways, and a gap wide enough to be a border would make them two exhibits. */
+.hb-pair{ display:flex; gap:7px; }
+.hb-pair .hb-field{ flex:1 1 0; min-width:0; }
+.hb-legend{ color:#3f7a5c; opacity:.75; }
 /* THE FLOOD STILL NEEDS NO CODE. Strokes are drawn at the nib width, spacing
    apart; take spacing under the nib and they overlap into solid ink on their
    own. Below the nib there is no hatch, there is ink. */
@@ -2013,6 +2018,13 @@ input:focus-visible{ outline-offset:3px; }
 
 /* the three knobs share one row */
 .hb-knobs{ justify-content:space-between; gap:4px; padding:2px 0 4px; }
+/* ONE KNOB, ONE POSITION, AND ONLY BECAUSE IT IS DOCUMENTED. Spacing and angle
+   reach every fill on the dial except one: hand random has no register to
+   rotate, and 08 says so in as many words — "a fill with no readable direction
+   is the whole definition of it". So Angle goes quiet there rather than turning
+   and changing nothing, which is the worse of the two. Everywhere else both
+   knobs are live, including on the hands. */
+.hb-knobs .kwrap.inert{ opacity:.34; pointer-events:none; }
 .hb-knobs .kwrap{ flex:1 1 0; min-width:0; align-items:center; gap:5px; }
 .hb-knobs .klab{ justify-content:center; font-size:8px; letter-spacing:.12em; }
 .hb-knobs .kval{ min-width:0; width:100%; text-align:center; }
@@ -2223,6 +2235,43 @@ input:focus-visible{ outline-offset:3px; }
 .demo-etch{ font-family:var(--font); font-size:15px; font-weight:700; letter-spacing:.18em; color:#5d626b;
   text-shadow:0 1px 0 rgba(255,255,255,.12), 0 -1px 0 rgba(0,0,0,.7); }
 
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE API BLOCK — the interface, not the argument
+
+   This section used to open with eleven paragraphs of reasoning, which is the
+   right thing to have and the wrong thing to put in front of someone who wants
+   to USE it. The reasoning stayed where it belongs — in the code comments, next
+   to the line it explains, where it cannot go stale without the line going with
+   it — and what is on the page is the smallest thing you can act on: the one
+   contract, the entry points, and a door to the full reference.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.api{
+  max-width:76ch; margin:0 0 4px; padding:16px 18px 14px;
+  border:1px solid #212327; border-radius:12px;
+  background:linear-gradient(180deg,#141518,#0f1012);
+}
+.api-rule{ font-size:13px; line-height:1.65; color:#8b909a; margin:0 0 14px; }
+.api-rule b{ color:#c6cad1; font-weight:600; }
+.api dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:5px 16px; align-items:baseline; }
+.api dt{
+  font-family:var(--font); font-size:11px; letter-spacing:.02em; color:#7CFFB0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.api dd{ margin:0; font-size:12.5px; line-height:1.5; color:#7d828b; }
+.api code{ font-family:var(--font); font-size:11px; color:#c6cad1; }
+.api-more{
+  display:inline-block; margin-top:15px; padding:6px 11px; border-radius:6px;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:#8b919b; text-decoration:none;
+  background:linear-gradient(180deg,var(--plate-hi),var(--plate) 52%,#1a1c20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.7),
+             0 2px 0 #0e0f11, 0 3px 5px rgba(0,0,0,.6);
+}
+.api-more:hover{ color:#e2e5ea; }
+.api-more:active{ transform:translateY(2px);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.8), 0 1px 2px rgba(0,0,0,.6); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    08 · FILLING — the specimen rig

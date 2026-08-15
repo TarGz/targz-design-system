@@ -1,6 +1,20 @@
-export const version = '1.11.0';
+export const version = '1.12.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.12.0',
+    date: '2026-08-15',
+    changes: [
+      'FIX — SERPENTINE WAS NOT SERPENTINE, and it joined in the wrong place twice over. It chained the runs WITHIN one scanline and never joined one scanline to the next: on the ball every scanline has exactly one run, so there was nothing to chain and the result was PARALLEL under another name',
+      'FIX — and on the blob, a scanline crossing the hole has two runs, so joining them ruled a line straight through the hole. That is why the shape came out solid. A serpentine is a boustrophedon: the join belongs at the TURNAROUND, end of one pass to start of the next, and a gap inside a pass is a hole, which is exactly where a pen DOES lift. Between lines, connect; within a line, lift. Measured after: 7 movetos for 73 linetos where parallel needs one per line, and zero ink inside the hole on all three machine fills',
+      'THE DIAL CARRIES BOTH WORLDS — three machine fills (Parallel, Crossed, Serpentine) and section 08\'s three hands (Hand, Hand cross, Hand random), borrowed rather than reimplemented: a second implementation of a hand would be two hands that drift apart, which is the same argument KIT makes about the ball. One definition, two callers. The bay\'s old machine-made Hand hatched is retired — it broke the register, and noisy is not hand-made',
+      'TWO SPECIMENS SIDE BY SIDE, ball left and blob right, and neither is optional. The ball answers what TONE a fill makes; the blob answers what it does when it hits an EDGE — where strokes stop, and what happens in a notch too narrow to fit one in. A fill can pass one and fail the other, so one sheet would let a hand look finished when it cannot turn a corner',
+      'And both subjects come from the SHARED KIT now. This section used to light its own sphere, which is the one thing the kit exists to prevent: light the ball differently in 07 than in 08 and every comparison between a machine fill and a hand one is comparing two balls instead of two fills',
+      'ALL THREE KNOBS REACH THE HANDS. They did not at first, on the reasoning that a hand\'s pitch and angle ARE the hand — wrong in an instructive way: 08 writes every hand against a BASE, each pitch a multiple of it and each pass angle an offset from it, so the character lives in the relationships and the base is only where they are anchored. Moving the anchor rotates the whole fill or changes its pitch without changing what it looks like, which is the difference between a parameter and a different drawing',
+      'Spacing is passed only when it means something: the hands default their pitch FROM THE NIB, so a caller that picks up a bigger pen and says nothing gets the same drawing with a bigger pen rather than a darker one. Handing them a number unconditionally would take that over on every render',
+      'One documented dead end survives: hand random has no register to rotate — 08 says a fill with no readable direction is the whole definition of it — so Angle goes quiet on that one position rather than turning and changing nothing. Verified by measurement: spacing moves all three hands, angle moves two of the three and leaves random byte-identical',
+    ],
+  },
   {
     version: '1.11.0',
     date: '2026-08-15',

@@ -1,6 +1,29 @@
-export const version = '1.5.0';
+export const version = '1.6.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.6.0',
+    date: '2026-08-15',
+    changes: [
+      'The bright skin is removed — 336 lines of [data-skin="light"] overrides, the DARK / LIGHT switch and its script. Every effect in this document is light modelling against a dark body: a cap is lighter than its case, a well is darker, and a recess is made by taking light away. That cannot be inverted, only rewritten, so the pale build was a second set of hand-tuned numbers drifting from the first every time either was touched. One material, one set of numbers',
+      'The exploration keeps its external stylesheet: physical-ui.css stays a file, dark only',
+      'The piano wells (page switcher and editor tabs) get the floor the bay was given back at 1.4 and never shared: #17191d → #1e2126 instead of near-black. A key\'s skirt is #0d0e10, so on a #0a0b0d floor the one part that proves a cap has a body was invisible and the key read as a grey rectangle printed on black. Inset shadow softened to .8 to match',
+      'The language has a name: SKEW. It is the word the hand types when it means skeuomorphic, and it is also the trick itself — a flat plane tilted into depth, lit from one lamp above left, nothing actually raised. In the page as targz-skew-design-system',
+      'The MOMENTARY VS LATCHING tile was two spans wearing the key classes, under a caption promising that one springs back and the other holds: a sample that could not do the thing it was a sample of. They come from the same key factory as the nav bar now, and both work',
+      'Its glyphs were 24px in a 38px cap, leaving 7px of face — on the lit one the sun\'s rays ran into the walls and the orange stopped reading as a legend and became the button\'s colour. 18px now, the nav bar\'s 16-in-34 ratio at this size',
+      'The MILLED WELL material tile was demonstrating the fault it documents: the tile stage was #101114, darker than the well cut into it, so the sample was a lighter rectangle on a dark ground. The stage is case metal now, the well sample carries the real recipe, and the caption states the floor rule',
+    ],
+  },
+  {
+    version: '1.5.1',
+    date: '2026-08-15',
+    changes: [
+      'Tool palette: keys were 5px apart, which is not 5px of daylight — each raised cap lays a 3px hard skirt plus its blur underneath, and a pressed cap drops 2px further into the gap below it. Pan / Turn / Select were touching. Now 10px, in line with the keypad\'s 11px between stacked rows, and the palette padding goes 7 → 8px so the outer margin does not read as tighter than the inner one',
+      'TOOL caption sits 6px above the first key rather than 4px, so the label is not closer to the key than the keys are to each other',
+      'Editor tab strip had the same fault worse: 3px between tabs, each laying a 2px skirt, so Letters / Place / Size / Drop / Shade were one object with lines drawn on it. 7px now, and the strip padding 4 → 5px',
+      'The editor tab no longer travels. A 26px cap falling into a strip this tight puts its shadow on the neighbour, and there is no room for the fall to read as a fall — it still goes in (recess, chamfer, lamp), it just does not move',
+    ],
+  },
   {
     version: '1.5.0',
     date: '2026-08-15',

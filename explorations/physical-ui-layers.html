@@ -412,11 +412,11 @@ h2 span{ color:#3d4149; }
   transform:translateY(1px);
   box-shadow:
     inset 0 0 0 1px rgba(0,0,0,.68),
-    inset 0 2px 1px rgba(0,0,0,.79),
-    inset 0 3px 4px -1px rgba(0,0,0,.46),
-    inset 3px 0 3px -2px rgba(0,0,0,.53),
-    inset -3px 0 3px -2px rgba(0,0,0,.53),
-    inset 0 -3px 4px -2px rgba(0,0,0,.31),
+    inset 0 2.4px 1.2px rgba(0,0,0,.79),
+    inset 0 3.6px 4.8px -1.2px rgba(0,0,0,.46),
+    inset 3.6px 0 3.6px -2.4px rgba(0,0,0,.53),
+    inset -3.6px 0 3.6px -2.4px rgba(0,0,0,.53),
+    inset 0 -3.6px 4.8px -2.4px rgba(0,0,0,.31),
     inset 0 -1px 0 rgba(255,255,255,.14),
     0 1px 0 #101317,
     0 1px 1px rgba(0,0,0,.4);
@@ -439,14 +439,23 @@ h2 span{ color:#3d4149; }
 .sw.on,
 .sw.mixed{
   transform:translateY(1px);
+  /* geometry +20% — offsets and blur only. The alphas are untouched, and so
+     is the 1px ring: a hairline that follows the border has no size to scale. */
   box-shadow:
     inset 0 0 0 1px rgba(0,0,0,.73),
-    inset 0 2px 1px rgba(0,0,0,.86),
-    inset 0 3px 4px -1px rgba(0,0,0,.51),
-    inset 3px 0 3px -2px rgba(0,0,0,.57),
-    inset -3px 0 3px -2px rgba(0,0,0,.57),
-    inset 0 -3px 4px -2px rgba(0,0,0,.31),
+    inset 0 2.4px 1.2px rgba(0,0,0,.86),
+    inset 0 3.6px 4.8px -1.2px rgba(0,0,0,.51),
+    inset 3.6px 0 3.6px -2.4px rgba(0,0,0,.57),
+    inset -3.6px 0 3.6px -2.4px rgba(0,0,0,.57),
+    inset 0 -3.6px 4.8px -2.4px rgba(0,0,0,.31),
     inset 0 -1px 0 rgba(255,255,255,.15),
+    /* THE LIP OF THE HOLE. A cutout in a real panel is not a clean cut — the
+       edge is broken, and that tiny chamfer faces the light. So the rim above
+       the cap catches a hairline while the rim below it stays in shade, which
+       is the pair of lines that says "this opening has a thickness". Without
+       it the cap floats in a dark rectangle; with it, it is sunk into a
+       surface. One pixel, 6% white, and it is the last thing the recess was
+       missing. */
     0 1px 0 #101317,
     0 1px 1px rgba(0,0,0,.4);
 }
@@ -456,6 +465,49 @@ h2 span{ color:#3d4149; }
    piece of grey plastic in two positions, so it gets ONE fill — the raised
    cap's, inherited — and the recess is drawn entirely by the walls above.
    A knock-on worth having: tune .sw's background and every state follows. */
+/* ── THE CHAMFER, AS A RING WITH A DIRECTION ────────────────────────────
+   A 1px white line along the top was the right idea drawn the wrong way. The
+   broken edge of a cutout runs all the way round, and it is not equally lit
+   anywhere: it FLARES where it faces the lamp, fades as it turns away, and
+   goes to shadow on the far side. A box-shadow cannot say that — it is the
+   same value the whole way round — so it always reads as a drawn outline.
+
+   This is the gradient-border trick: a 1.6px ring made by padding a
+   pseudo-element and masking its own middle out, filled with a gradient
+   running from the light. Bright at 152° (top-left, where every other
+   highlight in this panel comes from), through nothing at the equator, into a
+   soft dark on the bottom-right where the lip turns away. Half a pixel of
+   blur, because an edge that has been broken is round, and a round edge has
+   no hard line on it anywhere.
+
+   Only on the pressed states: when the cap is up it fills its hole and there
+   is no lip to see. */
+.sw.on::after,
+.sw.mixed::after,
+.sw:active::after{
+  content:''; position:absolute; inset:-2px; border-radius:9px;
+  pointer-events:none; padding:1.6px;
+  /* CONCAVE, NOT CONVEX — and this is the whole difference between a hole and
+     a bump. I lit the ring bright at the top-left and dark at the bottom-right,
+     which is a DOME: the side facing the lamp is the top. A chamfer that dives
+     into a hole does the opposite. Its upper edge tilts down and away from the
+     light, so it is the part in SHADOW; its lower edge tilts up toward the
+     light and is the part that catches. Dark at the top, bright at the bottom.
+
+     That polarity also has to agree with the walls inside the cap, which were
+     already correct — dark across the top, lit lip along the bottom. With the
+     ring inverted the two were arguing, and a bevel that says "out" wrapped
+     around a recess that says "in" resolves as a raised button every time. */
+  background:linear-gradient(152deg,
+    rgba(0,0,0,.50)        0%,
+    rgba(0,0,0,.20)       24%,
+    rgba(255,255,255,0)   50%,
+    rgba(255,255,255,.30) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  filter:blur(.5px);
+}
 .sw.on{ color:var(--led); }
 .sw.mixed{ color:#eef1f5; }
 .sw.on:hover{ color:var(--led-hot); }
@@ -466,9 +518,14 @@ h2 span{ color:#3d4149; }
    angle — 10% at this depth. Too small to notice as a change, which is the
    point: one more thing agreeing with the others, so the state reads as an
    object that moved rather than as a colour swap. */
+/* …AND THE SHRINK IS ESSENTIALLY GONE: .9 × 1.1 lands on .99, so the pressed
+   legend is now the same size as the raised one to within a rounding error.
+   Kept as a literal .99 rather than deleted, because the rule is still the
+   place the depth-versus-legend-size relationship lives — if the cap ever goes
+   deeper than 1px, this is the number that has to follow it. */
 .sw.on svg,
 .sw.mixed svg,
-.sw:active svg{ transform:scale(.9); }
+.sw:active svg{ transform:scale(.99); }
 .sw.on svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
 /* white is a legend, not a lamp — it gets no bloom */
 .sw.mixed svg{ filter:none; }
@@ -485,6 +542,7 @@ h2 span{ color:#3d4149; }
     0 0 0 1px rgba(0,0,0,.55);
 }
 .jewel.all{ background:var(--all-grad); }
+/* the ALL row is the only jewel left in the dock */
 .row.off .jewel{ filter:grayscale(1) brightness(.42); box-shadow:inset 0 -1px 2px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
 
 /* ── the name: laser-etched infill on the faceplate ──────────────────────── */
@@ -557,7 +615,7 @@ h2 span{ color:#3d4149; }
     inset 0 3px 4px -1px rgba(0,0,0,.44),
     inset 2px 0 3px -2px rgba(0,0,0,.5),
     inset -2px 0 3px -2px rgba(0,0,0,.5),
-    inset 0 -1px 0 rgba(255,255,255,.12);
+    inset 0 -1px 0 rgba(255,255,255,.12),;
 }
 .chev.open svg{ transform:scale(.9); filter:drop-shadow(0 0 3px rgba(255,130,30,.65)); }
 
@@ -1744,9 +1802,9 @@ footer{ margin-top:80px; padding-top:22px; border-top:1px solid #1c1e22;
         <li><b>On/off stops being a colour comparison.</b> A lit lamp against a dead one
             is a brightness difference, readable without comparing to the row next door
             and readable if you cannot separate the two oranges.</li>
-        <li><b>Off-state honesty.</b> A hidden layer has a dead pipe and a grey jewel —
-            the row reads as unpowered from across the screen, where today it is a
-            0.3 opacity dim you have to look for.</li>
+        <li><b>Off-state honesty.</b> A hidden layer has a dead pipe and a raised
+            cap — the row reads as unpowered from across the screen, where today it
+            is a 0.3 opacity dim you have to look for.</li>
         <li><b>Destructive controls can be guarded materially</b> — recessed instead of
             raised, hazard stripes on hover — instead of relying on red alone.</li>
         <li><b>Momentary vs latching is finally sayable.</b> A key that springs back did
@@ -1997,10 +2055,14 @@ function build() {
     rw.append(swBtn(L.cells, `layer ${i}'s placement cells`, ICON.cells, null,
       () => { L.cells = !L.cells; build(); }));
 
-    const dot = el('span', 'jewel');
-    dot.style.setProperty('--lyr', L.ink);
+    // NO JEWEL ON A NUMBERED ROW. The light pipe down its leading edge is
+    // already this layer's colour, and it is the better carrier of the two —
+    // taller, edge-lit, visible in peripheral vision. The dot repeated it 6px
+    // away, which is the same fact twice and 15px of the row's width. The ALL
+    // row keeps its jewel: that one wears the whole palette, and nothing else
+    // in the dock says what all five colours are.
     const nm = el('span', 'name', L.name);
-    rw.append(dot, nm);
+    rw.append(nm);
     if (L.tone) rw.append(el('span', 'tone', 'TONE'));
     // NO SUMMARY ON A NUMBERED ROW — the shipping row spends that width on the
     // two actions instead, and `470 · 2–103.5mm` is in the tooltip. Putting it

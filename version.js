@@ -1,6 +1,16 @@
-export const version = '1.4.1';
+export const version = '1.4.2';
 
 export const CHANGELOG = [
+  {
+    version: '1.4.2',
+    date: '2026-08-15',
+    changes: [
+      'Physical UI exploration: the chamfer round a pressed switch is now a ring with a direction, not a hairline. A cutout edge is broken all the way round and is not equally lit anywhere — it flares where it faces the lamp and dies as it turns away — and a box-shadow, being the same value the whole way round, always reads as a drawn outline instead',
+      'Corrected its polarity, which was the actual bug: the ring was bright top-left and dark bottom-right, which is a DOME. A chamfer diving into a hole is the opposite — its upper edge tilts away from the light and sits in shadow, its lower edge tilts toward it and catches. It was also arguing with the walls inside the cap, which were already right, and a bevel saying "out" wrapped around a recess saying "in" resolves as a raised button every time',
+      'Pressed shadow +20% in geometry (offsets and blur, alphas untouched), and the pressed legend is back to full size',
+      'Removed the colour dot from numbered layer rows — the light pipe on the leading edge is the same fact, said better and 6px away. The ALL row keeps its jewel, which wears the whole palette',
+    ],
+  },
   {
     version: '1.4.1',
     date: '2026-08-15',

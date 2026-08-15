@@ -1,0 +1,2857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physical UI — Layer panel · targz exploration</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHYSICAL UI — an exploration, not the design system.
+
+   This file answers one question: if the targz visual language were rebuilt
+   as machined hardware — anodised chassis, backlit keys, jewel LEDs, engraved
+   plates — what would the LAYER PANEL of Portrait-Typo look like?
+
+   Nothing here is adopted. index.html is untouched. The layer panel's anatomy
+   (rows, switches, colour bar, TONE badge, duplicate/delete, the chevron and
+   the stroke strip it opens, the counted Clear-all) is the REAL one, lifted
+   from Portrait-Typo/ui.js — so the comparison is like for like and this is
+   a re-skin of a shipping component rather than an invented one.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── the material palette ─────────────────────────────────────────────── */
+  --room:        #0b0b0d;   /* the desk it sits on                          */
+  --case:        #191a1d;   /* anodised aluminium chassis                    */
+  --case-lo:     #101113;   /* the shaded half of every bevel                */
+  --case-hi:     #2e3137;   /* the lit half                                  */
+  --bay:         #0e0f11;   /* the recessed well the rows sit in             */
+  --plate:       #232529;   /* a raised key / module face                    */
+  --plate-hi:    #34373d;
+  --groove:      #08090a;   /* milled channel                                */
+  --rim:         rgba(255,255,255,.09);  /* the 1px lit top edge             */
+  --rim-lo:      rgba(0,0,0,.75);        /* the 1px dark bottom edge         */
+
+  --txt:         #d3d6dc;   /* laser-etched white infill                     */
+  --txt-dim:     #7d828c;
+  --txt-etch:    #0a0b0c;   /* engraved-into-metal text                      */
+
+  --led:         #FF6A00;   /* the accent is a LAMP here, not a fill         */
+  --led-hot:     #FFB273;
+  --led-red:     #FF2D2D;
+
+  --font: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+
+  /* Grain. One texture, reused everywhere — real metal is never flat, and a
+     gradient with no grain reads as plastic within about two seconds. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{
+  background:
+    radial-gradient(120% 90% at 50% -10%, #1c1d21 0%, var(--room) 62%),
+    var(--room);
+  color:var(--txt);
+  font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+body::after{  /* room grain over everything, very light */
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:99;
+  background-image:var(--grain); opacity:.035; mix-blend-mode:overlay;
+}
+
+/* ── page furniture ──────────────────────────────────────────────────────── */
+.wrap{ max-width:1160px; margin:0 auto; padding:56px 32px 120px; }
+
+.masthead{ margin-bottom:14px; }
+.kicker{
+  font-family:var(--font); font-size:10px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--led); margin:0 0 14px;
+}
+h1{
+  font-size:clamp(30px,5vw,52px); line-height:1.02; margin:0 0 16px;
+  font-weight:700; letter-spacing:-.02em; color:#f2f4f7;
+}
+.lede{ font-size:15px; line-height:1.65; color:#9ba0aa; max-width:62ch; margin:0 0 8px; }
+.lede b{ color:#d3d6dc; font-weight:600; }
+
+.warn{
+  display:flex; gap:12px; align-items:flex-start;
+  margin:28px 0 0; padding:14px 16px;
+  border:1px solid rgba(255,106,0,.28); border-radius:10px;
+  background:linear-gradient(180deg, rgba(255,106,0,.10), rgba(255,106,0,.04));
+  font-size:13px; line-height:1.6; color:#c8bdb2; max-width:76ch;
+}
+.warn svg{ flex:0 0 16px; width:16px; height:16px; margin-top:2px; stroke:var(--led); fill:none; stroke-width:1.8; }
+
+h2{
+  font-size:12px; font-family:var(--font); letter-spacing:.18em; text-transform:uppercase;
+  color:#6d727c; font-weight:600; margin:78px 0 6px;
+  padding-bottom:10px; border-bottom:1px solid #212327;
+}
+h2 span{ color:#3d4149; }
+.sub{ font-size:14px; line-height:1.65; color:#8b909a; max-width:70ch; margin:16px 0 28px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE STAGE — a lit desk. The light comes from above-left and every bevel,
+   glow and cast shadow in the panel agrees with it. One light source is the
+   whole difference between "3D" and "a pile of gradients".
+   ═══════════════════════════════════════════════════════════════════════════ */
+.stage{
+  position:relative; margin-top:34px;
+  padding:64px 40px; border-radius:18px;
+  background:
+    radial-gradient(70% 60% at 28% 0%, rgba(255,255,255,.055), transparent 60%),
+    linear-gradient(180deg,#141518,#0c0d0f);
+  border:1px solid #1e2024;
+  display:flex; gap:56px; align-items:flex-start; justify-content:center; flex-wrap:wrap;
+}
+.stage-note{
+  position:absolute; left:18px; top:14px;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:#3f434a;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE CHASSIS
+   Five shadows do the whole job:
+     1  a wide soft cast shadow on the desk        (it is above the surface)
+     2  a tight contact shadow                     (it TOUCHES the surface)
+     3  inset 1px light on the top edge            (the lit chamfer)
+     4  inset 1px dark on the bottom edge          (the shaded chamfer)
+     5  a broad inset dark from below              (the body has thickness)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dock{
+  width:318px; flex:0 0 318px; position:relative;
+  border-radius:14px;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    0 42px 60px -24px rgba(0,0,0,.9),
+    0 8px 14px -6px rgba(0,0,0,.75),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9),
+    inset 0 -18px 26px -20px rgba(0,0,0,.8);
+  padding:3px;
+  user-select:none;
+}
+/* Brushed anodising: fine vertical striation + grain. Two cheap layers, and
+   without them the chassis is a plastic toy. */
+.dock::before{
+  content:''; position:absolute; inset:0; border-radius:14px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.020) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto, 140px 140px;
+  opacity:.5; mix-blend-mode:overlay;
+}
+/* The specular sweep — one soft diagonal band. Placed high-left, matching the
+   room light. Never centred: a centred highlight reads as a sticker. */
+.dock::after{
+  content:''; position:absolute; left:0; right:0; top:0; height:52%;
+  border-radius:14px 14px 40% 40%/14px 14px 100% 100%; pointer-events:none;
+  background:linear-gradient(158deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.016) 42%, transparent 70%);
+}
+
+/* Corner screws. Four, real, at the same inset — the cheapest single detail
+   that says "this is an object". Each is a countersunk pit + a domed head. */
+.screw{
+  position:absolute; width:9px; height:9px; border-radius:50%; z-index:3;
+  background:
+    radial-gradient(circle at 34% 28%, #6a6f78 0%, #3c4046 42%, #202225 100%);
+  box-shadow:
+    inset 0 -1px 1px rgba(0,0,0,.85),
+    inset 0 1px 1px rgba(255,255,255,.35),
+    0 1px 2px rgba(0,0,0,.85);
+}
+.screw::after{  /* the slot, oriented differently on each — nobody torques four screws to the same angle */
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(var(--a,20deg), transparent 44%, rgba(0,0,0,.85) 44%, rgba(0,0,0,.85) 56%, transparent 56%);
+  border-radius:50%;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14);
+}
+.screw.tl{ left:7px;  top:7px;    --a:24deg;  }
+.screw.tr{ right:7px; top:7px;    --a:-58deg; }
+.screw.bl{ left:7px;  bottom:7px; --a:82deg;  }
+.screw.br{ right:7px; bottom:7px; --a:-12deg; }
+
+/* ── the header: an engraved faceplate ───────────────────────────────────── */
+.head{
+  display:flex; align-items:center; gap:9px;
+  padding:14px 13px 12px 17px; position:relative; z-index:2;
+  border-bottom:1px solid rgba(0,0,0,.7);
+  box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+.head .t{
+  flex:1; font-family:var(--font); font-size:10.5px; font-weight:700;
+  letter-spacing:.24em; text-transform:uppercase;
+  /* ENGRAVED, not printed: the glyph is darker than the metal and carries a
+     1px light line UNDER it, which is the lit far wall of the cut. */
+  color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.10), 0 -1px 0 rgba(0,0,0,.6);
+}
+/* The count is a LAMP — a 7-segment window, dark glass with the digit lit
+   behind it. The panel's numbers stop being text and become a readout. */
+.readout{
+  min-width:30px; height:22px; padding:0 7px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:4px;
+  background:linear-gradient(180deg,#0a0c0b,#111413);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.95),
+    inset 0 -1px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.06);
+  font-family:var(--font); font-size:13px; font-weight:700;
+  color:#7CFFB0; text-shadow:0 0 7px rgba(124,255,176,.75), 0 0 18px rgba(124,255,176,.35);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ── a KEY: the physical push button primitive ───────────────────────────── */
+/* Everything clickable in this panel is one of these at some size. Raised
+   face, chamfered rim, cast shadow; pressed = travel down + the shadow
+   collapses + the top highlight moves to the bottom. That last part is what
+   sells the travel — a button that only moves 1px still looks flat. */
+.key{
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; position:relative;
+  border-radius:7px; color:#9aa0aa;
+  background:linear-gradient(180deg,var(--plate-hi),var(--plate) 52%,#1a1c20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 2px 0 #0e0f11,
+    0 3px 5px rgba(0,0,0,.65);
+  transition:box-shadow .09s ease, transform .09s ease, color .12s;
+}
+.key:hover{ color:#e2e5ea; background:linear-gradient(180deg,#3b3f46,#2a2d32 52%,#1e2024); }
+.key:active,.key.pressed{
+  transform:translateY(2px);
+  background:linear-gradient(180deg,#1a1c20,#232529);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.8),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    0 0 0 #0e0f11,
+    0 1px 2px rgba(0,0,0,.6);
+}
+.key:disabled{ opacity:.32; cursor:not-allowed; transform:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 1px 0 #0e0f11; }
+.key:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+.key svg{ stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+
+.add{ width:26px; height:26px; border-radius:8px; }
+.add svg{ width:14px; height:14px; stroke-width:2.2; }
+.add:hover{ color:var(--led-hot); }
+
+/* ── the BAY: the milled well the rows drop into ─────────────────────────── */
+.bay{
+  position:relative; z-index:2;
+  margin:11px 9px; padding:8px 7px;
+  border-radius:9px;
+  background:linear-gradient(180deg,#0b0c0e,#121316);
+  box-shadow:
+    inset 0 3px 7px rgba(0,0,0,.9),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.055);
+  display:flex; flex-direction:column; gap:5px;
+}
+
+/* ── a ROW: a module card seated in the bay ──────────────────────────────── */
+.item{ display:flex; flex-direction:column; }
+.row{
+  display:flex; align-items:center; gap:5px;
+  height:40px; padding:0 8px 0 0; width:100%;
+  border:0; border-radius:7px; cursor:pointer; text-align:left;
+  font-family:inherit; position:relative; overflow:hidden;
+  background:linear-gradient(180deg,#282b30,#1d1f23 60%,#191b1e);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 1px 2px rgba(0,0,0,.6);
+  transition:box-shadow .12s, background .12s, transform .09s;
+}
+.row::after{ /* faceplate grain, per module */
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:var(--grain); background-size:140px; opacity:.05; mix-blend-mode:overlay;
+}
+.row:hover{ background:linear-gradient(180deg,#31353b,#232629 60%,#1d1f22); }
+.row:active{ transform:translateY(1px); }
+.row:focus-visible{ outline:2px solid var(--led); outline-offset:-2px; }
+
+/* THE LAYER'S COLOUR IS A LIGHT PIPE, not a painted bar. An edge-lit acrylic
+   strip: a solid core, a bloom on the metal beside it, and a hot white line
+   up its middle where the LED is brightest. This is the single biggest win of
+   the physical language — the list stops being a legend and starts glowing in
+   the layer's own ink. */
+.pipe{
+  flex:0 0 4px; align-self:stretch; margin:6px 7px 6px 4px;
+  border-radius:3px; position:relative;
+  background:linear-gradient(180deg, var(--lyr), color-mix(in srgb, var(--lyr) 72%, #000));
+  box-shadow:
+    0 0 5px color-mix(in srgb, var(--lyr) 85%, transparent),
+    0 0 14px color-mix(in srgb, var(--lyr) 45%, transparent),
+    inset 0 0 3px rgba(255,255,255,.55);
+}
+.pipe::after{
+  content:''; position:absolute; left:1px; right:1px; top:14%; bottom:14%;
+  border-radius:2px; background:rgba(255,255,255,.55); filter:blur(1px);
+}
+.row.off .pipe{ background:#2a2c30; box-shadow:inset 0 1px 1px rgba(0,0,0,.8); }
+.row.off .pipe::after{ display:none; }
+
+/* ── a SWITCH: backlit key, 24px. Off is a dead lamp behind smoked plastic;
+   on is the lamp lit, and the light SPILLS onto the surrounding metal. ───── */
+/* ── THE SWITCH IS AN OBJECT WITH A SKIRT, AND IT TRAVELS ────────────────
+   The cap had light on it but no BODY: an inset chamfer and nothing outside,
+   so it was a painted square rather than a thing standing on a panel. Three
+   additions fix that, and they are the same three that make the big keys work.
+
+     A SKIRT      0 2px 0 of near-black — the wall of the cap you can see
+                  because it is raised off the face
+     A CAST       a soft shadow under that wall, on the panel
+     A DOMED FACE a radial sheen from the top-left, so the face is curved
+                  rather than a flat ramp
+
+   And then it MOVES. Off is up; on is driven 2px down and the skirt collapses
+   to nothing, so the cap ends where its own wall used to be. Mixed sits at
+   1px with half a skirt, which is the only honest place for "some". Three
+   physical positions, readable from across the panel and readable in a
+   greyscale screenshot — the state is in the geometry, not in a colour.
+
+   ON keeps the CAP'S OWN COLOUR with the gradient inverted (dark at the top
+   where the bezel now shades it, light at the bottom where the well bounces),
+   and lights the GLYPH. Same recipe as the big keys' :active, at 24px. */
+.sw{
+  width:24px; height:24px; flex:0 0 24px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; position:relative;
+  color:#a3aab4;                             /* a printed legend, not a dimmed one */
+  background:
+    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.11), transparent 62%),
+    linear-gradient(180deg,#343941 0%,#282c33 38%,#1e2226 68%,#171a1e 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 -2px 3px rgba(0,0,0,.6),
+    inset 0 0 0 1px rgba(0,0,0,.5),
+    0 2px 0 #0f1114,
+    0 3px 5px rgba(0,0,0,.65),
+    0 0 0 1px rgba(0,0,0,.4);
+  transition:color .12s, box-shadow .1s, background .12s, transform .1s;
+}
+.sw::before{
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:7px;
+  background-image:var(--grain); background-size:90px; opacity:.09; mix-blend-mode:overlay;
+}
+.sw svg{ position:relative; width:14px; height:14px; stroke:currentColor; fill:none;
+         stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.sw:hover{ color:#e3e7ec;
+  background:
+    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.14), transparent 62%),
+    linear-gradient(180deg,#3c424b 0%,#2f343b 38%,#23272c 68%,#1b1e22 100%); }
+.sw:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+/* pressed by a finger: the cap drops onto its own skirt */
+.sw:active{
+  transform:translateY(2px);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.85),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    inset 0 0 0 1px rgba(0,0,0,.5),
+    0 0 0 #0f1114,
+    0 1px 2px rgba(0,0,0,.5),
+    0 0 0 1px rgba(0,0,0,.4);
+}
+/* held down by the mechanism: the same position, and the legend lit */
+.sw.on{
+  color:var(--led);
+  transform:translateY(2px);
+  background:
+    radial-gradient(120% 95% at 34% 88%, rgba(255,255,255,.07), transparent 60%),
+    linear-gradient(180deg,#15171a 0%,#1b1e22 34%,#232830 62%,#2e333b 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.88),
+    inset 0 -1px 0 rgba(255,255,255,.10),
+    inset 0 0 0 1px rgba(0,0,0,.5),
+    0 0 0 #0f1114,
+    0 1px 2px rgba(0,0,0,.5),
+    0 0 0 1px rgba(0,0,0,.4);
+}
+.sw.on svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
+.sw.on:hover{ color:var(--led-hot);
+  background:
+    radial-gradient(120% 95% at 34% 88%, rgba(255,255,255,.09), transparent 60%),
+    linear-gradient(180deg,#181b1f 0%,#1f2328 34%,#282e36 62%,#343941 100%); }
+/* half-pressed: one pixel down, half a skirt, a dimmer legend, and the ring
+   that keeps the third state readable at 24px and in greyscale */
+.sw.mixed{
+  color:#C8681F;
+  transform:translateY(1px);
+  background:linear-gradient(180deg,#23272d 0%,#212529 50%,#23272d 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.6),
+    inset 0 0 0 1px rgba(255,106,0,.30),
+    0 1px 0 #0f1114,
+    0 2px 3px rgba(0,0,0,.5);
+}
+.sw.mixed svg{ filter:drop-shadow(0 0 2px rgba(255,130,30,.4)); }
+.sw.mixed:hover{ color:var(--led-hot); background:linear-gradient(180deg,#282d34 0%,#262a30 50%,#282d34 100%); }
+
+/* ── the jewel LED: the layer's colour as a lens ─────────────────────────── */
+.jewel{
+  width:11px; height:11px; flex:0 0 11px; border-radius:50%; position:relative;
+  background:
+    radial-gradient(circle at 34% 28%, #fff 0%, color-mix(in srgb,var(--lyr) 60%,#fff) 16%, var(--lyr) 52%, color-mix(in srgb,var(--lyr) 55%,#000) 100%);
+  box-shadow:
+    0 0 6px color-mix(in srgb,var(--lyr) 75%,transparent),
+    0 0 15px color-mix(in srgb,var(--lyr) 40%,transparent),
+    inset 0 -1px 2px rgba(0,0,0,.55),
+    0 0 0 1px rgba(0,0,0,.55);
+}
+.jewel.all{ background:var(--all-grad); }
+.row.off .jewel{ filter:grayscale(1) brightness(.42); box-shadow:inset 0 -1px 2px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
+
+/* ── the name: laser-etched infill on the faceplate ──────────────────────── */
+.name{
+  flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--font); font-size:12px; font-weight:700; letter-spacing:.02em;
+  color:#dfe2e7; text-shadow:0 1px 0 rgba(0,0,0,.85);
+}
+.sum{
+  flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.04em; color:#61666f;
+}
+.row.off .name{ color:#6a6f77; }
+
+/* TONE — an etched brass plate. A different METAL is how hardware says "a
+   different kind of thing"; a second colour would have fought the light pipe. */
+.tone{
+  flex:0 0 auto; font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.09em;
+  padding:2px 5px; border-radius:3px; color:#2a1c05;
+  background:linear-gradient(180deg,#E8B45C,#B8862F);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -1px 0 rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.6);
+  text-shadow:0 1px 0 rgba(255,255,255,.28);
+}
+
+/* micro keys — duplicate / delete. Recessed, not raised: they are destructive
+   or duplicative and should not invite the thumb the way the switches do. */
+.micro{
+  width:22px; height:22px; flex:0 0 22px; border-radius:5px;
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; color:#575c65;
+  background:linear-gradient(180deg,#151719,#1e2024);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.06);
+  transition:color .12s, box-shadow .12s;
+}
+.micro svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.micro:hover{ color:#d7dae0; box-shadow:inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.09); }
+.micro.del:hover{ color:#FF6B6B; box-shadow:inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 1px rgba(255,45,45,.35), 0 0 8px rgba(255,45,45,.2); }
+.micro:disabled{ opacity:.3; cursor:not-allowed; }
+.micro:focus-visible{ outline:2px solid var(--led); outline-offset:1px; }
+
+/* the milled channel between the row's actions and its chevron */
+.sep{ width:1px; height:18px; flex:0 0 1px; margin:0 3px;
+      background:#0a0b0c; box-shadow:1px 0 0 rgba(255,255,255,.07); }
+
+/* the chevron is a knurled thumbwheel edge — grip texture, so it reads as the
+   thing you flick rather than a thing you press */
+/* Knurled — but the teeth stay UNDER the glyph. At 20px a 3px knurl and an
+   11px chevron are the same spatial frequency, and the eye loses the chevron
+   in the texture: the grip has to be a whisper (.05) and the glyph has to be
+   brighter than anything around it, with a dark halo holding it off the metal. */
+.chev{
+  width:20px; height:22px; flex:0 0 20px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; color:#aeb4be;
+  background-image:repeating-linear-gradient(72deg, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,.16) 1px 3px);
+  background-color:#202226;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.6), 0 1px 1px rgba(0,0,0,.5);
+  transition:transform .16s, color .12s, box-shadow .12s;
+}
+.chev svg{ width:11px; height:11px; stroke:currentColor; fill:none; stroke-width:2.4;
+  stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 1px 1px rgba(0,0,0,.9)); }
+.chev:hover{ color:#fff; }
+.chev:focus-visible{ outline:2px solid var(--led); outline-offset:1px; }
+.chev.open{
+  transform:rotate(90deg); color:var(--led); background-color:#1a1c20;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.07);
+}
+.chev.open svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.65)); }
+
+/* ── the ALL row is a BUS BAR — a different material, once ───────────────── */
+.row.all{
+  background:
+    repeating-linear-gradient(96deg, rgba(255,255,255,.045) 0 1px, transparent 1px 2px),
+    linear-gradient(180deg,#3a3e45,#2a2d33 55%,#232629);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -1px 0 rgba(0,0,0,.75),
+    0 2px 4px rgba(0,0,0,.6);
+}
+.row.all:hover{ background:
+    repeating-linear-gradient(96deg, rgba(255,255,255,.055) 0 1px, transparent 1px 2px),
+    linear-gradient(180deg,#43474f,#31353b 55%,#282b30); }
+/* ALL never truncates — it is three characters and the row's whole subject. */
+.row.all .name{ letter-spacing:.14em; flex:0 0 auto; }
+
+/* selected — the module is UNDER power: a rim of its own colour and a lit face */
+.row.sel{
+  background:linear-gradient(180deg,#34383f,#232629 60%,#1e2023);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 0 0 1px color-mix(in srgb, var(--lyr) 55%, transparent),
+    0 0 12px -2px color-mix(in srgb, var(--lyr) 45%, transparent),
+    0 2px 5px rgba(0,0,0,.65);
+}
+
+/* ── the stroke strip: a sub-bay, wired to its row by the light pipe's rail ── */
+.strokes{
+  display:flex; align-items:center; gap:4px;
+  margin:4px 8px 2px 22px; padding:6px 8px;
+  border-radius:6px;
+  border-left:2px solid var(--lyr);
+  background:linear-gradient(180deg,#0a0b0d,#131519);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.05),
+             -3px 0 8px -4px color-mix(in srgb, var(--lyr) 60%, transparent);
+}
+.strokes.allstrip{ margin-left:16px; border-left-color:#4a4e56; box-shadow:inset 0 2px 5px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.05); }
+.gap{ width:8px; flex:0 0 8px; height:16px;
+      background:linear-gradient(90deg,transparent,#000,transparent); opacity:.6; }
+
+/* ── the footer: a guarded action. Hazard stripes are the affordance — this
+   is the one control in the panel that destroys work. ────────────────────── */
+.foot{ padding:0 9px 12px; position:relative; z-index:2; }
+.wipe{
+  width:100%; height:32px; gap:8px; border-radius:8px;
+  font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.06em;
+  color:#8d929b;
+}
+.wipe svg{ width:13px; height:13px; }
+.wipe:hover:not(:disabled){
+  color:#FFD3D3;
+  background:linear-gradient(180deg,#5c1414,#3a0d0d 55%,#280909);
+  box-shadow:
+    inset 0 1px 0 rgba(255,140,140,.3),
+    inset 0 -1px 0 rgba(0,0,0,.8),
+    0 2px 0 #180505,
+    0 0 12px rgba(255,45,45,.35);
+}
+.wipe:hover:not(:disabled)::before{
+  content:''; position:absolute; inset:0; border-radius:8px; pointer-events:none; opacity:.14;
+  background:repeating-linear-gradient(45deg,#FF2D2D 0 6px, transparent 6px 12px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE FLAT PANEL — what ships today, for honest comparison. Static.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.flat{
+  width:290px; flex:0 0 290px;
+  background:hsla(0,0%,92%,.92);
+  border:1px solid hsla(0,0%,100%,.5); border-radius:16px;
+  box-shadow:0 4px 24px rgba(0,0,0,.4);
+  font-family:var(--font-ui); color:#2a2622; user-select:none;
+}
+.f-head{ display:flex; align-items:center; gap:8px; padding:9px 8px 5px 12px; }
+.f-head .t{ flex:1; font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#6b655d; }
+.f-head .n{ font-size:10px; font-weight:600; color:#96908a; }
+.f-add{ width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+        background:hsla(0,0%,100%,.7); border:1px solid hsla(0,0%,100%,.6); border-radius:7px; color:#6b655d; }
+.f-add svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+.f-rows{ display:flex; flex-direction:column; padding:0 6px 6px; gap:2px; }
+.f-row{ display:flex; align-items:center; gap:6px; height:34px; padding:0 8px 0 4px; border-radius:9px; }
+.f-row.sel{ background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.f-bar{ flex:0 0 3px; align-self:stretch; margin:7px 1px 7px 0; border-radius:2px; background:var(--lyr); }
+.f-eye{ width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+        border-radius:6px; color:#96908a; }
+.f-eye svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.f-eye.on{ color:#FF6A00; background:rgba(255,106,0,.10); }
+.f-dot{ width:9px; height:9px; border-radius:50%; background:var(--lyr); }
+.f-name{ font-size:12px; font-weight:600; color:#2a2622; }
+.f-sum{ font-size:11px; color:#96908a; flex:1; }
+.f-tone{ font-size:9px; font-weight:700; color:#FF6A00; background:rgba(255,106,0,.10); border-radius:4px; padding:1px 4px; }
+.f-sep{ width:1px; height:15px; background:#2a2622; opacity:.16; margin:0 3px 0 4px; }
+.f-chev{ width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:#8a8378; opacity:.5; }
+.f-chev svg{ width:11px; height:11px; stroke:currentColor; fill:none; stroke-width:2.2; }
+.f-foot{ padding:0 6px 6px; }
+.f-wipe{ display:flex; align-items:center; justify-content:center; gap:6px; width:100%; height:28px;
+         border-radius:8px; font-size:11px; color:#6b655d; }
+.f-wipe svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.8; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE BUTTON, PROPERLY
+   ───────────────────────────────────────────────────────────────────────────
+   A real key has a BODY under its cap. Three shadows make the body:
+     0 3px 0 #0e0f11      the skirt — the wall you see because it is raised
+     0 4px 7px rgba(...)  the shadow that wall throws on the panel
+     inset hairlines      the chamfer catching the room light
+
+   PRESSED = the skirt COLLAPSES to 0 and the cap moves down by exactly the
+   skirt's height. Nothing else. That is why it reads as travel rather than as
+   a rectangle that jumped — the cap ends up where the skirt used to be.
+
+   And there are TWO KINDS, which is the whole point of building it in metal:
+     MOMENTARY  springs back. It DID something. (Import, Export, Launch)
+     LATCHING   stays down, lamp on. It IS something. (Light, Cells, 3D)
+   Flat UI has to say this with colour and hope; hardware says it with the
+   position of the cap, and you can read it from an angle, out of focus, in
+   peripheral vision.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.key.skirt{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 3px 0 #0e0f11,
+    0 5px 8px rgba(0,0,0,.7);
+}
+.key.skirt:active,
+.key.skirt.is-down{
+  transform:translateY(3px);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.85),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    0 0 0 #0e0f11,
+    0 1px 2px rgba(0,0,0,.5);
+}
+/* LATCHED: down AND lit. The lamp is what separates "held by a finger" from
+   "held by the mechanism". */
+/* LATCHED: down AND lit. The lamp is what separates "held by a finger" from
+   "held by the mechanism" — but the cap being 3px lower than its neighbours is
+   already most of the message, so the lamp is a warm glyph and a little light
+   in the well, not a bloom on the chassis. */
+/* LATCHED IS EXACTLY WHAT :active ALREADY DRAWS, held. That state was right
+   all along and the latched one kept inventing a darker cap instead of reusing
+   it — which is why a lit key read as a hole rather than as a key that is in.
+
+   The recipe, and it is the whole of it: the cap keeps ITS OWN COLOUR, the
+   gradient INVERTS (dark at the top, light at the bottom — the bezel is now
+   shading the top of a face that has dropped below it, and the light that
+   reaches it bounces off the well), a hard black inset runs along the top
+   edge, and a hairline of light sits along the bottom. Nothing is tinted, so
+   the cap you press and the cap that is held down are recognisably the same
+   object in two positions.
+
+   Then the LEGEND lights: orange, with just enough glow to read as backlit
+   rather than as printed. That is where all the colour in this state lives. */
+.key.is-down{
+  color:var(--led);
+  background:linear-gradient(180deg,#1a1c20,#232529);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.85),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    0 0 0 #0e0f11,
+    0 1px 2px rgba(0,0,0,.5);
+}
+.key.is-down svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
+.key.is-down:hover{ color:var(--led-hot); background:linear-gradient(180deg,#1d1f24,#282b30); }
+/* MOMENTARY actuation: the lamp pulses once and dies. Added for 260ms on
+   click. A key that does something and shows nothing is a key you press twice. */
+@keyframes actuate{
+  0%   { box-shadow:inset 0 2px 5px rgba(0,0,0,.85), 0 0 0 1px rgba(255,106,0,.65), 0 0 16px rgba(255,106,0,.55); color:#FFD9BC; }
+  100% { box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 #0e0f11, 0 5px 8px rgba(0,0,0,.7); }
+}
+.key.flash{ animation:actuate .26s ease-out; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE NAV BAR — a control strip screwed to the desk
+   ═══════════════════════════════════════════════════════════════════════════ */
+.strip{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 13px; border-radius:15px; position:relative;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 30%,#161719 80%,#1d1e22 100%);
+  box-shadow:
+    0 30px 44px -20px rgba(0,0,0,.9),
+    0 6px 12px -5px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9);
+}
+.strip::before{
+  content:''; position:absolute; inset:0; border-radius:15px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+.strip .key{ width:34px; height:34px; border-radius:9px; }
+.strip .key svg{ width:16px; height:16px; }
+/* A MILLED CHANNEL, not a border. Two 1px lines: the cut, and its lit far wall. */
+.chan{
+  width:2px; height:26px; flex:0 0 2px; margin:0 5px; border-radius:1px;
+  background:#08090a; box-shadow:1px 0 0 rgba(255,255,255,.08), inset 0 0 2px rgba(0,0,0,.9);
+}
+/* the status readout — a lit window, not a label */
+.lcd{
+  height:26px; padding:0 11px; margin-left:3px; display:flex; align-items:center; gap:7px;
+  border-radius:5px;
+  background:linear-gradient(180deg,#080a09,#0f1211);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.95),
+    inset 0 -1px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.07);
+  font-family:var(--font); font-size:10.5px; letter-spacing:.09em;
+  color:#7CFFB0; text-shadow:0 0 6px rgba(124,255,176,.7);
+  font-variant-numeric:tabular-nums;
+}
+.lcd.dim{ color:#3f6d55; text-shadow:none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE PAGE SWITCHER — piano keys with a mechanical interlock
+   Pressing one POPS THE OTHERS OUT. That is what a segmented control has
+   always been pretending to be, and in metal it is literally true: three
+   latching keys on one bar, and the bar can only hold one down.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.piano{
+  display:inline-flex; gap:5px; padding:6px;
+  border-radius:12px; position:relative;
+  background:linear-gradient(180deg,#0a0b0d,#141619);
+  box-shadow:
+    inset 0 3px 8px rgba(0,0,0,.95),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.07);
+}
+.pkey{
+  height:36px; padding:0 22px; min-width:78px;
+  display:flex; align-items:center; justify-content:center;
+  border:0; border-radius:8px; cursor:pointer;
+  font-family:var(--font); font-size:11.5px; font-weight:700; letter-spacing:.12em;
+  color:#8d929b;
+  background:linear-gradient(180deg,#34373d,#232529 55%,#1b1d20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 4px 0 #0d0e10,
+    0 6px 10px rgba(0,0,0,.7);
+  transition:transform .1s cubic-bezier(.3,1.4,.5,1), box-shadow .1s, color .12s, background .12s;
+}
+.pkey:hover{ color:#d6dae0; }
+.pkey:active{ transform:translateY(4px); }
+.pkey:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+/* A piano key that is DOWN is already saying so with 4px of travel, and it
+   carries a lamp bar under the engraving. That is two signals; a halo round
+   the cap would be a third saying the same thing. */
+.pkey.is-down{
+  transform:translateY(4px);
+  color:var(--led);
+  background:linear-gradient(180deg,#1b1d20,#2a2d32 60%,#34373d);
+  box-shadow:
+    inset 0 3px 6px rgba(0,0,0,.85),
+    inset 0 -1px 0 rgba(255,255,255,.09);
+  text-shadow:0 0 6px rgba(255,130,30,.55);
+}
+/* the lamp bar under the engraved label — the key is lit from inside */
+.pkey.is-down::after{
+  content:''; position:absolute; bottom:7px; left:22px; right:22px; height:2px;
+  border-radius:1px; background:var(--led);
+  box-shadow:0 0 5px rgba(255,106,0,.6);
+}
+.pkey{ position:relative; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LAUNCHPAD — one rack module per project
+   ═══════════════════════════════════════════════════════════════════════════ */
+.console{
+  border-radius:16px; padding:18px;
+  background:linear-gradient(176deg,#1d1f23,#141517 60%,#17181b);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.85),
+    0 26px 44px -22px rgba(0,0,0,.9);
+  position:relative;
+}
+.console::before{
+  content:''; position:absolute; inset:0; border-radius:16px; pointer-events:none;
+  background-image:var(--grain); background-size:140px; opacity:.05; mix-blend-mode:overlay;
+}
+.con-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; position:relative; z-index:1; }
+/* folder chips are latching radio keys, same interlock as the page switcher */
+.chip{
+  height:28px; padding:0 12px; display:inline-flex; align-items:center; gap:7px;
+  border:0; border-radius:7px; cursor:pointer;
+  font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.08em;
+  color:#8d929b;
+  background:linear-gradient(180deg,#2c2f34,#1e2024);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13), 0 2px 0 #0e0f11, 0 3px 5px rgba(0,0,0,.6);
+  transition:transform .1s, box-shadow .1s, color .12s, background .12s;
+}
+.chip:hover{ color:#dfe2e7; }
+.chip:active{ transform:translateY(2px); }
+.chip.is-down{
+  transform:translateY(2px); color:var(--led);
+  background:linear-gradient(180deg,#1e2024,#2c2f34);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.08);
+  text-shadow:0 0 6px rgba(255,130,30,.5);
+}
+.chip:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+.chip .ct{
+  font-size:9.5px; padding:1px 5px; border-radius:3px;
+  background:rgba(0,0,0,.45); color:#7CFFB0; text-shadow:0 0 5px rgba(124,255,176,.5);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.8);
+}
+.chip.is-down .ct{ color:#FFD9BC; text-shadow:0 0 5px rgba(255,140,60,.6); }
+.chip.new{ color:#6d727c; background:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.09), inset 0 1px 0 rgba(255,255,255,.05); }
+.chip.new:hover{ color:#c6cad1; box-shadow:inset 0 0 0 1px rgba(255,255,255,.18); }
+
+/* the search slot — a milled well with a real input in it */
+.slot{
+  display:flex; align-items:center; gap:8px; height:30px; padding:0 11px;
+  border-radius:7px; flex:1 1 190px; max-width:280px;
+  background:linear-gradient(180deg,#0a0b0d,#131518);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.05), 0 1px 0 rgba(255,255,255,.06);
+}
+.slot svg{ width:13px; height:13px; stroke:#5b6069; fill:none; stroke-width:1.8; flex:0 0 13px; }
+.slot input{
+  flex:1; min-width:0; background:none; border:0; outline:0; padding:0;
+  font-family:var(--font); font-size:11px; letter-spacing:.06em; color:#7CFFB0;
+  text-shadow:0 0 6px rgba(124,255,176,.5);
+}
+.slot input::placeholder{ color:#3f444c; text-shadow:none; letter-spacing:.1em; }
+
+.rack{ display:grid; grid-template-columns:repeat(auto-fill,minmax(272px,1fr)); gap:14px; position:relative; z-index:1; }
+
+.module{
+  position:relative; display:flex; flex-direction:column; gap:9px;
+  padding:14px 14px 12px 17px; border-radius:11px;
+  background:linear-gradient(178deg,#282b30,#1e2023 55%,#1a1c1f);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),
+    inset 0 -1px 0 rgba(0,0,0,.75),
+    0 3px 6px rgba(0,0,0,.6);
+  overflow:hidden;
+}
+.module::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:var(--grain); background-size:140px; opacity:.05; mix-blend-mode:overlay;
+}
+/* THE RUNNING RAIL — the green bar down the left of the shipping card, as a
+   light pipe. Dark and dead when the project is not up. */
+.module::before{
+  content:''; position:absolute; left:0; top:8px; bottom:8px; width:4px;
+  border-radius:0 3px 3px 0; background:#26282c;
+  box-shadow:inset -1px 0 2px rgba(0,0,0,.8);
+  transition:background .2s, box-shadow .2s;
+}
+.module.up::before{
+  background:linear-gradient(180deg,#7CFFB0,#22C55E);
+  box-shadow:0 0 7px rgba(60,230,140,.8), 0 0 18px rgba(60,230,140,.35), inset 0 0 3px rgba(255,255,255,.7);
+}
+.mod-head{ display:flex; align-items:center; gap:9px; }
+/* the status LED — a jewel, dark until the process is alive */
+.pilot{
+  width:9px; height:9px; flex:0 0 9px; border-radius:50%;
+  background:radial-gradient(circle at 34% 28%, #4a4f57, #26282c 70%);
+  box-shadow:inset 0 -1px 1px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.6);
+  transition:background .2s, box-shadow .2s;
+}
+.module.up .pilot{
+  background:radial-gradient(circle at 34% 28%, #fff 0%, #B6FFD4 18%, #2BE07A 55%, #128C45 100%);
+  box-shadow:0 0 6px rgba(43,224,122,.85), 0 0 15px rgba(43,224,122,.4), inset 0 -1px 1px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.5);
+}
+.mod-name{
+  flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--font); font-size:12.5px; font-weight:700; letter-spacing:.01em;
+  color:#e3e6eb; text-shadow:0 1px 0 rgba(0,0,0,.85);
+}
+/* NODE — a stamped plate, not a coloured pill */
+.stamp{
+  font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.14em;
+  padding:2px 5px; border-radius:3px; color:#0d1a12;
+  background:linear-gradient(180deg,#8FE9B4,#3FA96C);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.6);
+}
+.mod-desc{ font-size:11.5px; line-height:1.5; color:#7e838d; margin:0; min-height:34px; }
+
+/* the port display — a lit strip. It is a LINK, so it also has a key on it. */
+.port{
+  display:flex; align-items:center; gap:8px; height:30px; padding:0 10px;
+  border-radius:6px; cursor:pointer; border:0; width:100%; text-align:left;
+  background:linear-gradient(180deg,#06110c,#0c1a13);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 0 12px rgba(60,230,140,.10),
+             inset 0 -1px 0 rgba(255,255,255,.05), 0 1px 0 rgba(255,255,255,.06);
+  font-family:var(--font); font-size:11px; letter-spacing:.06em;
+  color:#7CFFB0; text-shadow:0 0 7px rgba(124,255,176,.7);
+}
+.port:hover{ box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 0 16px rgba(60,230,140,.2), 0 0 8px rgba(60,230,140,.2); }
+.port span:last-child{ margin-left:auto; font-size:9px; color:#3f7a5c; text-shadow:none; letter-spacing:.1em; }
+.port svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:1.8; }
+
+.mod-acts{ display:flex; align-items:center; gap:7px; }
+/* LAUNCH — an illuminated green key. The lamp lens is INSIDE the cap, left of
+   the label, the way a real illuminated pushbutton is built. */
+.act{
+  height:32px; padding:0 13px; gap:8px; border-radius:8px; flex:0 0 auto;
+  font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.08em;
+}
+.act svg{ width:12px; height:12px; }
+.act.go{
+  color:#CFFFE3;
+  background:linear-gradient(180deg,#1E7A47,#12613A 55%,#0C4529);
+  box-shadow:
+    inset 0 1px 0 rgba(190,255,220,.35),
+    inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 0 #06301c,
+    0 5px 9px rgba(0,0,0,.65),
+    0 0 12px rgba(43,224,122,.22);
+}
+.act.go:hover{ background:linear-gradient(180deg,#279456,#167544 55%,#0F5533);
+  box-shadow:inset 0 1px 0 rgba(190,255,220,.45), 0 3px 0 #06301c, 0 5px 9px rgba(0,0,0,.65), 0 0 18px rgba(43,224,122,.4); }
+.act.go:active{ transform:translateY(3px);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.8), 0 0 0 #06301c, 0 1px 2px rgba(0,0,0,.5), 0 0 14px rgba(43,224,122,.35); }
+/* STOP — red, and it reads as red BEFORE you read the word. The lens is lit
+   because the thing it stops is running; a dark stop button is a lie. */
+.act.halt{
+  color:#FFD6D6;
+  background:linear-gradient(180deg,#8E1F1F,#661616 55%,#490F0F);
+  box-shadow:
+    inset 0 1px 0 rgba(255,190,190,.35),
+    inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 0 #2c0808,
+    0 5px 9px rgba(0,0,0,.65),
+    0 0 12px rgba(255,45,45,.25);
+}
+.act.halt:hover{ background:linear-gradient(180deg,#A82626,#7C1B1B 55%,#5A1313);
+  box-shadow:inset 0 1px 0 rgba(255,190,190,.45), 0 3px 0 #2c0808, 0 5px 9px rgba(0,0,0,.65), 0 0 18px rgba(255,45,45,.45); }
+.act.halt:active{ transform:translateY(3px);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.85), 0 0 0 #2c0808, 0 1px 2px rgba(0,0,0,.5), 0 0 14px rgba(255,45,45,.4); }
+/* the lamp lens inside an illuminated key */
+.lens{ width:8px; height:8px; border-radius:50%; flex:0 0 8px; }
+.act.go .lens{ background:radial-gradient(circle at 35% 30%, #fff, #7CFFB0 40%, #1FA85C);
+  box-shadow:0 0 6px rgba(124,255,176,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
+.act.halt .lens{ background:radial-gradient(circle at 35% 30%, #fff, #FF9B9B 40%, #C21B1B);
+  box-shadow:0 0 6px rgba(255,80,80,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
+/* secondary keys — unlit, plain metal. They open something elsewhere. */
+.act.aux{ padding:0 11px; color:#9aa0aa; }
+/* …unless one of them LATCHES. `.act.aux` and `.key.is-down` have the same
+   specificity and this file declares aux later, so a latched aux key was
+   quietly keeping its grey glyph — the one thing the lit state is made of. */
+.act.is-down{ color:var(--led); }
+
+.mod-tags{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+/* an engraved tag: cut into the module face, so it is a MARK not a control */
+.tagcut{
+  font-family:var(--font); font-size:9px; letter-spacing:.1em; padding:2px 7px;
+  border-radius:4px; color:#797e88;
+  background:linear-gradient(180deg,#171a1c,#1e2124);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.06);
+  text-shadow:0 1px 0 rgba(255,255,255,.06);
+}
+.tagcut.folder{ color:#C99A5B; }
+/* the drag grip — knurled, bottom right, exactly where the shipping card has it */
+.grip{
+  position:absolute; right:9px; bottom:9px; width:14px; height:14px; border-radius:3px;
+  background-image:radial-gradient(circle, rgba(255,255,255,.22) 1px, transparent 1.2px);
+  background-size:5px 5px; opacity:.35; cursor:grab;
+}
+.grip:hover{ opacity:.7; }
+
+.empty{
+  grid-column:1/-1; padding:38px; text-align:center; border-radius:11px;
+  font-family:var(--font); font-size:10.5px; letter-spacing:.18em; color:#4a4e56;
+  background:linear-gradient(180deg,#0a0b0d,#131518);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.05);
+  text-shadow:0 1px 0 rgba(255,255,255,.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE KNOB — what a slider becomes when it has to exist as an object
+   ───────────────────────────────────────────────────────────────────────────
+   A slider is a track and a lump. A knob is FOUR parts and each one earns it:
+
+     1  THE COLLAR      a milled ring the cap sits in, so it looks fitted
+     2  THE ARC         the value, drawn as a lit trace around the collar from
+                        the minimum to where you are. This is the readout you
+                        actually use — the number is for confirming, the arc is
+                        for judging. A slider's filled track does the same job
+                        badly, because it is straight and everything else is not
+     3  THE CAP         knurled aluminium, conic-gradient teeth, domed with an
+                        off-centre specular that stays put as the cap turns
+     4  THE POINTER     one cut line, and it ROTATES. The knob's angle is the
+                        value, which is why you can read it from across the room
+
+   270° of travel, -135° to +135°, the way every real knob is built. Drag up or
+   right to raise it; the wheel works too; shift for fine.
+
+   WHERE A KNOB IS WRONG: a range with two ends you compare (Zone from / Zone
+   to) still wants a track, because "from here to there" is a LENGTH and a
+   length is a straight thing. Those stay faders — see .fader below.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.knob{
+  width:var(--kd,54px); height:var(--kd,54px); position:relative; flex:0 0 auto;
+  touch-action:none; cursor:ns-resize;
+}
+/* the collar it is fitted into */
+.knob-collar{
+  position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #0c0d0f 56%, #1d1f23 57%, #101113 100%);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.07), 0 1px 0 rgba(255,255,255,.06);
+}
+/* THE VALUE ARC IS AN SVG STROKE, and it has to be.
+   It was a conic-gradient behind a CSS mask, and both halves of that alias:
+   a conic hard stop is a hard pixel edge with no antialiasing, and a
+   radial-gradient mask has two more hard edges at the ring's inner and outer
+   walls. Three stair-stepped boundaries on a 54px circle — which is exactly
+   what a stepped orange arc looks like.
+   A stroked <circle> with stroke-dasharray is antialiased by the renderer,
+   scales to any size, gets a round cap for free, and the glow is one
+   drop-shadow on currentColor instead of a colour-mix per state. */
+.knob-ring{
+  position:absolute; inset:0; width:100%; height:100%; overflow:visible;
+  transform:rotate(135deg);            /* put the 90° dead zone at the bottom */
+  color:var(--arc,#FF6A00);
+}
+/* A BIPOLAR knob reads from the CENTRE, not from the minimum — Yaw at 0° with
+   a half-full arc says "half way up the range", which is true and useless;
+   what you want to see is how far off centre you are, and which side. So the
+   trace grows out of 12 o'clock in whichever direction you turned, and the
+   collar carries an etched centre mark for it to grow out of. */
+.knob.bi .knob-collar::after{
+  content:''; position:absolute; left:50%; top:-2px; width:2px; height:5px; margin-left:-1px;
+  border-radius:1px; background:#767d88; box-shadow:0 1px 1px rgba(0,0,0,.85);
+}
+.kr-track,.kr-val{ fill:none; stroke-linecap:round; stroke-width:7; }
+.kr-track{ stroke:rgba(255,255,255,.075); }
+.kr-val{ stroke:currentColor; filter:drop-shadow(0 0 3px currentColor); transition:stroke-dasharray .05s linear; }
+.knob.dragging .kr-val{ transition:none; }
+/* the cap: knurled edge, domed face, fixed specular */
+.knob-cap{
+  position:absolute; inset:19%; border-radius:50%;
+  background:
+    radial-gradient(circle at 36% 26%, rgba(255,255,255,.30) 0%, transparent 46%),
+    conic-gradient(#3a3e45 0deg, #23262b 3deg, #3a3e45 6deg, #23262b 9deg),
+    radial-gradient(circle at 50% 50%, #34383f 55%, #1c1e22 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    inset 0 -2px 4px rgba(0,0,0,.75),
+    0 2px 4px rgba(0,0,0,.8);
+  transform:rotate(var(--deg,0deg));
+  transition:transform .05s linear;
+}
+/* the pointer — a CUT, so it is dark with a lit lower wall */
+.knob-cap::after{
+  content:''; position:absolute; left:50%; top:9%; width:2px; height:34%;
+  margin-left:-1px; border-radius:1px;
+  background:#0a0b0c; box-shadow:0 0 0 1px rgba(255,255,255,.13), 0 0 5px rgba(255,255,255,.10);
+}
+.knob:focus-visible{ outline:2px solid var(--led); outline-offset:3px; border-radius:50%; }
+.knob.dragging .knob-cap{ transition:none; }
+
+/* ── the furniture, and it is the part that was too big ──────────────────
+   A caption line, a knob and a readout line stacked is THREE rows for ONE
+   control — a 54px knob in a 100px box. Stacked is kept only for a BANK,
+   where three of them side by side is the point (Yaw / Pitch / Roll).
+   Everything else is a ROW: knob, engraved label, readout, on one 42px line
+   — the same height a slider row already was, so the knob costs nothing. */
+.kwrap{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+/* The inline form is a PARAM STRIP: its own small plate, so a column of them
+   reads as a rack of channels rather than as controls floating on the body.
+   (The modifier is `inline`, not `row` — `.row` is the layer module, and a
+   knob strip was silently inheriting its plate, its hover and its grain.) */
+.kwrap.inline{
+  flex-direction:row; align-items:center; gap:12px; width:100%;
+  padding:4px 8px 4px 4px; border-radius:9px;
+  background:linear-gradient(180deg,#25282c,#1c1e21);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.65),
+             0 1px 2px rgba(0,0,0,.5);
+}
+.kwrap.inline .klab{ flex:1; text-align:left; }
+.kwrap.inline .kval{ min-width:58px; }
+.klab{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09); line-height:1;
+}
+.kval{
+  min-width:50px; height:18px; padding:0 7px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#080a09,#0f1211);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 1px 0 rgba(255,255,255,.06);
+  font-family:var(--font); font-size:10.5px; color:#7CFFB0;
+  text-shadow:0 0 6px rgba(124,255,176,.65); font-variant-numeric:tabular-nums;
+}
+
+/* ── the FADER, built like one ───────────────────────────────────────────
+   Kept only where the value is a LENGTH. The first pass was a rounded bar and
+   a rounded lump, which is the flat slider with a bevel painted on. A real
+   fader is four things:
+
+     THE SLOT     cut, not drawn — dark core, lit far wall at the bottom, and
+                  the ends CAPPED so the travel has a physical limit
+     THE SCALE    engraved ticks at 0 · ¼ · ½ · ¾ · 1 under the slot. Ticks are
+                  what make a track readable without a number, and they are the
+                  reason a fader can be a fader instead of a bar with a lump
+     THE TRACE    the lit part of the slot, glowing onto the metal around it
+     THE CAP      a moulded thumb: chamfered top, a knurled grip, a WAIST where
+                  the finger sits, and one bright indicator line on the exact
+                  value — the line is the pointer, the cap is just what holds it
+   ─────────────────────────────────────────────────────────────────────────── */
+.fader{ display:flex; align-items:center; gap:12px; padding:3px 0; }
+.fader .flab{ flex:0 0 62px; font-family:var(--font); font-size:8.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09); }
+/* The scale sits BELOW the cap's travel, not under it — a 24px cap on a 26px
+   slot covers its own ticks, which is the scale and the pointer fighting for
+   the same 4px. */
+.fslot{ flex:1; position:relative; height:30px; display:flex; align-items:center; }
+.ftrack{
+  position:absolute; left:0; right:0; top:7px; height:9px; border-radius:5px;
+  cursor:pointer; touch-action:none;
+  background:linear-gradient(180deg,#060708 0%,#0d0f11 55%,#191c20 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.98),
+    inset 0 -1px 0 rgba(255,255,255,.09),
+    inset 2px 0 3px -2px rgba(0,0,0,.9),
+    inset -2px 0 3px -2px rgba(0,0,0,.9),
+    0 1px 0 rgba(255,255,255,.07);
+}
+/* the engraved scale, under the slot */
+.fticks{
+  position:absolute; left:0; right:0; top:25px; height:4px; pointer-events:none;
+  background-image:linear-gradient(90deg, #000 0 1px, transparent 1px);
+  background-size:calc(25% - .25px) 3px; background-repeat:repeat-x;
+  box-shadow:0 1px 0 rgba(255,255,255,.05);
+  opacity:.85;
+}
+.fticks::after{ content:''; position:absolute; right:0; top:0; width:1px; height:3px; background:#000;
+  box-shadow:1px 0 0 rgba(255,255,255,.06); }
+.ffill{
+  position:absolute; left:2px; top:2px; bottom:2px; border-radius:3px;
+  background:linear-gradient(180deg,#FFC58F,var(--led) 55%,#C24E00);
+  box-shadow:0 0 5px rgba(255,106,0,.7), 0 0 13px rgba(255,106,0,.35),
+             inset 0 1px 0 rgba(255,255,255,.45);
+}
+/* THE BAND between two caps is a PIECE, not a fill that starts late. A fine
+   hatch is what says so — the same reason the caps are knurled. */
+.ffill.band{
+  top:1px; bottom:1px; border-radius:4px;
+  background-image:
+    repeating-linear-gradient(74deg, rgba(0,0,0,.26) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg,#FFC58F,var(--led) 55%,#C24E00);
+  box-shadow:0 0 6px rgba(255,106,0,.6), 0 0 14px rgba(255,106,0,.3),
+             inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(0,0,0,.35);
+}
+.kval.wide{ min-width:78px; }
+/* the cap — waisted, knurled, with the indicator line on the value */
+.fcap{
+  position:absolute; top:50%; width:17px; height:24px; margin:-12px 0 0 -8.5px;
+  border-radius:5px; cursor:grab;
+  background:
+    linear-gradient(180deg,#585d66 0%,#3a3e45 16%,#22252a 46%,#1a1c20 54%,#33373d 86%,#4c5158 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -1px 0 rgba(255,255,255,.22),
+    inset 1px 0 0 rgba(255,255,255,.10),
+    inset -1px 0 0 rgba(0,0,0,.6),
+    0 3px 6px rgba(0,0,0,.9),
+    0 0 0 1px rgba(0,0,0,.65);
+}
+.fcap:active{ cursor:grabbing; }
+/* knurl: fine teeth on the two shoulders, none across the waist */
+.fcap::before{
+  content:''; position:absolute; inset:2px 3px;
+  background-image:repeating-linear-gradient(0deg,
+    rgba(255,255,255,.13) 0 1px, rgba(0,0,0,.30) 1px 2.5px);
+  -webkit-mask:linear-gradient(180deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+          mask:linear-gradient(180deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+  border-radius:3px;
+}
+/* THE INDICATOR — this is the part that carries the value */
+.fcap::after{
+  content:''; position:absolute; left:2px; right:2px; top:50%; height:2px; margin-top:-1px;
+  border-radius:1px; background:var(--led-hot);
+  box-shadow:0 0 5px var(--led), 0 0 10px rgba(255,106,0,.55), 0 1px 0 rgba(0,0,0,.8);
+}
+
+/* ── the ROTARY SELECTOR: a dropdown with detents ────────────────────────
+   A <select> is a list that hides. A selector switch shows every position at
+   once and points at the one you are on.
+
+   THE POSITIONS ARE PIPS ON THE DIAL, which is where a rotary switch has
+   always put them: one small dot per detent, ringed round the collar at the
+   angle the pointer stops at. Two things fall out of that. You can see how
+   many positions there are without reading anything — four dots is four
+   choices. And the pointer LANDS ON ONE, so the knob is not merely "turned a
+   bit", it is at a position, which a bare pointer over an unmarked collar can
+   never say. The dots are dark until the pointer reaches them; the one under
+   the pointer is lit, so the dial answers on its own and the label list beside
+   it is only there to say what the positions are called. */
+/* THE DIAL SITS IN A BOSS THAT STANDS PROUD OF THE CASE.
+
+   A control does not have to live inside the rectangle. On real gear the big
+   selector gets its own raised boss moulded into the shell, half off the face,
+   because the switch body is deeper than the panel and the case grows to meet
+   it. Three things follow, and all three are why it is worth doing here:
+
+     the dial stops competing for panel width — the boss hangs ~20px outside
+     the edge, and the width it would have eaten is now free for the labels;
+     the panel gets a SILHOUETTE, so it reads as an object with a front and a
+     side rather than as a rounded rectangle;
+     and the one control that is not like the others stops looking like a knob
+     that wandered in — it is bolted through a different part of the case.
+
+   The positions then all fan to ONE side, which is what a boss on the left
+   edge forces and what a rotary switch does anyway: a tick per detent, a
+   leader line out to its name, the four names stacked in a column you read
+   top to bottom. */
+/* THE BAY: dial on the left, its two neighbours on the right, one band.
+   Moving the boss onto the panel edge frees the width the dial used to eat,
+   and the two param strips go into it at the same height — so what was three
+   stacked blocks is one. */
+.placebay{ display:flex; align-items:center; gap:6px; min-height:116px; }
+.placebay .knobcol{ flex:1 1 auto; min-width:0; }
+.placebay .kwrap.inline{ gap:9px; padding:4px 6px 4px 4px; }
+.placebay .kwrap.inline .kval{ min-width:52px; }
+
+.rotary{ position:relative; height:116px; flex:0 0 106px; --rcx:-5px; }
+/* THE LEGEND IS ON THE CASE, ABOVE THE WHOLE BAY — not tucked over the first
+   position. Inside the dial block it landed 8px above "Reference": two lines
+   of small grey caps, the same size and colour, which reads as a five-item
+   list whose first item happens to be the heading. Out here it is a heading
+   over three controls, with a hairline under it doing the separating that the
+   gap could not. */
+.bay-cap{
+  display:flex; align-items:center; gap:9px; padding:2px 2px 0;
+  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09); white-space:nowrap;
+}
+.bay-cap::after{
+  content:''; flex:1; height:1px; background:#0a0b0c; box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+/* THE BOSS WEARS THE CASE'S OWN FACE, not a darker disc laid on top of it.
+   That is the whole trick: it is opaque and it paints above the panel's
+   background, so the 1px rim running down the panel's left edge disappears
+   behind it and the SILHOUETTE becomes panel ∪ circle — the case bulging out
+   to meet a switch body deeper than the panel, which is why real enclosures
+   have these. Get the gradient wrong and it is a coin sitting on a box. */
+/* THE PANEL'S OUTLINE HAS TO FOLLOW IT, or it is a coin lying on a box.
+
+   Three things had to change for that. The boss is a child of the CASE now,
+   not of the dial — it paints on the panel's own background, above it and
+   below the body, so the 1px rim running down the panel's left edge simply
+   disappears behind it. Its centre sits 10px INSIDE the edge rather than on
+   it, so the circle crosses the straight edge at about 11° off vertical
+   instead of meeting it square: a soft junction where a half-disc gives you
+   two corners. And the panel's drop shadow is a FILTER rather than a
+   box-shadow — a box-shadow is cast by the border-box, so it would run
+   straight down the old rectangle and cut the bulge in half, while
+   filter: drop-shadow() is cast by the rendered ALPHA and therefore by the
+   union of rectangle and circle. One silhouette, one shadow. */
+/* THE BUMP IS THE PANEL'S OWN SHAPE. Nothing is added on top of it.
+
+   Two goes at this failed the same way, and it was the same mistake twice: a
+   separate disc sat over the panel, and a disc is a disc. Matching its grey
+   was never going to work, because the panel's face is ONE gradient run down
+   its whole height and the disc had a gradient of its own; and even with the
+   fill aligned there were two elements, two edges and two shadows to keep in
+   agreement, plus a blend mode inside a filtered box that blew the whole thing
+   out white.
+
+   So the panel is ONE element and the silhouette is a clip-path: the rounded
+   rectangle unioned with a circular lobe, joined by a TANGENT FILLET at each
+   end so the straight edge does not butt the curve — the flare the case would
+   have where a moulded boss grows out of a flat face. The background is the
+   panel's, painted once, clipped to that outline, so a seam cannot exist: it
+   is not two surfaces meeting, it is one surface with a bump in it.
+
+   The clip-path is generated from measured layout — the lobe's centre is
+   wherever the dial ended up — and the drop shadow goes on a WRAPPER, because
+   filters are applied before clipping and a shadow cast by the unclipped box
+   would be clipped away with it. */
+.bulge-wrap{
+  filter:
+    drop-shadow(0 26px 30px rgba(0,0,0,.75))
+    drop-shadow(0 6px 8px rgba(0,0,0,.6));
+}
+.box.bulge{
+  width:370px; flex:0 0 370px;               /* 318 of panel + 52 of lobe */
+  padding:3px 3px 3px 55px;                  /* content stays inside the face */
+  border-radius:0;                           /* the clip-path owns the corners now */
+  background-image:
+    radial-gradient(circle 46px at 44px var(--boss-y,50%), rgba(255,255,255,.055), transparent 74%),
+    radial-gradient(circle 46px at 54px calc(var(--boss-y,50%) + 12px), rgba(0,0,0,.24), transparent 68%),
+    linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9),
+    inset 0 -18px 26px -20px rgba(0,0,0,.8);
+  clip-path:var(--panel-shape, none);
+}
+/* the brushed overlay is full-bleed now — the clip-path is what shapes it */
+.box.bulge::before{ border-radius:0; }
+/* --rcx IS MEASURED FROM THE BODY'S CONTENT BOX, NOT THE PANEL'S EDGE, and
+   that is two paddings deep: the case's 55px on this side plus .box-body's own
+   12px. Offsetting by only the first left the dial sitting 12px right of the
+   lobe it is supposed to be concentric with — which is exactly the "the knob
+   is not in the middle of its bump" that no amount of moving the bump fixes.
+   Lobe centre 44 − (55 + 12) = −23. */
+.box.bulge .rotary{ --rcx:-23px; }
+/* the parting line where the moulded boss meets the flat face */
+.box-boss::after{
+  content:''; position:absolute; inset:6px; border-radius:50%;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.4);
+}
+/* the parting line where the boss meets the face */
+/* THE POINTER IS THE KNOB. A round cap with a cut line has to be read twice —
+   once to find the line, once to see where it points. A teardrop IS the arrow:
+   the body is what your fingers turn, the tip is the reading, and the whole
+   shape rotates. It is also the one LIGHT part of the panel, which is how a
+   selector on real gear is built — a pale lever on a dark plate, because where
+   it points is the thing you must see from across the room. */
+.rot-knob{
+  position:absolute; left:var(--rcx); top:50%; width:58px; height:58px; margin:-29px 0 0 -29px;
+  cursor:ns-resize; touch-action:none; border-radius:50%; z-index:2;
+}
+.rot-knob:focus-visible{ outline:2px solid var(--led); outline-offset:5px; }
+.rot-seat{
+  position:absolute; left:var(--rcx); top:50%; width:68px; height:68px; margin:-34px 0 0 -34px;
+  border-radius:50%;
+  background:radial-gradient(circle, #0c0d0f 60%, #1c1e22 62%, #0f1012 100%);
+  box-shadow:inset 0 2px 7px rgba(0,0,0,.92), 0 1px 0 rgba(255,255,255,.07);
+}
+.tear{
+  width:100%; height:100%; overflow:visible; display:block;
+  transform:rotate(var(--deg,0deg)); transform-origin:50% 50%;
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.8));
+  transition:transform .18s cubic-bezier(.3,1.5,.5,1);
+}
+.rot-knob.dragging .tear{ transition:none; }
+/* the leaders: tick end, elbow, then flat into the name. Engraved hairlines,
+   so they are strokes — a 1px div rotated to an angle is a grey smear. */
+.rot-leads{
+  position:absolute; left:var(--rcx); top:50%; margin-top:-65px; overflow:visible;
+  pointer-events:none;
+}
+.rot-lead{
+  fill:none; stroke:#4b515b; stroke-width:1; stroke-linejoin:round; stroke-linecap:round;
+  transition:stroke .14s, filter .14s;
+}
+.rot-lab{
+  position:absolute; left:var(--rcx); top:50%; border:0; background:none; cursor:pointer;
+  padding:4px 6px; margin:-4px -6px;      /* a real hit target, not just the word */
+  font-family:var(--font); font-size:9.5px; letter-spacing:.1em; white-space:nowrap;
+  color:#6b7079; transition:color .14s;
+}
+.rot-lab:hover{ color:#c2c7cf; }
+.rot-lab.on{ color:#FFD9BC; text-shadow:0 0 8px rgba(255,140,60,.6); }
+.rot-lab:focus-visible{ outline:2px solid var(--led); outline-offset:3px; border-radius:3px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PANEL BODIES — the editor and the viewport share one chassis
+   ═══════════════════════════════════════════════════════════════════════════ */
+.box{
+  width:318px; flex:0 0 318px; position:relative; padding:3px; border-radius:14px;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    0 42px 60px -24px rgba(0,0,0,.9),
+    0 8px 14px -6px rgba(0,0,0,.75),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9),
+    inset 0 -18px 26px -20px rgba(0,0,0,.8);
+  user-select:none;
+}
+.box::before{
+  content:''; position:absolute; inset:0; border-radius:14px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.020) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+.box-head{
+  display:flex; align-items:center; gap:9px; padding:13px 12px 11px 16px; position:relative; z-index:2;
+  border-bottom:1px solid rgba(0,0,0,.7); box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+.box-head .nm{ flex:1; font-family:var(--font); font-size:12px; font-weight:700; color:#e3e6eb;
+  text-shadow:0 1px 0 rgba(0,0,0,.85); }
+.box-body{ padding:12px; position:relative; z-index:2; display:flex; flex-direction:column; gap:12px; }
+
+/* tab keys — the same interlock as the page switcher, one size down */
+.piano.sm{ padding:4px; gap:3px; width:100%; }
+.piano.sm .pkey{ height:26px; min-width:0; flex:1; padding:0 6px; font-size:9px; letter-spacing:.06em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.7),
+             0 2px 0 #0d0e10, 0 3px 6px rgba(0,0,0,.6); }
+.piano.sm .pkey:active{ transform:translateY(2px); }
+.piano.sm .pkey.is-down{ transform:translateY(2px); }
+.piano.sm .pkey.is-down::after{ bottom:4px; left:8px; right:8px; }
+
+/* a screen: the reference image behind glass */
+.screen{
+  border-radius:8px; padding:9px; position:relative; overflow:hidden;
+  background:linear-gradient(180deg,#08090b,#111316);
+  box-shadow:inset 0 3px 8px rgba(0,0,0,.95), inset 0 -1px 0 rgba(255,255,255,.05), 0 1px 0 rgba(255,255,255,.06);
+}
+.screen canvas, .screen .thumb{ display:block; width:100%; border-radius:4px; filter:contrast(1.05) brightness(.96); }
+/* the glass: one diagonal reflection, and a scanline haze */
+.screen::after{
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:8px;
+  background:
+    linear-gradient(148deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.02) 26%, transparent 46%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+}
+.screen .cap{
+  display:block; text-align:center; margin-top:7px;
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c;
+}
+.filmrow{ display:flex; align-items:center; gap:10px; }
+.filmrow .thumb{ width:56px; height:56px; object-fit:cover; border-radius:5px; flex:0 0 56px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1), 0 2px 5px rgba(0,0,0,.7); }
+.filmrow .meta{ flex:1; min-width:0; }
+.filmrow .fn{ font-family:var(--font); font-size:11px; color:#dfe2e7; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.filmrow .fs{ font-family:var(--font); font-size:9px; letter-spacing:.08em; color:#61666f; margin-top:3px; }
+.filmrow .stack{ display:flex; flex-direction:column; gap:5px; }
+.filmrow .stack .key{ height:24px; padding:0 10px; font-family:var(--font); font-size:9px; letter-spacing:.1em; }
+
+.knobrow{ display:flex; align-items:flex-start; justify-content:space-around; gap:8px; padding:2px 0; }
+/* single knobs stack as ROWS — one 40px line each, the height a slider was */
+.knobcol{ display:flex; flex-direction:column; gap:8px; padding:1px 2px; }
+.divider{ height:1px; background:#0a0b0c; box-shadow:0 1px 0 rgba(255,255,255,.06); margin:1px 0; }
+.actrow{ display:flex; align-items:center; gap:7px; }
+.actrow .act{ flex:1; }
+.act.fire{
+  color:#FFE0C8;
+  background:linear-gradient(180deg,#C25411,#8E3B0B 55%,#6A2C08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,210,170,.4), inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 0 #451c05, 0 5px 9px rgba(0,0,0,.65), 0 0 14px rgba(255,106,0,.3);
+}
+.act.fire:hover{ background:linear-gradient(180deg,#DC6314,#A5450D 55%,#7C340A);
+  box-shadow:inset 0 1px 0 rgba(255,210,170,.5), 0 3px 0 #451c05, 0 5px 9px rgba(0,0,0,.65), 0 0 20px rgba(255,106,0,.5); }
+.act.fire:active{ transform:translateY(3px);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.85), 0 0 0 #451c05, 0 1px 2px rgba(0,0,0,.5), 0 0 16px rgba(255,106,0,.4); }
+.act.fire .lens{ background:radial-gradient(circle at 35% 30%, #fff, #FFC08A 40%, #E05A00);
+  box-shadow:0 0 7px rgba(255,140,50,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE GIZMO — an axis ball under a glass dome
+   ═══════════════════════════════════════════════════════════════════════════ */
+.gizmo{
+  width:132px; height:132px; margin:0 auto; position:relative; border-radius:50%;
+  background:
+    radial-gradient(circle at 38% 26%, rgba(255,255,255,.13) 0%, transparent 42%),
+    radial-gradient(circle at 50% 60%, #191b1f 0%, #0c0d0f 78%);
+  box-shadow:
+    inset 0 4px 10px rgba(0,0,0,.95),
+    inset 0 -2px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.07);
+}
+.gizmo::after{  /* the dome */
+  content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  background:linear-gradient(152deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 28%, transparent 52%);
+}
+.gz-arm{ position:absolute; left:50%; top:50%; height:2px; transform-origin:0 50%;
+  background:linear-gradient(90deg, color-mix(in srgb,var(--ax) 30%, transparent), var(--ax));
+  box-shadow:0 0 5px color-mix(in srgb,var(--ax) 55%, transparent); border-radius:1px; }
+.gz-node{
+  position:absolute; width:15px; height:15px; margin:-7.5px 0 0 -7.5px; border-radius:50%;
+  border:0; padding:0; cursor:pointer;
+  background:radial-gradient(circle at 34% 28%, #fff 0%, color-mix(in srgb,var(--ax) 55%,#fff) 18%, var(--ax) 55%, color-mix(in srgb,var(--ax) 50%,#000) 100%);
+  box-shadow:0 0 7px color-mix(in srgb,var(--ax) 70%,transparent), inset 0 -1px 2px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.55);
+  transition:transform .12s;
+}
+.gz-node:hover{ transform:scale(1.22); }
+.gz-node:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+.gz-node.hollow{ background:radial-gradient(circle at 50% 50%, #14161a 52%, color-mix(in srgb,var(--ax) 70%,#000) 53%);
+  box-shadow:inset 0 0 4px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.6); }
+.gz-hub{
+  position:absolute; left:50%; top:50%; width:11px; height:11px; margin:-5.5px 0 0 -5.5px;
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 28%, #cfd4db, #5f656e 60%, #26292e);
+  box-shadow:inset 0 -1px 1px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.6), 0 0 6px rgba(255,255,255,.14);
+}
+/* A KEY THAT TRAVELS NEEDS ROOM UNDER IT. On a 5px grid the pressed key drops
+   4px and its glow lands on the cap below — the two read as one welded block,
+   and the thing that was supposed to say "this one is down" instead says "these
+   two are joined". So the pad gets a taller ROW gap than column gap (they are
+   not the same problem: nothing travels sideways), and its keys get a 3px
+   skirt, which is what a short-travel key on a real pad has anyway. */
+.keypad{ display:grid; grid-template-columns:repeat(3,1fr); gap:11px 5px; }
+.keypad .pkey{
+  min-width:0; padding:0 4px; height:30px; font-size:9px; letter-spacing:.08em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.7),
+             0 3px 0 #0d0e10, 0 5px 8px rgba(0,0,0,.7);
+}
+.keypad .pkey:active{ transform:translateY(3px); }
+.keypad .pkey.is-down{ transform:translateY(3px); }
+.keypad .pkey.is-down::after{ bottom:5px; left:12px; right:12px; }
+/* same clearance rule against the divider under it */
+.modepad{ display:flex; gap:5px; margin-bottom:5px; }
+.modepad .pkey{ flex:1; min-width:0; padding:0 4px; height:34px; font-size:9.5px; }
+.modepad .pkey svg{ width:13px; height:13px; margin-right:5px; stroke:currentColor; fill:none; stroke-width:1.7; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MATERIALS — the primitives, so this is a language and not one drawing
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mats{ display:grid; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)); gap:16px; margin-top:26px; }
+.mat{
+  border:1px solid #212327; border-radius:12px; overflow:hidden;
+  background:linear-gradient(180deg,#141518,#0f1012);
+}
+.mat-stage{
+  height:104px; display:flex; align-items:center; justify-content:center; gap:10px;
+  background:radial-gradient(70% 80% at 30% 10%, rgba(255,255,255,.05), transparent 65%), #101114;
+  border-bottom:1px solid #1c1e22;
+}
+.mat-body{ padding:12px 14px 14px; }
+.mat-t{ font-family:var(--font); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#d3d6dc; margin:0 0 6px; }
+.mat-d{ font-size:12px; line-height:1.55; color:#7f848e; margin:0; }
+.mat-d code{ font-family:var(--font); font-size:11px; color:#9aa0aa; background:#1a1c20; padding:1px 4px; border-radius:3px; }
+
+/* demo objects in the material tiles */
+.demo-plate{ width:90px; height:44px; border-radius:8px;
+  background:linear-gradient(176deg,#2b2e33,#1b1d20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.85), 0 6px 12px -4px rgba(0,0,0,.8); }
+.demo-well{ width:90px; height:44px; border-radius:8px;
+  background:linear-gradient(180deg,#0a0b0d,#141619);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.95), 0 1px 0 rgba(255,255,255,.06); }
+.demo-etch{ font-family:var(--font); font-size:15px; font-weight:700; letter-spacing:.18em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.12), 0 -1px 0 rgba(0,0,0,.7); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE BILL — what the language costs. Read this before adopting anything.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.bill{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; margin-top:26px; }
+.card{ border:1px solid #212327; border-radius:12px; padding:18px 20px;
+       background:linear-gradient(180deg,#141518,#0f1012); }
+.card.good{ border-color:rgba(124,255,176,.22); }
+.card.bad{ border-color:rgba(255,45,45,.22); }
+.card h3{ margin:0 0 12px; font-family:var(--font); font-size:10px; letter-spacing:.16em;
+          text-transform:uppercase; color:#7CFFB0; }
+.card.bad h3{ color:#FF8A8A; }
+.card ul{ margin:0; padding-left:17px; }
+.card li{ font-size:13px; line-height:1.65; color:#8b909a; margin-bottom:9px; }
+.card li b{ color:#c6cad1; font-weight:600; }
+.card li:last-child{ margin-bottom:0; }
+
+footer{ margin-top:80px; padding-top:22px; border-top:1px solid #1c1e22;
+        font-family:var(--font); font-size:10.5px; color:#4a4e56; letter-spacing:.06em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <p class="kicker">targz · exploration 01 · not adopted</p>
+    <h1>Physical UI —<br>the targz language as hardware</h1>
+    <p class="lede">
+      If the targz language were rebuilt in the <b>hardcore skeuomorphic register</b> —
+      anodised chassis, backlit keys, jewel LEDs, engraved plates, edge-lit acrylic,
+      knurled knobs — what happens to the things we actually ship? Six of them, redrawn:
+      the <b>layer dock</b>, the <b>nav bar</b>, the <b>page switcher</b>, the
+      <b>layer editor</b>, the <b>viewport</b> and a <b>Launchpad card</b>.
+    </p>
+    <p class="lede">
+      Every anatomy is the real one — the layer dock is lifted control-for-control from
+      <b>Portrait-Typo/ui.js</b>. Two rules held throughout: <b>every button is a real
+      button</b> with a body, a skirt and travel, momentary or latching; and
+      <b>every slider that sets a quantity became a knob</b>, except where the value is
+      a length, which stays a fader. Everything on this page works — press it.
+    </p>
+  </div>
+
+  <div class="warn">
+    <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    <div>
+      <b>This is a separate document.</b> <code>index.html</code> — the design system —
+      is untouched, and none of these tokens exist there. Treat this as a look-see:
+      the panel below is live, everything clicks, and the last two sections are the
+      honest bill for adopting it.
+    </div>
+  </div>
+
+  <h2>01 <span>/</span> The panel</h2>
+  <p class="sub">
+    Left, the physical build — every control works: the switches latch, the masters
+    read <em>on / mixed / off</em>, the chevrons open the stroke strip, add and delete
+    change the list, and the footer counts what it will destroy. Right, what ships
+    today, at the same scale.
+  </p>
+
+  <div class="stage">
+    <div class="stage-note">light source · above left · 158°</div>
+    <div id="dock" class="dock">
+      <span class="screw tl"></span><span class="screw tr"></span>
+      <span class="screw bl"></span><span class="screw br"></span>
+    </div>
+    <div id="flat" class="flat"></div>
+  </div>
+
+  <h2>02 <span>/</span> The nav bar <span>·</span> momentary vs latching</h2>
+  <p class="sub">
+    The one idea flat UI cannot express. <b>Import</b>, <b>Export</b> and <b>Console</b> are
+    <em>momentary</em> — they spring back and pulse once, because they DID something.
+    <b>Reference</b>, <b>Light</b> and <b>Cells</b> are <em>latching</em> — they stay down with
+    the lamp on, because they ARE something. Today all six are the same grey icon and the
+    difference lives in a tooltip. Press them.
+  </p>
+  <div class="stage">
+    <div class="stage-note">momentary · latching · readout</div>
+    <div id="navbar" class="strip"></div>
+  </div>
+
+  <h2>03 <span>/</span> The page switcher <span>·</span> mechanical interlock</h2>
+  <p class="sub">
+    Three latching keys on one bar, and the bar holds one down at a time — the segmented
+    control is finally the thing it has always been drawing. The key that is down is
+    <em>down</em>: 4px lower than its neighbours, lit from inside, with a lamp bar under the
+    engraving.
+  </p>
+  <div class="stage">
+    <div class="stage-note">3-position interlock</div>
+    <div id="pages" class="piano"></div>
+  </div>
+
+  <h2>04 <span>/</span> The layer editor <span>·</span> knobs instead of sliders</h2>
+  <p class="sub">
+    L1's <b>Place</b> tab. Every slider that sets a <em>quantity</em> became a knob: 270° of
+    travel, a lit arc for the value and a pointer you can read at a glance. Drag up or right,
+    or use the wheel; hold <b>shift</b> for fine. A knob is one <b>48px param strip</b> —
+    knob, engraved label, readout on a single line — instead of the caption / knob / readout
+    stack, which spent three rows and about 100px on one control.
+    <b>Zone from / Zone to</b> stayed faders on purpose: that pair is a <em>length</em>, and
+    a length wants a straight track — so they were built as real ones, with a cut slot, an
+    engraved scale and a waisted cap carrying the indicator line. The <em>Place from</em>
+    dropdown became a rotary selector — one <b>pip per position</b> ringed round the dial,
+    dark until the pointer lands on it, so you can count the choices without reading them.
+  </p>
+  <div class="stage">
+    <div class="stage-note">rotary · 270° · shift = fine</div>
+    <div class="bulge-wrap"><div id="editor" class="box"></div></div>
+    <div id="mini-knobs" class="box" style="align-self:center"></div>
+  </div>
+
+  <h2>05 <span>/</span> The viewport <span>·</span> gizmo, keypad, three knobs</h2>
+  <p class="sub">
+    The axis ball sits in a well under a glass dome — its six nodes are the six view keys,
+    so you can hit a view from the picture or from the pad. Six latching view keys, three
+    interlocked tool keys, and <b>Yaw / Pitch / Roll</b> as knobs, which is what those three
+    have always wanted to be: three angles you dial, with the pointer showing the angle
+    literally.
+  </p>
+  <div class="stage">
+    <div class="stage-note">axis ball · 6-key pad · 3 × rotary</div>
+    <div id="viewport" class="box"></div>
+  </div>
+
+  <h2>06 <span>/</span> Launchpad <span>·</span> one rack module per project</h2>
+  <p class="sub">
+    The dashboard card as a rack unit. The green running bar is a light pipe, the status dot
+    is a pilot lamp that is dark until the process is actually alive, the port is a lit
+    display, and <b>Launch</b> / <b>Stop</b> are illuminated pushbuttons with the lens inside
+    the cap. Launch one and the whole module powers up — rail, lamp, display, and the running
+    count at the top.
+  </p>
+  <div class="console" id="console"></div>
+
+  <h2>07 <span>/</span> Materials</h2>
+  <p class="sub">
+    Nine primitives carry all six components. Every control on this page is one of them
+    at a size — which is what makes it a language rather than six hand-drawn pictures.
+  </p>
+  <div class="mats" id="mats"></div>
+
+  <h2>08 <span>/</span> The bill</h2>
+  <p class="sub">
+    What it buys, and what it costs. Both lists are about this component specifically,
+    not about skeuomorphism in general.
+  </p>
+  <div class="bill">
+    <div class="card good">
+      <h3>What it genuinely buys</h3>
+      <ul>
+        <li><b>The colour bar becomes a light source.</b> Edge-lit, it spills onto the
+            metal beside it — so a layer's ink is visible in peripheral vision, which
+            a 3px flat bar never was. This is the one improvement I would actually miss.</li>
+        <li><b>On/off stops being a colour comparison.</b> A lit lamp against a dead one
+            is a brightness difference, readable without comparing to the row next door
+            and readable if you cannot separate the two oranges.</li>
+        <li><b>Off-state honesty.</b> A hidden layer has a dead pipe and a grey jewel —
+            the row reads as unpowered from across the screen, where today it is a
+            0.3 opacity dim you have to look for.</li>
+        <li><b>Destructive controls can be guarded materially</b> — recessed instead of
+            raised, hazard stripes on hover — instead of relying on red alone.</li>
+        <li><b>Momentary vs latching is finally sayable.</b> A key that springs back did
+            something; a key held down by the mechanism <em>is</em> something. The nav bar
+            has both kinds and today they are the same grey icon.</li>
+        <li><b>Knobs beat sliders for angles.</b> Yaw / Pitch / Roll as three pointers is
+            the one substitution that is not a preference — the control's angle is the
+            value, so you read three numbers without reading any.</li>
+      </ul>
+    </div>
+    <div class="card bad">
+      <h3>What it costs</h3>
+      <ul>
+        <li><b>It is dark-only.</b> Every effect here is light modelling against a dark
+            body. There is no light-mode version of this panel — and the apps' canvas is
+            paper-white, so the panel would sit on the drawing like a foreign object.</li>
+        <li><b>~14 shadows per row.</b> The flat row is one background and one bar. Five
+            of these on a scrolling, dragging list is real paint cost, and drag-reorder
+            with glow + blur is where it will show.</li>
+        <li><b>Text contrast fights the texture.</b> 9.5px summaries on brushed metal are
+            already marginal here; the shipping row spends its width on a name and two
+            numbers, and grain eats small type first.</li>
+        <li><b>It out-shouts the drawing.</b> The whole point of the current chrome is
+            that it disappears next to the plot. This does not disappear.</li>
+        <li><b>Nothing else in the system speaks it.</b> Tweakpane, the nav bar, the tab
+            bar and the log would all need rebuilding, and Tweakpane is explicitly
+            "do not hand-build this" in the design system. Section 04 is a
+            hand-built Tweakpane, which is the rule this exploration breaks hardest.</li>
+        <li><b>Knobs are worse than sliders at three things</b>, and they matter: no
+            drag-anywhere-along-the-line (you must grab the cap), no slam-to-the-end, and
+            they are poor on touch. Every knob here needs a number box beside it to be
+            usable for typing a value — which is half a slider back.</li>
+        <li><b>Every knob is a pointer-drag handler.</b> Tweakpane gives that away free,
+            with keyboard, touch and value entry already solved and tested.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>targz design system · exploration · physical-ui-layers.html · index.html unchanged</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   The icon set is Portrait-Typo's own — same paths, same stroke language.
+   ══════════════════════════════════════════════════════════════════════════ */
+const svg = (d, w = 24) => `<svg viewBox="0 0 ${w} ${w}" aria-hidden="true">${d}</svg>`;
+const ICON = {
+  plus: svg('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'),
+  eye: svg('<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>'),
+  eyeOff: svg('<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'),
+  cells: svg('<polygon points="12 2 21 7 21 17 12 22 3 17 3 7 12 2"/><circle cx="12" cy="12" r="2.5"/>'),
+  cellsOff: svg('<polygon points="12 2 21 7 21 17 12 22 3 17 3 7 12 2"/><circle cx="12" cy="12" r="2.5"/><line x1="1" y1="1" x2="23" y2="23"/>'),
+  ground: svg('<path d="M3 20l6-9 4 5 3-4 5 8z"/><circle cx="8" cy="6" r="2"/>'),
+  groundOff: svg('<path d="M3 20l6-9 4 5 3-4 5 8z"/><line x1="3" y1="9" x2="16" y2="22"/>'),
+  outline: svg('<rect x="4" y="6" width="16" height="12" rx="2"/>'),
+  outlineOff: svg('<rect x="4" y="6" width="16" height="12" rx="2"/><line x1="2" y1="2" x2="22" y2="22"/>'),
+  face: svg('<rect x="4" y="6" width="16" height="12" rx="2"/><line x1="7" y1="15" x2="12" y2="9"/><line x1="11" y1="15" x2="16" y2="9"/>'),
+  faceOff: svg('<rect x="4" y="6" width="16" height="12" rx="2"/><line x1="7" y1="15" x2="12" y2="9"/><line x1="11" y1="15" x2="16" y2="9"/><line x1="2" y1="2" x2="22" y2="22"/>'),
+  side: svg('<path d="M4 9l4-3h12v9l-4 3H4z"/><line x1="16" y1="6" x2="16" y2="15"/><line x1="17.5" y1="16.5" x2="19.5" y2="14"/>'),
+  sideOff: svg('<path d="M4 9l4-3h12v9l-4 3H4z"/><line x1="16" y1="6" x2="16" y2="15"/><line x1="2" y1="2" x2="22" y2="22"/>'),
+  shade: svg('<rect x="3" y="5" width="10" height="10" rx="2"/><line x1="9" y1="19" x2="21" y2="19"/><line x1="13" y1="16" x2="17" y2="16"/><line x1="15" y1="22" x2="21" y2="22"/>'),
+  shadeOff: svg('<rect x="3" y="5" width="10" height="10" rx="2"/><line x1="9" y1="19" x2="21" y2="19"/><line x1="13" y1="16" x2="17" y2="16"/><line x1="2" y1="2" x2="22" y2="22"/>'),
+  copy: svg('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/>'),
+  trash: svg('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'),
+  chev: svg('<polyline points="9 6 15 12 9 18"/>'),
+  clear: svg('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><line x1="10" y1="11" x2="14" y2="15"/><line x1="14" y1="11" x2="10" y2="15"/>'),
+};
+
+const STROKES = [
+  ['outline', 'the letter outlines',       ICON.outline, ICON.outlineOff],
+  ['face',    'the face fill',             ICON.face,    ICON.faceOff],
+  ['side',    'the side fill',             ICON.side,    ICON.sideOff],
+  ['shadow',  'the shadow on the letters', ICON.shade,   ICON.shadeOff],
+];
+
+const MAX_LAYERS = 8;
+
+/* ── state ─────────────────────────────────────────────────────────────── */
+const mkLayer = (name, ink, count, lo, hi, tone = false) => ({
+  name, ink, count, lo, hi, tone,
+  shown: true, cells: true,
+  strokes: { outline: true, face: true, side: true, shadow: true },
+});
+
+const st = {
+  layers: [
+    mkLayer('L1', '#FF6A00', 470, 2, 103.5),
+    mkLayer('L2', '#2C6BFF', 260, 3, 64),
+    mkLayer('L3', '#7B3FE4', 180, 4, 48),
+    mkLayer('L4', '#E4123F', 96,  6, 30, true),
+    mkLayer('L5', '#4CE04C', 54,  8, 22),
+  ],
+  open: { 0: true },          // 0 is the ALL row; L1 opens on load to show the strip
+  sel: 1,                     // which module is under power
+  groundOn: true,
+  groundShadow: true,
+  groundContours: true,
+  letters: 1060,
+};
+
+/* ── helpers ───────────────────────────────────────────────────────────── */
+const el = (tag, cls, html) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html != null) e.innerHTML = html;
+  return e;
+};
+const summary = (L) => L.count ? `${L.count} · ${L.lo}–${L.hi}mm` : 'off';
+const tally = (fn) => {
+  const k = st.layers.filter(fn).length;
+  return k === 0 ? 'off' : k === st.layers.length ? 'on' : 'mixed';
+};
+const paletteGrad = () => {
+  const cs = st.layers.map(l => l.ink);
+  if (cs.length < 2) return cs[0] || '#111';
+  const step = 100 / cs.length;
+  return `linear-gradient(180deg, ${cs.map((c,k)=>`${c} ${k*step}%, ${c} ${(k+1)*step}%`).join(', ')})`;
+};
+
+/* A backlit switch. `state` is on | mixed | off for the masters; per-layer
+   switches pass null and use the plain on/off. */
+/* ONE ICON. NOT TWO, AND NOT DIMMED.
+
+   Off used to be the struck-through drawing in a darker grey, which was the
+   right answer when the switch was a flat chip and colour was all it had.
+   It is not the answer now: the cap is UP or DOWN, and that is already a
+   statement you can read from across the panel and in a greyscale shot. Adding
+   a slash to it means the state is said three times, and the slashed glyph is
+   the weakest of the three — it is the one you have to look AT rather than
+   see. Worse, a slashed grey icon on a raised cap reads as DISABLED, so half
+   the switches in the dock looked like controls that were not available.
+
+   So the legend is the plain drawing at its normal weight, exactly as it would
+   be silkscreened on a real cap — the same mark whatever the switch is doing —
+   and what changes is the cap's position and whether the legend is lit. */
+const swBtn = (on, label, icon, state, onClick) => {
+  const cls = 'sw' + (state ? ' ' + state : (on ? ' on' : ''));
+  const b = el('button', cls, icon);
+  b.type = 'button';
+  b.setAttribute(state ? 'role' : 'aria-pressed', state ? 'checkbox' : String(on));
+  if (state) b.setAttribute('aria-checked', state === 'mixed' ? 'mixed' : String(state === 'on'));
+  b.setAttribute('aria-label', `${on ? 'Hide' : 'Show'} ${label}`);
+  b.title = state === 'mixed' ? `Some layers only — click to hide ${label} everywhere`
+          : on ? `Hide ${label}` : `Show ${label}`;
+  b.addEventListener('click', e => { e.stopPropagation(); onClick(); });
+  return b;
+};
+
+const chevBtn = (open, label, onClick) => {
+  const b = el('button', 'chev' + (open ? ' open' : ''), ICON.chev);
+  b.type = 'button';
+  b.setAttribute('aria-expanded', String(open));
+  b.setAttribute('aria-label', `${open ? 'Hide' : 'Show'} what ${label} draws`);
+  b.title = open ? `Hide what ${label} draws` : `Show what ${label} draws`;
+  b.addEventListener('click', e => { e.stopPropagation(); onClick(); });
+  return b;
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BUILD — same shape as buildDock() in ui.js: head, list, foot.
+   ══════════════════════════════════════════════════════════════════════════ */
+const dock = document.getElementById('dock');
+
+function build() {
+  // keep the four screws, rebuild everything else
+  dock.querySelectorAll(':scope > :not(.screw)').forEach(n => n.remove());
+
+  /* ── head ─────────────────────────────────────────────────────────────── */
+  const head = el('div', 'head');
+  const t = el('span', 't', 'Layers');
+  const n = el('span', 'readout', String(st.layers.length));
+  const add = el('button', 'key add', ICON.plus);
+  add.type = 'button';
+  add.title = st.layers.length >= MAX_LAYERS ? `${MAX_LAYERS} layers is the limit` : 'Add a layer';
+  add.setAttribute('aria-label', 'Add a layer');
+  add.disabled = st.layers.length >= MAX_LAYERS;
+  add.addEventListener('click', () => {
+    const inks = ['#00D6C2','#FFD400','#FF3DBE','#6EE7FF'];
+    const i = st.layers.length + 1;
+    st.layers.push(mkLayer(`L${i}`, inks[(i - 6 + inks.length) % inks.length], 0, 4, 40));
+    st.sel = i; build();
+  });
+  head.append(t, n, add);
+
+  /* ── the bay ──────────────────────────────────────────────────────────── */
+  const bay = el('div', 'bay');
+
+  /* ── ALL: one row that is every layer ─────────────────────────────────── */
+  const allSel = st.sel === 0;
+  const arw = el('button', 'row all' + (allSel ? ' sel' : ''));
+  arw.type = 'button';
+  arw.style.setProperty('--lyr', '#9aa0aa');
+  arw.title = `Set a value on all ${st.layers.length} layers at once`;
+  arw.append(el('span', 'pipe'));
+
+  const tShown = tally(l => l.shown);
+  arw.append(swBtn(tShown !== 'off', 'the letters on every layer', ICON.eye, tShown, () => {
+    const to = tShown === 'off'; st.layers.forEach(l => l.shown = to); build();
+  }));
+  const tCells = tally(l => l.cells);
+  arw.append(swBtn(tCells !== 'off', 'the placement cells on every layer', ICON.cells, tCells, () => {
+    const to = tCells === 'off'; st.layers.forEach(l => l.cells = to); build();
+  }));
+  arw.append(swBtn(st.groundOn, 'the ground', ICON.ground, st.groundOn ? 'on' : 'off', () => {
+    st.groundOn = !st.groundOn; build();
+  }));
+
+  const adot = el('span', 'jewel all');
+  adot.style.setProperty('--all-grad', paletteGrad());
+  const anm = el('span', 'name', 'ALL');
+  const asm = el('span', 'sum', `every layer · ${st.layers.length}`);
+  arw.append(adot, anm, asm, el('span', 'sep'));
+  arw.append(chevBtn(!!st.open[0], 'every layer', () => { st.open[0] = !st.open[0]; build(); }));
+  arw.addEventListener('click', () => { st.sel = 0; build(); });
+
+  const aitem = el('div', 'item');
+  aitem.appendChild(arw);
+  if (st.open[0]) {
+    const sub = el('div', 'strokes allstrip');
+    for (const [key, label, icon] of STROKES) {
+      const state = tally(l => l.strokes[key]);
+      sub.appendChild(swBtn(state !== 'off', `${label} on every layer`, icon, state, () => {
+        const to = state === 'off'; st.layers.forEach(l => l.strokes[key] = to); build();
+      }));
+    }
+    // the two that belong to no layer, after a milled gap
+    sub.appendChild(el('span', 'gap'));
+    sub.appendChild(swBtn(st.groundShadow, 'the shadow on the ground', ICON.shade, null,
+      () => { st.groundShadow = !st.groundShadow; build(); }));
+    sub.appendChild(swBtn(st.groundContours, 'the ground contours', ICON.ground, null,
+      () => { st.groundContours = !st.groundContours; build(); }));
+    aitem.appendChild(sub);
+  }
+  bay.appendChild(aitem);
+
+  /* ── the layers ───────────────────────────────────────────────────────── */
+  st.layers.forEach((L, idx) => {
+    const i = idx + 1;
+    const sel = st.sel === i;
+    const rw = el('button', 'row' + (sel ? ' sel' : '') + (L.shown ? '' : ' off'));
+    rw.type = 'button';
+    rw.style.setProperty('--lyr', L.ink);
+    rw.title = `${L.name} — layer ${i} · ${summary(L)}`;
+    rw.append(el('span', 'pipe'));
+
+    rw.append(swBtn(L.shown, `layer ${i}`, ICON.eye, null,
+      () => { L.shown = !L.shown; build(); }));
+    rw.append(swBtn(L.cells, `layer ${i}'s placement cells`, ICON.cells, null,
+      () => { L.cells = !L.cells; build(); }));
+
+    const dot = el('span', 'jewel');
+    dot.style.setProperty('--lyr', L.ink);
+    const nm = el('span', 'name', L.name);
+    rw.append(dot, nm);
+    if (L.tone) rw.append(el('span', 'tone', 'TONE'));
+    // NO SUMMARY ON A NUMBERED ROW — the shipping row spends that width on the
+    // two actions instead, and `470 · 2–103.5mm` is in the tooltip. Putting it
+    // back cost the NAME its characters, which is exactly the trade ui.js
+    // documents. The physical build is wider and it still did not fit.
+    rw.append(el('span', 'sum', ''));
+
+    const dup = el('button', 'micro', ICON.copy);
+    dup.type = 'button';
+    dup.title = st.layers.length >= MAX_LAYERS ? `${MAX_LAYERS} layers is the limit`
+              : 'Duplicate this layer — its settings, not its letters';
+    dup.setAttribute('aria-label', `Duplicate layer ${i}`);
+    dup.disabled = st.layers.length >= MAX_LAYERS;
+    dup.addEventListener('click', e => {
+      e.stopPropagation();
+      const c = JSON.parse(JSON.stringify(L));
+      c.name = `L${st.layers.length + 1}`;
+      st.layers.splice(idx + 1, 0, c);
+      st.sel = i + 1; build();
+    });
+
+    const del = el('button', 'micro del', ICON.trash);
+    del.type = 'button';
+    del.title = st.layers.length <= 1 ? 'The last layer cannot be deleted' : 'Delete this layer';
+    del.setAttribute('aria-label', `Delete layer ${i}`);
+    del.disabled = st.layers.length <= 1;
+    del.addEventListener('click', e => {
+      e.stopPropagation();
+      st.layers.splice(idx, 1);
+      st.sel = Math.min(st.sel, st.layers.length); build();
+    });
+
+    rw.append(dup, del, el('span', 'sep'));
+    rw.append(chevBtn(!!st.open[i], `layer ${i}`, () => { st.open[i] = !st.open[i]; build(); }));
+    rw.addEventListener('click', () => { st.sel = i; build(); });
+
+    const item = el('div', 'item');
+    item.style.setProperty('--lyr', L.ink);
+    item.appendChild(rw);
+    if (st.open[i]) {
+      const sub = el('div', 'strokes');
+      for (const [key, label, icon] of STROKES) {
+        sub.appendChild(swBtn(L.strokes[key], `${label} of layer ${i}`, icon, null,
+          () => { L.strokes[key] = !L.strokes[key]; build(); }));
+      }
+      item.appendChild(sub);
+    }
+    bay.appendChild(item);
+  });
+
+  /* ── foot ─────────────────────────────────────────────────────────────── */
+  const foot = el('div', 'foot');
+  const total = st.letters;
+  const wipe = el('button', 'key wipe',
+    `${ICON.clear}<span>${total ? `CLEAR ALL ${total} LETTERS` : 'NO LETTERS TO CLEAR'}</span>`);
+  wipe.type = 'button';
+  wipe.disabled = !total;
+  wipe.title = 'Throw away every letter in every layer. The layers and their settings stay.';
+  wipe.addEventListener('click', () => { st.letters = 0; build(); });
+  foot.appendChild(wipe);
+
+  dock.append(head, bay, foot);
+}
+build();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE FLAT PANEL — static, as shipped, for the side-by-side
+   ══════════════════════════════════════════════════════════════════════════ */
+(function flatPanel() {
+  const f = document.getElementById('flat');
+  const rows = [
+    ['ALL', '#8a8378', 'every layer · 5', false, true],
+    ['L1', '#FF6A00', '470 · 2–103.5mm', false, false],
+    ['L2', '#2C6BFF', '260 · 3–64mm', false, false],
+    ['L3', '#7B3FE4', '180 · 4–48mm', false, false],
+    ['L4', '#E4123F', '96 · 6–30mm', true, false],
+    ['L5', '#4CE04C', '54 · 8–22mm', false, false],
+  ];
+  f.innerHTML = `
+    <div class="f-head">
+      <span class="t">Layers</span><span class="n">5</span>
+      <span class="f-add">${ICON.plus}</span>
+    </div>
+    <div class="f-rows">
+      ${rows.map(([name, ink, sum, tone, isAll]) => `
+        <div class="f-row${name === 'L1' ? ' sel' : ''}" style="--lyr:${ink}">
+          ${isAll ? '' : `<span class="f-bar"></span>`}
+          <span class="f-eye on">${ICON.eye}</span>
+          <span class="f-eye">${ICON.eyeOff}</span>
+          <span class="f-dot"></span>
+          <span class="f-name">${name}</span>
+          ${tone ? '<span class="f-tone">TONE</span>' : ''}
+          <span class="f-sum">${isAll ? sum : ''}</span>
+          <span class="f-sep"></span>
+          <span class="f-chev">${ICON.chev}</span>
+        </div>`).join('')}
+    </div>
+    <div class="f-foot">
+      <div class="f-wipe">${ICON.clear}<span>Clear all 1060 letters</span></div>
+    </div>`;
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MORE ICONS — same stroke language as the set above
+   ══════════════════════════════════════════════════════════════════════════ */
+Object.assign(ICON, {
+  file:  svg('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'),
+  upload:svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
+  image: svg('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
+  sun:   svg('<circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>'),
+  term:  svg('<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>'),
+  search:svg('<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'),
+  ext:   svg('<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>'),
+  play:  svg('<polygon points="6 3 20 12 6 21 6 3"/>'),
+  stop:  svg('<rect x="5" y="5" width="14" height="14" rx="2"/>'),
+  folder:svg('<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>'),
+  settle:svg('<line x1="12" y1="3" x2="12" y2="14"/><polyline points="7.5 9.5 12 14 16.5 9.5"/><line x1="4" y1="20" x2="20" y2="20"/>'),
+  run:   svg('<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>'),
+  close: svg('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
+  hand:  svg('<path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v7M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8v-1a2 2 0 1 1 4 0"/>'),
+  orbit: svg('<circle cx="12" cy="12" r="3"/><path d="M12 3a9 9 0 0 1 0 18"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)"/>'),
+  arrow: svg('<polygon points="4 2 4 18 8.5 13.5 11.5 20 14 19 11 12.5 17 12.5"/>'),
+  drop:  svg('<path d="M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3z"/>'),
+});
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE KNOB — 270° of travel, drag / wheel / arrows, shift for fine
+   ══════════════════════════════════════════════════════════════════════════ */
+const RING_R = 43;                       // in the 0–100 viewBox
+const RING_C = 2 * Math.PI * RING_R;     // 270.18
+function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
+                layout = 'stack', size, bipolar = false, onChange }) {
+  const row = layout === 'row';
+  if (size == null) size = row ? 40 : 46;
+  const wrap = el('div', 'kwrap' + (row ? ' inline' : ''));
+  const k = el('div', 'knob' + (bipolar ? ' bi' : ''));
+  k.style.setProperty('--kd', size + 'px');
+  k.style.setProperty('--arc', arc);
+  k.tabIndex = 0;
+  k.setAttribute('role', 'slider');
+  k.setAttribute('aria-label', label);
+  k.setAttribute('aria-valuemin', min);
+  k.setAttribute('aria-valuemax', max);
+  // the ring: two stroked circles, antialiased by the renderer
+  const ring = el('div', null,
+    `<svg class="knob-ring" viewBox="0 0 100 100" aria-hidden="true">
+       <circle class="kr-track" cx="50" cy="50" r="${RING_R}"
+               stroke-dasharray="${RING_C * .75} ${RING_C}"/>
+       <circle class="kr-val" cx="50" cy="50" r="${RING_R}"/>
+     </svg>`).firstElementChild;
+  const valArc = ring.querySelector('.kr-val');
+  const cap = el('div', 'knob-cap');
+  k.append(el('div', 'knob-collar'), ring, cap);
+  const val = el('div', 'kval');
+  let v = value;
+
+  const paint = () => {
+    const t = (v - min) / (max - min);
+    cap.style.setProperty('--deg', (-135 + t * 270) + 'deg');
+    // Unipolar grows from the start of the sweep; bipolar grows from its middle
+    // in whichever direction you turned. One dasharray + one dashoffset does both.
+    const from = bipolar ? 0.5 : 0;
+    const len = Math.abs(t - from) * .75 * RING_C;
+    valArc.setAttribute('stroke-dasharray', `${len} ${RING_C}`);
+    valArc.setAttribute('stroke-dashoffset', `${-Math.min(t, from) * .75 * RING_C}`);
+    valArc.style.opacity = len < 1.2 ? 0 : 1;   // no round-cap dot at the origin
+    val.textContent = fmt ? fmt(v) : String(v);
+    k.setAttribute('aria-valuenow', v);
+    k.setAttribute('aria-valuetext', val.textContent);
+  };
+  const set = (nv) => {
+    const q = Math.round(nv / step) * step;
+    v = +Math.min(max, Math.max(min, q)).toFixed(6);
+    paint(); onChange && onChange(v);
+  };
+
+  // 200px of travel is the full range. DOWN AND RIGHT BOTH TURN IT CLOCKWISE:
+  // you are pushing the near edge of a cap away from you, which is the
+  // direction it would actually spin under your finger. (Audio software mostly
+  // does the opposite — drag up to raise — but that is a fader's gesture
+  // borrowed by a knob, and this panel has real faders for that.) Shift
+  // divides the travel by five.
+  let sx = 0, sy = 0, sv = 0;
+  k.addEventListener('pointerdown', e => {
+    k.setPointerCapture(e.pointerId); k.classList.add('dragging');
+    sx = e.clientX; sy = e.clientY; sv = v; e.preventDefault();
+  });
+  k.addEventListener('pointermove', e => {
+    if (!k.classList.contains('dragging')) return;
+    const d = (e.clientY - sy) + (e.clientX - sx);
+    set(sv + (d / 200) * (max - min) * (e.shiftKey ? 0.2 : 1));
+  });
+  const end = () => k.classList.remove('dragging');
+  k.addEventListener('pointerup', end);
+  k.addEventListener('pointercancel', end);
+  k.addEventListener('wheel', e => {
+    e.preventDefault();
+    set(v + Math.sign(e.deltaY) * step * (e.shiftKey ? 1 : 10));
+  }, { passive: false });
+  k.addEventListener('keydown', e => {
+    const big = (max - min) / 20;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); set(v + (e.shiftKey ? step : big)); }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); set(v - (e.shiftKey ? step : big)); }
+  });
+
+  paint();
+  // In a row the knob leads, because the knob is the control; stacked, the
+  // caption leads, because three of them side by side need naming first.
+  if (row) wrap.append(k, el('div', 'klab', label), val);
+  else wrap.append(el('div', 'klab', label), k, val);
+  wrap.set = set;
+  return wrap;
+}
+
+/* ── ONE FADER WITH TWO ENDS, because the value is ONE LENGTH ─────────────
+   Zone from and Zone to were two sliders, and two sliders is a lie about what
+   they are: there is one band, it has a start and an end, and the thing you
+   are actually setting is the SPAN between them. Two separate tracks make you
+   compute that span in your head from two positions on two different lines,
+   and they let you set from > to, which is not a state the piece has — it is
+   just a slider that has not been corrected yet.
+
+   One slot, two caps, the band lit between them. The span is now a length you
+   can SEE, dragging either end keeps the other still, the caps cannot cross,
+   and the panel gets a row back. The band carries a fine hatch so it reads as
+   a solid piece between two thumbs rather than as a fill that happens to start
+   late — the same reason the cap has a knurl. */
+const CAP_W = 17, MIN_SPAN = 0.02;
+function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
+  const row = el('div', 'fader');
+  const slot = el('div', 'fslot');
+  const track = el('div', 'ftrack');
+  const band = el('div', 'ffill band');
+  const capA = el('div', 'fcap');
+  const capB = el('div', 'fcap');
+  const out = el('div', 'kval wide');
+  track.append(band, capA, capB);
+  slot.append(track, el('div', 'fticks'));
+  let a = from, b = to;
+
+  const q = v => +Math.min(max, Math.max(min, Math.round(v / step) * step)).toFixed(6);
+  const norm = v => (v - min) / (max - min);
+  // x of a cap CENTRE, in %, allowing for the cap's own width at both ends
+  const cx = t => `calc(${t * 100}% - ${(t - .5) * CAP_W}px)`;
+
+  const paint = () => {
+    const ta = norm(a), tb = norm(b);
+    capA.style.left = cx(ta);
+    capB.style.left = cx(tb);
+    band.style.left = cx(ta);
+    band.style.width = `calc(${(tb - ta) * 100}% - ${(tb - ta) * CAP_W}px)`;
+    out.textContent = `${fmt ? fmt(a) : a}–${fmt ? fmt(b) : b}`;
+    capA.setAttribute('aria-valuenow', a);
+    capB.setAttribute('aria-valuenow', b);
+  };
+  const set = (which, v) => {
+    if (which === 0) a = Math.min(q(v), b - MIN_SPAN * (max - min));
+    else b = Math.max(q(v), a + MIN_SPAN * (max - min));
+    paint(); onChange && onChange(a, b);
+  };
+
+  // The caps are painted, not hit — the TRACK takes every pointer event and
+  // hands it to whichever cap is nearer. Grabbing a 17px thumb exactly is a
+  // pointing task nobody should be set; clicking anywhere on the line and
+  // having the near end come to you is the same gesture with no aiming.
+  let active = 0;
+  const fromX = (e, pick) => {
+    const r = track.getBoundingClientRect();
+    const usable = r.width - CAP_W;
+    const t = Math.min(1, Math.max(0, (e.clientX - r.left - CAP_W / 2) / usable));
+    const v = min + t * (max - min);
+    if (pick) active = Math.abs(v - a) <= Math.abs(v - b) ? 0 : 1;
+    set(active, v);
+  };
+  track.addEventListener('pointerdown', e => {
+    track.setPointerCapture(e.pointerId); track.dataset.on = '1'; fromX(e, true);
+  });
+  track.addEventListener('pointermove', e => { if (track.dataset.on) fromX(e, false); });
+  track.addEventListener('pointerup', () => delete track.dataset.on);
+
+  [capA, capB].forEach((c, n) => {
+    c.tabIndex = 0;
+    c.setAttribute('role', 'slider');
+    c.setAttribute('aria-label', `${label} ${n ? 'end' : 'start'}`);
+    c.setAttribute('aria-valuemin', min);
+    c.setAttribute('aria-valuemax', max);
+    c.addEventListener('keydown', e => {
+      const big = (max - min) / 20, d = e.shiftKey ? step : big;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); set(n, (n ? b : a) + d); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); set(n, (n ? b : a) - d); }
+    });
+  });
+
+  paint();
+  row.append(el('div', 'flab', label), slot, out);
+  return row;
+}
+
+/* ── the rotary selector: a teardrop lever on a ring of marks ─────────────── */
+function rotary({ options, index, onChange }) {
+  const uid = 'tr' + (rotary.n = (rotary.n || 0) + 1);
+  const row = el('div', 'rotary');
+  row.append(el('span', 'rot-seat'));
+
+  /* THE TEARDROP. Circle of r=21 centred at (50,51), tapering to a tip at
+     (50,5) — two curves down each shoulder and the arc round the bottom. Drawn
+     in SVG because the silhouette is the control: a CSS border-radius teardrop
+     has a visible seam where the two radii meet, and this one rotates, so the
+     seam would swing round with it. */
+  const knob = el('div', 'rot-knob',
+    `<svg class="tear" viewBox="0 0 100 100" aria-hidden="true">
+       <defs>
+         <linearGradient id="${uid}b" x1="18%" y1="0%" x2="82%" y2="100%">
+           <stop offset="0" stop-color="#ffffff"/>
+           <stop offset=".42" stop-color="#e4e8ee"/>
+           <stop offset=".78" stop-color="#b6bdc7"/>
+           <stop offset="1" stop-color="#8f97a2"/>
+         </linearGradient>
+         <radialGradient id="${uid}h" cx="36%" cy="30%" r="44%">
+           <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+           <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+         </radialGradient>
+       </defs>
+       <path d="M50 5 C45 26 31 33 29 51 A21 21 0 0 0 71 51 C69 33 55 26 50 5 Z"
+             fill="url(#${uid}b)" stroke="rgba(0,0,0,.6)" stroke-width="1.4"/>
+       <ellipse cx="43" cy="44" rx="14" ry="11" fill="url(#${uid}h)"/>
+       <path d="M50 9 C46 27 34 34 32 50" stroke="#fff" stroke-opacity=".85"
+             stroke-width="1.6" fill="none" stroke-linecap="round"/>
+     </svg>`);
+  knob.tabIndex = 0;
+  knob.setAttribute('role', 'listbox');
+  knob.setAttribute('aria-label', 'Place from');
+  const tear = knob.querySelector('.tear');
+  row.append(knob);
+
+  /* THE MARKS FAN TO ONE SIDE AND THE NAMES ARE A COLUMN.
+
+     Two separate things were wrong with a 270° ring. The knob had to be
+     wrenched three-quarters of a turn to cross four positions — a lot of wrist
+     for four items — and the names sat at four different angles round the
+     dial, so picking one meant finding it first. Here the whole switch lives
+     in 76° on the side facing into the panel: three short steps end to end.
+
+     The NAMES ignore that geometry entirely. They are an evenly spaced
+     vertical list at a fixed x — scanned top to bottom like any list, and each
+     one a comfortable click target rather than a word wedged between two
+     ticks. The LEADER absorbs the mismatch: it leaves the tick on the radius,
+     elbows, and runs flat into its name. That is the whole job of a leader
+     line on a real panel, and it is why engraved gear can put a tidy list
+     beside a round switch without lying about where the detents are. */
+  const N = options.length, A0 = 50, A1 = 130;     // clockwise from 12 o'clock
+  const LEAD_R = 40, ELBOW_X = 40, LAB_X = 56, LAB_GAP = 22;
+  const SVG_W = 150, SVG_H = 130, CY = SVG_H / 2;
+  const leadSvg = el('div', null,
+    `<svg class="rot-leads" width="${SVG_W}" height="${SVG_H}" viewBox="0 0 ${SVG_W} ${SVG_H}"
+          aria-hidden="true"></svg>`).firstElementChild;
+  row.append(leadSvg);
+
+  const labs = [];
+  options.forEach((o, n) => {
+    const a = A0 + (n / (N - 1)) * (A1 - A0);
+    const rad = a * Math.PI / 180;
+    const ex = Math.sin(rad) * LEAD_R, ey = -Math.cos(rad) * LEAD_R;
+    const ly = (n - (N - 1) / 2) * LAB_GAP;
+
+
+    const pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    pl.setAttribute('class', 'rot-lead');
+    pl.setAttribute('points',
+      `${ex.toFixed(1)},${(ey + CY).toFixed(1)} ${ELBOW_X},${(ly + CY).toFixed(1)} ${LAB_X - 6},${(ly + CY).toFixed(1)}`);
+    leadSvg.append(pl);
+
+    const lab = el('button', 'rot-lab', o);
+    lab.type = 'button';
+    // Two chained translates rather than one with calc(): `calc(0 + 62px)` is
+    // invalid — a bare 0 cannot be added to a length — and an invalid transform
+    // is DROPPED, which parked every label on top of the knob.
+    lab.style.transform = `translate(${LAB_X}px, ${ly}px) translate(0, -50%)`;
+    lab.addEventListener('click', () => set(n));
+    row.append(lab); labs.push(lab);
+  });
+
+  let i = index;
+  const paint = () => {
+    /* THE POINTER READS THE SAME GEOMETRY THE TICKS DO. It did not: the marks
+       were narrowed to the 50–130° fan and this line was left sweeping the old
+       -135 → +135, so the tip pointed at an angle no detent was at — the switch
+       said one thing and the lit mark said another. One expression, used twice. */
+    tear.style.setProperty('--deg', (A0 + (i / (N - 1)) * (A1 - A0)) + 'deg');
+    labs.forEach((l, n) => l.classList.toggle('on', n === i));
+    knob.setAttribute('aria-activedescendant', options[i]);
+  };
+  const set = n => { i = Math.max(0, Math.min(N - 1, n)); paint(); onChange && onChange(options[i], i); };
+
+  let sy = 0, si = 0;
+  knob.addEventListener('pointerdown', e => {
+    knob.setPointerCapture(e.pointerId); knob.classList.add('dragging'); sy = e.clientY; si = i;
+  });
+  knob.addEventListener('pointermove', e => {
+    if (!knob.classList.contains('dragging')) return;
+    // down = clockwise = down the list, which is also the order the names are
+    // printed in — the gesture, the rotation and the reading all agree
+    set(si + Math.round((e.clientY - sy) / 26));
+  });
+  knob.addEventListener('pointerup', () => knob.classList.remove('dragging'));
+  knob.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); set(i + 1); }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); set(i - 1); }
+  });
+  paint();
+  return row;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE PANEL OUTLINE: rounded rectangle ∪ lobe, joined by tangent fillets.
+
+   Traversed clockwise from the top-left corner. Everything except the left
+   edge is an ordinary rounded rect; on the way back UP the left edge the path
+   flares out around the lobe and returns.
+
+   THE FILLET is the whole point — a circle butting a straight line leaves two
+   corners, and a moulded boss has a flare where it grows out of the face. A
+   fillet of radius f is tangent to the edge (so its centre is f to the left of
+   it) and externally tangent to the lobe (so its centre is R+f from the lobe's
+   centre). Those two conditions fix it, and the tangent point on the lobe is
+   just f/(R+f) of the way from one centre to the other.
+
+     L   the face's left edge          cx,cy  lobe centre, cx > L so it crosses
+     R   lobe radius                   f      fillet radius
+   ══════════════════════════════════════════════════════════════════════════ */
+function panelShape(w, h, cy, { L = 52, R = 44, f = 12, r = 14, cxOff = -8 } = {}) {
+  const cx = L + cxOff;
+  const fcx = L - f;                                  // fillet centre x
+  const d = cx - fcx;                                 // centre-to-centre, x only
+  const dy2 = (R + f) * (R + f) - d * d;
+  if (dy2 <= 0 || cy - Math.sqrt(dy2) < r + 4 || cy + Math.sqrt(dy2) > h - r - 4) {
+    // no room for the lobe on this panel — fall back to the plain rectangle
+    return `inset(0 0 0 ${L}px round ${r}px)`;
+  }
+  const fy = Math.sqrt(dy2);                          // fillet centre offset from cy
+  const k = f / (R + f);
+  const px = fcx + d * k;                             // tangent point on the lobe
+  const py = fy - fy * k;                             // …measured from cy
+  const n = v => (+v).toFixed(2);
+  return `path('M ${n(L + r)} 0
+    H ${n(w - r)} A ${r} ${r} 0 0 1 ${n(w)} ${r}
+    V ${n(h - r)} A ${r} ${r} 0 0 1 ${n(w - r)} ${n(h)}
+    H ${n(L + r)} A ${r} ${r} 0 0 1 ${n(L)} ${n(h - r)}
+    V ${n(cy + fy)}
+    A ${f} ${f} 0 0 0 ${n(px)} ${n(cy + py)}
+    A ${R} ${R} 0 0 1 ${n(px)} ${n(cy - py)}
+    A ${f} ${f} 0 0 0 ${n(L)} ${n(cy - fy)}
+    V ${r} A ${r} ${r} 0 0 1 ${n(L + r)} 0 Z')`.replace(/\s+/g, ' ');
+}
+
+/* A key. `latch:true` stays down; otherwise it springs back and pulses. */
+function key(html, { cls = '', title, down = false, latch = false, onClick, disabled = false } = {}) {
+  const b = el('button', `key skirt ${cls}` + (down ? ' is-down' : ''), html);
+  b.type = 'button';
+  if (title) { b.title = title; b.setAttribute('aria-label', title); }
+  b.disabled = disabled;
+  if (latch) b.setAttribute('aria-pressed', String(down));
+  b.addEventListener('click', () => {
+    if (!latch) { b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
+    onClick && onClick(b);
+  });
+  return b;
+}
+/* A piano key — latching, and its bar holds one down at a time. */
+function pkey(labelHtml, { down = false, title, onClick, cls = '' } = {}) {
+  const b = el('button', `pkey ${cls}` + (down ? ' is-down' : ''), labelHtml);
+  b.type = 'button';
+  b.setAttribute('role', 'radio');
+  b.setAttribute('aria-checked', String(down));
+  if (title) b.title = title;
+  b.addEventListener('click', () => onClick && onClick());
+  return b;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   02 · THE NAV BAR
+   ══════════════════════════════════════════════════════════════════════════ */
+const nav = { ref: true, light: true, cells: false, letters: 1060 };
+(function navbar() {
+  const bar = document.getElementById('navbar');
+  const draw = () => {
+    bar.textContent = '';
+    // momentary — they DO something
+    bar.append(key(ICON.file,   { title: 'New piece' }));
+    bar.append(key(ICON.upload, { title: 'Export SVG' }));
+    bar.append(el('span', 'chan'));
+    // latching — they ARE something
+    bar.append(key(ICON.image, { title: 'Reference image', latch: true, down: nav.ref,
+      onClick: () => { nav.ref = !nav.ref; draw(); } }));
+    bar.append(key(ICON.sun,   { title: 'Light', latch: true, down: nav.light,
+      onClick: () => { nav.light = !nav.light; draw(); } }));
+    bar.append(key(ICON.cells, { title: 'Placement cells', latch: true, down: nav.cells,
+      onClick: () => { nav.cells = !nav.cells; draw(); } }));
+    bar.append(el('span', 'chan'));
+    bar.append(key(ICON.term, { title: 'Console' }));
+    const lcd = el('div', 'lcd' + (nav.letters ? '' : ' dim'),
+      `${nav.letters} LETTERS <span style="opacity:.6">· LOADED</span>`);
+    bar.append(lcd);
+  };
+  draw();
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   03 · THE PAGE SWITCHER
+   ══════════════════════════════════════════════════════════════════════════ */
+(function pageSwitcher() {
+  const bar = document.getElementById('pages');
+  const PAGES = ['3D', 'Canvas', 'Maps'];
+  let at = 0;
+  const draw = () => {
+    bar.textContent = '';
+    PAGES.forEach((p, i) => bar.append(pkey(p, {
+      down: i === at, title: `Go to ${p}`, onClick: () => { at = i; draw(); },
+    })));
+  };
+  draw();
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   04 · THE LAYER EDITOR — L1 / Place
+   ══════════════════════════════════════════════════════════════════════════ */
+/* A portrait without an asset — a blurred SVG bust, because the panel needs
+   something that reads as A PHOTOGRAPH at thumbnail size, and stacked radial
+   gradients read as a lens flare. Head, shoulders, two eye sockets and a
+   mouth line, all under one 2.2 blur. It only has to survive being 56px wide
+   behind glass. */
+const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='2'/%3E%3C/filter%3E%3CradialGradient id='g' cx='40%25' cy='28%25'%3E%3Cstop offset='0' stop-color='%23f4f1eb'/%3E%3Cstop offset='.5' stop-color='%23b0a89d'/%3E%3Cstop offset='1' stop-color='%23524d47'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='%231b1a18'/%3E%3Cg filter='url(%23b)'%3E%3Cpath d='M50 63c19 0 31 15 34 40H16c3-25 15-40 34-40z' fill='%237d766d'/%3E%3Cellipse cx='50' cy='39' rx='21' ry='26' fill='url(%23g)'/%3E%3Cellipse cx='42' cy='37' rx='3.4' ry='2.2' fill='%233d3833' opacity='.75'/%3E%3Cellipse cx='58' cy='37' rx='3.4' ry='2.2' fill='%233d3833' opacity='.75'/%3E%3Cpath d='M44 51c4 3 9 3 13 0' stroke='%23433e39' stroke-width='2.4' fill='none' opacity='.65'/%3E%3Cpath d='M50 41v6' stroke='%235e564e' stroke-width='2' opacity='.5'/%3E%3C/g%3E%3C/svg%3E\") center/cover";
+
+(function editor() {
+  const box = document.getElementById('editor');
+  const TABS = ['Letters', 'Place', 'Size', 'Drop', 'Shade'];
+  const state = { tab: 1, from: 1, count: 470, zoneA: 0, zoneB: .43, fall: true };
+
+  const draw = () => {
+    box.textContent = '';
+    /* head */
+    const head = el('div', 'box-head');
+    const j = el('span', 'jewel'); j.style.setProperty('--lyr', '#FF6A00');
+    head.append(j, el('span', 'nm', 'L1'), el('span', 'tone', 'TONE'));
+    const x = key(ICON.close, { title: 'Close the panel' });
+    x.style.width = '26px'; x.style.height = '26px';
+    x.querySelector('svg').style.width = '13px'; x.querySelector('svg').style.height = '13px';
+    head.append(x);
+
+    const body = el('div', 'box-body');
+
+    /* tabs — one bar, one key down */
+    const tabs = el('div', 'piano sm');
+    TABS.forEach((t, i) => tabs.append(pkey(t, {
+      down: i === state.tab, title: `${t} settings`, onClick: () => { state.tab = i; draw(); },
+    })));
+    body.append(tabs);
+
+    if (state.tab !== 1) {
+      body.append(el('div', 'empty', 'PLACE IS THE ONLY TAB DRAWN HERE'));
+      box.append(head, body);
+      return;
+    }
+
+    /* the loaded map */
+    const film = el('div', 'filmrow');
+    const th = el('div', 'thumb');
+    th.style.background = PORTRAIT;
+    const meta = el('div', 'meta');
+    meta.append(el('div', 'fn', 'main.png'), el('div', 'fs', 'THIS LAYER ONLY'));
+    const stack = el('div', 'stack');
+    stack.append(key('LOAD', { title: 'Load a map for this layer' }),
+                 key('CLEAR', { title: 'Put this layer back on the main reference' }));
+    film.append(th, meta, stack);
+    body.append(film);
+
+    body.append(el('div', 'divider'));
+
+    /* ONE BAY: the selector on the panel edge, its two neighbours beside it.
+       Place from, Count and Attempts are the three questions this tab asks and
+       they were three stacked blocks; the boss hanging off the case is what
+       bought the width to put them on one line. */
+    body.append(el('div', 'bay-cap', 'Place from'));
+    const bay = el('div', 'placebay');
+    const dial = rotary({
+      options: ['Reference', 'Tone', 'Density', 'Size'], index: state.from,
+      onChange: (_, i) => { state.from = i; },
+    });
+    bay.append(dial);
+    const kr = el('div', 'knobcol');
+    kr.append(knob({
+      label: 'Count', min: 0, max: 2000, step: 10, value: state.count, layout: 'row', size: 38,
+      onChange: v => { state.count = v; },
+    }));
+    kr.append(knob({
+      label: 'Attempts', min: 1, max: 60, step: 1, value: 24, layout: 'row', size: 38,
+    }));
+    bay.append(kr);
+    body.append(bay);
+
+    /* the preview, behind glass */
+    const scr = el('div', 'screen');
+    const img = el('div');
+    img.style.cssText = `height:120px;border-radius:4px;background:${PORTRAIT}`;
+    scr.append(img, el('span', 'cap', 'PLACE · TONE'));
+    body.append(scr);
+
+    /* Zone from / Zone to — a LENGTH, so they stay faders */
+    body.append(rangeFader({ label: 'Zone', min: 0, max: 1,
+      from: state.zoneA, to: state.zoneB, fmt: v => v.toFixed(2),
+      onChange: (x, y) => { state.zoneA = x; state.zoneB = y; } }));
+
+    body.append(el('div', 'divider'));
+
+    /* the run row */
+    const acts = el('div', 'actrow');
+    acts.append(key(`<span class="lens"></span>${ICON.run}<span>COMPUTE</span>`,
+      { cls: 'act fire', title: 'Compute this layer' }));
+    acts.append(key(`${ICON.settle}<span>SETTLE</span>`, { cls: 'act aux', title: 'Re-apply gravity' }));
+    const pad = key(ICON.drop, { cls: 'act aux', title: 'Which way this layer falls',
+      latch: true, down: state.fall, onClick: () => { state.fall = !state.fall; draw(); } });
+    pad.style.flex = '0 0 auto'; pad.style.padding = '0 11px';
+    acts.append(pad);
+    body.append(acts);
+
+    const foot = el('div', 'actrow');
+    foot.append(key(`${ICON.clear}<span>CLEAR LETTERS</span>`, { cls: 'act aux', title: "Throw away this layer's letters" }));
+    const bin = key(ICON.trash, { cls: 'act aux', title: 'Delete this layer' });
+    bin.style.flex = '0 0 auto'; bin.style.padding = '0 11px';
+    foot.append(bin);
+    body.append(foot);
+
+    /* THE BULGE IS BOLTED TO THE CASE, so it is a child of the case — and its
+       height is wherever the dial ended up, which only layout knows. Measured
+       after paint rather than guessed from a stack of paddings that would go
+       stale the first time a row above it changed. */
+    box.classList.add('bulge');
+    box.append(head, body);
+    requestAnimationFrame(() => {
+      const d = dial.getBoundingClientRect(), b = box.getBoundingClientRect();
+      const y = d.top + d.height / 2 - b.top;
+      box.style.setProperty('--boss-y', `${y.toFixed(1)}px`);
+      box.style.setProperty('--panel-shape', panelShape(b.width, b.height, y));
+    });
+  };
+  draw();
+})();
+
+/* ── the A/B: the same control, shipped and physical ──────────────────────── */
+(function sliderVsKnob() {
+  const box = document.getElementById('mini-knobs');
+  box.style.flex = '0 0 268px'; box.style.width = '268px';
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'SLIDER → KNOB'));
+  const body = el('div', 'box-body');
+
+  const shipped = el('div');
+  shipped.style.cssText = 'background:hsla(0,0%,94%,.95);border-radius:10px;padding:12px 13px;color:#2a2622';
+  shipped.innerHTML = `
+    <div style="font-size:9px;letter-spacing:.14em;color:#96908a;margin-bottom:9px">AS SHIPPED</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;flex:0 0 46px;color:#4a453f">Count</span>
+      <span style="flex:1;height:4px;border-radius:2px;background:#d9d4cd;position:relative">
+        <span id="ab-fill" style="position:absolute;left:0;top:0;bottom:0;width:23.5%;background:#FF6A00;border-radius:2px"></span>
+        <span id="ab-cap" style="position:absolute;left:23.5%;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#FF6A00"></span>
+      </span>
+      <span id="ab-num" style="font-size:11px;font-variant-numeric:tabular-nums;background:#fff;border-radius:5px;padding:3px 8px;color:#2a2622">470</span>
+    </div>`;
+  body.append(shipped);
+
+  const note = el('div', 'klab', '↓  same value, same range');
+  note.style.textAlign = 'center';
+  body.append(note);
+
+  // The two halves are ONE value. Turning the knob moves the slider above it —
+  // a comparison that drifts apart the moment you touch it is not a comparison,
+  // and this card's whole claim is "same value, same range".
+  const fill = shipped.querySelector('#ab-fill');
+  const capd = shipped.querySelector('#ab-cap');
+  const num  = shipped.querySelector('#ab-num');
+  const wrap = el('div', 'knobcol');
+  wrap.append(knob({
+    label: 'Count', min: 0, max: 2000, step: 10, value: 470, layout: 'row', size: 44,
+    onChange: v => {
+      const pc = (v / 2000 * 100).toFixed(1) + '%';
+      fill.style.width = pc; capd.style.left = pc; num.textContent = v;
+    },
+  }));
+  body.append(wrap);
+
+  const why = el('p', 'mat-d',
+    'The arc is the part that does the work: <b style="color:#c6cad1">470 of 2000</b> is a shape you judge without reading, and the pointer angle survives being glanced at. What is lost is the drag-anywhere-along-a-line gesture — a knob needs a grab point, so it is worse on touch and worse when you want to slam a value to the end.');
+  why.style.marginTop = '2px';
+  body.append(why);
+
+  box.append(head, body);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   05 · THE VIEWPORT
+   ══════════════════════════════════════════════════════════════════════════ */
+(function viewport() {
+  const box = document.getElementById('viewport');
+  const VIEWS = ['Front', 'Right', 'Top', 'Back', 'Left', 'Bottom'];
+  const TOOLS = [['Pan', ICON.hand], ['Turn', ICON.orbit], ['Select', ICON.arrow]];
+  const st2 = { view: 0, tool: 2, yaw: 0, pitch: 0, roll: 0 };
+  let knobs = [];
+
+  const draw = () => {
+    box.textContent = '';
+    const head = el('div', 'box-head');
+    head.append(el('span', 'nm', 'VIEWPORT'));
+    const lcd = el('div', 'lcd', VIEWS[st2.view].toUpperCase());
+    head.append(lcd);
+    const body = el('div', 'box-body');
+
+    /* the axis ball. Each node is a view — the picture IS the control. */
+    const gz = el('div', 'gizmo');
+    const arm = (deg, len, ax) => {
+      const a = el('div', 'gz-arm');
+      a.style.cssText = `width:${len}px;transform:rotate(${deg}deg) translateY(-1px)`;
+      a.style.setProperty('--ax', ax);
+      return a;
+    };
+    const node = (x, y, ax, view, hollow) => {
+      const b = el('button', 'gz-node' + (hollow ? ' hollow' : ''));
+      b.type = 'button';
+      b.style.cssText = `left:${x}px;top:${y}px`;
+      b.style.setProperty('--ax', ax);
+      b.title = `${view} view`;
+      b.setAttribute('aria-label', `${view} view`);
+      b.addEventListener('click', () => { st2.view = VIEWS.indexOf(view); draw(); });
+      return b;
+    };
+    const C = 66, R = 40;
+    gz.append(arm(0, R, '#FF4A4A'), arm(180, R, '#FF4A4A'),
+              arm(-90, R, '#4ADE80'), arm(90, R, '#4ADE80'),
+              arm(-140, R * .62, '#5AA9FF'));
+    gz.append(node(C + R, C, '#FF4A4A', 'Right'), node(C - R, C, '#FF4A4A', 'Left', true),
+              node(C, C - R, '#4ADE80', 'Top'), node(C, C + R, '#4ADE80', 'Bottom', true),
+              node(C - R * .48, C - R * .40, '#5AA9FF', 'Back', true));
+    const hub = el('button', 'gz-node');
+    hub.type = 'button';
+    hub.style.cssText = `left:${C}px;top:${C}px;width:17px;height:17px;margin:-8.5px 0 0 -8.5px`;
+    hub.style.setProperty('--ax', '#5AA9FF');
+    hub.title = 'Front view';
+    hub.setAttribute('aria-label', 'Front view');
+    hub.addEventListener('click', () => { st2.view = 0; draw(); });
+    gz.append(hub);
+    body.append(gz);
+
+    /* six latching view keys, interlocked with the ball */
+    const pad = el('div', 'keypad');
+    VIEWS.forEach((v, i) => pad.append(pkey(v, {
+      down: i === st2.view, title: `${v} view`, onClick: () => { st2.view = i; draw(); },
+    })));
+    body.append(pad);
+
+    /* three interlocked tool keys */
+    const mode = el('div', 'modepad');
+    TOOLS.forEach(([t, ic], i) => mode.append(pkey(`${ic}${t}`, {
+      down: i === st2.tool, title: `${t} tool`, onClick: () => { st2.tool = i; draw(); },
+    })));
+    body.append(mode);
+
+    body.append(el('div', 'divider'));
+
+    /* Yaw / Pitch / Roll — three angles, so three knobs. The pointer IS the
+       angle, which is the one case where a knob is not a preference. */
+    const kr = el('div', 'knobrow');
+    knobs = [
+      knob({ label: 'Yaw', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.yaw,
+             fmt: v => `${v}°`, onChange: v => { st2.yaw = v; } }),
+      knob({ label: 'Pitch', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.pitch,
+             fmt: v => `${v}°`, onChange: v => { st2.pitch = v; } }),
+      knob({ label: 'Roll', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.roll,
+             fmt: v => `${v}°`, onChange: v => { st2.roll = v; } }),
+    ];
+    knobs.forEach(k => kr.append(k));
+    body.append(kr);
+
+    const acts = el('div', 'actrow');
+    acts.append(key('<span>FIT</span>', { cls: 'act aux', title: 'Fit the piece in the view' }));
+    acts.append(key('<span>RESET</span>', { cls: 'act aux', title: 'Back to 0° on all three',
+      onClick: () => { st2.yaw = st2.pitch = st2.roll = 0; knobs.forEach(k => k.set(0)); } }));
+    body.append(acts);
+
+    box.append(head, body);
+  };
+  draw();
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   06 · LAUNCHPAD
+   ══════════════════════════════════════════════════════════════════════════ */
+(function launchpad() {
+  const root = document.getElementById('console');
+  const PROJECTS = [
+    { name:'Portrait-Typo', folder:'Portrait', port:2857, up:true,
+      desc:'Generative portrait engine — 3D letters dropped into a virtual box under gravity, settled by physics, then flattened into a hatch-filled pen-plotter drawing.',
+      tags:['dev'] },
+    { name:'Portrait-ribbons', folder:'Portrait', port:2855, up:true,
+      desc:'Generative portrait engine — 3D ribbons on a flow field, twisting from face-on to edge-on to draw a portrait in white on black.',
+      tags:['dev'] },
+    { name:'Portrait-Cubes', folder:'Portrait', port:2851, up:true,
+      desc:'Generative isometric cube grid with hatching for pen plotter — portrait encoding via grayscale density.',
+      tags:['dev','start'] },
+    { name:'Portrait-DNA', folder:'Portrait', port:2853, up:false,
+      desc:'Generative portrait engine — DNA-shaped pattern layered over a portrait image, plotter-ready.',
+      tags:['dev'] },
+  ];
+  const FOLDERS = ['All', 'Portrait', 'Razo', 'Web'];
+  let folder = 0, q = '';
+
+  const visible = () => PROJECTS.filter(p =>
+    (folder === 0 || p.folder === FOLDERS[folder]) &&
+    p.name.toLowerCase().includes(q.toLowerCase()));
+
+  const draw = (keepFocus) => {
+    root.textContent = '';
+    const top = el('div', 'con-top');
+    FOLDERS.forEach((f, i) => {
+      const n = f === 'All' ? PROJECTS.length : PROJECTS.filter(p => p.folder === f).length;
+      const c = el('button', 'chip' + (i === folder ? ' is-down' : ''), `${f}<span class="ct">${n}</span>`);
+      c.type = 'button';
+      c.setAttribute('role', 'radio');
+      c.setAttribute('aria-checked', String(i === folder));
+      c.addEventListener('click', () => { folder = i; draw(); });
+      top.append(c);
+    });
+    const nf = el('button', 'chip new', '+ NEW FOLDER');
+    nf.type = 'button';
+    top.append(nf);
+
+    const slot = el('div', 'slot', ICON.search);
+    const inp = el('input');
+    inp.type = 'search'; inp.placeholder = 'SEARCH'; inp.value = q;
+    inp.setAttribute('aria-label', 'Search projects');
+    inp.addEventListener('input', () => { q = inp.value; draw(true); });
+    slot.append(inp);
+    top.append(slot);
+
+    const running = PROJECTS.filter(p => p.up).length;
+    const lcd = el('div', 'lcd' + (running ? '' : ' dim'), `${running} RUNNING`);
+    lcd.style.marginLeft = 'auto';
+    top.append(lcd, el('div', 'lcd dim', `${visible().length} SHOWN`));
+
+    const rack = el('div', 'rack');
+    const list = visible();
+    if (!list.length) rack.append(el('div', 'empty', 'NO PROJECTS IN THIS FOLDER'));
+
+    list.forEach(p => {
+      const m = el('div', 'module' + (p.up ? ' up' : ''));
+      const head = el('div', 'mod-head');
+      head.append(el('span', 'pilot'), el('span', 'mod-name', p.name), el('span', 'stamp', 'NODE'));
+      m.append(head, el('p', 'mod-desc', p.desc));
+
+      if (p.up) {
+        const port = el('button', 'port', `${ICON.ext}<span>localhost:${p.port}</span><span>OPEN</span>`);
+        port.type = 'button';
+        port.title = 'Open in browser';
+        m.append(port);
+      }
+
+      const acts = el('div', 'mod-acts');
+      acts.append(p.up
+        ? key(`<span class="lens"></span>${ICON.stop}<span>STOP</span>`, { cls: 'act halt',
+            title: `Stop ${p.name}`, onClick: () => { p.up = false; draw(); } })
+        : key(`<span class="lens"></span>${ICON.play}<span>LAUNCH</span>`, { cls: 'act go',
+            title: `Launch ${p.name}`, onClick: () => { p.up = true; draw(); } }));
+      acts.append(key(`${ICON.term}<span>iTerm</span>`, { cls: 'act aux', title: 'Open in iTerm' }));
+      acts.append(key(`${ICON.folder}<span>Finder</span>`, { cls: 'act aux', title: 'Reveal in Finder' }));
+      m.append(acts);
+
+      const tags = el('div', 'mod-tags');
+      tags.append(el('span', 'tagcut folder', p.folder));
+      p.tags.forEach(t => tags.append(el('span', 'tagcut', t)));
+      m.append(tags, el('span', 'grip'));
+      rack.append(m);
+    });
+
+    root.append(top, rack);
+    if (keepFocus) {
+      const f = root.querySelector('.slot input');
+      f.focus(); f.setSelectionRange(f.value.length, f.value.length);
+    }
+  };
+  draw();
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MATERIALS
+   ══════════════════════════════════════════════════════════════════════════ */
+(function materials() {
+  const box = document.getElementById('mats');
+  const tiles = [
+    ['Chassis / plate',
+     '<span class="demo-plate"></span>',
+     'A raised body. Two inset hairlines do the bevel — <code>rgba(255,255,255,.14)</code> on top, <code>rgba(0,0,0,.85)</code> below — plus a wide cast shadow and a tight contact shadow.'],
+    ['Milled well',
+     '<span class="demo-well"></span>',
+     'The same two hairlines, swapped. A deep <code>inset</code> shadow from the top edge and a 1px light OUTSIDE the bottom. Everything that holds other controls is a well.'],
+    ['Backlit key',
+     `<span class="sw on">${ICON.eye}</span><span class="sw">${ICON.eyeOff}</span><span class="sw mixed">${ICON.cells}</span>`,
+     'On, off, and mixed. Three states with three <em>shapes</em>, not three shades: lit face, dead face, hairline ring. Colour alone fails at 24px.'],
+    ['Jewel LED',
+     '<span class="jewel" style="--lyr:#FF6A00"></span><span class="jewel" style="--lyr:#2C6BFF"></span><span class="jewel" style="--lyr:#4CE04C"></span>',
+     'A lens, not a dot: off-centre white specular at 34%/28%, the colour at mid-radius, a dark rim, and two glow rings outside.'],
+    ['Light pipe',
+     '<span style="display:flex;gap:12px;height:56px"><span class="pipe" style="--lyr:#FF6A00"></span><span class="pipe" style="--lyr:#E4123F"></span><span class="pipe" style="--lyr:#4CE04C"></span></span>',
+     'Edge-lit acrylic. A hot white core blurred 1px, the colour around it, and the bloom spilling onto the metal. This replaces the 3px flat colour bar.'],
+    ['Engraving',
+     '<span class="demo-etch">LAYERS</span>',
+     'Cut into the metal: the glyph is <em>darker</em> than the surface with a 1px light line under it — the lit far wall of the cut. Never white text on grey.'],
+    ['Rotary knob',
+     '<span id="mat-knob"></span>',
+     '270° of travel, a lit arc for the value and a pointer you read at a glance. Replaces every slider that sets a <em>quantity</em>. Drag, wheel, arrows; <code>shift</code> for fine.'],
+    ['Momentary vs latching',
+     `<span class="key skirt" style="width:38px;height:38px;border-radius:9px">${ICON.upload}</span>
+      <span class="key skirt is-down" style="width:38px;height:38px;border-radius:9px">${ICON.sun}</span>`,
+     'Left springs back and pulses — it <em>did</em> something. Right is held down by the mechanism with its lamp on — it <em>is</em> something. Flat UI has no way to say this.'],
+    ['Illuminated key',
+     `<span class="key skirt act go" style="height:32px;padding:0 13px;gap:8px;font-family:var(--font);font-size:10.5px;font-weight:700"><span class="lens"></span>${ICON.play}<span>LAUNCH</span></span>`,
+     'The lamp lens is <em>inside</em> the cap, left of the label, the way a real illuminated pushbutton is built — so the state is in the button, not next to it.'],
+  ];
+  box.innerHTML = tiles.map(([t, demo, d]) => `
+    <div class="mat">
+      <div class="mat-stage">${demo}</div>
+      <div class="mat-body"><p class="mat-t">${t}</p><p class="mat-d">${d}</p></div>
+    </div>`).join('');
+  // the knob tile gets a live one
+  document.getElementById('mat-knob')
+          .replaceWith(knob({ label: '', min: 0, max: 100, value: 62, size: 58 }));
+})();
+</script>
+</body>
+</html>

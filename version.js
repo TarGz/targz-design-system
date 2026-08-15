@@ -1,6 +1,23 @@
-export const version = '1.3.0';
+export const version = '1.4.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.4.0',
+    date: '2026-08-15',
+    changes: [
+      'New document explorations/physical-ui-layers.html — a "what if the language were hardware" study. It is an EXPLORATION, not part of the system: index.html is untouched and none of these tokens exist there',
+      'Six shipping components redrawn in the skeuomorphic register, each with its real anatomy: the Portrait-Typo layer dock (lifted control-for-control from its ui.js), the nav bar, the page switcher, the layer editor, the viewport and a Launchpad project card',
+      'Buttons are objects with a body: a skirt, a cast shadow and real travel. Momentary keys spring back and pulse once; latching keys hold the same position a finger would, which is the distinction flat UI has no way to make',
+      'Latched, pressed and open all share one recipe — the cap keeps its own colour, the gradient inverts, a hard black inset runs along the top and a hairline of light along the bottom, and only the legend lights. Three-state switches sit at three physical heights (up / half / down), so the state reads in greyscale',
+      'One legend per switch: the plain drawing at normal weight, never struck through or dimmed, since the cap position already says on or off and a slashed grey icon reads as disabled',
+      'Sliders that set a quantity became knobs — 270° of travel, an SVG-stroked value arc (a conic gradient behind a CSS mask aliases on three edges), a pointer, drag/wheel/keys, and a bipolar mode that grows from 12 o\'clock. Drag down turns clockwise',
+      'Zone from / Zone to became ONE range fader, because the value is one length: cut slot, engraved scale, two waisted caps that cannot cross, a hatched band between them',
+      'The Place-from dropdown became a rotary selector: a pale teardrop lever, positions fanned into 76° with their names as a vertical list, leader lines absorbing the angle mismatch',
+      'The editor panel bulges around that selector — rounded rectangle unioned with a lobe and joined by tangent fillets, as one clip-path on one element, so the fill cannot seam. Its drop shadow is a filter on a wrapper, because a box-shadow is cast by the border-box and would cut the bulge in half',
+      'Glow is spent only on things that emit: light pipes, LED readouts and the big illuminated action keys',
+      'Closes with the bill — what the language buys, and what it costs (dark-only, paint cost per row, small type against grain, and that it out-shouts the drawing)',
+    ],
+  },
   {
     version: '1.3.0',
     date: '2026-08-06',

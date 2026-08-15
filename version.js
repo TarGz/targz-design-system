@@ -1,6 +1,16 @@
-export const version = '1.12.1';
+export const version = '1.12.2';
 
 export const CHANGELOG = [
+  {
+    version: '1.12.2',
+    date: '2026-08-15',
+    changes: [
+      'PROSE CUT THROUGHOUT physical-ui-layers.html. The page had grown an essay per section — three lede paragraphs where one does the job, and section 07 running to five paragraphs describing a control that is on screen, live, two inches below the sentence describing it',
+      'The rule applied: if the demo shows it, do not write it. A dial with six visible positions does not need its six positions listed; a knob with a lit arc does not need the arc described. What survives is the part the picture cannot say — why a ball and not a swatch, why the blob is not optional, why the three knobs stay independent',
+      'Section 07 from ~40 lines to 11. Masthead 3 paragraphs to 2, the warning banner halved, sections 01–06 and 08 cut to two or three sentences each, both bill columns tightened, and the fifteen material tiles trimmed of their restatements',
+      'No markup, no control and no behaviour touched — text only. Script parses, div count unchanged at 44, mat-count still writes itself',
+    ],
+  },
   {
     version: '1.12.1',
     date: '2026-08-15',

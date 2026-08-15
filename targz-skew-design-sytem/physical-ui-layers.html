@@ -15,42 +15,33 @@
     <p class="kicker">targz-skew-design-system · exploration 01 · not adopted</p>
     <h1>Skew —<br>the targz language as hardware</h1>
     <p class="lede">
-      If the targz language were rebuilt in the <b>hardcore skeuomorphic register</b> —
-      anodised chassis, backlit keys, jewel LEDs, engraved plates, edge-lit acrylic,
-      knurled knobs — what happens to the things we actually ship? Six of them, redrawn:
-      the <b>layer dock</b>, the <b>nav bar</b>, the <b>page switcher</b>, the
-      <b>layer editor</b>, the <b>viewport</b> and a <b>Launchpad card</b>.
+      The targz language in the <b>skeuomorphic register</b> — anodised chassis, backlit
+      keys, jewel LEDs, engraved plates, knurled knobs. The things we ship, redrawn:
+      <b>layer dock</b>, <b>nav bar</b>, <b>page switcher</b>, <b>layer editor</b>,
+      <b>viewport</b>, <b>Launchpad card</b>, <b>hatch bay</b>. Anatomies are the real
+      ones — the dock is lifted control-for-control from <b>Portrait-Typo/ui.js</b>.
     </p>
     <p class="lede">
-      <b>Skew</b>, because it is the word the hand types when it means <i>skeuomorphic</i>,
-      and because that is also the whole trick: a flat plane tilted into depth, lit from
-      one lamp above left, and nothing here is actually raised.
-    </p>
-    <p class="lede">
-      Every anatomy is the real one — the layer dock is lifted control-for-control from
-      <b>Portrait-Typo/ui.js</b>. Two rules held throughout: <b>every button is a real
-      button</b> with a body, a skirt and travel, momentary or latching; and
-      <b>every slider that sets a quantity became a knob</b>, except where the value is
-      a length, which stays a fader. Everything on this page works — press it.
+      Two rules: <b>every button is a real button</b> with a body, a skirt and travel,
+      momentary or latching; <b>every slider that sets a quantity became a knob</b>,
+      unless the value is a length, which stays a fader. One lamp, above left.
+      Everything here works — press it.
     </p>
   </div>
 
   <div class="warn">
     <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
     <div>
-      <b>This is a separate document.</b> <code>index.html</code> — the design system —
-      is untouched, and none of these tokens exist there. Treat this as a look-see:
-      the panel below is live, everything clicks, and the last two sections are the
-      honest bill for adopting it.
+      <b>Separate document.</b> <code>index.html</code> is untouched and none of these
+      tokens exist there. Section 10 is the bill for adopting it.
     </div>
   </div>
 
   <h2>01 <span>/</span> The panel</h2>
   <p class="sub">
-    Left, the physical build — every control works: the switches latch, the masters
-    read <em>on / mixed / off</em>, the chevrons open the stroke strip, add and delete
-    change the list, and the footer counts what it will destroy. Right, what ships
-    today, at the same scale.
+    Left, the physical build — switches latch, masters read <em>on / mixed / off</em>,
+    chevrons open the stroke strip, the footer counts what delete will destroy.
+    Right, what ships today, at the same scale.
   </p>
 
   <div class="stage">
@@ -65,10 +56,9 @@
   <h2>02 <span>/</span> The nav bar <span>·</span> momentary vs latching</h2>
   <p class="sub">
     The one idea flat UI cannot express. <b>Import</b>, <b>Export</b> and <b>Console</b> are
-    <em>momentary</em> — they spring back and pulse once, because they DID something.
-    <b>Reference</b>, <b>Light</b> and <b>Cells</b> are <em>latching</em> — they stay down with
-    the lamp on, because they ARE something. Today all six are the same grey icon and the
-    difference lives in a tooltip. Press them.
+    <em>momentary</em> — they spring back, because they DID something. <b>Reference</b>,
+    <b>Light</b> and <b>Cells</b> are <em>latching</em> — they stay down with the lamp on,
+    because they ARE something. Today all six are the same grey icon. Press them.
   </p>
   <div class="stage">
     <div class="stage-note">momentary · latching · readout</div>
@@ -77,10 +67,9 @@
 
   <h2>03 <span>/</span> The page switcher <span>·</span> mechanical interlock</h2>
   <p class="sub">
-    Three latching keys on one bar, and the bar holds one down at a time — the segmented
-    control is finally the thing it has always been drawing. The key that is down is
-    <em>down</em>: 4px lower than its neighbours, lit from inside, with a lamp bar under the
-    engraving.
+    Three latching keys on one bar, one down at a time — the segmented control as the thing
+    it has always been drawing. The key that is down is <em>down</em>: 4px lower than its
+    neighbours, lit from inside, lamp bar under the engraving.
   </p>
   <div class="stage">
     <div class="stage-note">3-position interlock</div>
@@ -89,16 +78,14 @@
 
   <h2>04 <span>/</span> The layer editor <span>·</span> knobs instead of sliders</h2>
   <p class="sub">
-    L1's <b>Place</b> tab. Every slider that sets a <em>quantity</em> became a knob: 270° of
-    travel, a lit arc for the value and a pointer you can read at a glance. Drag up or right,
-    or use the wheel; hold <b>shift</b> for fine. A knob is one <b>48px param strip</b> —
-    knob, engraved label, readout on a single line — instead of the caption / knob / readout
-    stack, which spent three rows and about 100px on one control.
-    <b>Zone from / Zone to</b> stayed faders on purpose: that pair is a <em>length</em>, and
-    a length wants a straight track — so they were built as real ones, with a cut slot, an
-    engraved scale and a waisted cap carrying the indicator line. The <em>Place from</em>
-    dropdown became a rotary selector — one <b>pip per position</b> ringed round the dial,
-    dark until the pointer lands on it, so you can count the choices without reading them.
+    L1's <b>Place</b> tab. Every slider that set a <em>quantity</em> became a knob: 270° of
+    travel, a lit arc, a pointer you read at a glance. Drag or wheel; <b>shift</b> for fine.
+    One <b>48px strip</b> — knob, engraved label, readout on a line — instead of the
+    caption / knob / readout stack that spent 100px on one control.
+    <b>Zone from / to</b> stayed a fader: that pair is a <em>length</em>, and a length wants
+    a straight track — cut slot, engraved scale, waisted cap. <em>Place from</em> became a
+    rotary selector, one <b>pip per position</b>, so you can count the choices without
+    reading them.
   </p>
   <div class="stage">
     <div class="stage-note">rotary · 270° · shift = fine</div>
@@ -108,15 +95,12 @@
   <h2>05 <span>/</span> The viewport <span>·</span> gizmo, keypad, three knobs</h2>
   <p class="sub">
     The axis ball sits in a well under a glass dome — its six nodes are the six view keys,
-    so you can hit a view from the picture or from the pad. Then <b>Yaw / Pitch / Roll</b> as
-    knobs, which is what those three always wanted to be: three angles you dial, with the
-    pointer showing the angle literally.
+    so you can hit a view from the picture or from the pad. <b>Yaw / Pitch / Roll</b> are
+    knobs: three angles you dial, the pointer showing the angle literally.
     <br><br>
-    <b>Pan / Turn / Select moved out.</b> Everything in that panel answers <em>where the
-    camera is</em>; those three answer <em>what the mouse does</em>, which stays true while
-    you are not looking at the viewport at all. Two questions, two objects — so they get a
-    tool palette of their own, narrow enough to sit anywhere, and separate enough to be
-    moved.
+    <b>Pan / Turn / Select moved out.</b> The panel answers <em>where the camera is</em>;
+    those three answer <em>what the mouse does</em>. Two questions, two objects — so they
+    get a tool palette of their own.
   </p>
   <div class="stage">
     <div class="stage-note">axis ball · 6-key pad · 3 × rotary</div>
@@ -126,59 +110,26 @@
 
   <h2>06 <span>/</span> Launchpad <span>·</span> one rack module per project</h2>
   <p class="sub">
-    The dashboard card as a rack unit. The green running bar is a light pipe, the status dot
-    is a pilot lamp that is dark until the process is actually alive, the port is a lit
-    display, and <b>Launch</b> / <b>Stop</b> are illuminated pushbuttons with the lens inside
-    the cap. Launch one and the whole module powers up — rail, lamp, display, and the running
-    count at the top.
+    The dashboard card as a rack unit. The running bar is a light pipe, the status dot a
+    pilot lamp dark until the process is alive, the port a lit display, <b>Launch</b> /
+    <b>Stop</b> illuminated pushbuttons with the lens inside the cap. Launch one and the
+    whole module powers up.
   </p>
   <div class="console" id="console"></div>
 
   <h2>07 <span>/</span> The hatch bay <span>·</span> a compound control</h2>
   <p class="sub">
-    Five bare rows — <b>Spacing</b>, <b>Pen</b>, <b>Min stroke</b>, <b>Join reach</b>,
-    <b>Colour</b> — every one the same shape with a green number at the end, so nothing on
-    screen said which one you turn to change how the drawing looks. Hatching is the one place
-    where the parameters are <em>physical objects</em>, so the bay is built round a
-    <b>specimen</b>: a lit sphere on its own shadow, drawn at <b>1:1 mm</b> on paper with real
-    spacing, real stroke, real angle and real ink. It is a ball rather than a swatch because a
-    rectangle of even hatch shows the <em>spacing</em> and hides everything else — and what
-    hatching is for is <em>tone</em>: the same pen and the same angle making light and dark by
-    how much paper it leaves. Everything else here is an input to that one picture.
+    Five bare rows with a green number at the end said nothing about what the drawing would
+    do. So the bay is built round a <b>specimen</b>, drawn at <b>1:1 mm</b>. A ball rather
+    than a swatch, because a rectangle of even hatch shows the <em>spacing</em> and hides
+    everything else — and what hatching is for is <em>tone</em>. The blob is there because a
+    fill can make good tone and still fall apart at an edge.
     <br><br>
-    <b>The type is a selector switch</b>, and it now carries both worlds. Three <em>machine</em>
-    fills — <b>parallel</b> lifts the pen at the end of every pass, <b>serpentine</b> does not
-    and is one continuous stroke, <b>crossed</b> is a second pass at 90° — and the three
-    <em>hands</em> from section 08: <b>hand</b>, <b>hand cross</b> and <b>hand random</b>, the
-    same generators that section draws, borrowed rather than reimplemented. Six positions on
-    one dial, all visible at once with the lever on the one you are on.
-    <br><br>
-    <b>Two sheets, and neither is optional.</b> The <b>ball</b> on the left answers <em>what
-    tone does this fill make</em>; the <b>blob</b> on the right answers <em>what does it do
-    when it hits an edge</em> — and a fill can pass one and fail the other, which is why both
-    are on screen. Both come from the shared specimen kit, so what section 07 draws and what
-    section 08 draws are the same ball and the same shape: light them differently and every
-    comparison becomes two balls rather than two fills. The machine fills clip their lines to
-    the subject, because a serpentine <em>is</em> its turnarounds and on an over-sized grid
-    every turnaround falls off the paper.
-    <br><br>
-    <b>Then three knobs</b>, because this page's own rule says a quantity is a knob and only a
-    length keeps a track — and pen, spacing and angle are three single quantities. <b>Pen</b>
-    runs free from <b>0.1 to 3 mm</b>: what is being set is a stroke width, and a stroke width
-    is a quantity you dial until it looks right against the specimen in front of you.
-    <b>Spacing</b> is a distance in millimetres and <b>angle</b>
-    detents at 0 / 45 / 90 / 135. The three are <em>independent</em> — no control here quietly
-    edits another, so a value you set by hand stays the value you set. Take spacing under the
-    nib and the strokes overlap into solid ink: not a fault, and not reported as one. It is a
-    fill, it is something you might want, and the specimen shows it the way it shows
-    everything else.
-    <b>Colour is a cap whose face is the ink</b>: the case ships with
-    black, grey and white and six empty slots, and <em>every one of them</em> can be refilled —
-    a swatch you cannot change is a swatch lying about being a pen. Click a full one twice, or
-    an empty one once, and it opens the picker: a plate made of the same metal as everything
-    else. The two cleanup
-    thresholds are in a recess below the fold, because they are set once and never touched
-    again.
+    Three knobs, because a quantity is a knob and only a length keeps a track. They are
+    <em>independent</em> — no control quietly edits another. Take spacing under the nib and
+    the strokes overlap into solid ink: a fill, not a fault, and not reported as one. Every
+    ink slot can be refilled, empty or not — a swatch you cannot change is a swatch lying
+    about being a pen. The two cleanup thresholds sit in a recess, set once and forgotten.
   </p>
   <div class="stage">
     <div class="stage-note">two specimens · 1:1 mm · 6 fills · machine and hand</div>
@@ -188,27 +139,25 @@
   <h2>08 <span>/</span> Filling <span>·</span> by hand, and by machine</h2>
   <p class="sub">
     Two halves that want opposite things from one job: <b>three fills that must not look like a
-    machine made them</b>, and <b>the fill only a machine can draw</b>. They share a rig — same
-    ball, same lamp, same holed blob — because that is the only way the two can be read against
-    each other. What follows is the interface, not the argument; the argument is in the code
-    comments and in <code>HATCH-API.md</code>.
+    machine made them</b>, and <b>the fill only a machine can draw</b>. Same ball, same lamp,
+    same holed blob — the only way the two can be read against each other. Below is the
+    interface; the argument is in the code comments and <code>HATCH-API.md</code>.
   </p>
 
   <div class="api">
     <div class="api-rule">
       <b>A region is a function.</b> <code>tone(x, y)</code> — negative outside,
       <code>0…1</code> inside, 0 bare paper and 1 as dark as the fill goes. That is the entire
-      coupling between what is drawn and how it is filled: any subject that answers it can be
-      filled by any generator here, and no generator asks what shape it is on.
-      <b>Everything is millimetres</b> — measure the element, convert at 96/25.4, and the paths
-      go to SVG and onto the plotter with no rescale.
+      coupling: any subject that answers it can be filled by any generator here, and no
+      generator asks what shape it is on. <b>Everything is millimetres</b> — convert at
+      96/25.4, and the paths go to SVG and the plotter with no rescale.
     </div>
     <dl>
       <dt>KIT.scene(w, h)</dt><dd>ball · table · lamp — two tone functions</dd>
       <dt>KIT.blob(w, h, seed)</dt><dd>closed shape with a hole — tone, rings</dd>
       <dt>KIT.parallels(…) · KIT.latitudes(…)</dt><dd>straight lines · curves that follow the form</dd>
       <dt>KIT.carve(runs, tone, tau, dither, minLen)</dt><dd>where tone becomes geometry</dd>
-      <dt>HANDS.draw / .drawShape(kind, w, h, seed, opt?)</dt><dd>the three hands → <code>{ paths, nib }</code><br><code>opt: { nib, spacing, angle }</code> — mm, mm, degrees. Every internal pitch is a multiple of <code>spacing</code> and every pass angle an offset from <code>angle</code>, so one turns the fill and the other changes its pitch. Spacing defaults <em>from the nib</em>, because pitch and nib are one setting. <code>angle</code> does nothing on <code>'random'</code>, and cannot.</dd>
+      <dt>HANDS.draw / .drawShape(kind, w, h, seed, opt?)</dt><dd>the three hands → <code>{ paths, nib }</code><br><code>opt: { nib, spacing, angle }</code> — mm, mm, degrees. Pitches are multiples of <code>spacing</code>, pass angles offsets from <code>angle</code>; spacing defaults <em>from the nib</em>. <code>angle</code> does nothing on <code>'random'</code>, and cannot.</dd>
       <dt>stitch(runs, bridge)</dt><dd>the serpentine — the bridge decides what is legal</dd>
     </dl>
     <a class="api-more" href="HATCH-API.md">HATCH-API.md — the rest of it, and the rules that are not tunable</a>
@@ -222,65 +171,58 @@
 
   <h2>09 <span>/</span> Materials</h2>
   <p class="sub">
-    <span id="mat-count">These</span> primitives carry all six components. Every control on this page is
-    one of them at a size — which is what makes it a language rather than six hand-drawn
-    pictures. The count is written by the tiles themselves, because the sentence said
-    <em>nine</em> for three versions after the tenth was built.
+    <span id="mat-count">These</span> primitives carry every component above. Each control on
+    this page is one of them at a size — which is what makes it a language rather than a set of
+    hand-drawn pictures. The count is written by the tiles themselves.
   </p>
   <div class="mats" id="mats"></div>
 
   <h2>10 <span>/</span> The bill</h2>
   <p class="sub">
-    What it buys, and what it costs. Both lists are about this component specifically,
-    not about skeuomorphism in general.
+    What it buys, what it costs — about these components specifically, not about
+    skeuomorphism in general.
   </p>
   <div class="bill">
     <div class="card good">
       <h3>What it genuinely buys</h3>
       <ul>
-        <li><b>The colour bar becomes a light source.</b> Edge-lit, it spills onto the
-            metal beside it — so a layer's ink is visible in peripheral vision, which
-            a 3px flat bar never was. This is the one improvement I would actually miss.</li>
-        <li><b>On/off stops being a colour comparison.</b> A lit lamp against a dead one
-            is a brightness difference, readable without comparing to the row next door
-            and readable if you cannot separate the two oranges.</li>
-        <li><b>Off-state honesty.</b> A hidden layer has a dead pipe and a raised
-            cap — the row reads as unpowered from across the screen, where today it
-            is a 0.3 opacity dim you have to look for.</li>
-        <li><b>Destructive controls can be guarded materially</b> — recessed instead of
-            raised, hazard stripes on hover — instead of relying on red alone.</li>
+        <li><b>The colour bar becomes a light source.</b> Edge-lit, it spills onto the metal
+            beside it — a layer's ink is visible in peripheral vision, which a 3px flat bar
+            never was. The one improvement I would miss.</li>
+        <li><b>On/off stops being a colour comparison.</b> A lit lamp against a dead one is a
+            brightness difference — readable without the row next door, and without colour
+            vision.</li>
+        <li><b>Off-state honesty.</b> A hidden layer has a dead pipe and a raised cap; today
+            it is a 0.3 opacity dim you have to look for.</li>
+        <li><b>Destructive controls can be guarded materially</b> — recessed, hazard stripes
+            on hover — instead of relying on red alone.</li>
         <li><b>Momentary vs latching is finally sayable.</b> A key that springs back did
-            something; a key held down by the mechanism <em>is</em> something. The nav bar
-            has both kinds and today they are the same grey icon.</li>
-        <li><b>Knobs beat sliders for angles.</b> Yaw / Pitch / Roll as three pointers is
-            the one substitution that is not a preference — the control's angle is the
-            value, so you read three numbers without reading any.</li>
+            something; a key held down <em>is</em> something. Today both are the same grey
+            icon.</li>
+        <li><b>Knobs beat sliders for angles.</b> The control's angle is the value, so you
+            read Yaw / Pitch / Roll without reading any number.</li>
       </ul>
     </div>
     <div class="card bad">
       <h3>What it costs</h3>
       <ul>
-        <li><b>It is dark-only.</b> Every effect here is light modelling against a dark
-            body. There is no light-mode version of this panel — and the apps' canvas is
-            paper-white, so the panel would sit on the drawing like a foreign object.</li>
-        <li><b>~14 shadows per row.</b> The flat row is one background and one bar. Five
-            of these on a scrolling, dragging list is real paint cost, and drag-reorder
-            with glow + blur is where it will show.</li>
+        <li><b>It is dark-only.</b> Every effect here is light modelling against a dark body.
+            The apps' canvas is paper-white, so the panel would sit on the drawing like a
+            foreign object.</li>
+        <li><b>~14 shadows per row</b> against one background and one bar today. On a
+            scrolling, dragging list that is real paint cost.</li>
         <li><b>Text contrast fights the texture.</b> 9.5px summaries on brushed metal are
-            already marginal here; the shipping row spends its width on a name and two
-            numbers, and grain eats small type first.</li>
-        <li><b>It out-shouts the drawing.</b> The whole point of the current chrome is
-            that it disappears next to the plot. This does not disappear.</li>
-        <li><b>Nothing else in the system speaks it.</b> Tweakpane, the nav bar, the tab
-            bar and the log would all need rebuilding, and Tweakpane is explicitly
-            "do not hand-build this" in the design system. Section 04 is a
-            hand-built Tweakpane, which is the rule this exploration breaks hardest.</li>
-        <li><b>Knobs are worse than sliders at three things</b>, and they matter: no
-            drag-anywhere-along-the-line (you must grab the cap), no slam-to-the-end, and
-            they are poor on touch. Every knob here needs a number box beside it to be
-            usable for typing a value — which is half a slider back.</li>
-        <li><b>Every knob is a pointer-drag handler.</b> Tweakpane gives that away free,
-            with keyboard, touch and value entry already solved and tested.</li>
+            already marginal, and grain eats small type first.</li>
+        <li><b>It out-shouts the drawing.</b> The current chrome disappears next to the plot.
+            This does not.</li>
+        <li><b>Nothing else in the system speaks it.</b> Tweakpane, the nav bar, the tab bar
+            and the log would all need rebuilding — and section 04 is a hand-built Tweakpane,
+            which the design system explicitly forbids.</li>
+        <li><b>Knobs are worse than sliders at three things:</b> no drag-anywhere-along-the-line,
+            no slam-to-the-end, poor on touch. Each needs a number box beside it — half a
+            slider back.</li>
+        <li><b>Every knob is a pointer-drag handler.</b> Tweakpane gives that away free, with
+            keyboard, touch and value entry solved.</li>
       </ul>
     </div>
   </div>
@@ -3187,7 +3129,7 @@ const KIT = (function specimenKit() {
      'A raised body. Two inset hairlines do the bevel — <code>rgba(255,255,255,.14)</code> on top, <code>rgba(0,0,0,.85)</code> below — plus a wide cast shadow and a tight contact shadow.'],
     ['Milled well',
      '<span class="demo-well"></span>',
-     'The same two hairlines, swapped. A deep <code>inset</code> shadow from the top edge and a 1px light OUTSIDE the bottom. The floor is the case <em>minus some light</em>, never black: a key\'s skirt is nearly black, and on a black floor the cap loses the one part that proves it has a body. Everything that holds other controls is a well.'],
+     'The same two hairlines, swapped: a deep <code>inset</code> from the top edge, a 1px light OUTSIDE the bottom. The floor is the case <em>minus some light</em>, never black — a key\'s skirt is nearly black, and on a black floor the cap loses the part that proves it has a body. Everything that holds other controls is a well.'],
     ['Backlit key',
      `<span class="sw on">${ICON.eye}</span><span class="sw">${ICON.eyeOff}</span><span class="sw mixed">${ICON.cells}</span>`,
      'On, off, mixed. The cap is <em>up</em> or <em>down</em> — that is the state — and the legend says which kind of down: white for some, orange for all. A brightness difference, so it survives with no colour vision.'],
@@ -3202,39 +3144,39 @@ const KIT = (function specimenKit() {
      'Cut into the metal: the glyph is <em>darker</em> than the surface with a 1px light line under it — the lit far wall of the cut. Never white text on grey.'],
     ['Readout',
      '<span class="lcd">3 RUNNING</span><span class="lcd dim">0 SHOWN</span>',
-     'A lit window, not a label — and the answer to every place a number wanted to be text. The glass is cut into the case: a deep <code>inset</code> from the top and a 1px light OUTSIDE the bottom edge, so it sits below the panel the way the well does. Digits are phosphor — colour plus a 6px glow, tabular so nothing shifts when the count changes. Its off state is <code>.dim</code>: the same green with the glow taken away, because a display reading zero is powered, not dark.'],
+     'A lit window, not a label — the answer to every place a number wanted to be text. The glass is cut into the case, so it sits below the panel the way the well does. Digits are phosphor: colour plus a 6px glow, tabular so nothing shifts when the count changes. Off state is <code>.dim</code> — the same green with the glow taken away, because a display reading zero is powered, not dark.'],
     ['Rotary knob',
      '<span id="mat-knob"></span>',
-     '270° of travel, a lit arc for the value and a pointer you read at a glance. Replaces every slider that sets a <em>quantity</em>. Drag, wheel, arrows; <code>shift</code> for fine. <em>Where a knob is wrong:</em> a range with two ends you compare still wants a track, because "from here to there" is a LENGTH and a length is a straight thing. Those stay faders — the four tiles under this one.'],
+     '270° of travel, a lit arc for the value, a pointer you read at a glance. Replaces every slider that sets a <em>quantity</em>. Drag, wheel, arrows; <code>shift</code> for fine. <em>Where it is wrong:</em> "from here to there" is a LENGTH, and a length is a straight thing — those stay faders, the four tiles below.'],
     ['Fader · one cap',
      '<span id="mat-fader1"></span>',
-     'The plain form, and the one the refs are full of. The lit fill runs from the end of the slot to the cap, so the value is <em>how much of the track is on</em> — readable without the number. Drag the line, wheel it, or tab to the cap and use the arrows.',
+     'The plain form. The lit fill runs from the end of the slot to the cap, so the value is <em>how much of the track is on</em> — readable without the number. Drag the line, wheel it, or tab to the cap and use the arrows.',
      'wide'],
     ['Fader · centre detent',
      '<span id="mat-faderbi"></span>',
-     'A trim is not "how much", it is "how far off", so the fill starts at the middle and runs out to whichever side. The scale carries a full-height tick at zero and the cap <em>notches</em> into it: inside 3% of centre it snaps, the way a real centre-detent pot has a notch cut in its track. Zero is a place you can find without looking.',
+     'A trim is not "how much", it is "how far off" — so the fill starts at the middle and runs out to whichever side. Full-height tick at zero, and the cap <em>notches</em> into it inside 3%, the way a real centre-detent pot does. Zero is a place you can find without looking.',
      'wide'],
     ['Fader · vertical bank',
      '<span id="mat-fbank"></span>',
-     'The same control stood up, which is not a style choice: a bank of caps makes a <em>profile</em> you read across at a glance, which is why every mixer is built this way and why an EQ reads as a curve. Legend at the foot, readout on top, because your hand covers the middle.',
+     'The same control stood up — not a style choice: a bank of caps makes a <em>profile</em> you read across at a glance, which is why every mixer is built this way. Legend at the foot, readout on top, because your hand covers the middle.',
      'tall'],
     ['Range fader',
      '<span id="mat-fader"></span>',
-     'What a knob cannot say: a <em>span</em>. Two caps in one slot with the band lit between them, so the value is a distance you can see rather than two numbers you have to compare. The caps cannot cross, and the track takes every pointer event and hands it to whichever end is nearer — you click the line, you do not aim at a 17px thumb. Every slider that set a quantity became a knob; a length stays here.',
+     'What a knob cannot say: a <em>span</em>. Two caps in one slot with the band lit between them, so the value is a distance you see rather than two numbers you compare. The caps cannot cross, and the track hands every pointer event to whichever end is nearer — you click the line, you do not aim at a 17px thumb.',
      'wide'],
     ['Colour picker',
      '<span id="mat-pick"></span>',
-     'The one surface the OS used to draw. <code>input[type=color]</code> renders its popup in browser chrome and no CSS reaches it, so touching a colour produced a bright system sheet on a machined panel — the exact moment every other primitive here exists to avoid. So it is not themed, it is <em>replaced</em>: a floating <em>plate</em> in the panel\'s own metal, the field behind the same glass as any display, hue on a real fader with the knurled cap and a scale at the six primaries, and one lit <code>.lcd</code> window instead of three white boxes borrowed from a form. The native input stays as the <em>value</em> and never as the surface. Dark on purpose — a picker is the one place the panel must disappear so the colour can be judged, so the only saturated thing inside is the colour you are picking. Click the cap.',
+     'The one surface the OS used to draw. <code>input[type=color]</code> puts its popup in browser chrome where no CSS reaches it — a bright system sheet on a machined panel. So it is not themed, it is <em>replaced</em>: a floating plate in the panel\'s own metal, the field behind display glass, hue on a real fader with a scale at the six primaries, one lit <code>.lcd</code> window instead of three form boxes. The native input stays as the <em>value</em>, never the surface. Dark on purpose — the only saturated thing inside is the colour you are picking. Click the cap.',
      'wide'],
     ['Momentary vs latching',
      '<span id="mat-keys"></span>',
      'Left springs back and pulses — it <em>did</em> something. Right is held down by the mechanism with its lamp on — it <em>is</em> something. Flat UI has no way to say this. Both are live: press them.'],
     ['Micro key',
      '<span id="mat-micro"></span>',
-     'Duplicate and delete, at 22px and <em>recessed</em> rather than raised: they are destructive or duplicative and must not invite the thumb the way a switch does. The well\'s two hairlines, sunk instead of proud. Delete is the only control in the document that goes red, and only under the pointer — a warning you meet on the way to it, not a colour it wears while sitting still. Hover both.'],
+     'Duplicate and delete, at 22px and <em>recessed</em> rather than raised: they must not invite the thumb the way a switch does. The well\'s two hairlines, sunk instead of proud. Delete is the only control that goes red, and only under the pointer — a warning you meet on the way to it, not one it wears sitting still. Hover both.'],
     ['Knurled chevron',
      '<span id="mat-chev"></span>',
-     'Grip texture, because this is the thing you <em>flick</em>, not a thing you press — a thumbwheel edge rather than a cap. Shown at its real 20px, since the size <em>is</em> the difficulty: a 3px knurl and an 11px glyph are the same spatial frequency and the eye loses one in the other, so the grip stays a whisper at <code>.05</code> and the glyph carries a dark halo to hold it off the metal. Open, it turns 90°, drops into the recess with its chamfer ring, and the glyph goes to the lamp colour with the drop shadow turned into a glow. To its left, <code>.sep</code> — a 1px cut and its lit far wall, doing the separating a gap cannot. Click it.'],
+     'Grip texture, because this is a thing you <em>flick</em>, not a thing you press. Shown at its real 20px, since the size <em>is</em> the difficulty: a 3px knurl and an 11px glyph are the same spatial frequency, so the grip stays a whisper at <code>.05</code> and the glyph carries a dark halo. Open, it turns 90°, drops into its chamfered recess and goes to the lamp colour. To its left, <code>.sep</code> — a 1px cut and its lit far wall, doing the separating a gap cannot. Click it.'],
     ['Illuminated key',
      `<span class="key skirt act go" style="height:32px;padding:0 13px;gap:8px;font-family:var(--font);font-size:10.5px;font-weight:700"><span class="lens"></span>${ICON.play}<span>LAUNCH</span></span>`,
      'The lamp lens is <em>inside</em> the cap, left of the label, the way a real illuminated pushbutton is built — so the state is in the button, not next to it.'],

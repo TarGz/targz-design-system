@@ -1,6 +1,17 @@
-export const version = '1.12.0';
+export const version = '1.12.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.12.1',
+    date: '2026-08-15',
+    changes: [
+      'HATCH-API.md — the reference for the fill generators, written because the section that documented them did it in eleven paragraphs of prose. That prose was the right thing to HAVE and the wrong thing to put in front of somebody who wants to use the code: the argument for a choice and the interface to it are two different documents, and only one of them belongs on the page',
+      'THE ONE CONTRACT, stated once and in one place: a region is a function tone(x, y) — negative outside, 0…1 inside, 0 bare paper and 1 as dark as the fill goes. That is the entire coupling between what is drawn and how it is filled, which is why any subject that can answer it can be filled by any generator here and no generator ever asks what shape it is on',
+      'And the things you only find out on paper: everything is millimetres at 96/25.4 with no pixel below the DOM layer; pitch and nib are ONE setting; four passes at pitch s land the darkest tone at s/4, so s stays four nibs clear of the flood crossing; dither is not optional on a hand fill or the tone bands into isolines of the lighting; the pole trap in latitudes and why aiming the axis down the light hides both blank caps',
+      'THE WALL WALK IS WRITTEN UP AS DELIBERATELY NOT IMPLEMENTED, with the reason, so that nobody rebuilds it. It takes a flat fill to one stroke and it was removed — the count is not the drawing, and every trick of that kind buys a lift with a line that cannot be erased. A dead end is only recorded once; after that it is just an absence somebody helpfully fills in again',
+      'The page keeps the ultra-basic — the contract, six signatures, one line each — and a door to the file. The reasoning went where it belongs, into the code comments beside the line each paragraph explains, where it cannot go stale without the line going with it',
+    ],
+  },
   {
     version: '1.12.0',
     date: '2026-08-15',

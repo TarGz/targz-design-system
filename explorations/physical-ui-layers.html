@@ -40,6 +40,35 @@
   --led-hot:     #FFB273;
   --led-red:     #FF2D2D;
 
+  /* ── THE RECESS, ONCE ─────────────────────────────────────────────────
+     Everything that goes IN uses these two, whatever its size. It took the
+     whole layer switch to arrive at them and there is no reason for the nav
+     bar or a tab to relearn it — worse, five copies is five things that drift
+     apart the next time one is tuned. One place to change, one place to read.
+
+       --recess   the four walls, sharp: a hard near-black line under the top
+                  edge, the sides tight, the bottom softer because that is the
+                  wall light reaches, and a lit lip under it all
+       --chamfer  the broken edge of the cutout, lit DIRECTIONALLY and with
+                  concave polarity — dark where it turns from the lamp at the
+                  top, bright where it turns into it at the bottom. Get this
+                  backwards and the control reads as a bump, every time. */
+  --recess:
+    inset 0 0 0 1px rgba(0,0,0,.73),
+    inset 0 2.4px 1.2px rgba(0,0,0,.86),
+    inset 0 3.6px 4.8px -1.2px rgba(0,0,0,.51),
+    inset 3.6px 0 3.6px -2.4px rgba(0,0,0,.57),
+    inset -3.6px 0 3.6px -2.4px rgba(0,0,0,.57),
+    inset 0 -3.6px 4.8px -2.4px rgba(0,0,0,.31),
+    inset 0 -1px 0 rgba(255,255,255,.15),
+    0 1px 0 #101317,
+    0 1px 1px rgba(0,0,0,.4);
+  --chamfer: linear-gradient(152deg,
+    rgba(0,0,0,.50)        0%,
+    rgba(0,0,0,.20)       24%,
+    rgba(255,255,255,0)   50%,
+    rgba(255,255,255,.30) 100%);
+
   --font: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
 
@@ -238,7 +267,6 @@ h2 span{ color:#3d4149; }
 }
 .key:disabled{ opacity:.32; cursor:not-allowed; transform:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 1px 0 #0e0f11; }
-.key:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 .key svg{ stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 
 .add{ width:26px; height:26px; border-radius:8px; }
@@ -285,7 +313,6 @@ h2 span{ color:#3d4149; }
 }
 .row:hover{ background:linear-gradient(180deg,#3a3f46,#2c3036 60%,#26292f); }
 .row:active{ transform:translateY(1px); }
-.row:focus-visible{ outline:2px solid var(--led); outline-offset:-2px; }
 
 /* THE LAYER'S COLOUR IS A LIGHT PIPE, not a painted bar. An edge-lit acrylic
    strip: a solid core, a bloom on the metal beside it, and a hot white line
@@ -364,7 +391,6 @@ h2 span{ color:#3d4149; }
   background:
     radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.18), transparent 62%),
     linear-gradient(180deg,#525965 0%,#434955 36%,#343a42 68%,#282d33 100%); }
-.sw:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 /* pressed by a finger: the cap drops onto its own skirt */
 /* ── A SUNK CAP IS A CAP IN SHADOW, and at 24px that has to be overdrawn.
 
@@ -408,19 +434,7 @@ h2 span{ color:#3d4149; }
    changes is the box-shadow: the skirt goes (it is resting on it now) and the
    four walls of the recess come on. Plus 1px of travel, and the legend lights.
    Three declarations, one object. */
-.sw:active{
-  transform:translateY(1px);
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,.68),
-    inset 0 2.4px 1.2px rgba(0,0,0,.79),
-    inset 0 3.6px 4.8px -1.2px rgba(0,0,0,.46),
-    inset 3.6px 0 3.6px -2.4px rgba(0,0,0,.53),
-    inset -3.6px 0 3.6px -2.4px rgba(0,0,0,.53),
-    inset 0 -3.6px 4.8px -2.4px rgba(0,0,0,.31),
-    inset 0 -1px 0 rgba(255,255,255,.14),
-    0 1px 0 #101317,
-    0 1px 1px rgba(0,0,0,.4);
-}
+.sw:active{ transform:translateY(1px); box-shadow:var(--recess); }
 /* ── DOWN IS ONE STATE. THE LEGEND SAYS WHICH KIND OF DOWN. ─────────────
    ON and MIXED are the same cap in the same position with the same recess,
    and they differ only in the colour of what is printed on it:
@@ -437,28 +451,7 @@ h2 span{ color:#3d4149; }
    orange is a difference you can still see with no colour vision at all,
    because it is a difference in brightness, which the old dim-orange was not. */
 .sw.on,
-.sw.mixed{
-  transform:translateY(1px);
-  /* geometry +20% — offsets and blur only. The alphas are untouched, and so
-     is the 1px ring: a hairline that follows the border has no size to scale. */
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,.73),
-    inset 0 2.4px 1.2px rgba(0,0,0,.86),
-    inset 0 3.6px 4.8px -1.2px rgba(0,0,0,.51),
-    inset 3.6px 0 3.6px -2.4px rgba(0,0,0,.57),
-    inset -3.6px 0 3.6px -2.4px rgba(0,0,0,.57),
-    inset 0 -3.6px 4.8px -2.4px rgba(0,0,0,.31),
-    inset 0 -1px 0 rgba(255,255,255,.15),
-    /* THE LIP OF THE HOLE. A cutout in a real panel is not a clean cut — the
-       edge is broken, and that tiny chamfer faces the light. So the rim above
-       the cap catches a hairline while the rim below it stays in shade, which
-       is the pair of lines that says "this opening has a thickness". Without
-       it the cap floats in a dark rectangle; with it, it is sunk into a
-       surface. One pixel, 6% white, and it is the last thing the recess was
-       missing. */
-    0 1px 0 #101317,
-    0 1px 1px rgba(0,0,0,.4);
-}
+.sw.mixed{ transform:translateY(1px); box-shadow:var(--recess); }
 /* NO FILL ON EITHER, DELIBERATELY. Every attempt at a separate pressed colour
    was a way of drawing shade with paint, and it kept killing the shadow: a
    darker cap has nothing left for a shadow to take away. The moulding is one
@@ -482,32 +475,6 @@ h2 span{ color:#3d4149; }
 
    Only on the pressed states: when the cap is up it fills its hole and there
    is no lip to see. */
-.sw.on::after,
-.sw.mixed::after,
-.sw:active::after{
-  content:''; position:absolute; inset:-2px; border-radius:9px;
-  pointer-events:none; padding:1.6px;
-  /* CONCAVE, NOT CONVEX — and this is the whole difference between a hole and
-     a bump. I lit the ring bright at the top-left and dark at the bottom-right,
-     which is a DOME: the side facing the lamp is the top. A chamfer that dives
-     into a hole does the opposite. Its upper edge tilts down and away from the
-     light, so it is the part in SHADOW; its lower edge tilts up toward the
-     light and is the part that catches. Dark at the top, bright at the bottom.
-
-     That polarity also has to agree with the walls inside the cap, which were
-     already correct — dark across the top, lit lip along the bottom. With the
-     ring inverted the two were arguing, and a bevel that says "out" wrapped
-     around a recess that says "in" resolves as a raised button every time. */
-  background:linear-gradient(152deg,
-    rgba(0,0,0,.50)        0%,
-    rgba(0,0,0,.20)       24%,
-    rgba(255,255,255,0)   50%,
-    rgba(255,255,255,.30) 100%);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude;
-  filter:blur(.5px);
-}
 .sw.on{ color:var(--led); }
 .sw.mixed{ color:#eef1f5; }
 .sw.on:hover{ color:var(--led-hot); }
@@ -581,7 +548,6 @@ h2 span{ color:#3d4149; }
 .micro:hover{ color:#d7dae0; box-shadow:inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.09); }
 .micro.del:hover{ color:#FF6B6B; box-shadow:inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 1px rgba(255,45,45,.35), 0 0 8px rgba(255,45,45,.2); }
 .micro:disabled{ opacity:.3; cursor:not-allowed; }
-.micro:focus-visible{ outline:2px solid var(--led); outline-offset:1px; }
 
 /* the milled channel between the row's actions and its chevron */
 .sep{ width:1px; height:18px; flex:0 0 1px; margin:0 3px;
@@ -605,18 +571,7 @@ h2 span{ color:#3d4149; }
 .chev svg{ width:11px; height:11px; stroke:currentColor; fill:none; stroke-width:2.4;
   stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 1px 1px rgba(0,0,0,.9)); }
 .chev:hover{ color:#fff; }
-.chev:focus-visible{ outline:2px solid var(--led); outline-offset:1px; }
-.chev.open{
-  transform:rotate(90deg); color:var(--led);
-  background:linear-gradient(180deg,#0e1013,#1f242b 60%,#2b3038);
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,.66),
-    inset 0 2px 1px rgba(0,0,0,.77),
-    inset 0 3px 4px -1px rgba(0,0,0,.44),
-    inset 2px 0 3px -2px rgba(0,0,0,.5),
-    inset -2px 0 3px -2px rgba(0,0,0,.5),
-    inset 0 -1px 0 rgba(255,255,255,.12),;
-}
+.chev.open{ color:var(--led); }
 .chev.open svg{ transform:scale(.9); filter:drop-shadow(0 0 3px rgba(255,130,30,.65)); }
 
 /* ── the ALL row is a BUS BAR — a different material, once ───────────────── */
@@ -746,15 +701,49 @@ h2 span{ color:#3d4149; }
     0 3px 0 #0e0f11,
     0 5px 8px rgba(0,0,0,.7);
 }
+/* ── EVERY CONTROL THAT IS IN, DRAWN THE ONE WAY ─────────────────────────
+   Finger-held and mechanism-held are the same physical position, so they are
+   the same rule. None of them declares a fill: each inherits its own raised
+   face, which is what keeps a pressed cap recognisably the same object as the
+   cap next to it, and means tuning a surface tunes both its states at once.
+
+   Travel is 2px on the big keys and 1px on the small ones, down from 3-4px.
+   With the walls and the chamfer doing the work the drop no longer has to
+   carry the message, and a tab that fell 4px was moving further than the gap
+   to its neighbour. */
 .key.skirt:active,
-.key.skirt.is-down{
-  transform:translateY(3px);
-  box-shadow:
-    inset 0 2px 5px rgba(0,0,0,.85),
-    inset 0 -1px 0 rgba(255,255,255,.07),
-    0 0 0 #0e0f11,
-    0 1px 2px rgba(0,0,0,.5);
+.key.skirt.is-down,
+.pkey:active,
+.pkey.is-down,
+.chip:active,
+.chip.is-down,
+.chev.open{
+  transform:translateY(2px);
+  box-shadow:var(--recess);
 }
+/* the small ones travel half as far — 2px on a 24px cap is a lurch */
+.sw:active, .sw.on, .sw.mixed{ transform:translateY(1px); }
+.chev.open{ transform:rotate(90deg) translateY(1px); }
+
+/* THE CHAMFER, on everything with a hole to sit in. --ring-r is the control's
+   own radius plus the 2px the ring sits outside it. */
+.sw.on::after, .sw.mixed::after, .sw:active::after,
+.key.skirt.is-down::after, .key.skirt:active::after,
+.pkey.is-down::after, .pkey:active::after,
+.chip.is-down::after, .chip:active::after,
+.chev.open::after{
+  content:''; position:absolute; inset:-2px; border-radius:var(--ring-r,9px);
+  pointer-events:none; padding:1.6px; background:var(--chamfer);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  filter:blur(.5px);
+}
+.sw{ --ring-r:9px; }
+.key{ --ring-r:9px; }
+.pkey{ --ring-r:10px; }
+.chip{ --ring-r:9px; }
+.chev{ --ring-r:6px; }
 /* LATCHED: down AND lit. The lamp is what separates "held by a finger" from
    "held by the mechanism". */
 /* LATCHED: down AND lit. The lamp is what separates "held by a finger" from
@@ -775,15 +764,7 @@ h2 span{ color:#3d4149; }
 
    Then the LEGEND lights: orange, with just enough glow to read as backlit
    rather than as printed. That is where all the colour in this state lives. */
-.key.is-down{
-  color:var(--led);
-  background:linear-gradient(180deg,#1a1c20,#232529);
-  box-shadow:
-    inset 0 2px 5px rgba(0,0,0,.85),
-    inset 0 -1px 0 rgba(255,255,255,.07),
-    0 0 0 #0e0f11,
-    0 1px 2px rgba(0,0,0,.5);
-}
+.key.is-down{ color:var(--led); }
 .key.is-down svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
 .key.is-down:hover{ color:var(--led-hot); background:linear-gradient(180deg,#1d1f24,#282b30); }
 /* MOMENTARY actuation: the lamp pulses once and dies. Added for 260ms on
@@ -793,6 +774,82 @@ h2 span{ color:#3d4149; }
   100% { box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 #0e0f11, 0 5px 8px rgba(0,0,0,.7); }
 }
 .key.flash{ animation:actuate .26s ease-out; }
+
+/* ── THE SAME SURGE WHEN A TOGGLE GOES IN ────────────────────────────────
+   A momentary key pulses once when you hit it, and that pulse turned out to
+   be the most convincing thing on the panel — it is the only moment the UI
+   behaves like something with current in it. A toggle deserves it more, not
+   less: a momentary key's pulse reports an event, a toggle's reports that a
+   circuit has just closed and is now staying closed.
+
+   IT IS LITERALLY THE MOMENTARY KEY'S ANIMATION. I wrote a second one for
+   toggles — a filter with a brightness ramp — on the theory that a latching
+   control wanted its own gesture. It did not. Two surges that are nearly the
+   same read as one done badly, and the filter version was the worse of the
+   two: brightness lifts the whole cap, including the shadow inside it, so the
+   recess washes out at exactly the moment the eye is on it.
+
+   The good one puts the light OUTSIDE — a hot rim on the cutout and a 16px
+   bloom on the panel around it — and leaves the cap alone. Same keyframe shape
+   as :active, same 260ms, and the only difference is where it lands: the
+   momentary key settles back to its raised shadow, this one settles into the
+   recess, because that is where a toggle stops. */
+/* THE LEGEND IS ORANGE FROM FRAME ONE. It was starting at #FFD9BC — near
+   white — and animating to the accent, so for a quarter second the icon was
+   pale and only arrived at orange as the glow died: the switch appeared to
+   turn on AFTER the surge rather than because of it. That washed-out start
+   works on the momentary key, where the lamp is the whole event and there is
+   no lit state waiting at the end. Here there is one, so the colour is simply
+   already there and the animation only carries the light around it. */
+@keyframes engage{
+  0%   { box-shadow:var(--recess),
+                    0 0 0 1px rgba(255,106,0,.65),
+                    0 0 16px rgba(255,106,0,.55); }
+  100% { box-shadow:var(--recess); }
+}
+.engage{ animation:engage .26s ease-out; }
+
+/* ── FOCUS, WITHOUT THE BROWSER RING ─────────────────────────────────────
+   Eleven outline rules are gone. A 2px accent rectangle floating 2px off a
+   moulded cap is the one thing on this panel that is unmistakably a web page,
+   and it lands hardest exactly where the illusion is most expensive — around
+   the small keys, where the ring is nearly as big as the object.
+
+   It is replaced rather than deleted, because a keyboard still has to be able
+   to say where it is. The cap simply comes UP under the light: brighter face,
+   a warmer top edge. That is what a physical control does when your attention
+   is on it, it costs no geometry, and it cannot be confused with the pressed
+   state, which goes the other way.
+
+   Honest note, and it is in the bill: a brightness shift is weaker than an
+   outline. It is fine on a dark panel at this size and it is not the equal of
+   a WCAG focus indicator — if this language ever shipped, this is the first
+   thing that would need a real answer. */
+/* AND KILL THE BROWSER'S OWN RING FIRST. Deleting my outlines did not remove
+   a focus ring, it removed the one I controlled — Chrome's default came back
+   underneath, 2-3px of white-blue, which is worse than what was there before.
+   :focus-visible has to be answered, not ignored.
+
+   One hairline, everywhere: 1px, the panel's own orange, offset by 1. At that
+   weight it reads as the edge catching light rather than as a widget, which is
+   the most a focus indicator can do in this language without becoming the
+   loudest thing on screen. The cap still lifts in brightness underneath it, so
+   the cue is carried twice — a thin line and a change in the object itself. */
+*:focus{ outline:none; }
+*:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:1px; }
+input:focus-visible{ outline-offset:3px; }
+
+.key:focus-visible,
+.sw:focus-visible,
+.micro:focus-visible,
+.chev:focus-visible,
+.pkey:focus-visible,
+.chip:focus-visible,
+.rot-lab:focus-visible,
+.row:focus-visible{ filter:brightness(1.25); }
+.knob:focus-visible,
+.rot-knob:focus-visible,
+.gz-node:focus-visible{ filter:brightness(1.3) drop-shadow(0 0 4px rgba(255,150,60,.45)); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE NAV BAR — a control strip screwed to the desk
@@ -867,25 +924,11 @@ h2 span{ color:#3d4149; }
 }
 .pkey:hover{ color:#d6dae0; }
 .pkey:active{ transform:translateY(4px); }
-.pkey:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 /* A piano key that is DOWN is already saying so with 4px of travel, and it
    carries a lamp bar under the engraving. That is two signals; a halo round
    the cap would be a third saying the same thing. */
-.pkey.is-down{
-  transform:translateY(4px);
-  color:var(--led);
-  background:linear-gradient(180deg,#1b1d20,#2a2d32 60%,#34373d);
-  box-shadow:
-    inset 0 3px 6px rgba(0,0,0,.85),
-    inset 0 -1px 0 rgba(255,255,255,.09);
-  text-shadow:0 0 6px rgba(255,130,30,.55);
-}
+.pkey.is-down{ color:var(--led); text-shadow:0 0 6px rgba(255,130,30,.5); }
 /* the lamp bar under the engraved label — the key is lit from inside */
-.pkey.is-down::after{
-  content:''; position:absolute; bottom:7px; left:22px; right:22px; height:2px;
-  border-radius:1px; background:var(--led);
-  box-shadow:0 0 5px rgba(255,106,0,.6);
-}
 .pkey{ position:relative; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -917,13 +960,7 @@ h2 span{ color:#3d4149; }
 }
 .chip:hover{ color:#dfe2e7; }
 .chip:active{ transform:translateY(2px); }
-.chip.is-down{
-  transform:translateY(2px); color:var(--led);
-  background:linear-gradient(180deg,#1e2024,#2c2f34);
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.08);
-  text-shadow:0 0 6px rgba(255,130,30,.5);
-}
-.chip:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+.chip.is-down{ color:var(--led); text-shadow:0 0 6px rgba(255,130,30,.5); }
 .chip .ct{
   font-size:9.5px; padding:1px 5px; border-radius:3px;
   background:rgba(0,0,0,.45); color:#7CFFB0; text-shadow:0 0 5px rgba(124,255,176,.5);
@@ -1174,7 +1211,6 @@ h2 span{ color:#3d4149; }
   margin-left:-1px; border-radius:1px;
   background:#0a0b0c; box-shadow:0 0 0 1px rgba(255,255,255,.13), 0 0 5px rgba(255,255,255,.10);
 }
-.knob:focus-visible{ outline:2px solid var(--led); outline-offset:3px; border-radius:50%; }
 .knob.dragging .knob-cap{ transition:none; }
 
 /* ── the furniture, and it is the part that was too big ──────────────────
@@ -1440,7 +1476,6 @@ h2 span{ color:#3d4149; }
   position:absolute; left:var(--rcx); top:50%; width:58px; height:58px; margin:-29px 0 0 -29px;
   cursor:ns-resize; touch-action:none; border-radius:50%; z-index:2;
 }
-.rot-knob:focus-visible{ outline:2px solid var(--led); outline-offset:5px; }
 .rot-seat{
   position:absolute; left:var(--rcx); top:50%; width:68px; height:68px; margin:-34px 0 0 -34px;
   border-radius:50%;
@@ -1472,7 +1507,6 @@ h2 span{ color:#3d4149; }
 }
 .rot-lab:hover{ color:#c2c7cf; }
 .rot-lab.on{ color:#FFD9BC; text-shadow:0 0 8px rgba(255,140,60,.6); }
-.rot-lab:focus-visible{ outline:2px solid var(--led); outline-offset:3px; border-radius:3px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PANEL BODIES — the editor and the viewport share one chassis
@@ -1505,12 +1539,15 @@ h2 span{ color:#3d4149; }
 
 /* tab keys — the same interlock as the page switcher, one size down */
 .piano.sm{ padding:4px; gap:3px; width:100%; }
-.piano.sm .pkey{ height:26px; min-width:0; flex:1; padding:0 6px; font-size:9px; letter-spacing:.06em;
+/* A SIZE OVERRIDE MUST NOT OUT-RANK THE STATE. These say how big a key is,
+   and they were also re-declaring its box-shadow — at the same specificity as
+   the shared pressed rule but later in the file, so a small key that went down
+   kept its RAISED shadow and only the label changed colour. Scoped to :not()
+   so the raised shadow is only claimed while the key is actually up. */
+.piano.sm .pkey{ height:26px; min-width:0; flex:1; padding:0 6px; font-size:9px; letter-spacing:.06em; }
+.piano.sm .pkey:not(.is-down):not(:active){
   box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.7),
              0 2px 0 #0d0e10, 0 3px 6px rgba(0,0,0,.6); }
-.piano.sm .pkey:active{ transform:translateY(2px); }
-.piano.sm .pkey.is-down{ transform:translateY(2px); }
-.piano.sm .pkey.is-down::after{ bottom:4px; left:8px; right:8px; }
 
 /* a screen: the reference image behind glass */
 .screen{
@@ -1587,7 +1624,6 @@ h2 span{ color:#3d4149; }
   transition:transform .12s;
 }
 .gz-node:hover{ transform:scale(1.22); }
-.gz-node:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 .gz-node.hollow{ background:radial-gradient(circle at 50% 50%, #14161a 52%, color-mix(in srgb,var(--ax) 70%,#000) 53%);
   box-shadow:inset 0 0 4px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.6); }
 .gz-hub{
@@ -1603,18 +1639,49 @@ h2 span{ color:#3d4149; }
    not the same problem: nothing travels sideways), and its keys get a 3px
    skirt, which is what a short-travel key on a real pad has anyway. */
 .keypad{ display:grid; grid-template-columns:repeat(3,1fr); gap:11px 5px; }
-.keypad .pkey{
-  min-width:0; padding:0 4px; height:30px; font-size:9px; letter-spacing:.08em;
+.keypad .pkey{ min-width:0; padding:0 4px; height:30px; font-size:9px; letter-spacing:.08em; }
+.keypad .pkey:not(.is-down):not(:active){
   box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.7),
              0 3px 0 #0d0e10, 0 5px 8px rgba(0,0,0,.7);
 }
-.keypad .pkey:active{ transform:translateY(3px); }
-.keypad .pkey.is-down{ transform:translateY(3px); }
-.keypad .pkey.is-down::after{ bottom:5px; left:12px; right:12px; }
-/* same clearance rule against the divider under it */
-.modepad{ display:flex; gap:5px; margin-bottom:5px; }
-.modepad .pkey{ flex:1; min-width:0; padding:0 4px; height:34px; font-size:9.5px; }
-.modepad .pkey svg{ width:13px; height:13px; margin-right:5px; stroke:currentColor; fill:none; stroke-width:1.7; }
+/* ── THE TOOLS ARE NOT PART OF THE VIEWPORT ──────────────────────────────
+   Pan, Turn and Select were the third row of the viewport panel, under the
+   view keys, and that is a filing error you can feel: everything else in that
+   box answers WHERE THE CAMERA IS — a view, an angle, a fit. These three
+   answer WHAT THE MOUSE DOES, which is true of the whole application and stays
+   true while you are not looking at the viewport at all. Two different
+   questions do not share a chassis.
+
+   So they get their own palette, and it is a tool palette in the old sense: a
+   narrow strip, one key per tool, stacked, small enough to sit anywhere on the
+   canvas. Being a separate object also lets it be MOVED, which a row inside a
+   panel can never be — and being three keys on their own bar makes the
+   interlock obvious, where in a stack of rows it read as one more row. */
+.palette{
+  width:118px; flex:0 0 118px; align-self:flex-start;
+  display:flex; flex-direction:column; gap:5px;
+  padding:7px; border-radius:12px; position:relative;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 30%,#161719 80%,#1d1e22 100%);
+  box-shadow:
+    0 28px 40px -20px rgba(0,0,0,.9),
+    0 6px 12px -5px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9);
+}
+.palette::before{
+  content:''; position:absolute; inset:0; border-radius:12px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+.pal-cap{
+  font-family:var(--font); font-size:8px; letter-spacing:.2em; text-transform:uppercase;
+  color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09);
+  padding:2px 0 4px 3px;
+}
+.palette .pkey{ height:34px; min-width:0; padding:0 10px; font-size:9.5px; justify-content:flex-start; }
+.palette .pkey svg{ width:14px; height:14px; margin-right:8px; stroke:currentColor; fill:none; stroke-width:1.7; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MATERIALS — the primitives, so this is a language and not one drawing
@@ -1760,14 +1827,20 @@ footer{ margin-top:80px; padding-top:22px; border-top:1px solid #1c1e22;
   <h2>05 <span>/</span> The viewport <span>·</span> gizmo, keypad, three knobs</h2>
   <p class="sub">
     The axis ball sits in a well under a glass dome — its six nodes are the six view keys,
-    so you can hit a view from the picture or from the pad. Six latching view keys, three
-    interlocked tool keys, and <b>Yaw / Pitch / Roll</b> as knobs, which is what those three
-    have always wanted to be: three angles you dial, with the pointer showing the angle
-    literally.
+    so you can hit a view from the picture or from the pad. Then <b>Yaw / Pitch / Roll</b> as
+    knobs, which is what those three always wanted to be: three angles you dial, with the
+    pointer showing the angle literally.
+    <br><br>
+    <b>Pan / Turn / Select moved out.</b> Everything in that panel answers <em>where the
+    camera is</em>; those three answer <em>what the mouse does</em>, which stays true while
+    you are not looking at the viewport at all. Two questions, two objects — so they get a
+    tool palette of their own, narrow enough to sit anywhere, and separate enough to be
+    moved.
   </p>
   <div class="stage">
     <div class="stage-note">axis ball · 6-key pad · 3 × rotary</div>
     <div id="viewport" class="box"></div>
+    <div id="tools" class="palette"></div>
   </div>
 
   <h2>06 <span>/</span> Launchpad <span>·</span> one rack module per project</h2>
@@ -1949,7 +2022,7 @@ const swBtn = (on, label, icon, state, onClick) => {
   b.setAttribute('aria-label', `${on ? 'Hide' : 'Show'} ${label}`);
   b.title = state === 'mixed' ? `Some layers only — click to hide ${label} everywhere`
           : on ? `Hide ${label}` : `Show ${label}`;
-  b.addEventListener('click', e => { e.stopPropagation(); onClick(); });
+  b.addEventListener('click', e => { e.stopPropagation(); engage(b, onClick, 'on'); });
   return b;
 };
 
@@ -1959,7 +2032,7 @@ const chevBtn = (open, label, onClick) => {
   b.setAttribute('aria-expanded', String(open));
   b.setAttribute('aria-label', `${open ? 'Hide' : 'Show'} what ${label} draws`);
   b.title = open ? `Hide what ${label} draws` : `Show what ${label} draws`;
-  b.addEventListener('click', e => { e.stopPropagation(); onClick(); });
+  b.addEventListener('click', e => { e.stopPropagation(); engage(b, onClick, 'open'); });
   return b;
 };
 
@@ -2518,6 +2591,28 @@ function panelShape(w, h, cy, { L = 52, R = 44, f = 12, r = 14, cxOff = -8 } = {
     V ${r} A ${r} ${r} 0 0 1 ${n(L + r)} 0 Z')`.replace(/\s+/g, ' ');
 }
 
+/* FLASH THE CONTROL THAT WENT IN — ACROSS THE REBUILD THAT ATE IT.
+
+   Every one of these panels redraws itself wholesale on a click, so the button
+   you pressed does not exist by the time you would put a class on it. Its
+   REPLACEMENT does, at the same index of the same selector inside the same
+   root — and the roots (#dock, #editor, …) are the part that survives, because
+   build() empties and refills them rather than replacing them. So: note the
+   index, let the rebuild happen, find the new element, light it.
+
+   Only if it actually ended up IN. Flipping a switch off is a circuit opening;
+   there is nothing to surge. */
+const ENGAGE_ROOTS = '#dock, #editor, #viewport, #tools, #navbar, #console, #pages';
+function engage(btn, run, cls) {
+  const root = btn.closest(ENGAGE_ROOTS) || document.body;
+  const sel = '.' + btn.className.trim().split(/\s+/)[0];
+  const at = [...root.querySelectorAll(sel)].indexOf(btn);
+  run();
+  const now = [...root.querySelectorAll(sel)][at];
+  if (!now || !now.classList.contains(cls)) return;
+  now.classList.remove('engage'); void now.offsetWidth; now.classList.add('engage');
+}
+
 /* A key. `latch:true` stays down; otherwise it springs back and pulses. */
 function key(html, { cls = '', title, down = false, latch = false, onClick, disabled = false } = {}) {
   const b = el('button', `key skirt ${cls}` + (down ? ' is-down' : ''), html);
@@ -2526,7 +2621,8 @@ function key(html, { cls = '', title, down = false, latch = false, onClick, disa
   b.disabled = disabled;
   if (latch) b.setAttribute('aria-pressed', String(down));
   b.addEventListener('click', () => {
-    if (!latch) { b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); }
+    if (latch) { engage(b, () => onClick && onClick(b), 'is-down'); return; }
+    b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash');
     onClick && onClick(b);
   });
   return b;
@@ -2538,7 +2634,7 @@ function pkey(labelHtml, { down = false, title, onClick, cls = '' } = {}) {
   b.setAttribute('role', 'radio');
   b.setAttribute('aria-checked', String(down));
   if (title) b.title = title;
-  b.addEventListener('click', () => onClick && onClick());
+  b.addEventListener('click', () => engage(b, () => onClick && onClick(), 'is-down'));
   return b;
 }
 
@@ -2767,8 +2863,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 (function viewport() {
   const box = document.getElementById('viewport');
   const VIEWS = ['Front', 'Right', 'Top', 'Back', 'Left', 'Bottom'];
-  const TOOLS = [['Pan', ICON.hand], ['Turn', ICON.orbit], ['Select', ICON.arrow]];
-  const st2 = { view: 0, tool: 2, yaw: 0, pitch: 0, roll: 0 };
+  const st2 = { view: 0, yaw: 0, pitch: 0, roll: 0 };
   let knobs = [];
 
   const draw = () => {
@@ -2821,13 +2916,6 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     })));
     body.append(pad);
 
-    /* three interlocked tool keys */
-    const mode = el('div', 'modepad');
-    TOOLS.forEach(([t, ic], i) => mode.append(pkey(`${ic}${t}`, {
-      down: i === st2.tool, title: `${t} tool`, onClick: () => { st2.tool = i; draw(); },
-    })));
-    body.append(mode);
-
     body.append(el('div', 'divider'));
 
     /* Yaw / Pitch / Roll — three angles, so three knobs. The pointer IS the
@@ -2851,6 +2939,24 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     body.append(acts);
 
     box.append(head, body);
+  };
+  draw();
+})();
+
+/* ── the tool palette: its own object, its own state ──────────────────────
+   It answers what the MOUSE does, not where the camera is, so it does not
+   live in the viewport and it does not share its state either. Three keys on
+   one bar, interlocked. */
+(function tools() {
+  const pal = document.getElementById('tools');
+  const TOOLS = [['Pan', ICON.hand], ['Turn', ICON.orbit], ['Select', ICON.arrow]];
+  let at = 2;
+  const draw = () => {
+    pal.textContent = '';
+    pal.append(el('div', 'pal-cap', 'Tool'));
+    TOOLS.forEach(([t, ic], i) => pal.append(pkey(`${ic}${t}`, {
+      down: i === at, title: `${t} tool`, onClick: () => { at = i; draw(); },
+    })));
   };
   draw();
 })();
@@ -2890,7 +2996,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       c.type = 'button';
       c.setAttribute('role', 'radio');
       c.setAttribute('aria-checked', String(i === folder));
-      c.addEventListener('click', () => { folder = i; draw(); });
+      c.addEventListener('click', () => engage(c, () => { folder = i; draw(); }, 'is-down'));
       top.append(c);
     });
     const nf = el('button', 'chip new', '+ NEW FOLDER');

@@ -1,6 +1,21 @@
-export const version = '1.4.2';
+export const version = '1.5.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.5.0',
+    date: '2026-08-15',
+    changes: [
+      'Physical UI exploration: the pressed recipe is now two tokens in :root — --recess (the four sharp walls plus the lit lip) and --chamfer (the directional, concave-polarity ring). Five copies of it across switches, keys, tabs, chips and chevrons was five things that drift apart the next time one is tuned',
+      'Every toggle in the document now uses it: layer switches, stroke switches, the ALL masters, nav bar latches, editor tabs, the page switcher, view keys, folder chips and chevrons. None declares a fill — each inherits its own raised face, so a pressed cap stays the same object as the cap beside it',
+      'Travel normalised: 2px on the big keys, 1px on the small. A tab falling 4px was travelling further than the gap to its neighbour',
+      'Fixed: .keypad .pkey and .piano.sm .pkey re-declared box-shadow at the same specificity as the pressed rule but later in the file, so the view keys and editor tabs kept their RAISED shadow when down and only the label changed colour. The size overrides are scoped to :not(.is-down):not(:active) now',
+      'Fixed: .chev.open\'s box-shadow ended in a stray comma, making the whole declaration invalid — the open chevron had had no shadow at all',
+      'Toggles get the momentary key\'s actuation surge when they engage, and only when they engage: flipping a switch off is a circuit opening, there is nothing to surge. Reuses the same keyframe rather than a second one, since two nearly-identical surges read as one done badly',
+      'Pan / Turn / Select moved out of the viewport into their own tool palette. Everything else in that panel answers where the camera is; those three answer what the mouse does, which stays true while you are not looking at the viewport at all',
+      'Focus: removed eleven accent outlines and answered :focus-visible explicitly — deleting them had only uncovered Chrome\'s own white-blue default. One hairline everywhere, 1px in the panel\'s orange, plus a brightness lift on the control itself',
+      'Removed the colour dot from numbered layer rows; the ALL row keeps its jewel, which wears the whole palette',
+    ],
+  },
   {
     version: '1.4.2',
     date: '2026-08-15',

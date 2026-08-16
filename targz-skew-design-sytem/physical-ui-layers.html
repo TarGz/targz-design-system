@@ -618,6 +618,66 @@ Object.assign(ICON, {
    ══════════════════════════════════════════════════════════════════════════ */
 const RING_R = 43;                       // in the 0–100 viewBox
 const RING_C = 2 * Math.PI * RING_R;     // 270.18
+/* ══════════════════════════════════════════════════════════════════════════
+   A READOUT YOU CAN TYPE INTO.
+
+   Every lit readout on this panel is the value of a control you can only
+   reach by dragging, and dragging is the wrong tool for "45" — you can find
+   44 and 46 all day. A knob is for LOOKING FOR a value and a keyboard is for
+   KNOWING one, and a panel that only offers the first is a panel you fight
+   whenever you already have the number.
+
+   DOUBLE-CLICK, not click: a single click on a readout is what happens on the
+   way to somewhere else, and a field that opens by accident is a field that
+   eats the next keystroke. The window is the same lit glass it always was —
+   it does not turn into a form control, because it is not one; it is the same
+   readout with a cursor in it.
+
+   The units in the readout are FORMATTING, not input: `45°`, `1.6×` and
+   `0.35` are all one number, so what comes back is parsed and the format is
+   reapplied by the control's own paint. Type `45` or `45°` and both work.
+   ══════════════════════════════════════════════════════════════════════════ */
+function typeable(el, read, write) {
+  el.classList.add('kedit-able');
+  el.title = 'Double-click to type a value';
+  el.addEventListener('dblclick', e => {
+    e.preventDefault();
+    if (el.querySelector('input')) return;
+    const inp = document.createElement('input');
+    inp.className = 'kedit';
+    inp.value = String(read());
+    inp.setAttribute('aria-label', 'Type a value');
+    el.textContent = '';
+    el.append(inp);
+    inp.focus();
+    inp.select();
+
+    let closed = false;
+    const close = commit => {
+      if (closed) return;
+      closed = true;
+      const raw = inp.value.replace(',', '.');
+      inp.remove();
+      /* WRITE AFTER REMOVING, never before: write() repaints the readout, and
+         a repaint with the input still in it would set textContent over the
+         top of the element being removed and leave the field half-torn. */
+      const v = parseFloat(raw);
+      if (commit && !Number.isNaN(v)) write(v);
+      else el.textContent = String(read());
+    };
+    inp.addEventListener('keydown', ev => {
+      /* THE CONTROL UNDERNEATH IS LISTENING FOR ARROWS. Without this, typing
+         into the box also nudges the thing the box is reporting on. */
+      ev.stopPropagation();
+      if (ev.key === 'Enter') { ev.preventDefault(); close(true); }
+      if (ev.key === 'Escape') { ev.preventDefault(); close(false); }
+    });
+    inp.addEventListener('blur', () => close(true));
+    inp.addEventListener('wheel', ev => ev.stopPropagation(), { passive: true });
+    inp.addEventListener('pointerdown', ev => ev.stopPropagation());
+  });
+}
+
 function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
                 layout = 'stack', size, bipolar = false, detents = null, onChange }) {
   const row = layout === 'row';
@@ -704,6 +764,7 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   });
 
   paint();
+  typeable(val, () => v, set);
   // In a row the knob leads, because the knob is the control; stacked, the
   // caption leads, because three of them side by side need naming first.
   if (row) wrap.append(k, el('div', 'klab', label), val);
@@ -899,6 +960,7 @@ function fader({ label, min, max, step = 0.01, value, fmt, mode = 'level',
   });
 
   paint();
+  typeable(out, () => v, set);
   row.append(el('div', 'flab', label), slot, out);
   row.set = set;                       // same handle knob() exposes, same reason
   return row;
@@ -1111,25 +1173,82 @@ function rotary({ options, index, onChange }) {
      in SVG because the silhouette is the control: a CSS border-radius teardrop
      has a visible seam where the two radii meet, and this one rotates, so the
      seam would swing round with it. */
+  /* A ROUND CAP WITH A POINTER, and the roundness is the ARGUMENT rather than
+     a style. The lever was a teardrop, and a teardrop has to rotate as a whole
+     — which means its lighting rotates too, so "lit from above left" spent
+     half the dial lit from below right. A circle has no orientation, so the
+     CAP never turns, its lighting is nailed to the room like every other cap
+     here, and the only thing that moves is the line. That is what a pointer
+     is, and why every real rotary switch ever built is round.
+
+     MATTE, AND MACHINED. The first round build was one big radial sheen on a
+     dark disc, which is how you draw a plastic bead: a broad soft gloss says
+     the surface is smooth and slightly wet. A machined knob is the opposite —
+     the face is nearly flat in value and the light lives in the EDGES, a
+     hairline on the rim and a knurled collar that catches it tooth by tooth.
+     So the bloom is gone, the face barely moves across its width, and what
+     reads is a lit rim, a ring of teeth, and one line. */
+  /* THE KNOB IS FOUR RINGS AND A DOT, read off the reference and built in that
+     order from the outside in — a knurled collar, a lit bevel, a near-flat
+     face, and one small bright indicator.
+
+     THE FACE IS ALMOST FLAT IN VALUE. That is the single thing that separates
+     machined metal from a plastic bead: a broad radial sheen across the top
+     says the surface is domed and slightly wet, and a real knob's top is a
+     turned disc. So the face barely moves across its width and ALL the light
+     lives in the edges — a crisp ring on the bevel, and a collar of teeth that
+     each catch the lamp separately.
+
+     THE INDICATOR IS A DOT, NOT A LINE. A line is a second radius competing
+     with the ring it sits inside; a dot is a position and nothing else, which
+     is all a pointer has ever had to be. */
+  const TEETH = 52;
+  const LAMP = -2.36;                                   // up and left, 158°
+  const knurl = Array.from({ length: TEETH }, (_, i) => {
+    const a = (i / TEETH) * Math.PI * 2, c = Math.cos(a), s2 = Math.sin(a);
+    /* A tooth facing the lamp is a bright fleck and one facing away is a dark
+       one — that alternation IS the knurl. A uniform ring of ticks is a
+       texture, and textures do not turn in the light. */
+    const lit = Math.max(0, Math.cos(a - LAMP)) ** 1.7;
+    return `<line x1="${(50 + c * 40.5).toFixed(2)}" y1="${(50 + s2 * 40.5).toFixed(2)}"` +
+           ` x2="${(50 + c * 47).toFixed(2)}" y2="${(50 + s2 * 47).toFixed(2)}"` +
+           ` stroke="#fff" stroke-opacity="${(0.05 + lit * 0.5).toFixed(3)}"` +
+           ` stroke-width="1.35" stroke-linecap="round"/>`;
+  }).join('');
   const knob = el('div', 'rot-knob',
     `<svg class="tear" viewBox="0 0 100 100" aria-hidden="true">
        <defs>
-         <linearGradient id="${uid}b" x1="18%" y1="0%" x2="82%" y2="100%">
-           <stop offset="0" stop-color="#ffffff"/>
-           <stop offset=".42" stop-color="#e4e8ee"/>
-           <stop offset=".78" stop-color="#b6bdc7"/>
-           <stop offset="1" stop-color="#8f97a2"/>
+         <linearGradient id="${uid}c" x1="22%" y1="2%" x2="78%" y2="98%">
+           <stop offset="0"   stop-color="#31363d"/>
+           <stop offset=".5"  stop-color="#1b1f24"/>
+           <stop offset="1"   stop-color="#0e1114"/>
          </linearGradient>
-         <radialGradient id="${uid}h" cx="36%" cy="30%" r="44%">
-           <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
-           <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+         <!-- the bevel: a full ring, brightest where it turns into the lamp
+              and never quite dark, because a turned edge catches something all
+              the way round -->
+         <linearGradient id="${uid}r" x1="26%" y1="0%" x2="74%" y2="100%">
+           <stop offset="0"   stop-color="#ffffff" stop-opacity=".95"/>
+           <stop offset=".30" stop-color="#ffffff" stop-opacity=".46"/>
+           <stop offset=".58" stop-color="#ffffff" stop-opacity=".10"/>
+           <stop offset=".84" stop-color="#ffffff" stop-opacity=".16"/>
+           <stop offset="1"   stop-color="#ffffff" stop-opacity=".32"/>
+         </linearGradient>
+         <radialGradient id="${uid}f" cx="42%" cy="34%" r="92%">
+           <stop offset="0"   stop-color="#22262b"/>
+           <stop offset=".72" stop-color="#1a1e22"/>
+           <stop offset="1"   stop-color="#121517"/>
          </radialGradient>
        </defs>
-       <path d="M50 5 C45 26 31 33 29 51 A21 21 0 0 0 71 51 C69 33 55 26 50 5 Z"
-             fill="url(#${uid}b)" stroke="rgba(0,0,0,.6)" stroke-width="1.4"/>
-       <ellipse cx="43" cy="44" rx="14" ry="11" fill="url(#${uid}h)"/>
-       <path d="M50 9 C46 27 34 34 32 50" stroke="#fff" stroke-opacity=".85"
-             stroke-width="1.6" fill="none" stroke-linecap="round"/>
+       <circle cx="50" cy="50" r="48" fill="url(#${uid}c)" stroke="#08090b" stroke-width="1"/>
+       <g>${knurl}</g>
+       <circle cx="50" cy="50" r="38.6" fill="none"
+               stroke="url(#${uid}r)" stroke-width="2.6"/>
+       <circle cx="50" cy="50" r="36.6" fill="url(#${uid}f)"
+               stroke="#0b0d10" stroke-width=".9"/>
+       <g class="tear-ptr">
+         <circle cx="50" cy="27.5" r="5.6" fill="#ffffff" opacity=".10"/>
+         <circle cx="50" cy="27.5" r="2.7" fill="#f2f6fb"/>
+       </g>
      </svg>`);
   knob.tabIndex = 0;
   knob.setAttribute('role', 'listbox');

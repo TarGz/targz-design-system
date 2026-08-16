@@ -1251,6 +1251,28 @@ input:focus-visible{ outline-offset:3px; }
   text-shadow:0 0 6px rgba(124,255,176,.65); font-variant-numeric:tabular-nums;
 }
 
+/* THE FIELD IS THE WINDOW, not a box drawn inside it. A readout being typed
+   into is the same lit glass with a cursor in it — same phosphor, same tabular
+   figures, no border and no white ground, because nothing about it has become
+   a form. Only the caret says it is live. */
+/* NO I-BEAM ON THE WINDOW. A text cursor over a readout says "this is a text
+   field", and it is not one — it is a display that will take a value if you
+   ask it twice. The pointer stays a pointer until the caret is actually in
+   there. */
+.kedit-able{ cursor:default; }
+.kval input.kedit{
+  width:100%; min-width:0; border:0; padding:0; margin:0; background:none;
+  text-align:center; font:inherit; color:inherit; text-shadow:inherit;
+  font-variant-numeric:tabular-nums; letter-spacing:inherit;
+  caret-color:#7CFFB0;
+}
+.kval input.kedit:focus{ outline:none; }
+/* the window brightens while it is taking input, the way a lit display does */
+.kval:has(input.kedit){
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 0 0 1px rgba(124,255,176,.35),
+             0 0 7px rgba(124,255,176,.20);
+}
+
 /* ── the FADER, built like one ───────────────────────────────────────────
    Kept only where the value is a LENGTH. The first pass was a rounded bar and
    a rounded lump, which is the flat slider with a bevel painted on. A real
@@ -1545,22 +1567,29 @@ input:focus-visible{ outline-offset:3px; }
    selector on real gear is built — a pale lever on a dark plate, because where
    it points is the thing you must see from across the room. */
 .rot-knob{
-  position:absolute; left:var(--rcx); top:50%; width:58px; height:58px; margin:-29px 0 0 -29px;
+  position:absolute; left:var(--rcx); top:50%; width:62px; height:62px; margin:-31px 0 0 -31px;
   cursor:ns-resize; touch-action:none; border-radius:50%; z-index:2;
 }
 .rot-seat{
-  position:absolute; left:var(--rcx); top:50%; width:68px; height:68px; margin:-34px 0 0 -34px;
+  position:absolute; left:var(--rcx); top:50%; width:74px; height:74px; margin:-37px 0 0 -37px;
   border-radius:50%;
   background:radial-gradient(circle, #0c0d0f 60%, #1c1e22 62%, #0f1012 100%);
   box-shadow:inset 0 2px 7px rgba(0,0,0,.92), 0 1px 0 rgba(255,255,255,.07);
 }
+/* THE CAP DOES NOT TURN — only the pointer does. That is the whole reason the
+   lever became a disc: a circle has no orientation, so its lighting can be
+   nailed to the room like every other cap here instead of swinging round with
+   the value. */
 .tear{
   width:100%; height:100%; overflow:visible; display:block;
-  transform:rotate(var(--deg,0deg)); transform-origin:50% 50%;
-  filter:drop-shadow(0 4px 7px rgba(0,0,0,.8));
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.78));
+}
+.tear-ptr{
+  transform:rotate(var(--deg,0deg));
+  transform-box:view-box; transform-origin:50% 50%;
   transition:transform .18s cubic-bezier(.3,1.5,.5,1);
 }
-.rot-knob.dragging .tear{ transition:none; }
+.rot-knob.dragging .tear-ptr{ transition:none; }
 /* the leaders: tick end, elbow, then flat into the name. Engraved hairlines,
    so they are strokes — a 1px div rotated to an angle is a grey smear. */
 .rot-leads{
@@ -2064,12 +2093,50 @@ input:focus-visible{ outline-offset:3px; }
   width:28px; height:28px; flex:0 0 28px;
   border:0; padding:0; cursor:pointer; position:relative;
   border-radius:9px;
+  /* ── GLASS SHADING, SAME SHAPE ────────────────────────────────────────
+     The squircle stays; what changes is that it stops being a painted face
+     and starts being a body of ink seen THROUGH something. Three layers,
+     outside in, and the order is the argument:
+
+     1 · THE WALLS ARE THE BRIGHTEST THING ON IT. This is the part that is
+         counter-intuitive and the part that does all the work: the instinct
+         is to darken the edges because that is more colour to look through,
+         which is true of a solid lump of liquid and false of anything with a
+         WALL. A lit glass wall throws the room straight back at you, so both
+         edges go white and the colour retreats to the middle.
+     2 · ONE HARD SPECULAR, left of centre and running the full height,
+         because it is on the OUTSIDE of the glass — it belongs to the room,
+         not to the ink, and it does not care what is behind it.
+     3 · THE INK AS A CORE, lit from above left like every other body here.
+
+     A soft top edge and a bounce along the bottom close it: the first is the
+     lamp on the near shoulder, the second is the panel throwing a little back
+     up the underside so the lower edge does not dissolve into the rail. */
   background:
-    radial-gradient(115% 85% at 30% 16%, rgba(255,255,255,.36), transparent 60%),
+    linear-gradient(180deg,
+      rgba(255,255,255,.50) 0 5%,
+      rgba(255,255,255,.10) 11%,
+      transparent 26%, transparent 82%,
+      rgba(255,255,255,.13) 94%,
+      rgba(255,255,255,.26) 100%),
+    linear-gradient(90deg,
+      transparent 0 9%,
+      rgba(255,255,255,.52) 14%,
+      rgba(255,255,255,.86) 19%,
+      rgba(255,255,255,.14) 27%,
+      transparent 36%),
+    linear-gradient(90deg,
+      rgba(255,255,255,.88) 0 4%,
+      rgba(255,255,255,.34) 9%,
+      rgba(255,255,255,.04) 17%,
+      transparent 30%, transparent 72%,
+      rgba(255,255,255,.10) 84%,
+      rgba(255,255,255,.42) 93%,
+      rgba(255,255,255,.82) 97% 100%),
     linear-gradient(158deg,
       color-mix(in srgb,var(--ink) 74%,#fff) 0%,
-      var(--ink) 46%,
-      color-mix(in srgb,var(--ink) 84%,#000) 100%);
+      var(--ink) 44%,
+      color-mix(in srgb,var(--ink) 86%,#000) 100%);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.34),
     inset 0 -1px 0 rgba(0,0,0,.55),
@@ -2077,8 +2144,6 @@ input:focus-visible{ outline-offset:3px; }
     0 5px 9px rgba(0,0,0,.72);
   transition:transform .1s cubic-bezier(.3,1.4,.5,1), box-shadow .1s;
 }
-/* Hover moves nothing either — it lights a rim, the way every key on this
-   panel changes colour under the pointer rather than position. */
 .pencap:hover{
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.34),
@@ -2103,24 +2168,37 @@ input:focus-visible{ outline-offset:3px; }
    the face — the same trap that once erased a knurl. */
 .pencap.on{
   transform:none;
+  /* THE GLASS IS RESTATED IN FULL, not half-declared. `background` resets
+     background-image, so listing only the core here would strip the walls and
+     the specular off the one swatch you are looking at — the same trap that
+     once erased a knurl. Only the CORE inverts: dark at the top, light at the
+     bottom, because the bezel now shades a body that has dropped below it. The
+     room does not move, so the walls and the specular do not either. */
   background:
-    radial-gradient(115% 85% at 32% 88%, rgba(255,255,255,.22), transparent 62%),
+    linear-gradient(180deg,
+      rgba(255,255,255,.22) 0 5%,
+      rgba(255,255,255,.05) 11%,
+      transparent 26%, transparent 82%,
+      rgba(255,255,255,.16) 94%,
+      rgba(255,255,255,.30) 100%),
+    linear-gradient(90deg,
+      transparent 0 9%,
+      rgba(255,255,255,.44) 14%,
+      rgba(255,255,255,.74) 19%,
+      rgba(255,255,255,.12) 27%,
+      transparent 36%),
+    linear-gradient(90deg,
+      rgba(255,255,255,.78) 0 4%,
+      rgba(255,255,255,.28) 9%,
+      rgba(255,255,255,.03) 17%,
+      transparent 30%, transparent 72%,
+      rgba(255,255,255,.09) 84%,
+      rgba(255,255,255,.36) 93%,
+      rgba(255,255,255,.72) 97% 100%),
     linear-gradient(158deg,
-      color-mix(in srgb,var(--ink) 80%,#000) 0%,
+      color-mix(in srgb,var(--ink) 84%,#000) 0%,
       var(--ink) 52%,
-      color-mix(in srgb,var(--ink) 78%,#fff) 100%);
-  /* AND THE LAMP, which is the other half of latched. The file's rule is that
-     down AND lit is what separates "held by a finger" from "held by the
-     mechanism" — and every other latching control here says it with a warm
-     GLYPH. A colour swatch has no glyph: the face is the legend, and tinting
-     it orange would be lying about the ink. So the lamp goes into the WELL
-     instead — a tight warm line at the cutout and a short bloom off it, which
-     is light escaping round a seated cap.
-
-     It is the panel's lamp colour, not the ink's, and deliberately: an
-     indicator that changed colour with the thing it indicates stops being an
-     indicator. Kept to the source's own limit for a latched control — "a
-     little light in the well, not a bloom on the chassis". */
+      color-mix(in srgb,var(--ink) 76%,#fff) 100%);
   box-shadow:
     var(--recess),
     0 0 0 1px rgba(255,106,0,.42),

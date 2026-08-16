@@ -1,6 +1,22 @@
-export const version = '1.12.2';
+export const version = '1.13.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.13.0',
+    date: '2026-08-16',
+    changes: [
+      'THE ROTARY\'S LEVER IS A KNOB NOW, and the roundness is an argument rather than a style. It was a white teardrop, which has to rotate as a whole — so its lighting rotated with it and "lit from above left" spent half the dial lit from below right. Counter-rotating the shading inside the silhouette fixes the physics and still looks wrong, because the eye reads a moving edge as a moving surface whatever is painted on it. A circle has no orientation, so the cap never turns, its lighting is nailed to the room like every other cap here, and the only thing that moves is the indicator',
+      'Four rings and a dot, built outside in: a knurled collar, a lit bevel, a near-flat face, one small bright dot. THE FACE IS ALMOST FLAT IN VALUE and that is the whole difference between machined metal and a plastic bead — a broad radial sheen says the surface is domed and slightly wet, and a real knob\'s top is a turned disc. All the light lives in the edges',
+      'Each knurl tooth takes the lamp separately, bright where it faces it and dark where it turns away. That alternation IS the knurl; a uniform ring of ticks is a texture, and textures do not turn in the light',
+      'THE INDICATOR IS A DOT, NOT A LINE. A line is a second radius competing with the ring it sits inside; a dot is a position and nothing else, which is all a pointer has ever had to be. 62px, down from the first round build',
+      'GLASS SHADING ON THE INK SWATCHES — the same squircle, but it stops being a painted face and starts being a body of ink seen THROUGH something. The walls are the brightest thing on it, which is the counter-intuitive half: the instinct is to darken the edges because that is more colour to look through, true of a solid lump of liquid and false of anything with a WALL. A lit glass wall throws the room straight back, so both edges go white and the colour retreats to the middle',
+      'One hard specular left of centre running the full height, because it is on the OUTSIDE of the glass and belongs to the room rather than to the ink. The seated state restates every layer rather than half of one: `background` resets background-image, so declaring only the core would strip the walls and the specular off the one swatch you are looking at — the trap that once erased a knurl. Only the CORE inverts; the room does not move',
+      'ANY LIT READOUT TAKES A TYPED VALUE — double-click it. A knob is for LOOKING FOR a value and a keyboard is for KNOWING one, and a panel that only offers the first is one you fight whenever you already have the number. Pen, Spacing, Angle, Count, Attempts, Yaw, Pitch, Roll, Hue, Min stroke, Join reach, Level and Trim',
+      'Double-click and not click, because a single click on a readout is what happens on the way to somewhere else and a field that opens by accident eats the next keystroke. Units are formatting, not input — 45 and 45° both work. The window does not become a form control: same lit glass, same phosphor, same tabular figures, a caret and nothing else, and NO I-BEAM on hover, because a text cursor claims it is a text field and it is not — it is a display that will take a value if you ask it twice',
+      'The control underneath stops hearing arrow keys while the field is open, or typing into the box also nudges the thing the box reports on. The write happens after the input is removed, because write() repaints the readout and a repaint with the input still in it leaves the field half-torn',
+      'FEATURE REQUEST recorded, not built: the ink swatch as a glass capsule, filled or empty. Written up with the prior art — pen cap, nib and pipette were all built and rejected before the squircle, and all three failed the same way, by getting better at being a picture of a thing on the desk and no better at being a control. And with the open question it has to settle first: a slot is binary today, so a three-state capsule needs a third fact to carry or half-full is decoration',
+    ],
+  },
   {
     version: '1.12.2',
     date: '2026-08-15',

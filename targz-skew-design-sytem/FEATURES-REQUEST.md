@@ -27,6 +27,39 @@ future adoption pays for them again.
 
 ## Open
 
+### `[design system]` The ink swatch as a glass capsule, filled or empty
+The rail's swatches are modelled squircle caps today — a coloured face that goes down and lights
+when it is the one in use. The request is to make them **little glass capsules** instead, at the
+same rendering quality the panel's other glass has, and to use **how full they are** as the state:
+a capsule with ink in it is a pen you own, a half-filled one and an empty one say the rest.
+
+**Why it is not just a reskin.** The rail currently carries three facts — which pen is selected,
+which slots have ink, which are empty — and it says them with three different devices: the seated
+state, the coloured face, and the milled well. A capsule that is full / half / empty folds the
+second and third into one reading, which is better, but it has to keep saying the first, and a
+glass tube's "selected" cannot be the recess-and-lamp the squircle uses without looking like a
+capsule pressed into the panel edge-on.
+
+**Prior art in this repo, and it is worth reading before starting.** Three swatch objects were
+built and rejected before the squircle: a pen cap (read as a battery), a technical nib (read as a
+marker tip), and a glass pipette (read correctly as a pipette and was still wrong). The failure
+was the same each time — each got better at being a *picture of a thing on the desk* and none got
+better at being a *control*: you could not tell at a glance which one was selected, the colour
+fought a silhouette for attention, and at swatch size the depicted object was unreadable. Any
+capsule attempt has to answer that, not just look good enlarged.
+
+**What was learned about drawing glass here** (from the pipette): the ink is a CORE, not a skin —
+a lit glass wall is the brightest thing on the object, so the edges go bright and the colour sits
+inside; the meniscus must be a CURVE, because flat reads as a painted stripe; and the specular
+runs the full height because it is on the outside and does not care where the liquid stops. Those
+three are the difference between glass and a coloured lozenge.
+
+**Open question the request has to settle:** what half-full *means*. Right now a slot is binary —
+it has ink or it does not. A three-state capsule needs a third fact to carry, and if there is not
+one, half-full is decoration.
+
+---
+
 ### `[design system]` The machine half of 08 — built; one decision left
 The serpentine is in as the second half of section 08: parallel as a control, serpentine as the
 result, on the same ball and the same holed blob, with a pen-down count under each. Read the two

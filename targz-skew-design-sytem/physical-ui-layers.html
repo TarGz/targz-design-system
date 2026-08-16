@@ -346,6 +346,230 @@ const el = (tag, cls, html) => {
   if (html != null) e.innerHTML = html;
   return e;
 };
+/* ══════════════════════════════════════════════════════════════════════════
+   THE PANEL MAKES A NOISE, AND IT IS THE SAME ARGUMENT THE DETENT MADE.
+
+   The drum's tick was written as a one-off, with the reasoning that a detent
+   is the one control whose defining feature — the notch it drops into — has
+   no visual at all, so you hear it or you get nothing. That reasoning was
+   never about the drum. EVERY object on this panel is a machined part with a
+   sound: a key bottoms out, a switch snaps over, an encoder ratchets, a fader
+   cap is picked up off its track and set back down. Drawing all of that under
+   one lamp and then rendering it silent is the same half-finished illusion as
+   drawing one control lit from the other side.
+
+   SO IT IS ONE BANK OF VOICES AT THE TOP OF THE KIT, NOT A FUNCTION IN THE
+   DRUM. Same rule as `--recess` and `--chamfer`: declared once, used at any
+   size. Seven voices out of TWO generators — a ringing one for the parts that
+   really ring and a struck one for the parts that hit, which is the argument
+   directly below. Nothing is sampled and nothing ships: the whole bank is
+   under eighty lines and there is no asset.
+
+   THE BUDGET IS THE WHOLE DESIGN, AND IT IS DISCREET RATHER THAN QUIET. These
+   are 3.5–14ms of transient with at most 30ms of body under it, at a level you
+   should notice you have STOPPED hearing rather than notice you are hearing —
+   a control that announces itself is a control you turn the volume off for,
+   and then every one of them is silent. It is one number, `MASTER`, so the
+   whole panel moves together and the balance between the parts cannot drift
+   while it does. Loudest is the press, because it is the one you make on
+   purpose; the tab is a third of it, because a tab strip is WALKED.
+
+   AND AN ENCODER TICKS PER NOTCH, NOT PER STEP. A knob with `step: 1` over a
+   0–360 range fires 360 times across its travel, which at any rate limit at
+   all is a buzz rather than a ratchet. A real encoder has a fixed number of
+   detents whatever it is wired to, so the tick is keyed to a fixed division
+   of the TRAVEL — `ENC` of them end to end — and the value's own step is left
+   to say what the value is. THE KNOB ALONE: a fader has no ratchet in it and
+   is silent as it runs, which is the note on `rangeFader`'s setter.
+
+   BUILT LAZILY, on the first sound, because an AudioContext made before a
+   gesture is one the browser suspends and one nobody asked for. Muted through
+   `SFX.on`, in localStorage rather than in any document's state: whether the
+   room is quiet is a property of the room, not of the piece being made in it.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* AN OSCILLATOR IS A TONE AND A CLICK IS NOT A TONE — that is the whole of why
+   the first build came out sounding electronic. A falling square wave is a
+   CHIRP: it has a pitch, you can hum it, and a panel full of them is a panel of
+   little beeps. Nothing in a machine makes a pitch when you press it. What a
+   plastic cap hitting an aluminium skirt makes is a BURST OF NOISE, a few
+   milliseconds long, coloured by the resonance of whatever was struck — plus a
+   thump from the mass behind it.
+
+   SO THE STRIKE IS NOISE THROUGH A BANDPASS, AND THAT IS THE MODEL. White noise
+   is every frequency at once, which is what an impact is before the object gets
+   to it; the filter is the object. `f` is what the thing rings at and `Q` is how
+   dead it is — a low Q is a dull damped thock, a high one is a small hard
+   ringing tick. One buffer of noise is made once and every strike reads a
+   RANDOM SLICE of it, so no two are the same waveform.
+
+   AND THE BODY IS A SECOND, LOWER COMPONENT, because a real press is two events
+   in one: the tick of the contact and the thud of the mass. A sine at 150–350Hz
+   dropping slightly as it decays is that thud. Skip it and a key sounds like a
+   fingernail on the desk rather than a key going down.
+
+   NOTHING REPEATS EXACTLY. Frequency ±6%, level ±15%, a different slice of noise
+   every time. Identical repeats are most of what "digital" means — a real object
+   struck twice makes two different sounds, and the ear is far better at spotting
+   that they are the SAME than at hearing what either one was.
+
+   THE KNOB'S RATCHET IS DELIBERATELY NOT THIS. `step` is still a chirp: an
+   encoder's notch is the one thing on this panel that really does ring at a
+   pitch, it is forty-to-a-turn so it has to be tiny rather than detailed, and
+   it was asked to stay. It is the LAST one — the drum's chirp went the same way
+   every other tone here did, and for the same reason. */
+const ENC = 40;                        // notches across a knob's travel
+const SFX = (() => {
+  let ac = null, noise = null, on = true;
+  try { on = localStorage.getItem('skew.sfx') !== 'off'; } catch { /* no storage, stay on */ }
+  const vary = (a, b) => a + Math.random() * (b - a);
+
+  const wake = () => {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    if (!noise) {
+      // 0.4s of white noise, made once. Every strike takes a random slice, which
+      // is what stops two presses being the same waveform.
+      noise = ac.createBuffer(1, Math.ceil(ac.sampleRate * .4), ac.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return ac;
+  };
+
+  /* THE RINGING VOICE, kept for the ENCODER's notch: a pitch falling through an
+     exponential gain. It is the knob's ratchet and nothing else now. */
+  const blip = (f0, f1, g0, dur, type) => {
+    if (!on) return;
+    try {
+      const c = wake(), t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(f0, t);
+      o.frequency.exponentialRampToValueAtTime(f1, t + dur * .45);
+      g.gain.setValueAtTime(g0, t);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(c.destination);
+      o.start(t); o.stop(t + dur * 1.25);
+    } catch { /* no audio here, and every control still works */ }
+  };
+
+  /* DISCREET IS A LEVEL, AND IT IS ONE NUMBER. Every strike is scaled by
+     `MASTER` on its way out, so "the panel is too loud" is one edit and not
+     fourteen — and the BALANCE between the voices, which is the part that took
+     the tuning, cannot drift while you are changing the volume. The per-voice
+     numbers below are therefore relative: what a press is against a tab, not
+     what either is against the room.
+
+     THE ONE THAT RINGS IS NOT SCALED BY IT. `step` was asked to stay exactly as
+     it is, and "exactly" includes its level, so it goes out at its own gain.
+     That is the only reason `MASTER` is inside `strike` rather than on a master
+     GainNode across the whole bank.
+
+     AND THE BODY IS CUT HARDER THAN THE TRANSIENT, because loudness at these
+     levels is almost all in the low end: an equal cut leaves a click that
+     measures quiet and still THUDS. The transient is what says the object is
+     hard; the body is what says it is heavy, and a discreet panel is one whose
+     parts are hard and light. */
+  const MASTER = .34;
+
+  /* AN IMPACT: a slice of noise shaped by what it hit, over an optional thud. */
+  const strike = (f, q, dur, g0, body, bodyG, bodyDur) => {
+    if (!on) return;
+    try {
+      const c = wake(), t = c.currentTime;
+      const s = c.createBufferSource();
+      s.buffer = noise;
+      const bp = c.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = f * vary(.94, 1.06);
+      bp.Q.value = q;
+      const g = c.createGain();
+      // the attack is half a millisecond — an impact has no attack at all, and
+      // anything slower than this is audible as a swell rather than a hit
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.linearRampToValueAtTime(g0 * MASTER * vary(.85, 1.15), t + .0005);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      s.connect(bp).connect(g).connect(c.destination);
+      s.start(t, Math.random() * (noise.duration - .05), dur + .01);
+      s.stop(t + dur + .02);
+      if (body) {
+        // the mass behind the contact: a struck body drops slightly in pitch as
+        // it dies, which is the difference between a thud and a bleep
+        const o = c.createOscillator(), bg = c.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(body * vary(.96, 1.04), t);
+        o.frequency.exponentialRampToValueAtTime(body * .78, t + bodyDur);
+        bg.gain.setValueAtTime(.0001, t);
+        bg.gain.linearRampToValueAtTime(bodyG * MASTER * vary(.85, 1.15), t + .001);
+        bg.gain.exponentialRampToValueAtTime(.0001, t + bodyDur);
+        o.connect(bg).connect(c.destination);
+        o.start(t); o.stop(t + bodyDur + .02);
+      }
+    } catch { /* no audio here, and every control still works */ }
+  };
+
+  return {
+    isOn: () => on,
+    mute: v => { on = !v; try { localStorage.setItem('skew.sfx', on ? 'on' : 'off'); } catch {} },
+    /* ── THE ONE THAT RINGS, AND IT IS THE KNOB'S ONLY. One notch of an
+       encoder: asked to stay exactly as it is and left exactly as it is.
+
+       THE DRUM'S CHIRP IS GONE, AND IT WAS THE LAST THING IN HERE THAT SOUNDED
+       LIKE A UI. It was kept on the grounds that it is the sound the part
+       shipped with and somebody had been listening to it since before any of
+       this — which is an argument about HISTORY, not about the object, and the
+       object is a machined barrel with a sprung ball riding a groove. A falling
+       square wave at 0.05 is a gimmick, it is not what that makes, and it was
+       the loudest thing left in the bank. `roll` is what it makes. Nothing
+       calls `blip` now except the ratchet, which is the only place a pitch was
+       ever honest: an encoder's notch really does ring. */
+    step:    () => blip(3100, 2000, .012, .010, 'square'),
+    // ── AND THE SEVEN THAT STRIKE.       f     Q   dur   lvl  body  lvl   dur
+    // a cap bottoming out on its skirt — hard and light, a whisper of mass
+    press:   () => strike(1800, 1.4, .009, .34,  200, .018, .028),
+    // and springing back to its top stop — lighter, brighter, no mass at all
+    release: () => strike(3200, 1.8, .005, .11),
+    // a switch going over centre — crisper than a key, and shorter
+    flip:    () => strike(2800, 2.3, .007, .26,  350, .012, .016),
+    /* A SELECTOR SWITCH SNAPPING INTO A POSITION. Heavier than a toggle,
+       because the part is: a sprung ball, a machined star wheel and a shaft
+       with a knob on it. Higher Q than anything else in the bank, which is
+       what makes it read as METAL rather than as plastic — but a strike and
+       not a chirp, because the ball is what makes the noise and a ball hitting
+       a groove has no pitch to hum. */
+    clack:   () => strike(2200, 3.4, .011, .30,  430, .016, .024),
+    /* A DRUM IS THE SAME MECHANISM IN A BIGGER, DEADER PART. A rotary is a
+       machined star wheel on a short shaft and it rings; a drum is a barrel
+       with mass in it, gripped at the rim, and mass is what kills a ring. So:
+       lower, a full point less Q, and two thirds of the level — the difference
+       between flicking a switch and rolling a wheel round to the next name. */
+    roll:    () => strike(1500, 2.3, .009, .19,  270, .010, .020),
+    /* A PIANO KEY IS A THINNER PART, AND IT IS THE ONE YOU HIT MOST. A tab
+       strip is WALKED — six of them, back and forth, while you compare one
+       setting across six marks — so a key's full thock on a tab is the loudest
+       thing in the panel attached to the lightest gesture in it. Higher,
+       shorter, a third of the level and no mass behind it at all: the sound of
+       a thin key on a bar rather than a command key on a skirt. */
+    tap:     () => strike(2500, 1.7, .005, .11),
+    lift:    () => strike(3500, 1.9, .0035, .045),
+    // a fader cap lifted off its track — damped, nothing rings
+    grab:    () => strike( 980,  .9, .011, .15),
+    // and set back down on it
+    drop:    () => strike( 800, 1.0, .014, .17,  160, .014, .030),
+  };
+})();
+
+/* Every key, switch and chevron in the kit takes the same pair, so the two
+   halves of a press cannot drift apart between one control and the next. It
+   is on the POINTER and not on `click`, because the sound of a key is the
+   sound of it going down — a click fires on the way back up, by which time
+   the noise is late by however long you held it. */
+const clicky = (b, down = SFX.press, up = SFX.release) => {
+  b.addEventListener('pointerdown', () => { if (!b.disabled) down(); });
+  b.addEventListener('pointerup',   () => { if (!b.disabled) up(); });
+  return b;
+};
+
 const summary = (L) => L.count ? `${L.count} · ${L.lo}–${L.hi}mm` : 'off';
 const tally = (fn) => {
   const k = st.layers.filter(fn).length;
@@ -384,7 +608,7 @@ const swBtn = (on, label, icon, state, onClick) => {
   b.title = state === 'mixed' ? `Some layers only — click to hide ${label} everywhere`
           : on ? `Hide ${label}` : `Show ${label}`;
   b.addEventListener('click', e => { e.stopPropagation(); engage(b, onClick, 'on'); });
-  return b;
+  return clicky(b, SFX.flip, SFX.release);
 };
 
 const chevBtn = (open, label, onClick) => {
@@ -394,7 +618,7 @@ const chevBtn = (open, label, onClick) => {
   b.setAttribute('aria-label', `${open ? 'Hide' : 'Show'} what ${label} draws`);
   b.title = open ? `Hide what ${label} draws` : `Show what ${label} draws`;
   b.addEventListener('click', e => { e.stopPropagation(); engage(b, onClick, 'open'); });
-  return b;
+  return clicky(b, SFX.flip, SFX.release);
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -608,6 +832,12 @@ Object.assign(ICON, {
   image: svg('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
   sun:   svg('<circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>'),
   term:  svg('<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>'),
+  /* THE SPEAKER TAKES THE SAME SLASH EVERY OTHER `…Off` IN THIS SET TAKES —
+     the plain drawing with a rule through it, so off is a SHAPE and not a
+     second grey. The waves come off rather than being dimmed: what is gone is
+     the sound, and the cone is still there. */
+  sound: svg('<polygon points="4 9 8 9 13 5 13 19 8 15 4 15"/><path d="M16.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M19.2 5.8a8.8 8.8 0 0 1 0 12.4"/>'),
+  soundOff: svg('<polygon points="4 9 8 9 13 5 13 19 8 15 4 15"/><line x1="2" y1="2" x2="22" y2="22"/>'),
   search:svg('<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'),
   ext:   svg('<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>'),
   play:  svg('<polygon points="6 3 20 12 6 21 6 3"/>'),
@@ -733,13 +963,36 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
      eye. Within 2% of the sweep the cap falls in — wide enough to catch, tight
      enough that the numbers between the notches are still reachable. */
   const NOTCH = .02 * (max - min);
-  const set = (nv) => {
+  /* THE RATCHET. `enc` is which of the ENC notches across the sweep the cap is
+     standing in, and the tick fires when that number changes — so the noise is
+     the KNOB's and not the value's, and a 0–360 knob at step 1 ratchets forty
+     times across its travel instead of buzzing three hundred and sixty. Seeded
+     from the starting value, or the control announces itself on the way in.
+     `quiet` is what a host's `set` passes: a sync is not an edit, and a panel
+     refreshed after a layer switch must not sound like one being played. */
+  const notch = x => Math.round(((x - min) / (max - min)) * ENC);
+  let enc = notch(v), held = null;
+  const set = (nv, quiet) => {
     const q = Math.round(nv / step) * step;
     v = +Math.min(max, Math.max(min, q)).toFixed(6);
+    let fell = false;
     if (detents) {
+      // `held` is what makes this fire ONCE. Without it the cap is re-snapped
+      // on every pointermove inside the notch band and the detent machine-guns
+      // for as long as you sit in it.
       const near = detents.find(d => Math.abs(v - d) < NOTCH);
-      if (near != null) v = near;
+      if (near != null) { fell = held !== near; v = near; held = near; }
+      else held = null;
     }
+    if (!quiet) {
+      /* Landing in a DECLARED notch is a decision and gets the selector's
+         clack — a notch cut in a knob and a notch cut in a rotary are the same
+         part, so they are the same sound. Crossing an encoder notch is just
+         travel, and keeps the ratchet. The drum's chirp reaches neither. */
+      if (fell) SFX.clack();
+      else if (notch(v) !== enc) SFX.step();
+    }
+    enc = notch(v);
     paint(); onChange && onChange(v);
   };
 
@@ -778,7 +1031,7 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   // caption leads, because three of them side by side need naming first.
   if (row) wrap.append(k, el('div', 'klab', label), val);
   else wrap.append(el('div', 'klab', label), k, val);
-  wrap.set = set;
+  wrap.set = nv => set(nv, true);        // a host drives this control SILENTLY
   return wrap;
 }
 
@@ -823,6 +1076,13 @@ function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
     capA.setAttribute('aria-valuenow', a);
     capB.setAttribute('aria-valuenow', b);
   };
+  /* A FADER IS SILENT WHILE IT SLIDES, AND A KNOB IS NOT. That is not a taste
+     call, it is what the two parts are: an encoder is a ratchet with a fixed
+     number of detents cut into it and it clicks through every one, while a
+     fader cap runs on a greased track with nothing to click against. The only
+     noises a fader has are the cap coming off the track and going back down —
+     and, where the part has one, the notch at the centre. A ratchet on a fader
+     is the sound of a control that does not exist. */
   const set = (which, v) => {
     if (which === 0) a = Math.min(q(v), b - MIN_SPAN * (max - min));
     else b = Math.max(q(v), a + MIN_SPAN * (max - min));
@@ -843,10 +1103,13 @@ function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
     set(active, v);
   };
   track.addEventListener('pointerdown', e => {
-    track.setPointerCapture(e.pointerId); track.dataset.on = '1'; fromX(e, true);
+    track.setPointerCapture(e.pointerId); track.dataset.on = '1'; SFX.grab(); fromX(e, true);
   });
   track.addEventListener('pointermove', e => { if (track.dataset.on) fromX(e, false); });
-  track.addEventListener('pointerup', () => delete track.dataset.on);
+  track.addEventListener('pointerup', () => {
+    if (track.dataset.on) SFX.drop();
+    delete track.dataset.on;
+  });
 
   [capA, capB].forEach((c, n) => {
     c.tabIndex = 0;
@@ -933,10 +1196,19 @@ function fader({ label, min, max, step = 0.01, value, fmt, mode = 'level',
     cap.setAttribute('aria-valuenow', v);
     cap.setAttribute('aria-valuetext', out.textContent);
   };
-  const set = x => {
+  // silent while it slides — see the note on the range fader's `set`. The ONE
+  // thing a fader can click on is a notch that is really cut in the part, and
+  // `held` is what makes it fire once on the way in rather than on every
+  // pointermove for as long as you sit in the band.
+  let held = false;
+  const set = (x, quiet) => {
     v = q(x);
     // the notch: inside 3% of the middle the cap falls into zero
-    if (mode === 'center' && Math.abs(norm(v) - zero) < DETENT) v = q(min + zero * (max - min));
+    if (mode === 'center' && Math.abs(norm(v) - zero) < DETENT) {
+      v = q(min + zero * (max - min));
+      if (!held && !quiet) SFX.clack();
+      held = true;
+    } else held = false;
     paint(); onChange && onChange(v);
   };
 
@@ -949,10 +1221,13 @@ function fader({ label, min, max, step = 0.01, value, fmt, mode = 'level',
     set(min + Math.min(1, Math.max(0, at / usable)) * (max - min));
   };
   track.addEventListener('pointerdown', e => {
-    track.setPointerCapture(e.pointerId); track.dataset.on = '1'; fromXY(e);
+    track.setPointerCapture(e.pointerId); track.dataset.on = '1'; SFX.grab(); fromXY(e);
   });
   track.addEventListener('pointermove', e => { if (track.dataset.on) fromXY(e); });
-  track.addEventListener('pointerup', () => delete track.dataset.on);
+  track.addEventListener('pointerup', () => {
+    if (track.dataset.on) SFX.drop();
+    delete track.dataset.on;
+  });
   track.addEventListener('wheel', e => {
     e.preventDefault(); set(v - Math.sign(e.deltaY) * (e.shiftKey ? step : (max - min) / 40));
   }, { passive: false });
@@ -971,7 +1246,7 @@ function fader({ label, min, max, step = 0.01, value, fmt, mode = 'level',
   paint();
   typeable(out, () => v, set);
   row.append(el('div', 'flab', label), slot, out);
-  row.set = set;                       // same handle knob() exposes, same reason
+  row.set = x => set(x, true);         // same handle knob() exposes, same reason
   return row;
 }
 
@@ -1224,32 +1499,11 @@ function openPicker(anchor, value, onChange, swatches) {
 const DRUM_STEP = 18, DRUM_ROW = 18;                 // degrees per name, px per name
 const DRUM_R = DRUM_ROW / (2 * Math.tan(DRUM_STEP * Math.PI / 360));
 
-/* THE DETENT MAKES A NOISE, because a detent is a noise. Everything else in
-   this document is a picture of a mechanism; this is the one control whose
-   defining feature — the notch it drops into — has no visual at all. You feel
-   a detent, and failing that you hear it.
-
-   SYNTHESISED, NOT SAMPLED: a 40ms chirp falling 2.2kHz to 700Hz through an
-   exponential gain, which is what a small sprung ball dropping into a groove
-   sounds like and is four lines rather than an asset to ship. Built lazily on
-   the first turn, because an AudioContext made before a gesture is one the
-   browser suspends and one nobody asked for. */
-let drumAC = null;
-function drumTick() {
-  try {
-    drumAC = drumAC || new (window.AudioContext || window.webkitAudioContext)();
-    if (drumAC.state === 'suspended') drumAC.resume();
-    const t = drumAC.currentTime;
-    const o = drumAC.createOscillator(), g = drumAC.createGain();
-    o.type = 'square';
-    o.frequency.setValueAtTime(2200, t);
-    o.frequency.exponentialRampToValueAtTime(700, t + 0.018);
-    g.gain.setValueAtTime(0.05, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.038);
-    o.connect(g).connect(drumAC.destination);
-    o.start(t); o.stop(t + 0.045);
-  } catch { /* no audio here, and the drum still works */ }
-}
+/* THE DETENT MAKES A NOISE, because a detent is a noise, and THAT is the
+   argument the whole voice bank at the top of the kit grew out of — this
+   control's defining feature, the notch it drops into, has no visual at all.
+   It is `SFX.roll` now rather than the chirp it shipped with: a barrel with
+   mass in it, not a bleep. The chirp is deleted rather than left unread. */
 
 function drum({ options, index = 0, label, onChange }) {
   /* THE WHOLE ASSEMBLY DROPS INTO A WELL. A drum standing on the faceplate is
@@ -1320,7 +1574,7 @@ function drum({ options, index = 0, label, onChange }) {
     if (to === i) return;
     i = to; paint();
     if (!quiet) {
-      drumTick();
+      SFX.roll();
       win.classList.remove('knock'); void win.offsetWidth; win.classList.add('knock');
     }
     onChange && onChange(options[i], i);
@@ -1567,7 +1821,14 @@ function rotary({ options, index, onChange }) {
     labs.forEach((l, n) => l.classList.toggle('on', n === i));
     knob.setAttribute('aria-activedescendant', options[i]);
   };
-  const set = n => { i = Math.max(0, Math.min(N - 1, n)); paint(); onChange && onChange(options[i], i); };
+  // A ROTARY IS ALL DETENT — there is no travel between its positions, only
+  // positions — so it gets the detent's own voice, and only when `i` moves.
+  const set = n => {
+    const was = i;
+    i = Math.max(0, Math.min(N - 1, n));
+    if (i !== was) SFX.clack();
+    paint(); onChange && onChange(options[i], i);
+  };
   /* the same handle knob() and fader() expose, and for the same reason: a
      control another control has to be able to move needs a way in that is not
      "rebuild it" */
@@ -1668,7 +1929,7 @@ function key(html, { cls = '', title, down = false, latch = false, onClick, disa
     b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash');
     onClick && onClick(b);
   });
-  return b;
+  return clicky(b);
 }
 /* A piano key — latching, and its bar holds one down at a time. */
 function pkey(labelHtml, { down = false, title, onClick, cls = '' } = {}) {
@@ -1678,7 +1939,7 @@ function pkey(labelHtml, { down = false, title, onClick, cls = '' } = {}) {
   b.setAttribute('aria-checked', String(down));
   if (title) b.title = title;
   b.addEventListener('click', () => engage(b, () => onClick && onClick(), 'is-down'));
-  return b;
+  return clicky(b, SFX.tap, SFX.lift);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1700,6 +1961,16 @@ const nav = { ref: true, light: true, cells: false, letters: 1060 };
       onClick: () => { nav.light = !nav.light; draw(); } }));
     bar.append(key(ICON.cells, { title: 'Placement cells', latch: true, down: nav.cells,
       onClick: () => { nav.cells = !nav.cells; draw(); } }));
+    /* THE MUTE IS A NAV KEY AND NOT A PANEL SETTING. Whether the room is
+       quiet is a property of the ROOM, not of the piece — same argument as
+       the panel positions, so it lives in localStorage and never in a saved
+       file. It is latching because it IS something rather than DOES
+       something, and it is in the bar because a control you reach for when
+       somebody walks in is one you must not have to go and find. */
+    bar.append(key(SFX.isOn() ? ICON.sound : ICON.soundOff,
+      { title: SFX.isOn() ? 'Panel sound — on' : 'Panel sound — off',
+        latch: true, down: SFX.isOn(),
+        onClick: () => { SFX.mute(SFX.isOn()); draw(); } }));
     bar.append(el('span', 'chan'));
     bar.append(key(ICON.term, { title: 'Console' }));
     const lcd = el('div', 'lcd' + (nav.letters ? '' : ' dim'),

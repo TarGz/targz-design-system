@@ -1,6 +1,26 @@
-export const version = '1.15.0';
+export const version = '1.16.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.16.0',
+    date: '2026-08-16',
+    changes: [
+      'NEW PRIMITIVE — the DRUM, for a list the dial cannot hold. The rotary\'s fan is a fixed 80°, so its detents run from 27° apart at four names to 9° at ten, and a real selector switch detents at about 30° — the positions stop being AIMABLE long before the names stop fitting. Six is the ceiling and the 3D page had already passed it',
+      'It gives up the rotary\'s claim to show every position, and gives it up honestly. A drum shows the NEIGHBOURHOOD — the one you are on, lit, in a milled window, with the names either side curving away. A <select> is a list that HIDES; a drum is a list you are looking at part of, and the part you cannot see is visibly still there, rolling round the back of the cylinder',
+      'IT IS A REAL CYLINDER, not a scaled list: each name is rotated about the drum\'s axis and pushed out to its radius in 3D, so the spacing compresses towards the edges and the top and bottom rows FALL AWAY rather than fading. A list with an opacity ramp on it is a list with an opacity ramp on it, and the eye knows',
+      'The geometry is solved rather than guessed — a name k steps out projects to R·sin(kθ), so how many you SEE is fixed by the window height and not by how many you draw. 18° at an 18px pitch gives a 57px radius, which puts the fifth name past a 76px window: five visible, the sixth clipped, the right neighbourhood for a list of ten',
+      'FIX — the first build magnified everything. Items sat at translateZ(+R), 57px toward the viewer against a 200px perspective, so the front row was scaled 1.4× and every name came out sliced down both sides. The whole drum is pushed back by its own radius now, so the row you are reading lands at z=0 at its true size',
+      'FIX — you turn it by the WHEEL, not by the names. Dragging across the window was dragging across TEXT, so the browser started selecting it: a blue smear over the list with the drum moving underneath. The names are not a handle, they are the thing being read. A click still picks a name, because a click is not a drag',
+      'THE WHEEL WAS SHADED THE WRONG WAY ROUND. The drum\'s axis is horizontal, so its edge turns away at the TOP and BOTTOM and is broadest across the middle — the shading has to run vertically to match, and it ran horizontally, which shades a cylinder lying the other way and contradicts the very list rolling beside it. 24px wide now, lit crown just above centre, and the teeth die at the ends because on a real wheel they crowd together as the surface turns out of sight',
+      'THE WHEEL COMES UP THROUGH A CUT. It was butted against the window, which reads as two panels side by side rather than a cylinder in a slot: hard dark walls closing over it, the far wall catching the room at the bottom, a chamfer on the cut edge, and a lit line on the CASE ABOVE the opening — a recess is dark inside its top wall, but the flat face it is cut into is the part facing the lamp most directly, and without that line the drum had no top at all',
+      'AND THE WHOLE ASSEMBLY DROPS INTO A MILLED WELL with 8px of floor showing all round. A recess is read from its FLOOR, not its walls, so a well with no floor showing is not a well, it is a border',
+      'BLOCKED BETWEEN NOTCHES, on purpose. A mouse click and a trackpad flick are not the same event: a wheel sends one big delta per notch, a trackpad a stream of small ones, so accumulating everything fired twice per mouse click and stepping per event ran the list past. A big delta IS a notch and lands at once; small ones are added up until they are worth one — and both pass a 70ms lockout, which is about as fast as a thumb can index a real wheel. The lockout is on the GESTURE and not on set(), because a tab switch writing six controls must land immediately and silently',
+      'AND THE DIRECTION IS INVERTED, because you are turning a cylinder rather than scrolling a list. Push down on the face of a wheel and its top rolls away from you, so the names come UP past the window. Matching the scrollbar convention would mean the drum turning the opposite way to the thumb on it',
+      'THE DETENT MAKES A NOISE, because a detent IS a noise. This is the one control whose defining feature — the notch it drops into — has no visual at all: you feel a detent, and failing that you hear it. Synthesised rather than sampled, a 40ms chirp falling 2.2kHz to 700Hz through an exponential gain, built lazily on the first turn because an AudioContext made before a gesture is one the browser suspends. It fails silently where audio is blocked and the drum still works',
+      'Plus the two visual halves of a notch: the name OVERSHOOTS and settles, because one that slides to its place has been dragged there and one that goes slightly past has DROPPED INTO something — and the case takes the knock, the detent line brightening for 90ms',
+      'FIX — the rotary\'s box grows with its list. It was a fixed 130px, which fits six names at 22px apart and silently clipped the seventh; the column is centred, so the overflow went UP as well as down and the first name landed on the caption above the bay. Growing the box does not raise the ceiling — the detents are still the limit — it just stops the failure being invisible',
+    ],
+  },
   {
     version: '1.15.0',
     date: '2026-08-16',

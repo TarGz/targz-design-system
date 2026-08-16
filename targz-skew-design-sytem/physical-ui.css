@@ -2195,6 +2195,182 @@ input:focus-visible{ outline-offset:3px; }
 .hatchbay .fader .flab{ flex:0 0 96px; }
 .hatchbay .kwrap.inline .klab{ flex:0 0 82px; }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DRUM — a cylinder of names in a milled window
+
+   THE WINDOW IS CUT, THE DRUM IS BEHIND IT. That order matters: the recess
+   belongs to the CASE and the names belong to the thing turning inside it, so
+   the shadow at the top of the window falls ON the names and does not travel
+   with them. Get that backwards and the drum reads as a list with a gradient
+   over it, which is what every software picker looks like and what this is
+   not trying to be.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* ── THE WELL IT IS CUT INTO ──────────────────────────────────────────────
+   The same milled recess every other bay in this document uses, and the
+   MARGIN is the point: a recess is read from its FLOOR, not from its walls, so
+   a well with no floor showing is not a well, it is a border. Eight pixels of
+   case all the way round is what lets the eye see the drum is standing in
+   something rather than butted against it. */
+.drum-bay{
+  display:inline-block; padding:8px; border-radius:12px;
+  background:linear-gradient(180deg,#15181b,#1c2024 55%,#131619);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 3px 7px rgba(0,0,0,.85),
+    inset 3px 0 5px -3px rgba(0,0,0,.7),
+    inset -3px 0 5px -3px rgba(0,0,0,.7),
+    inset 0 -1px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.07);
+}
+
+/* THE DRUM SITS ON THAT FLOOR, so it throws one shadow rather than two:
+   a drop-shadow on the pair follows the outline they make together, where a
+   box-shadow on each would draw a seam down the join. */
+.drum{
+  display:flex; align-items:stretch; gap:0; height:76px;
+  /* NOTHING IN HERE IS SELECTABLE TEXT. The names are a readout that happens
+     to be made of letters; a drag across them is a turn of the drum, and a
+     browser that helpfully highlights them has misread the object. */
+  user-select:none; -webkit-user-select:none;
+  filter:drop-shadow(0 5px 9px rgba(0,0,0,.75)) drop-shadow(0 1px 2px rgba(0,0,0,.6));
+}
+.drum-win{
+  position:relative; flex:1 1 auto; min-width:0; overflow:hidden;
+  border-radius:6px 0 0 6px; cursor:default;
+  /* the milled well the cylinder sits in */
+  background:linear-gradient(180deg,#111417,#191d21 52%,#101316);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.7),
+    inset 0 3px 6px rgba(0,0,0,.9),
+    inset 0 -3px 6px rgba(0,0,0,.75),
+    inset 2px 0 3px -1px rgba(0,0,0,.7),
+    inset 0 -1px 0 rgba(255,255,255,.11),
+    /* THE CASE ABOVE THE CUT IS LIT, and that edge was missing. A recess is
+       dark INSIDE its top wall — but the flat face it is cut into is the part
+       of the panel facing the lamp most directly, so there is a bright line
+       right where the surface stops and the hole begins. Without it the drum
+       has no top: the names just start out of nothing. */
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 -1px 0 rgba(255,255,255,.07),
+    0 1px 0 rgba(255,255,255,.09);
+  /* far enough back that the curve is a drum and not a fisheye */
+  perspective:260px;
+  perspective-origin:50% 50%;
+}
+.drum-list{
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+  pointer-events:none;
+}
+.drum-item{
+  position:absolute; left:0; right:0; top:50%; height:18px; margin-top:-9px;
+  display:flex; align-items:center; justify-content:flex-start; padding:0 10px;
+  border:0; background:none; cursor:pointer; pointer-events:auto;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.1em; white-space:nowrap;
+  color:#6b7079;
+  backface-visibility:hidden;
+  /* THE OVERSHOOT IS THE DETENT. A name that slides to its place has been
+     dragged there; one that goes slightly past and settles has DROPPED INTO
+     something. That tiny bounce is the only visual a notch has — you normally
+     feel it, and here there is nothing to feel. */
+  transition:color .12s, transform .17s cubic-bezier(.22,1.7,.36,1), opacity .17s ease-out;
+}
+.drum-item:hover{ color:#c2c7cf; }
+/* THE ONE IN THE WINDOW IS LIT, and it is the only thing that says which is
+   selected — the others are simply nearer or further round the drum. */
+.drum-item.on{ color:#FFD9BC; text-shadow:0 0 8px rgba(255,140,60,.6); }
+
+/* THE SHADOW LIVES ON THE CASE, NOT ON THE CYLINDER. It is the lip of the
+   window cutting the light off top and bottom, so it stays put while the names
+   roll under it. */
+.drum-win::after{
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:6px 0 0 6px;
+  background:
+    linear-gradient(180deg, rgba(8,9,11,.95) 0%, rgba(8,9,11,.30) 22%, transparent 40%),
+    linear-gradient(0deg,   rgba(8,9,11,.95) 0%, rgba(8,9,11,.30) 22%, transparent 40%);
+}
+/* the detent line: where the drum reads, engraved on the case */
+.drum-win::before{
+  content:''; position:absolute; left:0; right:0; top:50%; height:18px; margin-top:-9px;
+  pointer-events:none; z-index:1;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(255,255,255,.05);
+}
+
+/* THE GRIP IS THE RIM, and the rim is where a drum is actually turned. Each
+   tooth takes the lamp separately, the same alternation the knob's collar has
+   — a uniform ridge pattern is a texture, and textures do not turn. */
+/* ── THE WHEEL ────────────────────────────────────────────────────────────
+   THE BARREL CURVES THE WAY THE NAMES DO. The drum's axis is horizontal, so
+   its edge turns away at the TOP and BOTTOM and is broadest across the middle
+   — the shading has to run vertically to match. It ran horizontally at first,
+   which shades a cylinder lying the other way and quietly contradicts the very
+   list rolling beside it.
+
+   AND THE TEETH DIE AT THE ENDS. A knurl at one pitch from top to bottom is a
+   striped strip; on a real wheel the teeth crowd together as the surface turns
+   out of sight, and it is that crowding — not the stripes — that says round. A
+   mask at both ends is the cheap way to say it, and at this size it is the
+   honest one too: past about 70° the teeth are finer than a pixel anyway. */
+.drum-grip{
+  flex:0 0 24px; position:relative; border-radius:0 7px 7px 0;
+  cursor:ns-resize; touch-action:none;
+  background:
+    repeating-linear-gradient(180deg,
+      rgba(255,255,255,.17) 0 1px, rgba(0,0,0,.44) 1px 3px),
+    linear-gradient(180deg,
+      #191d22 0%, #232830 8%, #2f353e 20%, #3f4650 36%, #454d58 45%,
+      #2e343c 63%, #191d22 85%, #0d1013 100%);
+  /* THE SLOT IT TURNS IN. The wheel was butted straight against the window,
+     which reads as two panels side by side rather than as a cylinder coming up
+     through a cut in the case. A wheel that protrudes has to protrude THROUGH
+     something: hard dark walls closing over it top and bottom, the far wall
+     catching the room at the bottom, and a lit lip on the case below the whole
+     slot. Same four hairlines as every other recess here — this one just has
+     something turning in it. */
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0,0,0,.92),
+    inset 0 -3px 5px -1px rgba(0,0,0,.85),
+    inset -2px 0 3px -1px rgba(0,0,0,.8),
+    inset 1px 0 0 rgba(0,0,0,.6),
+    inset 0 -1px 0 rgba(255,255,255,.13),
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 -1px 0 rgba(255,255,255,.07),
+    0 1px 0 rgba(255,255,255,.09);
+}
+/* the broken edge of the cut, lit directionally — dark where it turns from the
+   lamp at the top, bright where it turns into it at the bottom. Concave, like
+   every other chamfer in this document, or the wheel reads as a bump. */
+.drum-grip::before{
+  content:''; position:absolute; inset:-1.5px -1.5px -1.5px 0;
+  border-radius:0 8px 8px 0; pointer-events:none; z-index:2;
+  padding:1.5px; background:var(--chamfer);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  filter:blur(.4px);
+}
+/* the ends turning away, and one specular along the crown */
+.drum-grip::after{
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:
+    linear-gradient(180deg,
+      rgba(8,10,12,.88) 0%, rgba(8,10,12,.30) 5%, transparent 13%,
+      transparent 87%, rgba(8,10,12,.34) 95%, rgba(8,10,12,.9) 100%),
+    linear-gradient(180deg,
+      transparent 36%, rgba(255,255,255,.18) 42%, rgba(255,255,255,.05) 48%, transparent 54%);
+}
+/* AND THE CASE TAKES THE KNOCK. The ball dropping into the groove is a small
+   impact, so the window flinches: one frame of the detent line brightening and
+   the lip shadow deepening, gone in 90ms. Long enough to register, too short
+   to be an animation you notice. */
+@keyframes drum-knock{
+  0%   { box-shadow:inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(255,255,255,.22); }
+  100% { box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(255,255,255,.05); }
+}
+.drum-win.knock::before{ animation:drum-knock .09s ease-out; }
+
+.drum-win:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+
 /* ── THE TYPE SELECTOR ────────────────────────────────────────────────────
    Four ways to fill an area, on the switch rather than on a bar of keys. A
    row of keys shows four labels and makes you infer that they are one choice;

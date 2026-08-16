@@ -1191,6 +1191,219 @@ function openPicker(anchor, value, onChange, swatches) {
   return plate;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   THE DRUM — a selector for a list the dial cannot hold
+
+   THE ROTARY HAS A CEILING AND IT IS ABOUT SIX. Its fan is a fixed 80°, so
+   the detents run from 27° apart at four names to 9° at ten, and a real
+   selector switch detents at about 30° — long before the names stop fitting,
+   the positions stop being aimable. The rotary's whole claim is that it SHOWS
+   EVERY POSITION AT ONCE and points at the one you are on, and past six you
+   cannot keep that and keep the switch.
+
+   So this gives up the half that cannot survive, and gives it up HONESTLY. A
+   drum shows the NEIGHBOURHOOD: the one you are on, lit, in a milled window,
+   with the names either side of it curving away. You do not see all ten — but
+   nothing here pretends you do, which is the difference between this and a
+   `<select>`. A select is a list that HIDES; a drum is a list you are looking
+   at part of, and the part you cannot see is visibly still there, rolling
+   round the back of the cylinder.
+
+   IT IS A REAL CYLINDER, not a scaled list. Each name sits on the surface of
+   one — rotated about the drum's axis and pushed out to its radius in 3D — so
+   the spacing compresses towards the edges the way a drum's does, and the top
+   and bottom rows fall away rather than just fading. A list with an opacity
+   ramp on it is a list with an opacity ramp on it; the eye knows.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* THE GEOMETRY, AND IT HAS TO BE SOLVED RATHER THAN GUESSED. A name k steps
+   from the centre sits at y = R·sin(kθ) once projected, so how many you can
+   see is fixed by the window height and NOT by how many you draw. At 18° and
+   an 18px pitch the radius is 57px, which puts the second name 33px out and
+   the third 46px — so a 76px window shows five and clips the sixth, which is
+   the right amount of neighbourhood for a list of ten. */
+const DRUM_STEP = 18, DRUM_ROW = 18;                 // degrees per name, px per name
+const DRUM_R = DRUM_ROW / (2 * Math.tan(DRUM_STEP * Math.PI / 360));
+
+/* THE DETENT MAKES A NOISE, because a detent is a noise. Everything else in
+   this document is a picture of a mechanism; this is the one control whose
+   defining feature — the notch it drops into — has no visual at all. You feel
+   a detent, and failing that you hear it.
+
+   SYNTHESISED, NOT SAMPLED: a 40ms chirp falling 2.2kHz to 700Hz through an
+   exponential gain, which is what a small sprung ball dropping into a groove
+   sounds like and is four lines rather than an asset to ship. Built lazily on
+   the first turn, because an AudioContext made before a gesture is one the
+   browser suspends and one nobody asked for. */
+let drumAC = null;
+function drumTick() {
+  try {
+    drumAC = drumAC || new (window.AudioContext || window.webkitAudioContext)();
+    if (drumAC.state === 'suspended') drumAC.resume();
+    const t = drumAC.currentTime;
+    const o = drumAC.createOscillator(), g = drumAC.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(2200, t);
+    o.frequency.exponentialRampToValueAtTime(700, t + 0.018);
+    g.gain.setValueAtTime(0.05, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.038);
+    o.connect(g).connect(drumAC.destination);
+    o.start(t); o.stop(t + 0.045);
+  } catch { /* no audio here, and the drum still works */ }
+}
+
+function drum({ options, index = 0, label, onChange }) {
+  /* THE WHOLE ASSEMBLY DROPS INTO A WELL. A drum standing on the faceplate is
+     a drum somebody left there; a drum in a milled recess with a margin of
+     floor round it is a drum the case was CUT FOR. The room around it is the
+     whole of the difference — butt the walls up against the window and the
+     well disappears, because a recess is read from its floor and not from its
+     walls, and with no floor showing there is nothing to read. */
+  const bay = el('div', 'drum-bay');
+  const wrap = el('div', 'drum');
+  const win = el('div', 'drum-win');
+  const list = el('div', 'drum-list');
+  /* THE WHOLE DRUM IS PUSHED BACK BY ITS OWN RADIUS. Without this the front
+     name sits R in front of the screen and the perspective magnifies it —
+     200/(200-57) is 1.4×, so every name overflowed the window and came out
+     sliced down both sides. Back by R and the row you are reading lands at
+     z = 0 at its true size, with the others falling away behind it, which is
+     what looking at a drum actually is. */
+  list.style.transform = `translateZ(${(-DRUM_R).toFixed(2)}px)`;
+  win.append(list);
+  /* THE KNURL IS ON THE EDGE YOU WOULD TOUCH. A drum is gripped at its rim,
+     not at its face — the face is where the names are, and a knurl across it
+     would be a texture over the one thing being read. */
+  const grip = el('div', 'drum-grip');
+  wrap.append(win, grip);
+
+  const items = options.map((o, i) => {
+    const it = el('button', 'drum-item', o);
+    it.type = 'button';
+    it.setAttribute('role', 'option');
+    it.addEventListener('click', () => set(i));
+    list.append(it);
+    return it;
+  });
+
+  win.tabIndex = 0;
+  win.setAttribute('role', 'listbox');
+  if (label) win.setAttribute('aria-label', label);
+
+  let i = index;
+  const paint = () => {
+    items.forEach((it, n) => {
+      const a = (n - i) * DRUM_STEP;
+      /* Anything past 84° is on the far side of the drum and must not be
+         clickable — it is behind the panel. backface-visibility would hide it
+         and still take the pointer. */
+      const gone = Math.abs(a) > 84;
+      it.style.transform = `rotateX(${-a}deg) translateZ(${DRUM_R}px)`;
+      it.style.opacity = gone ? 0 : Math.max(0, Math.cos(a * Math.PI / 180)) ** 1.6;
+      it.style.pointerEvents = gone ? 'none' : 'auto';
+      it.classList.toggle('on', n === i);
+    });
+    win.setAttribute('aria-activedescendant', options[i]);
+  };
+  /* IT IS BLOCKED BETWEEN NOTCHES, on purpose. A detent that can be crossed as
+     fast as the input arrives is not a detent, it is a slider with names on
+     it: a trackpad delivers sixty events a second and the list becomes a blur
+     you cannot stop on. 70ms is about as fast as a thumb can actually index a
+     real wheel, and it is what makes the thing feel sprung rather than free.
+
+     THE LOCKOUT IS ON THE GESTURE, NOT ON set(). A tab switch or a preset
+     writing six controls at once must land immediately and silently — the
+     resistance belongs to the hand, not to the value. */
+  let lastAt = 0;
+  const DETENT_MS = 70;
+  const set = (n, quiet) => {
+    const to = Math.max(0, Math.min(options.length - 1, n));
+    if (to === i) return;
+    i = to; paint();
+    if (!quiet) {
+      drumTick();
+      win.classList.remove('knock'); void win.offsetWidth; win.classList.add('knock');
+    }
+    onChange && onChange(options[i], i);
+  };
+  const step = n => {
+    const now = performance.now();
+    if (now - lastAt < DETENT_MS) return;
+    const before = i;
+    set(n);
+    if (i !== before) lastAt = now;
+  };
+
+  /* DRAG IS VERTICAL AND SO IS THE DRUM. One row per DRUM_ROW of travel, which
+     is the same distance the name moves — the thing under your finger goes
+     where your finger goes, which is the only gesture a cylinder can honestly
+     offer. */
+  /* YOU TURN IT BY THE WHEEL, NOT BY THE NAMES. Dragging across the window
+     was dragging across TEXT, so the browser did what it does with text and
+     started selecting it — a blue smear over the list, and the drum moving
+     underneath. The names are not a handle; they are the thing being read, and
+     the wheel is right there for the hand. A click on a name still picks it,
+     because that is a click and not a drag. */
+  let sy = 0, si = 0, on = false;
+  grip.addEventListener('pointerdown', e => {
+    grip.setPointerCapture(e.pointerId); on = true; sy = e.clientY; si = i;
+    e.preventDefault();
+  });
+  grip.addEventListener('pointermove', e => {
+    if (on) step(si - Math.round((e.clientY - sy) / DRUM_ROW));
+  });
+  const end = () => { on = false; };
+  grip.addEventListener('pointerup', end);
+  grip.addEventListener('pointercancel', end);
+  /* the wheel still works over the whole thing — a scroll is not a grab, and
+     nobody aims a trackpad at a 24px strip */
+  grip.addEventListener('wheel', e => win.dispatchEvent(new WheelEvent('wheel', e)),
+                        { passive: false });
+  /* THE WHEEL ACCUMULATES INSTEAD OF STEPPING PER EVENT. One notch per event
+     is right for a mouse, which sends one big delta per click, and wrong for a
+     trackpad, which sends a stream of small ones — so a flick that meant "down
+     one" ran the whole list past. Travel is added up and a name is taken every
+     42px of it, which is roughly the same distance a drag needs for two rows:
+     the same wheel, the same list, the same speed, whichever device is on it.
+
+     Reversing zeroes the tally, or a change of mind has to pay off the travel
+     it already banked in the other direction before anything moves. */
+  /* A MOUSE CLICK AND A TRACKPAD FLICK ARE NOT THE SAME EVENT, and treating
+     them as one was the whole problem. A wheel sends one big delta per notch;
+     a trackpad sends a stream of small ones. Accumulating everything made the
+     mouse fire twice per click, and stepping per event made the trackpad run
+     the list past. So: a big delta IS a notch and lands at once, and small
+     ones are added up until they are worth one. Either way it goes through
+     step(), so the detent lockout has the last word and no gesture can index
+     faster than a real wheel would.
+
+     AND THE DIRECTION IS INVERTED, because you are turning a cylinder and not
+     scrolling a list. Push down on the face of a wheel and its top rolls away
+     from you: the names come UP past the window, so the one you land on is
+     the one that was above. Matching the scrollbar convention here would mean
+     the drum turned the opposite way to the thumb on it. */
+  let acc = 0;
+  const WHEEL_STEP = 64, WHEEL_NOTCH = 40;
+  win.addEventListener('wheel', e => {
+    e.preventDefault();
+    const d = e.deltaY;
+    if (d * acc < 0) acc = 0;
+    if (Math.abs(d) >= WHEEL_NOTCH) { acc = 0; step(i - Math.sign(d)); return; }
+    acc += d;
+    if (Math.abs(acc) >= WHEEL_STEP) { step(i - Math.sign(acc)); acc = 0; }
+  }, { passive: false });
+  win.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); step(i + 1); }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); step(i - 1); }
+    if (e.key === 'Home') { e.preventDefault(); set(0); }
+    if (e.key === 'End') { e.preventDefault(); set(options.length - 1); }
+  });
+
+  paint();
+  bay.append(wrap);
+  bay.set = n => { i = Math.max(0, Math.min(options.length - 1, n)); paint(); };  // silent, immediate
+  return bay;
+}
+
 /* ── the rotary selector: a teardrop lever on a ring of marks ─────────────── */
 function rotary({ options, index, onChange }) {
   const uid = 'tr' + (rotary.n = (rotary.n || 0) + 1);
@@ -1302,10 +1515,22 @@ function rotary({ options, index, onChange }) {
      beside a round switch without lying about where the detents are. */
   const N = options.length, A0 = 50, A1 = 130;     // clockwise from 12 o'clock
   const LEAD_R = 40, ELBOW_X = 40, LAB_X = 56, LAB_GAP = 22;
-  const SVG_W = 150, SVG_H = 130, CY = SVG_H / 2;
+  /* THE BOX GROWS WITH THE LIST. It was a fixed 130px, which fits six names at
+     22px apart and silently clips the seventh — and worse, the column is
+     centred, so the overflow goes UP as well as down and the first name lands
+     on the caption above the bay. A selector that quietly writes over its own
+     heading is a selector that looks broken for a reason nobody can see.
+
+     Six is still the sensible ceiling — the fan is a fixed 80°, so the detents
+     go from 16° apart at six to 9° at ten and stop being aimable long before
+     they stop fitting. Growing the box does not raise that ceiling; it just
+     stops the failure being invisible. Past six, use the drum. */
+  const SVG_W = 150, SVG_H = Math.max(130, (N - 1) * LAB_GAP + 34), CY = SVG_H / 2;
   const leadSvg = el('div', null,
     `<svg class="rot-leads" width="${SVG_W}" height="${SVG_H}" viewBox="0 0 ${SVG_W} ${SVG_H}"
           aria-hidden="true"></svg>`).firstElementChild;
+  leadSvg.style.marginTop = `${-CY}px`;           // the CSS -65px was half of the old fixed box
+  row.style.minHeight = `${Math.max(116, SVG_H)}px`;
   row.append(leadSvg);
 
   const labs = [];
@@ -3562,6 +3787,10 @@ const KIT = (function specimenKit() {
      '<span id="mat-fader"></span>',
      'What a knob cannot say: a <em>span</em>. Two caps in one slot with the band lit between them, so the value is a distance you see rather than two numbers you compare. The caps cannot cross, and the track hands every pointer event to whichever end is nearer — you click the line, you do not aim at a 17px thumb.',
      'wide'],
+    ['Drum selector',
+     '<span id="mat-drum"></span>',
+     'What to reach for when a list outgrows the dial. The rotary\'s fan is a fixed 80°, so its detents go from 27° apart at four names to 9° at ten — a real selector switch detents at about 30°, and the positions stop being aimable well before the names stop fitting. Past six, this. It gives up the rotary\'s claim to show <em>every</em> position and gives it up honestly: the names sit on a real cylinder, rotated about its axis and pushed out to its radius, so they compress towards the edges and fall away over the top the way a drum\'s do. A <code>&lt;select&gt;</code> is a list that hides; this is a list you are looking at part of, with the rest visibly still there round the back. Drag it, wheel it, or tab to it and use the arrows.',
+     'wide'],
     ['Colour picker',
      '<span id="mat-pick"></span>',
      'The one surface the OS used to draw. <code>input[type=color]</code> puts its popup in browser chrome where no CSS reaches it — a bright system sheet on a machined panel. So it is not themed, it is <em>replaced</em>: a floating plate in the panel\'s own metal, the field behind display glass, hue on a real fader with a scale at the six primaries, one lit <code>.lcd</code> window instead of three form boxes. The native input stays as the <em>value</em>, never the surface. Dark on purpose — the only saturated thing inside is the colour you are picking. Click the cap.',
@@ -3625,6 +3854,18 @@ const KIT = (function specimenKit() {
     }),
   );
   document.getElementById('mat-keys').replaceWith(keys);
+
+  /* AND THE DRUM IS LIVE TOO, with a list long enough to be the argument: ten
+     names is where the rotary has already given up, so the tile shows the case
+     the component exists for rather than a comfortable four. */
+  const dr = drum({
+    label: 'Place from',
+    options: ['Subject', 'Edges', 'Detail', 'Room', 'Density',
+              'Tone', 'Contrast', 'Depth', 'Motion', 'Grain'],
+    index: 2,
+  });
+  dr.querySelector('.drum').style.width = '190px';
+  document.getElementById('mat-drum').replaceWith(dr);
 
   /* THE PICKER TILE IS A LIVE PEN CAP, because a picker that cannot be opened
      is a screenshot of one — and the thing being demonstrated is a surface

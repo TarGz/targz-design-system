@@ -169,7 +169,39 @@
     <div id="serp" class="box handbay"></div>
   </div>
 
-  <h2>09 <span>/</span> Materials</h2>
+  <h2>09 <span>/</span> The settings panel <span>·</span> a whole Tweakpane, rebuilt</h2>
+  <p class="sub">
+    The one every generative tool grows: folders of sliders and dropdowns, and no object in
+    sight. Rebuilt here with nothing new invented — every control below is already on this
+    page. The interesting part is not the skin, it is that <em>choosing which primitive</em>
+    turns out to be most of the design: a quantity is a knob, a short list is a switch, a long
+    one is a drum, two exclusive things are a pair of keys that cannot both be down, and a
+    number the app computes for you is a readout and not an input you are invited to fight.
+  </p>
+  <div class="stage">
+    <div class="stage-note">two panes · nothing new invented</div>
+    <div id="setpanel" class="box"></div>
+    <div id="setglobal" class="box"></div>
+  </div>
+
+  <h2>10 <span>/</span> Windows <span>·</span> close or reduce, never both</h2>
+  <p class="sub">
+    Every panel on this page moves, and every panel gets out of the way exactly one way. Both
+    buttons answer the same question — <em>get this off my screen</em> — so a title bar with
+    both asks you to choose between two ways of doing one thing, every time, forever. The
+    choice belongs to the <em>panel</em>: one you can do without gets an <b>×</b> and something
+    else has to bring it back; one the app needs gets a <b>—</b> and can only get small. The
+    button is the panel telling you whether it is optional. Drag any of them by the title bar.
+    The tab strip and the footer are out of scope on purpose — those are the chassis, and a
+    page whose own navigation can be dragged into a corner is a page you can lose.
+  </p>
+  <div class="stage" style="display:block">
+    <div class="stage-note">drag the heads · × removes · — reduces</div>
+    <div class="win-floor" id="winfloor"></div>
+    <div class="win-dock" id="windock"></div>
+  </div>
+
+  <h2>11 <span>/</span> Materials</h2>
   <p class="sub">
     <span id="mat-count">These</span> primitives carry every component above. Each control on
     this page is one of them at a size — which is what makes it a language rather than a set of
@@ -177,7 +209,7 @@
   </p>
   <div class="mats" id="mats"></div>
 
-  <h2>10 <span>/</span> The bill</h2>
+  <h2>12 <span>/</span> The bill</h2>
   <p class="sub">
     What it buys, what it costs — about these components specifically, not about
     skeuomorphism in general.
@@ -1664,7 +1696,7 @@ function drum({ options, index = 0, label, onChange }) {
 }
 
 /* ── the rotary selector: a teardrop lever on a ring of marks ─────────────── */
-function rotary({ options, index, onChange }) {
+function rotary({ options, index, onChange, compact = false }) {
   const uid = 'tr' + (rotary.n = (rotary.n || 0) + 1);
   const row = el('div', 'rotary');
   row.append(el('span', 'rot-seat'));
@@ -1773,7 +1805,19 @@ function rotary({ options, index, onChange }) {
      line on a real panel, and it is why engraved gear can put a tidy list
      beside a round switch without lying about where the detents are. */
   const N = options.length, A0 = 50, A1 = 130;     // clockwise from 12 o'clock
-  const LEAD_R = 40, ELBOW_X = 40, LAB_X = 56, LAB_GAP = 22;
+  /* COMPACT IS FOR A SETTINGS BAY, where a switch is one of five on a 318px
+     panel rather than the one object in a viewport. Nothing about the switch
+     changes — same fan, same detents, same leaders — only the space it is
+     allowed to reserve: names 4px closer together, and a floor that comes from
+     the SEAT rather than from a constant. */
+  const LEAD_R = 40, LAB_GAP = compact ? 18 : 22;
+  /* AND THE NAMES COME IN, not just closer together. The leader's whole job is
+     to absorb the mismatch between a fan of ticks and a straight column, and
+     it can do that over 34px as well as 40 — which is 8px of name back on
+     every switch, on a panel where 8px is the difference between a word
+     fitting and being abbreviated. */
+  const ELBOW_X = compact ? 34 : 40, LAB_X = compact ? 48 : 56;
+  const FLOOR = compact ? 84 : 130;
   /* THE BOX GROWS WITH THE LIST. It was a fixed 130px, which fits six names at
      22px apart and silently clips the seventh — and worse, the column is
      centred, so the overflow goes UP as well as down and the first name lands
@@ -1784,12 +1828,12 @@ function rotary({ options, index, onChange }) {
      go from 16° apart at six to 9° at ten and stop being aimable long before
      they stop fitting. Growing the box does not raise that ceiling; it just
      stops the failure being invisible. Past six, use the drum. */
-  const SVG_W = 150, SVG_H = Math.max(130, (N - 1) * LAB_GAP + 34), CY = SVG_H / 2;
+  const SVG_W = 150, SVG_H = Math.max(FLOOR, (N - 1) * LAB_GAP + 34), CY = SVG_H / 2;
   const leadSvg = el('div', null,
     `<svg class="rot-leads" width="${SVG_W}" height="${SVG_H}" viewBox="0 0 ${SVG_W} ${SVG_H}"
           aria-hidden="true"></svg>`).firstElementChild;
   leadSvg.style.marginTop = `${-CY}px`;           // the CSS -65px was half of the old fixed box
-  row.style.minHeight = `${Math.max(116, SVG_H)}px`;
+  row.style.minHeight = `${Math.max(compact ? 78 : 116, SVG_H)}px`;
   row.append(leadSvg);
 
   const labs = [];
@@ -4015,6 +4059,478 @@ const KIT = (function specimenKit() {
     });
   }
   requestAnimationFrame(paint);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE WINDOW — every panel moves, and every panel gets out of the way ONCE
+
+   CLOSE OR REDUCE, NEVER BOTH, and that is the whole rule. Both buttons answer
+   the same question — "get this off my screen" — so a title bar with both on
+   it asks you to choose between two ways of doing one thing, every time,
+   forever. The choice is not the user's to make; it belongs to the PANEL, and
+   it follows from one fact about it:
+
+     · A panel you can do without CLOSES.  It is gone, and something has to
+       bring it back — a dock, a menu, a key. Reducing it would leave a stub
+       on screen for a thing you had finished with.
+     · A panel the app needs REDUCES.  It cannot be closed, because closing it
+       would leave the app with no way to reach something essential, so the
+       most it can do is get small and stay reachable.
+
+   Which means the button is not a preference: it is the panel telling you
+   whether it is optional. A window with an × is one you are allowed to
+   dismiss. A window with a — is one that will always be somewhere.
+
+   THE WHOLE HEAD IS THE HANDLE. Not a grip in a corner: a title bar is the one
+   strip of a panel with nothing in it you can hit by accident, which is why
+   every window in every OS drags from there and why adding a separate handle
+   is inventing a control the object already has.
+
+   EXCLUDED, DELIBERATELY: the top tab strip and the bottom nav. Those are the
+   chassis, not things ON it — a page whose own navigation can be dragged into
+   a corner and closed is a page you can lose.
+   ══════════════════════════════════════════════════════════════════════════ */
+const WIN_ICON = {
+  close:  svg('<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>'),
+  reduce: svg('<line x1="6" y1="12" x2="18" y2="12"/>'),
+};
+
+function windowise(box, { title, mode = 'reduce', onClose } = {}) {
+  const head = box.querySelector('.box-head');
+  if (!head) return box;
+  box.classList.add('win');
+  head.classList.add('win-head');
+  head.title = 'Drag to move';
+
+  /* ONE BUTTON, AND WHICH ONE IS THE PANEL'S ANSWER, NOT A SETTING. */
+  const btn = el('button', 'win-btn', mode === 'close' ? WIN_ICON.close : WIN_ICON.reduce);
+  btn.type = 'button';
+  btn.title = mode === 'close' ? `Close ${title || 'this panel'}`
+                               : `Reduce ${title || 'this panel'} to its title`;
+  btn.setAttribute('aria-label', btn.title);
+  btn.addEventListener('pointerdown', e => e.stopPropagation());   // not a drag
+  btn.addEventListener('click', () => {
+    if (mode === 'close') { SFX?.clack?.(); box.classList.add('gone'); onClose && onClose(box); }
+    else {
+      const to = !box.classList.contains('reduced');
+      box.classList.toggle('reduced', to);
+      btn.setAttribute('aria-expanded', String(!to));
+      SFX?.flip?.();
+    }
+  });
+  head.append(btn);
+
+  /* DRAG FROM THE HEAD, AND THE PANEL STAYS WHERE YOU PUT IT. Transform rather
+     than left/top: it does not reflow anything, it composites, and a panel
+     dragged across a page full of live specimens must not make them re-lay-out
+     sixty times a second. */
+  let dx = 0, dy = 0, sx = 0, sy = 0, on = false;
+  const place = () => { box.style.transform = `translate(${dx}px, ${dy}px)`; };
+  head.addEventListener('pointerdown', e => {
+    if (e.target.closest('.win-btn')) return;
+    head.setPointerCapture(e.pointerId);
+    on = true; sx = e.clientX - dx; sy = e.clientY - dy;
+    box.classList.add('dragging');
+    /* THE ONE YOU TOUCHED COMES TO THE FRONT. Two overlapping panels where the
+       one underneath stays underneath when you grab it is a stack you cannot
+       reorder, which is most of what moving them is for. */
+    box.style.zIndex = String(++windowise.top);
+    e.preventDefault();
+  });
+  head.addEventListener('pointermove', e => {
+    if (!on) return;
+    dx = e.clientX - sx; dy = e.clientY - sy;
+    place();
+  });
+  const stop = () => { on = false; box.classList.remove('dragging'); };
+  head.addEventListener('pointerup', stop);
+  head.addEventListener('pointercancel', stop);
+
+  box.reset = () => { dx = dy = 0; place(); box.classList.remove('gone', 'reduced'); };
+  return box;
+}
+windowise.top = 10;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   09 · THE SETTINGS PANEL — a whole Tweakpane, rebuilt
+
+   NOTHING NEW IS INVENTED HERE. Every control is one already on this page, and
+   that is the point: the work of this section is not drawing, it is CHOOSING.
+   A pane of sliders and dropdowns hides that choice by having only two kinds
+   of thing in it, so every parameter comes out looking like every other one
+   and the panel tells you nothing about what you are actually setting.
+
+   THE FIVE DECISIONS, and they cover almost everything a generative tool has:
+
+     · A QUANTITY IS A KNOB.  Depth, count, gamma, margin — things with a
+       range you sweep looking for a value you cannot name in advance.
+     · A SHORT LIST IS A SWITCH.  Four or fewer named alternatives, all of
+       them worth seeing at once, is a rotary: it shows the whole set and
+       points at one.
+     · A LONG LIST IS A DRUM.  Fonts, paper sizes. Past six the switch stops
+       being aimable, so you show the neighbourhood and admit the rest is
+       round the back.
+     · TWO EXCLUSIVE THINGS ARE TWO KEYS that cannot both be down. Portrait
+       and landscape is not a dropdown; it is an interlock, and a bar that can
+       only hold one down says so without being read.
+     · A NUMBER THE APP WORKS OUT IS A READOUT.  Width and height come FROM
+       the paper size. A slider there is an invitation to fight the app for a
+       value it is going to overwrite, which is the worst control on any panel
+       and the most common.
+   ══════════════════════════════════════════════════════════════════════════ */
+(function settingsPanel() {
+  const box = document.getElementById('setpanel');
+  const st = {
+    depth: 400, count: 153,
+    speed: 1, gravity: 0, viewFrom: 0, plotFrom: 0,
+    font: 3, adv: false,
+    seed: 42, collide: 0.040, friction: 0.80, bounce: 0.050,
+  };
+
+  const head = el('div', 'box-head');
+  const lamp = el('span', 'jewel');
+  lamp.style.setProperty('--lyr', '#FF6A00');
+  /* THE PANEL IS SETTINGS, AND ONE OF ITS BAYS IS LETTERS. It was called
+     LETTERS too, which made the head look like a heading for the bay three
+     rows below it — a panel and a folder inside it cannot share a name without
+     one of them being read as the other. */
+  head.append(lamp, el('span', 'nm', 'SETTINGS'));
+  const body = el('div', 'box-body set-body');
+
+  /* a bay is a folder, and it says so with a cap and a hairline rather than
+     with a header bar you can collapse — five collapsed folders is a panel
+     that has hidden itself */
+  const bay = (cap, engIcon) => {
+    const b = el('div', 'bay set-bay');
+    b.append(el('div', 'bay-cap', `${engIcon || ''}<span>${cap}</span>`));
+    return b;
+  };
+
+  // ── BOX ──────────────────────────────────────────────────────────────────
+  const box1 = bay('BOX', ENG.spacing);
+  const kr = el('div', 'knobrow');
+  kr.append(
+    knob({ label: 'Depth', min: 50, max: 900, step: 10, value: st.depth, size: 44,
+           fmt: v => v + ' mm', onChange: v => { st.depth = v; } }),
+    knob({ label: 'At once', min: 1, max: 400, step: 1, value: st.count, size: 44,
+           onChange: v => { st.count = v; } }),
+  );
+  box1.append(kr);
+  /* DROP SPEED AND GRAVITY ARE FOUR NAMED THINGS EACH, so they are switches.
+     A dropdown here would hide three of four options to save a control's worth
+     of height, on a panel that has plenty. */
+  const twoUp = el('div', 'set-two');
+  twoUp.append(
+    wrapSel('DROP SPEED', rotary({ compact: true, options: ['Slow', 'Fast', 'Faster', 'Instant'],
+      index: st.speed, onChange: (_, i) => { st.speed = i; } })),
+    wrapSel('GRAVITY', rotary({ compact: true, options: ['Stack', 'Scatter', 'Fall', 'Float'],
+      index: st.gravity, onChange: (_, i) => { st.gravity = i; } })),
+  );
+  box1.append(twoUp);
+
+  // ── VIEW ─────────────────────────────────────────────────────────────────
+  const box2 = bay('VIEW', ENG.angle);
+  /* THESE TWO DO NOT PAIR. A half-width bay leaves about 60px for a name once
+     the dial and its leaders have taken theirs, and "Same as view" wants 75 —
+     so the label ran out of the panel entirely. Two switches sit side by side
+     when their names are SHORT and stack when they are not; the alternative is
+     abbreviating a name to fit a layout, which is the layout winning an
+     argument it should not have been in. */
+  /* SIDE BY SIDE, AND THE COPY GAVE WAY. "Same as view" and "Last drop" are
+     the only two names on this panel that could not share a row, and a whole
+     column of empty floor is a steep price for four extra letters. "As view"
+     and "Last" say the same thing in a bay half the height — the words are
+     serving the panel here, not the other way round.
+
+     What did NOT give way is which primitive it is. Shortening a name is a
+     copy edit; turning a switch into a dropdown to save the same space would
+     have been the panel losing the argument. */
+  const twoDn = el('div', 'set-two');
+  twoDn.append(
+    wrapSel('VIEW FROM', rotary({ compact: true, options: ['Front', 'Right', 'Top', 'Last'],
+      index: st.viewFrom, onChange: (_, i) => { st.viewFrom = i; } })),
+    wrapSel('PLOT FROM', rotary({ compact: true, options: ['As view', 'Front', 'Top'],
+      index: st.plotFrom, onChange: (_, i) => { st.plotFrom = i; } })),
+  );
+  box2.append(twoDn);
+  /* THE ONE DESTRUCTIVE THING GETS THE ONE LIT KEY. Everything else on this
+     panel changes a number you can change back; this throws a camera away. */
+
+  // ── LETTERS ──────────────────────────────────────────────────────────────
+  const box3 = bay('LETTERS', ENG.nib);
+  const fonts = ['Archivo', 'Bodoni Moda', 'Bowlby One', 'Cormorant', 'DM Serif',
+                 'Fraunces', 'Inter Tight', 'Playfair', 'Space Grotesk', 'Syne'];
+  box3.append(wrapSel('FONT', drum({ options: fonts, index: st.font,
+    label: 'Font', onChange: (_, i) => { st.font = i; } }), true));
+
+  /* ADVANCED IS A DRAWER, and the chevron is the one already on the layer
+     rows: a folder that hides is fine when what it hides is genuinely rare. */
+  const adv = el('div', 'set-adv');
+  const advHead = el('div', 'bay-cap set-advcap', '<span>ADVANCED</span>');
+  const chev = chevBtn(st.adv, 'the advanced settings', () => {
+    st.adv = !st.adv; adv.classList.toggle('open', st.adv);
+  });
+  advHead.append(chev);
+
+  /* WHAT IS ALLOWED BEHIND A CHEVRON. Not "the settings we ran out of room
+     for" — these four are the ones you set when the simulation is misbehaving
+     and then never touch again, which is the only honest reason to hide
+     anything. Everything above the drawer is something you change while
+     looking at the drawing. */
+  const advBody = el('div', 'set-advbody');
+
+  /* A SEED IS NOT A QUANTITY, so it does not get a knob. You do not sweep a
+     seed looking for a value — there is no "warmer" or "more"; 41 and 43 are
+     no more alike than 41 and 9000. It is an IDENTITY: a lit window you can
+     type an exact one into when you want to go back to a drawing you liked,
+     and a key that throws a new one when you do not care. A slider here is
+     the classic mistake, and it is the one control on a panel where dragging
+     is genuinely meaningless. */
+  const seedOut = el('div', 'lcd', String(st.seed));
+  typeable(seedOut, () => st.seed, v => { st.seed = Math.round(v); seedOut.textContent = st.seed; });
+  const roll = key('ROLL', { cls: 'act aux set-roll', title: 'Throw a new seed',
+    onClick: () => { st.seed = 1 + Math.floor(Math.random() * 99999); seedOut.textContent = st.seed; } });
+  const seedRow = el('div', 'set-seed');
+  seedRow.append(el('span', 'hb-optlab', 'SEED'), seedOut, roll);
+  advBody.append(seedRow);
+
+  /* THE THREE THAT ARE QUANTITIES GET KNOBS, and they share one row because
+     they are one subject: how the pieces behave when they hit each other. */
+  const phys = el('div', 'knobrow');
+  phys.append(
+    knob({ label: 'Collider', min: .005, max: .2, step: .005, value: st.collide, size: 40,
+           fmt: v => v.toFixed(3), onChange: v => { st.collide = v; } }),
+    knob({ label: 'Friction', min: 0, max: 1, step: .01, value: st.friction, size: 40,
+           fmt: v => v.toFixed(2), onChange: v => { st.friction = v; } }),
+    knob({ label: 'Bounce', min: 0, max: 1, step: .005, value: st.bounce, size: 40,
+           fmt: v => v.toFixed(3), onChange: v => { st.bounce = v; } }),
+  );
+  advBody.append(phys);
+  adv.append(advHead, advBody);
+
+  body.append(box1, box2, box3, adv);
+  box.append(head, body);
+
+  /* ── THE SECOND PANE ─────────────────────────────────────────────────── */
+  const gbox = document.getElementById('setglobal');
+  const PAPER = { A5: [14.8, 21.0], A4: [21.0, 29.7], A3: [29.7, 42.0],
+                  A2: [42.0, 59.4], A1: [59.4, 84.1], A0: [84.1, 118.9],
+                  Custom: null };
+  const sizes = Object.keys(PAPER);
+  /* SQUARE IS AN ORIENTATION, NOT A FORMAT. It was in the format list, which
+     put it in the wrong argument entirely: A2 is a quantity of paper and
+     portrait is what you do with it, and "Square" answers the second question
+     while sitting in the list that answers the first. Squaring an A2 is still
+     an A2 — you have cut it down, and how much of it is left is exactly the
+     kind of thing you then want to nudge. So it joins the interlock, and it
+     brings its own knob. */
+  const gst = { paper: 3, orient: 'landscape', margin: 5, w: 42.0, h: 42.0, side: 42.0 };
+
+  const ghead = el('div', 'box-head');
+  const glamp = el('span', 'jewel');
+  glamp.style.setProperty('--lyr', '#4CE04C');
+  /* IT IS THE CANVAS. "Global" says where a setting reaches — everywhere —
+     which is a fact about scope and not about what the panel is FOR. This one
+     is a sheet of paper: a size, a way up and a margin. Naming a panel after
+     its scope is how you end up with two panels called Global and neither of
+     them findable. */
+  ghead.append(glamp, el('span', 'nm', 'CANVAS'),
+               el('div', 'lcd dim', 'v9.5.0'));
+  const gbody = el('div', 'box-body set-body');
+
+  const gb = bay('SHEET', ENG.spacing);
+  /* THE NAME AND THE SIZE ON ONE LINE. "A4" alone is a name you have to
+     already know, and a drum row is a wide strip with one short word in it —
+     so the row was mostly empty AND mostly useless at the same time. The
+     millimetres are the part you are actually choosing between; the letter is
+     just what it is called. Custom says what it is instead of a size, because
+     it has not got one yet. */
+  const fmtLabels = sizes.map(n => {
+    const d = PAPER[n];
+    return d ? `${n} · ${d[0].toFixed(1)} × ${d[1].toFixed(1)}` : `${n} · set below`;
+  });
+  const fmtDrum = drum({ options: fmtLabels, index: gst.paper,
+    label: 'Paper format', onChange: (_, i) => { gst.paper = i; sheet(); } });
+  gb.append(wrapSel('FORMAT', fmtDrum, true));
+
+  /* PORTRAIT AND LANDSCAPE ARE AN INTERLOCK. Two things, exactly one true, and
+     a bar that can only hold one key down says that without being read. */
+  const orient = el('div', 'piano sm set-orient');
+  const ORI = ['portrait', 'landscape', 'square'];
+  const oKeys = ['PORTRAIT', 'LANDSCAPE', 'SQUARE'].map((n, i) => pkey(n, {
+    down: ORI[i] === gst.orient,
+    title: `${n} — ${ORI[i] === 'square' ? 'cut square, and set the side' : 'the sheet as it comes'}`,
+    onClick: () => {
+      gst.orient = ORI[i];
+      oKeys.forEach((k, m) => k.classList.toggle('is-down', ORI[m] === gst.orient));
+      sheet();
+    },
+  }));
+  orient.append(...oKeys);
+  gb.append(orient);
+
+  /* WIDTH AND HEIGHT ARE NOT INPUTS. They come from the format and the
+     orientation, and a slider on a derived number is an invitation to fight
+     the app for a value it is about to overwrite. Lit windows, and they move
+     when the two controls above them do — which is the panel showing its own
+     arithmetic instead of asking you to do it. */
+  /* ── THREE KNOBS, ALWAYS, ON ONE LINE ────────────────────────────────────
+     WIDTH, HEIGHT AND MARGIN ARE ONE ROW because they are one question: how
+     big is the sheet and how much of it do you leave alone. They were two lit
+     windows, a Side knob and a pair of Custom knobs swapping in and out of the
+     same slot — three layouts for three states, and the panel changed SHAPE as
+     you worked. A control that moves house depending on the mode is a control
+     you have to find again every time.
+
+     SO THE KNOBS ARE ALWAYS THERE AND THE MODE CHANGES WHAT THEY DO. On a
+     named format they REPORT: pick A2 and they swing to 42.0 and 59.4, because
+     that is what the sheet is. Turn one and you have said the sheet is
+     something else — so the format rolls to Custom and keeps your number. The
+     act of turning is the act of claiming, exactly as typing into them is.
+
+     ON SQUARE THEY ARE TIED. Turn either and both follow, because a square has
+     one dimension and two knobs that could disagree about it would be offering
+     you a way to make a square that is not one. */
+  let syncing = false;
+  const claim = (which, v) => {
+    if (syncing) return;
+    if (gst.orient === 'square') { gst.side = v; sheet(); return; }
+    const d = dimsNow();
+    gst.w = which === 'w' ? v : d.w;
+    gst.h = which === 'h' ? v : d.h;
+    gst.paper = customIdx;
+    fmtDrum.set(customIdx);
+    sheet();
+  };
+  const wKnob = knob({ label: 'Width', min: 5, max: 150, step: .1, value: gst.w, size: 42,
+                       fmt: v => v.toFixed(1), onChange: v => claim('w', v) });
+  const hKnob = knob({ label: 'Height', min: 5, max: 150, step: .1, value: gst.h, size: 42,
+                       fmt: v => v.toFixed(1), onChange: v => claim('h', v) });
+  const mKnob = knob({ label: 'Margin', min: 0, max: 40, step: .5, value: gst.margin, size: 42,
+                       fmt: v => v.toFixed(1), onChange: v => { gst.margin = v; } });
+  const dimRow = el('div', 'knobrow set-dimrow');
+  dimRow.append(wKnob, hKnob, mKnob);
+  gb.append(dimRow, el('div', 'set-units', '<span>cm</span><span>cm</span><span>mm</span>'));
+
+  const customIdx = sizes.indexOf('Custom');
+  const dimsNow = () => {
+    const spec = PAPER[sizes[gst.paper]];
+    if (!spec) return { w: gst.w, h: gst.h };
+    if (gst.orient === 'square') return { w: gst.side, h: gst.side };
+    return gst.orient === 'landscape' ? { w: spec[1], h: spec[0] } : { w: spec[0], h: spec[1] };
+  };
+
+  let lastPaper = gst.paper;
+  const sheet = () => {
+    const spec = PAPER[sizes[gst.paper]];
+    const isCustom = !spec;
+    /* CUSTOM ALREADY IS AN ORIENTATION — two free knobs make any shape, so
+       asking which way up it goes is a question with no answer. */
+    orient.classList.toggle('inert', isCustom);
+    if (gst.orient === 'square' && !isCustom && gst.paper !== lastPaper) {
+      gst.side = Math.min(spec[0], spec[1]);          // biggest square out of the new sheet
+    }
+    lastPaper = gst.paper;
+    const d = dimsNow();
+    /* SILENT WRITE-BACK. .set() fires onChange, and onChange claims Custom —
+       so a plain sync would turn every format change into a claim and the
+       format list would be unusable. */
+    syncing = true; wKnob.set(d.w); hKnob.set(d.h); syncing = false;
+  };
+  sheet();
+
+  gbody.append(gb);
+  gbox.append(ghead, gbody);
+
+  /* one caption, one control, one column — the label is engraved on the case
+     above the thing rather than floating beside it in a form row */
+  function wrapSel(cap, ctl, tall) {
+    const w = el('div', 'set-sel' + (tall ? ' tall' : ''));
+    w.append(el('div', 'set-cap', cap), ctl);
+    return w;
+  }
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   10 · WINDOWS — the demonstration
+
+   Three panels on a floor. TWO OF THEM CLOSE and one REDUCES, and which is
+   which is the argument: the two that close are things you consult — a colour
+   reference, a readout — and the app is fine without either. The one that
+   reduces is the transport, which the app cannot be without, so the most it
+   is allowed to do is get small.
+
+   The dock is the price of being closeable. A panel with an × has to have
+   somewhere to come back from, and that somewhere has to be VISIBLE — a menu
+   three levels down is how a closed panel becomes a lost one.
+   ══════════════════════════════════════════════════════════════════════════ */
+(function windowsDemo() {
+  const floor = document.getElementById('winfloor');
+  const dock = document.getElementById('windock');
+  dock.append(el('span', 'lab', 'CLOSED'));
+
+  const mk = (title, lampCol, at, mode, fill) => {
+    const b = el('div', 'box win-demo');
+    b.style.left = at[0] + 'px'; b.style.top = at[1] + 'px';
+    b.style.width = '250px'; b.style.flex = '0 0 250px';
+    const h = el('div', 'box-head');
+    const j = el('span', 'jewel'); j.style.setProperty('--lyr', lampCol);
+    h.append(j, el('span', 'nm', title));
+    const bd = el('div', 'box-body');
+    fill(bd);
+    b.append(h, bd);
+    floor.append(b);
+    return windowise(b, { title, mode, onClose: () => chipFor(b, title).classList.remove('away') });
+  };
+
+  const chips = new Map();
+  const chipFor = (b, title) => {
+    if (chips.has(b)) return chips.get(b);
+    const c = el('button', 'chip away', title);
+    c.type = 'button';
+    c.title = `Bring ${title} back`;
+    c.addEventListener('click', () => { b.reset(); c.classList.add('away'); });
+    dock.append(c);
+    chips.set(b, c);
+    return c;
+  };
+
+  /* CLOSES — a reference you consult and put away */
+  const w1 = mk('SWATCHES', '#FF6A00', [26, 24], 'close', bd => {
+    const rail = el('div', 'pens');
+    ['#16181C', '#5E646D', '#FFFFFF', '#FF6A00', '#E4123F', '#2C6BFF'].forEach((c, n) => {
+      const p = el('button', 'pencap' + (n === 3 ? ' on' : ''));
+      p.type = 'button'; p.style.setProperty('--ink', c);
+      p.addEventListener('click', () => {
+        rail.querySelectorAll('.pencap').forEach((q, m) => q.classList.toggle('on', m === n));
+      });
+      rail.append(p);
+    });
+    bd.append(el('div', 'bay-cap', '<span>INK</span>'), rail);
+  });
+  chipFor(w1, 'SWATCHES');
+
+  /* CLOSES — a readout, and nothing depends on it being on screen */
+  const w2 = mk('READOUT', '#4CE04C', [300, 74], 'close', bd => {
+    const row = el('div', 'win-readout');
+    const a = el('div', 'lcd', '1 240'), c = el('div', 'lcd', '86 %');
+    row.append(el('span', 'set-dlab', 'N'), a, el('span', 'set-dlab', 'INK'), c);
+    bd.append(row);
+  });
+  chipFor(w2, 'READOUT');
+
+  /* REDUCES — the transport. There is no version of this app with no
+     transport, so there is no × on it: the most it can do is get small. */
+  mk('TRANSPORT', '#2C6BFF', [96, 178], 'reduce', bd => {
+    const bar = el('div', 'strip');
+    bar.append(key(ICON.play, { title: 'Plot' }), el('span', 'chan'),
+               key(ICON.stop, { title: 'Stop' }),
+               key(ICON.upload, { title: 'Export' }));
+    const k = el('div', 'knobrow');
+    k.append(knob({ label: 'Speed', min: 1, max: 100, step: 1, value: 62, size: 44,
+                    fmt: v => v + '%' }));
+    bd.append(bar, k);
+  });
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════

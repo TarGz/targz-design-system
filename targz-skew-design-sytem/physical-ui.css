@@ -1260,15 +1260,18 @@ input:focus-visible{ outline-offset:3px; }
    ask it twice. The pointer stays a pointer until the caret is actually in
    there. */
 .kedit-able{ cursor:default; }
-.kval input.kedit{
+.kval input.kedit,
+.lcd input.kedit{
   width:100%; min-width:0; border:0; padding:0; margin:0; background:none;
   text-align:center; font:inherit; color:inherit; text-shadow:inherit;
   font-variant-numeric:tabular-nums; letter-spacing:inherit;
   caret-color:#7CFFB0;
 }
-.kval input.kedit:focus{ outline:none; }
+.kval input.kedit:focus,
+.lcd input.kedit:focus{ outline:none; }
 /* the window brightens while it is taking input, the way a lit display does */
-.kval:has(input.kedit){
+.kval:has(input.kedit),
+.lcd:has(input.kedit){
   box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 0 0 1px rgba(124,255,176,.35),
              0 0 7px rgba(124,255,176,.20);
 }
@@ -1710,6 +1713,8 @@ input:focus-visible{ outline-offset:3px; }
 .filmrow .stack .key{ height:24px; padding:0 10px; font-family:var(--font); font-size:9px; letter-spacing:.1em; }
 
 .knobrow{ display:flex; align-items:flex-start; justify-content:space-around; gap:8px; padding:2px 0; }
+/* a settings bay is not a viewport — the knobs sit tight and share the row */
+.set-bay .knobrow{ padding:0; justify-content:space-evenly; }
 /* single knobs stack as ROWS — one 40px line each, the height a slider was */
 .knobcol{ display:flex; flex-direction:column; gap:8px; padding:1px 2px; }
 .divider{ height:1px; background:#0a0b0c; box-shadow:0 1px 0 rgba(255,255,255,.06); margin:1px 0; }
@@ -2598,6 +2603,172 @@ input:focus-visible{ outline-offset:3px; }
    full of settings that are doing nothing looks like it */
 .hatchbay.off .jewel{ filter:grayscale(1) brightness(.4);
   box-shadow:inset 0 -1px 2px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE WINDOW — moved, and got out of the way exactly one way
+   ═══════════════════════════════════════════════════════════════════════════ */
+.win{ position:relative; will-change:transform; }
+/* THE WHOLE HEAD IS THE HANDLE, so it says so with the cursor and not with a
+   grip glyph in the corner. A title bar is the one strip of a panel with
+   nothing in it you can hit by accident. */
+.win-head{ cursor:grab; user-select:none; }
+.win.dragging .win-head{ cursor:grabbing; }
+/* LIFTED WHILE IT MOVES. A panel being dragged is off the desk, so it throws
+   the harder, shorter shadow a .plate does — the same elevation vocabulary,
+   because it is the same fact. */
+.win.dragging{
+  box-shadow:
+    0 26px 40px -12px rgba(0,0,0,.92),
+    0 8px 14px -4px rgba(0,0,0,.8),
+    0 0 0 1px rgba(0,0,0,.9),
+    inset 0 1px 0 rgba(255,255,255,.16);
+}
+/* ONE BUTTON, and it is a micro key: recessed, because it removes something.
+   The raised caps on this panel invite the thumb; this one should not. */
+.win-btn{
+  width:22px; height:22px; flex:0 0 22px; margin-left:auto;
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; color:#575c65; border-radius:5px;
+  background:linear-gradient(180deg,#151719,#1e2024);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.06);
+  transition:color .12s, box-shadow .12s;
+}
+.win-btn svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2;
+              stroke-linecap:round; }
+.win-btn:hover{ color:#d7dae0; box-shadow:inset 0 1px 2px rgba(0,0,0,.8),
+                0 0 0 1px rgba(255,255,255,.09); }
+
+/* REDUCED IS THE TITLE BAR AND NOTHING ELSE. Not a shrunken panel — a panel at
+   50% is a panel you cannot read and cannot use, which is the worst of both.
+   The head is already a complete object: a lamp, a name, and the one control
+   that puts it back. */
+.win.reduced .box-body,
+.win.reduced .hb-body{ display:none; }
+.win.reduced{ width:auto; min-width:190px; }
+.win.reduced .win-head{ border-bottom:0; box-shadow:none; }
+/* CLOSED IS GONE, not hidden-but-taking-space. Something else has to bring it
+   back, which is the price of being closeable and the reason a panel the app
+   needs does not get an ×. */
+.win.gone{ display:none; }
+
+/* the dock that brings the closed ones back */
+/* the demo readout's own row — it borrowed the settings panel's dimension
+   layout, which no longer exists now that those are three knobs */
+.win-readout{ display:flex; align-items:center; gap:6px; }
+.win-readout .lcd{ flex:1 1 0; min-width:0; justify-content:center; }
+
+.win-dock{
+  display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+  padding:9px 11px; border-radius:10px; margin-top:16px;
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.055);
+}
+.win-dock .lab{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09); margin-right:4px;
+}
+.win-dock .chip.away{ opacity:.42; }
+
+/* the demo floor: panels sit ON something, or "moved it" has no meaning */
+.win-floor{
+  position:relative; min-height:330px; padding:18px;
+  border-radius:14px; overflow:hidden;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 1px, transparent 1px 26px),
+    linear-gradient(180deg,#0d0e10,#121417);
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.04);
+}
+.win-floor .box{ position:absolute; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   09 · THE SETTINGS PANEL
+
+   A FOLDER IS A BAY, not a collapsible header. Five folders that all collapse
+   is a panel that has hidden itself: you open one to look at it and close it
+   to reach the next, and at no point can you see the machine. These are milled
+   wells with an engraved cap and a hairline — the same object the layer rows
+   drop into — so the whole panel is legible at once and only the genuinely
+   rare stuff goes behind a chevron.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.set-body{ gap:7px; }
+.set-bay{ margin:0; padding:8px 9px 9px; display:flex; flex-direction:column; gap:7px; }
+.set-bay > .bay-cap{ margin:0 0 1px; }
+
+/* two switches side by side, because four names each is small enough to sit
+   in half a panel and a column of them would be twice the height for nothing */
+.set-two{ display:flex; gap:6px; }
+.set-two > *{ flex:1 1 0; min-width:0; }
+
+/* THE CAPTION IS ENGRAVED ABOVE THE CONTROL, not floated beside it. A form row
+   puts the name and the thing on one line and makes the name a column that has
+   to be wide enough for the longest one — which is why every pane like this
+   ends up with a third of its width spent on text nobody reads twice. */
+.set-sel{ display:flex; flex-direction:column; gap:3px; }
+.set-cap{
+  font-family:var(--font); font-size:8px; letter-spacing:.16em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09);
+}
+/* THE DIAL IS SMALLER IN A SETTINGS BAY than in a viewport, and it has to be:
+   a 76px cap plus 56px of leader plus a name is more width than a 318px panel
+   has to give five times over. 54px keeps the pointer readable and buys 22px
+   back for the names, which is the difference between "Smallest first" fitting
+   and not. */
+.set-sel .rotary{ height:auto; --rcx:22px; }
+.set-sel .rot-knob{ width:54px; height:54px; margin:-27px 0 0 -27px; }
+.set-sel .rot-seat{ width:64px; height:64px; margin:-32px 0 0 -32px; }
+.set-sel .rot-lab{ font-size:9px; letter-spacing:.08em; }
+.set-sel.tall .drum-bay{ display:block; }
+/* a row carrying a name AND its size needs the width and a touch less letter */
+.set-sel .drum-item{ font-size:9px; letter-spacing:.06em; padding:0 9px; }
+
+.set-orient{ width:100%; }
+.set-orient .pkey{ flex:1 1 0; min-width:0; height:26px; font-size:8.5px; letter-spacing:.06em; padding:0 4px; }
+/* a square has no orientation and a custom size already is one — the bar goes
+   quiet rather than offering a choice with one outcome */
+.set-orient.inert{ opacity:.3; pointer-events:none; }
+/* both live in the same slot; exactly one of them is ever in it */
+
+/* THREE KNOBS ON ONE LINE, and the units engraved under them rather than
+   repeated in every readout. A knob that says "42.0" three times over with
+   "cm" glued on is three copies of a fact that belongs to the row. */
+.set-dimrow{ padding:2px 0 0; justify-content:space-evenly; }
+.set-units{
+  display:flex; justify-content:space-evenly; padding:1px 0 0;
+  font-family:var(--font); font-size:8px; letter-spacing:.14em; color:#3f7a5c;
+}
+.set-units span{ flex:1 1 0; text-align:center; }
+.set-orient.inert{ opacity:.3; pointer-events:none; }
+/* both live in the same slot; exactly one of them is ever in it */
+
+/* THE DERIVED PAIR. Two lit windows and a unit, reading what the format and
+   the orientation make — no track, no thumb, nothing that says "drag me". */
+.set-dlab{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09);
+}
+.set-dunit{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c; }
+
+
+/* ADVANCED IS A DRAWER. It is allowed to hide because what it hides is rare;
+   the four bays above it are not, which is the whole argument for their being
+   open wells rather than four more of these. */
+.set-adv{ padding:2px 9px 8px; }
+.set-advcap{ cursor:default; }
+.set-adv .chev{ margin-left:2px; }
+/* THE DRAWER IS SHUT UNTIL IT IS OPEN, and it is a drawer rather than a bay
+   because what is in it is rare. A bay that is always open for four numbers
+   you touch twice a year is four numbers in the way of the ones you touch
+   every minute. */
+.set-advbody{ display:none; flex-direction:column; gap:7px; padding:8px 0 0; }
+.set-adv.open .set-advbody{ display:flex; }
+.set-seed{ display:flex; align-items:center; gap:8px; }
+.set-seed .lcd{ flex:1 1 auto; justify-content:center; }
+.set-roll{
+  flex:0 0 auto; height:22px; padding:0 10px; border-radius:6px;
+  font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.1em;
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MATERIALS — the primitives, so this is a language and not one drawing

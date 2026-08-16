@@ -1,6 +1,29 @@
-export const version = '1.17.0';
+export const version = '1.18.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.18.0',
+    date: '2026-08-16',
+    changes: [
+      'TWO NEW SECTIONS. 09 rebuilds a whole Tweakpane — SETTINGS and CANVAS — with nothing new invented, because the work of that panel is not drawing, it is CHOOSING: a pane of sliders and dropdowns has only two kinds of thing in it, so every parameter looks like every other one and the panel tells you nothing about what you are setting',
+      'THE FIVE DECISIONS it comes down to: a QUANTITY is a knob; a SHORT LIST is a switch; a LONG LIST is a drum; TWO EXCLUSIVE THINGS are two keys that cannot both be down; and a number the app WORKS OUT is a readout, not an input you are invited to fight',
+      'A FOLDER IS A BAY, not a collapsible header. Five folders that all collapse is a panel that has hidden itself — you open one to look and close it to reach the next, and at no point can you see the machine. Only ADVANCED gets a chevron, because what it hides is genuinely rare: four numbers you set when the simulation misbehaves and then never touch again',
+      'A SEED IS NOT A QUANTITY, so it does not get a knob. You do not sweep a seed looking for a value — 41 and 43 are no more alike than 41 and 9000. It is an IDENTITY: a lit window you can type an exact one into, and a key that throws a new one. A slider there is the one control on a panel where dragging is genuinely meaningless',
+      'SQUARE IS AN ORIENTATION, NOT A FORMAT. It shipped in the format list, which put it in the wrong argument entirely: A2 is a quantity of paper and portrait is what you do with it. Squaring an A2 is still an A2 — you have cut it down — so it joined the interlock, and changing format while square re-fits the side to the biggest square the new sheet gives',
+      'WIDTH, HEIGHT AND MARGIN ARE THREE KNOBS ON ONE LINE, always. They were two lit windows, a Side knob and a pair of Custom knobs swapping in and out of one slot — three layouts for three states, so the panel changed SHAPE as you worked, and a control that moves house depending on the mode is one you have to find again every time',
+      'The knobs are always there and the MODE changes what they do: on a named format they REPORT, and turning one says the sheet is something else, so the format rolls to Custom and keeps your number. The act of turning is the act of claiming — which is how the readout rule survives rather than breaks. On Square they are tied, because two knobs that could disagree about one dimension offer you a way to make a square that is not one',
+      'Write-back is SILENT. .set() fires onChange and onChange claims Custom, so a plain sync would turn every format change into a claim and make the format list unusable',
+      'Any lit window takes typing now, not just knob readouts — the .kedit styles were scoped to .kval, and a lit window is a lit window',
+      'SECTION 10 — WINDOWS. Every panel moves, and every panel gets out of the way EXACTLY ONE WAY. Close or reduce, never both: both buttons answer the same question, so a title bar with both asks you to choose between two ways of doing one thing, every time, forever',
+      'And the choice is not the user\'s, it belongs to the PANEL. One you can do without CLOSES, and something has to bring it back. One the app needs REDUCES, because closing it would strand something essential. The button is the panel telling you whether it is optional',
+      'THE WHOLE HEAD IS THE HANDLE — a title bar is the one strip with nothing in it you can hit by accident, which is why every window in every OS drags from there and why adding a separate grip is inventing a control the object already has. Dragging is a transform and not left/top, so a panel crossing a page of live specimens does not reflow them sixty times a second, and the one you grab comes to the front',
+      'REDUCED IS THE TITLE BAR AND NOTHING ELSE, not a shrunken panel — a panel at 50% is one you can neither read nor use. The dock is the price of being closeable: a menu three levels down is how a closed panel becomes a lost one. The tab strip and the footer are out of scope on purpose, because those are the chassis and a page whose own navigation can be dragged into a corner is a page you can lose',
+      'rotary() takes `compact`, for a switch that is one of five on a 318px panel rather than the one object in a viewport. Nothing about the switch changes — same fan, same detents, same leaders — only the space it reserves: names 4px closer, leaders pulled in 8px, and a floor from the seat rather than a constant. It had been reserving 130px for a 54px dial and four names, which is 42px of empty per selector',
+      'And the copy gave way where it had to: "Same as view" and "Last drop" were the only two names that could not share a row, and a column of empty floor is a steep price for four letters. What did NOT give way is which primitive it is — shortening a name is a copy edit, turning a switch into a dropdown to save the same space would be the panel losing the argument',
+      'The format rows carry their size — A4 · 21.0 × 29.7. "A4" alone is a name you have to already know, and the row was mostly empty AND mostly useless at once',
+      'RENAMED — the panel is SETTINGS, not LETTERS: a panel and a folder inside it cannot share a name without one being read as the other. And the second is CANVAS, not GLOBAL: "global" says where a setting REACHES, which is a fact about scope and not about what the panel is for',
+    ],
+  },
   {
     version: '1.17.0',
     date: '2026-08-16',

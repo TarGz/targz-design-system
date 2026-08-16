@@ -91,18 +91,18 @@ lines**, each on two specimens: the ball (tone) and a flat blob (boundary). All 
 geometry in millimetres at 1:1 and goes straight out to SVG. What is left is not build work —
 it is three decisions, and each one is cheap to make and expensive to make twice.
 
-- **The bay's `Hand hatched` position is now superseded and still on the dial.** These three
-  exist because that one does not get the vibe: breaking the register makes a fill look
-  *noisy*, and noisy is not hand-made. So the rotary has four positions of which one is known
-  wrong. **Decide:** retire it and put the three hands on the dial (seven positions, which is
-  a lot for one switch), or keep the machine four on the bay and give the hands a switch of
-  their own. Nothing else in the bay changes either way.
-- **Which constants become knobs.** Every hand is currently a hard-coded table: pitch, the
-  four tone thresholds, the angle drift per pass, the jitter fraction (0.34 of pitch), the
-  end over/undershoot, the re-grip length (17mm). Some of those are the *definition* of the
-  type and must not be exposed — the four thresholds are what "four passes" means. Some are
-  genuinely per-drawing: **pitch** certainly, **jitter** probably, **nothing else obviously**.
-  The block ships with no controls on purpose, so this is still an open hand.
+- ~~The bay's machine-made `Hand hatched` position~~ — **settled (v1.12.0).** It was retired
+  and the three hands went onto the dial in its place: six positions, not seven, because the
+  one that was known wrong left rather than sitting there. Breaking the register makes a fill
+  look *noisy*, and noisy is not hand-made.
+- **Which constants become knobs — half settled.** Pitch and angle are exposed: the bay's
+  Spacing and Angle knobs reach the hands, and they work because 08 writes every hand against
+  a BASE — each pitch a multiple of it, each pass angle an offset — so the character lives in
+  the relationships and the base is only where they are anchored. Moving the anchor is a
+  parameter; moving the relationships would be a different drawing. **Still open:** the jitter
+  fraction (0.34 of pitch), the end over/undershoot and the re-grip length (17mm). The four
+  tone thresholds are the *definition* of "four passes" and must not be exposed. One known
+  dead end: `hand random` has no register to rotate, so Angle goes quiet on that position.
 - **Nothing writes a file.** The paths are plottable and the units are right, but there is no
   export. That is one function and a Blob, and it is deliberately not in the design system —
   it belongs to whichever app adopts this. Recorded so it is not mistaken for done.
@@ -113,34 +113,40 @@ rule every few tenths; they beat, and the moire lands on the exact property bein
 
 ---
 
-### `[design system]` The hatch bay — two pieces still outstanding
-The bay is built (v1.9.0): specimen at 1:1 mm on toned stock, a rotary type selector with four
-hatch types, three independent knobs (pen over the kit, spacing, angle with detents), pen-cap
-colour with two refillable slots on the new `.picker`, `.bay-cap` + `.jewel`, the two cleanup
-thresholds in a recess, and **`.eng`** — the engraved icon primitive, which was the part of
-this entry that mattered beyond hatching and is now available to every label row.
+### `[design system]` The hatch bay — built; one decision left
+The bay is built and has outgrown the entry that asked for it. It now carries a **tab strip of
+six surfaces**, each with its own hatch state; a **rotary selector with six fills** — three
+machine (parallel, crossed, serpentine) and section 08's three hands, borrowed rather than
+reimplemented; **three independent knobs** (pen continuous 0.1–3 mm, spacing, angle with
+detents); a **follow-the-object** toggle that changes what the angle knob measures against; a
+rail of **nine refillable ink slots** on `.picker`; **two specimens** side by side — the ball
+for tone, the blob for boundary, both from the shared `KIT`; the two cleanup thresholds in a
+recess; and **`.eng`**, the engraved icon primitive, which was the part of this entry that
+mattered beyond hatching and is available to every label row.
 
-Flooding is a *result*, not a warning, so nothing reports it — the strokes overlap into solid
-ink on their own and the specimen shows it like it shows everything else. Pen and spacing are
-**independent**: an earlier build had the pen drag spacing to hold a nib ratio, which means one
-control silently edits another, so a value you set by hand stops being the value you set.
+**Settled, and worth not re-opening:**
 
-**Two sub-items from the original spec were deliberately not built, and both want a decision
-rather than a build:**
+- Flooding is a *result*, not a warning. Nothing reports it; the strokes overlap into solid ink
+  on their own and the specimen shows it like it shows everything else.
+- Pen and spacing are **independent**. An earlier build had the pen drag spacing to hold a nib
+  ratio, which means one control silently edits another — so a value you set by hand stops
+  being the value you set.
+- Pen is **continuous**, not a kit of six. This closed the old "demoted free Pen (mm) fader"
+  sub-item: a kit is the right model for choosing a pen off a shelf and the wrong one for
+  dialling a line until it looks right, which is what having a specimen in front of you is for.
+- Selecting a surface and **drawing** it are two facts, so they get two gestures: click selects,
+  double-click toggles drawn. Down is what the next change reaches; a lit legend is what gets
+  plotted, and a tab can be either without the other.
+- The specimens are **SVG geometry in millimetres**, not gradients — four of the six fills are
+  paths that no gradient can express. Still DOM rather than canvas, so the glass is free. That
+  is an exception argued from the subject, **not** an answer to the canvas question at the foot
+  of this file.
 
-- **The demoted free `Pen (mm)` fader**, "for the pens that are not in the kit". Left out
-  because the turret's whole argument is that a nib is one of six objects — putting a
-  continuous fader beside it hands back the 0.43 the turret exists to refuse. If the kit is
-  genuinely incomplete the fix is a longer kit, not a second control. **Decide which.**
-- **Engraved graduations on the angle knob's collar.** `.knob-collar` is currently bare. This
-  is a change to the SHARED knob, not to the bay — every knob in the language would get them,
-  or none would, and at 42px the graduations and the pointer are close to the same spatial
-  frequency that already cost the chevron its knurl. **Wants one decision for all knobs.**
-
-**Also settled here, and only here:** the specimen is DOM, not canvas — hatch is literally
-parallel lines, so it is a `repeating-linear-gradient` and takes `::before`/`::after` glass for
-free. That is an exception argued from the subject, **not** an answer to the canvas question at
-the foot of this file. The gizmo and the screen are still open.
+**What is left, and it is one decision for the whole language:** engraved graduations on
+`.knob-collar`. It is bare on every value knob. The rotary's own cap got a knurled collar in
+v1.13.0 and it reads well, which is a precedent but not a ruling — every knob gets them or none
+do, and at 44px graduations and a pointer are close to the same spatial frequency that already
+cost the chevron its knurl.
 
 ---
 

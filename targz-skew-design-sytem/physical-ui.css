@@ -1963,8 +1963,63 @@ input:focus-visible{ outline-offset:3px; }
    block that should prove the language, and it needs a chassis idea the
    language did not have: a bay whose members feed a display INSIDE it.
    ═══════════════════════════════════════════════════════════════════════════ */
-.box.hatchbay{ width:520px; flex:0 0 520px; }
+/* 520 of face plus the 52 the lobe sticks out to the left, so the CONTENT is
+   the same width it was before the bay grew a boss. .box.bulge sets 370 for
+   the editor; this rule is later and more specific to the bay, and both are
+   the same arithmetic: face + lobe. */
+.box.hatchbay{ width:572px; flex:0 0 572px; }
 .hb-body{ display:flex; flex-direction:column; gap:11px; }
+
+/* ── THE TAB STRIP, AND THE ENABLE ON THE SAME BAR ────────────────────────
+   Six keys and a switch in one well. The keys share the width evenly because
+   they are peers; the switch does not, because it is not one — it is what the
+   channel to its left says it is, a different question on the same bar. */
+.hb-tabs{ display:flex; align-items:center; gap:5px; padding:5px; width:100%; }
+.hb-tabs .pkey{
+  flex:1 1 0; min-width:0; padding:0 4px; height:26px;
+  font-size:8.5px; letter-spacing:.06em;
+}
+.hb-tabs .chan{ margin:0 4px; height:20px; }
+/* ALL SAYS ALL. A glyph was a quarter of the width and cost more than it
+   saved: every other key on this bar is a WORD, so a lone mark among six names
+   reads as a different KIND of thing rather than as the same kind with a wider
+   reach — which is the one thing it must not say. It is narrow because it is
+   set tight, not because it is abbreviated. */
+.hb-tabs .hb-all{
+  flex:0 0 auto; width:auto; height:26px; min-width:0; padding:0 9px; border-radius:7px;
+  font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.08em;
+}
+
+/* ── TWO FACTS, TWO CHANNELS ──────────────────────────────────────────────
+   DOWN is what the next change reaches. A LIT LEGEND is what gets plotted.
+   They are independent, so a tab can be down and dark — you are editing
+   something that will not be drawn, which is a real state and a useful one —
+   or up and lit. A muted tab keeps its cap and loses its legend: the key is
+   still there, the mark it makes is not. */
+.hb-tabs .pkey.mute{ color:#4a4e55; text-shadow:none; }
+.hb-tabs .pkey.mute.is-down{ color:#5a4a3e; text-shadow:none; }
+
+/* ── THE OPTION ROW ───────────────────────────────────────────────────────
+   One switch, its engraving and its name, on the line under the knob whose
+   units it changes. Not a bay of its own: it is a modifier, and a modifier
+   that gets its own well reads as a setting in its own right. */
+.hb-opt{ display:flex; align-items:center; gap:8px; padding:2px 2px 4px; }
+.hb-opt .sw{ flex:0 0 22px; width:22px; height:22px; border-radius:6px; --ring-r:8px; }
+.hb-opt .sw svg{ width:12px; height:12px; }
+.hb-optlab{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09);
+}
+/* the whole bar warms while it is engaged — the state belongs to the strip,
+   not to the one key that set it */
+.hb-tabs.all-on{
+  box-shadow:inset 0 3px 8px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.05),
+             inset 0 0 0 1px rgba(255,106,0,.22), 0 1px 0 rgba(255,255,255,.07);
+}
+.hatchbay.noline .hb-row,
+.hatchbay.noline .hb-deep{ opacity:.32; pointer-events:none; }
+.hatchbay.noline .hb-field{ background:#20242a; }
+.hatchbay.noline .hb-field svg{ visibility:hidden; }
 
 /* ── THE SPECIMEN — the readout, and it is not decoration ─────────────────
    The refs both put the display in among the controls that feed it: the
@@ -2087,56 +2142,24 @@ input:focus-visible{ outline-offset:3px; }
    ─────────────────────────────────────────────────────────────────────────── */
 .pens{ display:flex; align-items:center; justify-content:space-between;
        gap:4px; padding:6px 0 4px; height:46px; }
+/* GLASS SHADING WAS TRIED HERE AND REVERTED, once. Bright walls, a hard
+   specular and the ink as a core — the recipe that is correct for a tube and
+   is wrong for a 28px square, because at that size the two lit walls and the
+   specular are most of the object and the colour is what is left over. On a
+   swatch the COLOUR IS THE POINT, and any treatment that spends the width on
+   describing the material has already lost. The modelled cap stands. */
 .pencap{
   --ink:#FF6A00;
   --ring-r:11px;
   width:28px; height:28px; flex:0 0 28px;
   border:0; padding:0; cursor:pointer; position:relative;
   border-radius:9px;
-  /* ── GLASS SHADING, SAME SHAPE ────────────────────────────────────────
-     The squircle stays; what changes is that it stops being a painted face
-     and starts being a body of ink seen THROUGH something. Three layers,
-     outside in, and the order is the argument:
-
-     1 · THE WALLS ARE THE BRIGHTEST THING ON IT. This is the part that is
-         counter-intuitive and the part that does all the work: the instinct
-         is to darken the edges because that is more colour to look through,
-         which is true of a solid lump of liquid and false of anything with a
-         WALL. A lit glass wall throws the room straight back at you, so both
-         edges go white and the colour retreats to the middle.
-     2 · ONE HARD SPECULAR, left of centre and running the full height,
-         because it is on the OUTSIDE of the glass — it belongs to the room,
-         not to the ink, and it does not care what is behind it.
-     3 · THE INK AS A CORE, lit from above left like every other body here.
-
-     A soft top edge and a bounce along the bottom close it: the first is the
-     lamp on the near shoulder, the second is the panel throwing a little back
-     up the underside so the lower edge does not dissolve into the rail. */
   background:
-    linear-gradient(180deg,
-      rgba(255,255,255,.50) 0 5%,
-      rgba(255,255,255,.10) 11%,
-      transparent 26%, transparent 82%,
-      rgba(255,255,255,.13) 94%,
-      rgba(255,255,255,.26) 100%),
-    linear-gradient(90deg,
-      transparent 0 9%,
-      rgba(255,255,255,.52) 14%,
-      rgba(255,255,255,.86) 19%,
-      rgba(255,255,255,.14) 27%,
-      transparent 36%),
-    linear-gradient(90deg,
-      rgba(255,255,255,.88) 0 4%,
-      rgba(255,255,255,.34) 9%,
-      rgba(255,255,255,.04) 17%,
-      transparent 30%, transparent 72%,
-      rgba(255,255,255,.10) 84%,
-      rgba(255,255,255,.42) 93%,
-      rgba(255,255,255,.82) 97% 100%),
+    radial-gradient(115% 85% at 30% 16%, rgba(255,255,255,.36), transparent 60%),
     linear-gradient(158deg,
       color-mix(in srgb,var(--ink) 74%,#fff) 0%,
-      var(--ink) 44%,
-      color-mix(in srgb,var(--ink) 86%,#000) 100%);
+      var(--ink) 46%,
+      color-mix(in srgb,var(--ink) 84%,#000) 100%);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.34),
     inset 0 -1px 0 rgba(0,0,0,.55),
@@ -2144,6 +2167,8 @@ input:focus-visible{ outline-offset:3px; }
     0 5px 9px rgba(0,0,0,.72);
   transition:transform .1s cubic-bezier(.3,1.4,.5,1), box-shadow .1s;
 }
+/* Hover moves nothing either — it lights a rim, the way every key on this
+   panel changes colour under the pointer rather than position. */
 .pencap:hover{
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.34),
@@ -2168,37 +2193,24 @@ input:focus-visible{ outline-offset:3px; }
    the face — the same trap that once erased a knurl. */
 .pencap.on{
   transform:none;
-  /* THE GLASS IS RESTATED IN FULL, not half-declared. `background` resets
-     background-image, so listing only the core here would strip the walls and
-     the specular off the one swatch you are looking at — the same trap that
-     once erased a knurl. Only the CORE inverts: dark at the top, light at the
-     bottom, because the bezel now shades a body that has dropped below it. The
-     room does not move, so the walls and the specular do not either. */
   background:
-    linear-gradient(180deg,
-      rgba(255,255,255,.22) 0 5%,
-      rgba(255,255,255,.05) 11%,
-      transparent 26%, transparent 82%,
-      rgba(255,255,255,.16) 94%,
-      rgba(255,255,255,.30) 100%),
-    linear-gradient(90deg,
-      transparent 0 9%,
-      rgba(255,255,255,.44) 14%,
-      rgba(255,255,255,.74) 19%,
-      rgba(255,255,255,.12) 27%,
-      transparent 36%),
-    linear-gradient(90deg,
-      rgba(255,255,255,.78) 0 4%,
-      rgba(255,255,255,.28) 9%,
-      rgba(255,255,255,.03) 17%,
-      transparent 30%, transparent 72%,
-      rgba(255,255,255,.09) 84%,
-      rgba(255,255,255,.36) 93%,
-      rgba(255,255,255,.72) 97% 100%),
+    radial-gradient(115% 85% at 32% 88%, rgba(255,255,255,.22), transparent 62%),
     linear-gradient(158deg,
-      color-mix(in srgb,var(--ink) 84%,#000) 0%,
+      color-mix(in srgb,var(--ink) 80%,#000) 0%,
       var(--ink) 52%,
-      color-mix(in srgb,var(--ink) 76%,#fff) 100%);
+      color-mix(in srgb,var(--ink) 78%,#fff) 100%);
+  /* AND THE LAMP, which is the other half of latched. The file's rule is that
+     down AND lit is what separates "held by a finger" from "held by the
+     mechanism" — and every other latching control here says it with a warm
+     GLYPH. A colour swatch has no glyph: the face is the legend, and tinting
+     it orange would be lying about the ink. So the lamp goes into the WELL
+     instead — a tight warm line at the cutout and a short bloom off it, which
+     is light escaping round a seated cap.
+
+     It is the panel's lamp colour, not the ink's, and deliberately: an
+     indicator that changed colour with the thing it indicates stops being an
+     indicator. Kept to the source's own limit for a latched control — "a
+     little light in the well, not a bloom on the chassis". */
   box-shadow:
     var(--recess),
     0 0 0 1px rgba(255,106,0,.42),

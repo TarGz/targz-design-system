@@ -133,7 +133,7 @@
   </p>
   <div class="stage">
     <div class="stage-note">two specimens · 1:1 mm · 6 fills · machine and hand</div>
-    <div id="hatch" class="box hatchbay"></div>
+    <div class="bulge-wrap"><div id="hatch" class="box hatchbay"></div></div>
   </div>
 
   <h2>08 <span>/</span> Filling <span>·</span> by hand, and by machine</h2>
@@ -1314,6 +1314,10 @@ function rotary({ options, index, onChange }) {
     knob.setAttribute('aria-activedescendant', options[i]);
   };
   const set = n => { i = Math.max(0, Math.min(N - 1, n)); paint(); onChange && onChange(options[i], i); };
+  /* the same handle knob() and fader() expose, and for the same reason: a
+     control another control has to be able to move needs a way in that is not
+     "rebuild it" */
+  row.set = n => { i = Math.max(0, Math.min(N - 1, n)); paint(); };
 
   let sy = 0, si = 0;
   knob.addEventListener('pointerdown', e => {
@@ -1855,7 +1859,35 @@ let HANDS;
     { n: 'Hand random',hand: 'random' },
   ];
 
-  const hb = { on: true, nib: 0.35, spacing: 1.05, angle: 45, ink: 0, type: 0 };
+  /* SIX SURFACES, EACH WITH ITS OWN HATCH. A drawing is not one fill: the face
+     of a letter, its sides, its shadow and the ground under it are four
+     different marks, and a panel that offers one set of hatch settings makes
+     you believe they share them. They do not, so the bay carries six states
+     and the tab strip is which one you are editing.
+
+     STROKE DOES NOT HATCH, and that is the honest reason the enable exists. A
+     contour is a LINE — it has a width and an ink and nothing to fill — so its
+     tab has no hatch to turn on, and the switch beside it goes dead rather
+     than pretending. Every other surface can be hatched or left bare. */
+  const SURFACES = [
+    { n: 'STROKE',    hatches: false },
+    { n: 'FACE',      hatches: true, st: { drawn: true,  follow: false, nib: 0.35, spacing: 1.05, angle: 45,  ink: 0, type: 0 } },
+    { n: 'SIDES',     hatches: true, st: { drawn: true,  follow: true,  nib: 0.25, spacing: 0.70, angle: 20,  ink: 1, type: 1 } },
+    { n: 'SHADOW',    hatches: true, st: { drawn: true,  follow: true,  nib: 0.50, spacing: 1.60, angle: 135, ink: 0, type: 3 } },
+    { n: 'GND SHDW',  hatches: true, st: { drawn: false, follow: false, nib: 0.35, spacing: 2.10, angle: 90,  ink: 1, type: 2 } },
+    { n: 'GROUND',    hatches: true, st: { drawn: true,  follow: false, nib: 0.70, spacing: 2.60, angle: 0,   ink: 1, type: 5 } },
+  ];
+  let surf = 1;                                   // FACE — the first that hatches
+  const hb = { ...SURFACES[1].st, all: false };
+
+  /* WITH ALL ENGAGED, A CHANGE LANDS ON EVERY SURFACE THAT CAN TAKE IT — and
+     only the field you touched. Copying the whole state would make ALL mean
+     "make them identical", which is a different and much more destructive
+     thing than "change this one setting everywhere". */
+  const spread = field => {
+    if (!hb.all) return;
+    SURFACES.forEach(sf => { if (sf.st) sf.st[field] = hb[field]; });
+  };
   const MM = 96 / 25.4;
   const nibMM = () => hb.nib;
 
@@ -2006,15 +2038,14 @@ let HANDS;
     return out;
   }
 
-  /* ── the head: the bay's own lamp, lit only when it is actually hatching ── */
+  /* ── the head: the bay's own lamp, lit only when it is actually hatching ──
+     THE HEAD HOLDS NO CONTROL. A switch up here reads as belonging to the
+     PANEL, and everything this bay does belongs to one surface out of six —
+     so the only thing in the title bar is the lamp, which reports rather than
+     acts. */
   const head = el('div', 'box-head');
   const jewel = el('span', 'jewel');
   head.append(jewel, el('span', 'nm', 'HATCH'));
-  const power = swBtn(hb.on, 'hatching', ICON.cells, null, () => {
-    hb.on = !hb.on; power.classList.toggle('on', hb.on); paint();
-  });
-  power.style.marginLeft = 'auto';
-  head.append(power);
 
   const body = el('div', 'box-body hb-body');
 
@@ -2035,12 +2066,126 @@ let HANDS;
 
 
   /* ── the turret, and the three straight controls beside it ────────────── */
+  /* ── THE TAB STRIP, AND THE SWITCH IS PART OF IT ─────────────────────────
+     Six surfaces on one bar that can only hold one down — the same interlock
+     the page switcher uses, because it is the same fact: these are
+     alternatives, and a row of keys where two could be down is lying about
+     that.
+
+     ALL SITS ON THE SAME BAR, past a milled channel. The channel does real
+     work: without it ALL reads as a seventh surface, and with it the bar says
+     two things — which surface you are on, and how wide the next change goes.
+     Those belong together because they are the same question asked twice. */
+  const tabs = el('div', 'piano sm hb-tabs');
+  const tabKeys = SURFACES.map((sf, i) => pkey(sf.n, {
+    down: i === surf,
+    title: sf.hatches ? `${sf.n} — click to edit it, double-click to turn it off`
+                      : `${sf.n} — a line, so it has no fill`,
+    onClick: () => selectSurface(i),
+  }));
+  tabKeys.forEach((k, i) => {
+    if (!SURFACES[i].st) return;
+    k.addEventListener('dblclick', e => { e.preventDefault(); toggleDrawn(i); });
+  });
+  tabs.append(...tabKeys, el('span', 'chan'));
+
+  /* ── EDIT ALL ────────────────────────────────────────────────────────────
+     Not an enable. A switch that turned this surface's hatch off was answering
+     a question nobody asked at the end of a strip about WHICH surface — and
+     the useful question there is the opposite one: whether what you are about
+     to turn applies to the surface you are on, or to all of them.
+
+     Six surfaces means six of every setting, and most of the time a pen change
+     is a pen change everywhere. Without this you edit the pen six times and
+     the sixth is different from the first because you mistyped it. It is a
+     LATCH, held down while it is on, so a knob turned by accident with ALL
+     engaged is a mistake you can see before you make it. */
+  const all = key('ALL', {
+    cls: 'hb-all', latch: true, title: 'Apply every change to all six surfaces',
+    onClick: (b) => {
+      hb.all = b.classList.toggle('is-down');
+      b.setAttribute('aria-pressed', String(hb.all));
+      tabs.classList.toggle('all-on', hb.all);
+      paintTabs();
+    },
+  });
+  tabs.append(all);
+
+  /* WITH ALL ENGAGED EVERY TAB IS DOWN, and that is not decoration — it is the
+     literal truth of the state. Dimming the five you are not on said the
+     opposite: that they were somehow less involved, when the whole point is
+     that a change now lands on all six equally. So they all go in, and they
+     all light.
+
+     aria-checked STILL NAMES ONE. Down is what the change reaches; checked is
+     which surface the controls are reading, and those stop being the same fact
+     the moment ALL is on. A screen reader that heard six checked tabs would be
+     told the panel is showing six things at once, which it is not. */
+  const paintTabs = () => {
+    tabKeys.forEach((k, n) => {
+      const sf = SURFACES[n];
+      k.classList.toggle('is-down', hb.all || n === surf);
+      k.classList.toggle('mute', !!sf.st && !sf.st.drawn);
+      k.setAttribute('aria-checked', String(n === surf));
+      k.setAttribute('aria-disabled', String(!!sf.st && !sf.st.drawn));
+    });
+  };
+
+  /* TWO FACTS, TWO GESTURES, TWO CHANNELS.
+
+     Which surface you are EDITING and whether that surface is DRAWN are not
+     the same question, and the first build ran them through one switch and got
+     both wrong: turning a surface off also meant leaving it, so you could not
+     see what you had turned off, and coming back to it turned it on again.
+
+     So: a single click SELECTS — that is what the strip is for — and a double
+     click TOGGLES DRAWN. They read differently too. DOWN is what the next
+     change reaches; a LIT LEGEND is what the plotter will draw. A tab can be
+     down and dark (you are editing something that will not be drawn, which is
+     a real and useful state) or up and lit (drawn, just not the one in hand).
+
+     AND WITH ALL ENGAGED THE DOUBLE CLICK GOES WIDE TOO, because ALL means
+     every change lands everywhere and this is a change. The alternative —
+     edits spread but on/off does not — is the kind of half-rule nobody can
+     hold in their head, and the first surface it surprises is the one you
+     stopped looking at. */
+  const toggleDrawn = i => {
+    const targets = hb.all ? SURFACES.filter(sf => sf.st) : [SURFACES[i]];
+    if (!targets.length || !targets[0].st) return;
+    const to = !targets[0].st.drawn;
+    targets.forEach(sf => { sf.st.drawn = to; });
+    if (SURFACES[surf].st) hb.drawn = SURFACES[surf].st.drawn;
+    paintTabs();
+    paint();
+  };
+
+  /* SWITCHING TABS LOADS THAT SURFACE, and every control follows — which is the
+     entire reason knob(), fader() and rotary() all expose .set(). A tab strip
+     that changes a heading and leaves six controls showing the previous
+     surface's numbers is worse than no tabs at all. */
+  function selectSurface(i) {
+    if (SURFACES[surf].st) Object.assign(SURFACES[surf].st, hb);
+    surf = i;
+    paintTabs();
+    const sf = SURFACES[i];
+    box.classList.toggle('noline', !sf.hatches);
+    if (!sf.hatches) { paint(); return; }
+    Object.assign(hb, sf.st);
+    followSw.classList.toggle('on', hb.follow);
+    turret.set(hb.type);
+    pen.set(hb.nib);
+    spacing.set(hb.spacing);
+    angleKnob.set(hb.angle);
+    select(hb.ink);
+    paint();
+  }
+
   const row = el('div', 'hb-row');
 
   const turret = rotary({
     options: TYPES.map(t => t.n),
     index: hb.type,
-    onChange: (_, i) => { hb.type = i; paint(); },
+    onChange: (_, i) => { hb.type = i; spread('type'); paint(); },
   });
   turret.classList.add('hb-sel');
   const turretCol = el('div', 'hb-turret');
@@ -2074,26 +2219,52 @@ let HANDS;
   const pen = knob({
     label: 'Pen', min: 0.1, max: 3, step: 0.01, value: hb.nib, size: 44,
     fmt: v => v.toFixed(2),
-    onChange: v => { hb.nib = v; paint(); },
+    onChange: v => { hb.nib = v; spread('nib'); paint(); },
   });
   pen.querySelector('.klab').prepend(el('span', null, ENG.nib).firstElementChild);
 
   const spacing = knob({
     label: 'Spacing', min: 0.1, max: 4, step: 0.05, value: hb.spacing, size: 44,
     fmt: v => v.toFixed(2),
-    onChange: v => { hb.spacing = v; paint(); },
+    onChange: v => { hb.spacing = v; spread('spacing'); paint(); },
   });
   spacing.querySelector('.klab').prepend(el('span', null, ENG.spacing).firstElementChild);
 
   const angleKnob = knob({
     label: 'Angle', min: 0, max: 180, step: 1, value: hb.angle, size: 44,
     detents: [0, 45, 90, 135, 180],
-    fmt: v => v + '°',
-    onChange: v => { hb.angle = v; paint(); },
+    fmt: v => (hb.follow ? '+' : '') + v + '°',
+    onChange: v => { hb.angle = v; spread('angle'); paint(); },
   });
   angleKnob.querySelector('.klab').prepend(el('span', null, ENG.angle).firstElementChild);
 
   knobs.append(pen, spacing, angleKnob);
+
+  /* ── FOLLOW THE OBJECT ────────────────────────────────────────────────────
+     OPTIONAL, AND IT CHANGES WHAT THE ANGLE KNOB MEANS. Off, 45° is 45° from
+     the sheet — every surface hatched the same bearing, which is what you want
+     when the fill is a texture over a whole drawing. On, 45° is 45° from the
+     OBJECT, so the hatch turns with whatever it is filling: a letter's sides
+     stay lit from the same side however the letter is rotated, and a shadow
+     keeps running across the light instead of drifting into a pattern that
+     fights it.
+
+     IT LIVES NEXT TO ANGLE AND NOWHERE ELSE, because it is not a seventh
+     setting — it is the units the sixth is measured in. A toggle that changes
+     what a number means and sits across the panel from that number is two
+     controls you have to remember are connected. The readout says which it is:
+     45° absolute, +45° relative. */
+  const follow = el('div', 'hb-opt');
+  const followSw = swBtn(hb.follow, 'follow the object', ICON.side, null, () => {
+    hb.follow = !hb.follow;
+    followSw.classList.toggle('on', hb.follow);
+    spread('follow');
+    angleKnob.set(hb.angle);            // the readout changes with the units
+    paint();
+  });
+  follow.append(followSw, el('span', null, ENG.angle).firstElementChild,
+                el('span', 'hb-optlab', 'FOLLOW THE OBJECT'));
+
 
   /* THE RAIL IS A CASE, SO IT IS FULL OF SLOTS — including the ones with no
      pen in them yet. A rail that stops after the pens you happen to own reads
@@ -2104,6 +2275,7 @@ let HANDS;
   const pens = el('div', 'pens');
   const select = i => {
     hb.ink = i;
+    spread('ink');
     pens.querySelectorAll('.pencap').forEach((q, n) => {
       q.classList.toggle('on', n === i);
       q.setAttribute('aria-pressed', String(n === i));
@@ -2176,7 +2348,7 @@ let HANDS;
   };
   drawPens();
 
-  stack.append(knobs, el('div', 'bay-cap', `${ENG.ink}<span>INK</span>`), pens);
+  stack.append(knobs, follow, el('div', 'bay-cap', `${ENG.ink}<span>INK</span>`), pens);
   row.append(turretCol, stack);
 
   /* ── SET ONCE: the two thresholds that are not part of the rhythm ─────── */
@@ -2192,8 +2364,30 @@ let HANDS;
   join.querySelector('.flab').prepend(el('span', null, ENG.joinreach).firstElementChild);
   deep.append(minStroke, join);
 
-  body.append(spec, row, deep);
+  /* THE TABS COME FIRST, above the specimen. They are not a control the way
+     the knobs are — they choose WHICH DRAWING the whole bay is about, and a
+     selector that sits under the thing it selects reads as belonging to it.
+     Everything below the strip is the surface the strip has picked. */
+  body.append(tabs, spec, row, deep);
+  /* THE PANEL GROWS OUT TO MEET THE DIAL, exactly as the layer editor's does.
+     Without it the knob sits half off the edge of a flat rectangle, which is a
+     disc laid on a box; with it the silhouette becomes panel ∪ lobe and the
+     case reads as one moulding with a bump in it — which is why real
+     enclosures have these, and the only reason a switch body deeper than the
+     case is allowed to stick out of it.
+
+     MEASURED AFTER PAINT, not guessed: the boss's height is wherever the dial
+     ended up, and that is a stack of paddings and a bay-cap that would go
+     stale the first time a row above it changed. */
+  box.classList.add('bulge');
   box.append(head, body);
+  requestAnimationFrame(() => {
+    const d = turret.querySelector('.rot-knob').getBoundingClientRect();
+    const b = box.getBoundingClientRect();
+    const y = d.top + d.height / 2 - b.top;
+    box.style.setProperty('--boss-y', `${y.toFixed(1)}px`);
+    box.style.setProperty('--panel-shape', panelShape(b.width, b.height, y));
+  });
 
   /* ── paint ────────────────────────────────────────────────────────────── */
   const SVGNS = 'http://www.w3.org/2000/svg';
@@ -2223,7 +2417,10 @@ let HANDS;
        of a specimen. */
     const ink = INKS[hb.ink].c;
     jewel.style.setProperty('--lyr', ink);
-    box.classList.toggle('off', !hb.on);
+    /* A SURFACE THAT IS NOT DRAWN SHOWS NOTHING. The sheets go dark rather
+       than showing the fill it WOULD make — a specimen of a mark nobody is
+       plotting is the panel telling you a thing that is not true. */
+    box.classList.toggle('off', SURFACES[surf].st ? !SURFACES[surf].st.drawn : false);
     // the one documented dead end: hand random has no register to rotate
     angleKnob.classList.toggle('inert', TYPES[hb.type].hand === 'random');
     if (!mmW || queued) return;

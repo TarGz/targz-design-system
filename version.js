@@ -1,6 +1,22 @@
-export const version = '1.13.0';
+export const version = '1.14.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.14.0',
+    date: '2026-08-16',
+    changes: [
+      'SIX SURFACES ON A TAB STRIP, above the specimen. A drawing is not one fill: the face of a letter, its sides, its shadow and the ground under it are four different marks, and a panel offering one set of hatch settings makes you believe they share them. Each tab carries its own type, pen, spacing, angle, ink and follow — and switching loads all of it, which is the entire reason knob(), fader() and now rotary() expose .set(). A strip that changed a heading and left six controls showing the previous surface\'s numbers would be worse than no strip',
+      'THE TABS GO ABOVE THE SPECIMEN, not below it. They are not a control the way the knobs are — they choose WHICH DRAWING the bay is about, and a selector under the thing it selects reads as belonging to it. Everything below the strip is the surface the strip picked',
+      'EDIT ALL, on the same bar past a milled channel. It replaced an enable switch that was answering a question nobody asked at the end of a strip about WHICH surface — the useful question there is the opposite one: whether the next change lands on the surface you are on or on all six. Six surfaces means six of every setting, and without it you edit the pen six times and the sixth differs from the first because you mistyped it',
+      'ALL spreads ONLY THE FIELD YOU TOUCHED. Copying the whole state would make it mean "make them identical", which is a different and far more destructive thing than "change this one setting everywhere". And it is a LATCH, held down while on, so a knob turned by accident with it engaged is a mistake you can see before you make it',
+      'With ALL engaged every tab goes down and lights. Dimming the five you are not on said the opposite of the truth — that they were less involved — when the point is that a change now lands on all six equally. aria-checked still names exactly one, because DOWN is what the change reaches and CHECKED is what the controls are reading, and those stop being the same fact the moment ALL is on',
+      'TWO FACTS, TWO GESTURES, TWO CHANNELS. Which surface you are EDITING and whether it is DRAWN are different questions, and the first build ran both through one switch and got both wrong: turning a surface off also meant leaving it, so you could not see what you had turned off and coming back to look turned it on again. Single click selects, double click toggles drawn. DOWN is what the next change reaches; a LIT LEGEND is what gets plotted. A tab can be down and dark — editing something that will not be drawn, which is a real and useful state — or up and lit',
+      'And with ALL engaged the double click goes wide too. Edits spreading but on/off not is the kind of half-rule nobody can hold in their head, and the first surface it surprises is the one you stopped looking at',
+      'FOLLOW THE OBJECT — optional, and it changes what the Angle knob MEANS. Off, 45° is 45° from the sheet. On, it is 45° from the object, so a letter\'s sides stay lit from the same side however it is rotated and a shadow keeps running across the light instead of drifting into a pattern that fights it. It sits next to Angle and nowhere else, because it is not a seventh setting — it is the units the sixth is measured in, and a toggle that changes what a number means from across the panel is two controls you have to remember are connected. The readout says which: 45° absolute, +45° relative',
+      'ALL is a WORD again. As a glyph it was a quarter of the width and cost more than it saved: every other key on that bar is a word, so a lone mark among six names reads as a different KIND of thing rather than the same kind with a wider reach, which is the one thing it must not say',
+      'REVERTED — glass shading on the ink swatches. Bright walls, a hard specular and the ink as a core is the correct recipe for a tube and the wrong one for a 28px square, because at that size the two lit walls and the specular are most of the object and the colour is what is left over. On a swatch the COLOUR IS THE POINT, and any treatment that spends the width describing the material has already lost. Recorded in the CSS so the dead end is only walked once',
+    ],
+  },
   {
     version: '1.13.0',
     date: '2026-08-16',

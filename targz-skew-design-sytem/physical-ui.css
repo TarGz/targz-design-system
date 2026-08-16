@@ -1950,7 +1950,9 @@ input:focus-visible{ outline-offset:3px; }
 .pk-well{ height:34px; align-items:center; }
 .pk-well[hidden]{ display:none; }
 .pk-well .pencap{ width:17px; height:17px; flex:0 0 17px; border-radius:6px; --ring-r:8px; }
-.pk-well .pencap.on{ transform:none; }
+/* pinned: both selectors weigh the same and the rail's rules come later, so
+   without this the selected recent takes the rail's size */
+.pk-well .pencap.on{ transform:none; width:17px; height:17px; flex:0 0 17px; border-radius:6px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE HATCH BAY — the first COMPOUND control in the language.
@@ -1996,16 +1998,27 @@ input:focus-visible{ outline-offset:3px; }
    something that will not be drawn, which is a real state and a useful one —
    or up and lit. A muted tab keeps its cap and loses its legend: the key is
    still there, the mark it makes is not. */
-.hb-tabs .pkey.mute{ color:#4a4e55; text-shadow:none; }
-.hb-tabs .pkey.mute.is-down{ color:#5a4a3e; text-shadow:none; }
+/* A STRUCK LEGEND, not a faded one. Dimming says "this key is unavailable",
+   which is the opposite of true — an undrawn surface is still fully editable,
+   and you often want to set one up before you switch it on. A strike says the
+   name is still there and the MARK IS NOT. The line takes the key's own
+   colour, so an off tab that is down strikes in the lamp colour and one that
+   is up strikes in grey. */
+.hb-tabs .pkey.mute{
+  text-decoration:line-through;
+  text-decoration-color:currentColor;
+  text-decoration-thickness:1.4px;
+  color:#7c828b;
+}
 
 /* ── THE OPTION ROW ───────────────────────────────────────────────────────
    One switch, its engraving and its name, on the line under the knob whose
    units it changes. Not a bay of its own: it is a modifier, and a modifier
    that gets its own well reads as a setting in its own right. */
 .hb-opt{ display:flex; align-items:center; gap:8px; padding:2px 2px 4px; }
-.hb-opt .sw{ flex:0 0 22px; width:22px; height:22px; border-radius:6px; --ring-r:8px; }
-.hb-opt .sw svg{ width:12px; height:12px; }
+/* THE ONLY MARK ON THE ROW, so it gets the room to be read. */
+.hb-opt .sw{ flex:0 0 26px; width:26px; height:26px; border-radius:7px; --ring-r:9px; }
+.hb-opt .sw svg{ width:15px; height:15px; }
 .hb-optlab{
   font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
   text-shadow:0 1px 0 rgba(255,255,255,.09);
@@ -2016,10 +2029,16 @@ input:focus-visible{ outline-offset:3px; }
   box-shadow:inset 0 3px 8px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.05),
              inset 0 0 0 1px rgba(255,106,0,.22), 0 1px 0 rgba(255,255,255,.07);
 }
-.hatchbay.noline .hb-row,
-.hatchbay.noline .hb-deep{ opacity:.32; pointer-events:none; }
-.hatchbay.noline .hb-field{ background:#20242a; }
-.hatchbay.noline .hb-field svg{ visibility:hidden; }
+/* A CONTOUR HAS NO AREA TO FILL, so the four controls that fill one go quiet.
+   PEN AND INK STAY LIVE, because a contour has both — dimming the whole row
+   made the one tab where you set a line's weight the one tab where you could
+   not touch anything. The sheets keep drawing: a contour's preview is its
+   outline, which is exactly what the tab is for. */
+.hatchbay.noline .hb-turret,
+.hatchbay.noline .hb-knobs .kwrap:nth-child(2),
+.hatchbay.noline .hb-knobs .kwrap:nth-child(3),
+.hatchbay.noline .hb-opt,
+.hatchbay.noline .hb-deep{ opacity:.3; pointer-events:none; }
 
 /* ── THE SPECIMEN — the readout, and it is not decoration ─────────────────
    The refs both put the display in among the controls that feed it: the
@@ -2072,6 +2091,19 @@ input:focus-visible{ outline-offset:3px; }
 .hatchbay.off .hb-field{ background:#20242a; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), inset 0 2px 8px rgba(0,0,0,.7); }
 .hatchbay.off .hb-field svg{ visibility:hidden; }
 .hatchbay.off .hb-scale{ color:#3c4149; }
+
+/* ── A SURFACE THAT IS NOT DRAWN HAS ITS LAMPS OUT ────────────────────────
+   Every lit thing on this bay means one thing: this is going to be plotted.
+   On a surface you have struck through none of that is true.
+
+   ONE FILTER, NOT TWENTY OVERRIDES — the lamps are spread across knob arcs,
+   fader fills, cap indicators, readouts and the ink lamp, and half of them
+   hard-code their colour, so hunting them one by one would miss some and go
+   stale. The controls stay LIVE and only their light goes, because editing a
+   surface before switching it on is why the strike is a strike and not a
+   disable. The tab strip is excluded: you have to be able to reach the tab
+   that turns it back on. */
+.hatchbay.off .hb-body > :not(.hb-tabs){ filter:saturate(.06) brightness(.6); }
 
 .hb-scale{
   display:flex; justify-content:space-between; align-items:center; margin-top:7px;
@@ -2151,80 +2183,91 @@ input:focus-visible{ outline-offset:3px; }
 .pencap{
   --ink:#FF6A00;
   --ring-r:11px;
-  width:28px; height:28px; flex:0 0 28px;
+  width:22px; height:22px; flex:0 0 22px;
   border:0; padding:0; cursor:pointer; position:relative;
-  border-radius:9px;
+  border-radius:7px;
   background:
     radial-gradient(115% 85% at 30% 16%, rgba(255,255,255,.36), transparent 60%),
     linear-gradient(158deg,
       color-mix(in srgb,var(--ink) 74%,#fff) 0%,
-      var(--ink) 46%,
-      color-mix(in srgb,var(--ink) 84%,#000) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.34),
-    inset 0 -1px 0 rgba(0,0,0,.55),
-    0 3px 0 #0c0d0f,
-    0 5px 9px rgba(0,0,0,.72);
-  transition:transform .1s cubic-bezier(.3,1.4,.5,1), box-shadow .1s;
-}
-/* Hover moves nothing either — it lights a rim, the way every key on this
-   panel changes colour under the pointer rather than position. */
-.pencap:hover{
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.34),
-    inset 0 -1px 0 rgba(0,0,0,.55),
-    0 0 0 1px rgba(255,255,255,.18),
-    0 3px 0 #0c0d0f,
-    0 5px 9px rgba(0,0,0,.72);
-}
-/* IN USE IS IN — AND IT DOES NOT FALL. Same decision the small piano keys
-   made: at 28px there is no room for the drop to be legible as a drop, so the
-   movement goes and the state stays. The recess and the chamfer say pressed.
+      var(--ink) 44%,
+      color-mix(in srgb,var(--ink) 86%,#000) 100%);
+  /* THE ONES YOU ARE NOT USING SIT DOWN IN THE CASE, and the hairlines are the
+     whole of it. An inset shadow laid over the RAISED recipe — light hairline
+     above, dark below, a skirt and a cast shadow — is a proud cap with a smudge
+     on it, and the eye believes the hairlines every time.
 
-   And the pressed recipe is the key's own, applied to a coloured face: the cap
-   KEEPS ITS OWN COLOUR and the gradient INVERTS — dark at the top, light at
-   the bottom, because the bezel is now shading the top of a face that has
-   dropped below it and what light reaches it bounces up off the well. Nothing
-   is tinted, so the swatch you press and the swatch that is held down are
-   recognisably the same object in two positions.
+     A recess inverts all four: a hard near-black line INSIDE the top edge, the
+     wall shading down from it, a faint light INSIDE the bottom because that is
+     the wall the room actually reaches, and a lit lip OUTSIDE below the whole
+     thing. And no cast shadow at all — a hole does not throw one.
 
-   The shorthand is restated in full on purpose: `background` resets
-   background-image, and half a declaration here would take the specular off
-   the face — the same trap that once erased a knurl. */
-.pencap.on{
-  transform:none;
-  background:
-    radial-gradient(115% 85% at 32% 88%, rgba(255,255,255,.22), transparent 62%),
-    linear-gradient(158deg,
-      color-mix(in srgb,var(--ink) 80%,#000) 0%,
-      var(--ink) 52%,
-      color-mix(in srgb,var(--ink) 78%,#fff) 100%);
-  /* AND THE LAMP, which is the other half of latched. The file's rule is that
-     down AND lit is what separates "held by a finger" from "held by the
-     mechanism" — and every other latching control here says it with a warm
-     GLYPH. A colour swatch has no glyph: the face is the legend, and tinting
-     it orange would be lying about the ink. So the lamp goes into the WELL
-     instead — a tight warm line at the cutout and a short bloom off it, which
-     is light escaping round a seated cap.
-
-     It is the panel's lamp colour, not the ink's, and deliberately: an
-     indicator that changed colour with the thing it indicates stops being an
-     indicator. Kept to the source's own limit for a latched control — "a
-     little light in the well, not a bloom on the chassis". */
+     THE DIM IS A FILTER, not a second set of colours: nine inks would need
+     nine muted twins, and they would drift from the real ones the first time
+     either was tuned. */
+  filter:brightness(.6) saturate(.82);
   box-shadow:
-    var(--recess),
-    0 0 0 1px rgba(255,106,0,.42),
-    0 0 6px rgba(255,106,0,.34),
-    0 0 13px rgba(255,106,0,.16);
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 2.4px 1.2px rgba(0,0,0,.88),
+    inset 0 7px 11px -3px rgba(0,0,0,.72),
+    inset 3.5px 0 4px -3px rgba(0,0,0,.6),
+    inset -3.5px 0 4px -3px rgba(0,0,0,.6),
+    inset 0 -3px 5px -2px rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(255,255,255,.16),
+    0 1px 0 rgba(255,255,255,.085);
+  transition:box-shadow .1s, filter .12s;
 }
-/* the broken edge of the cutout, same chamfer every seated control gets */
-.pencap.on::after{
-  content:''; position:absolute; inset:-2px; border-radius:var(--ring-r);
-  pointer-events:none; padding:1.6px; background:var(--chamfer);
+/* ── THE CHAMFER ON THE EDGE ──────────────────────────────────────────────
+   The one thing a box-shadow cannot draw: an edge lit DIRECTIONALLY, dark
+   where it turns away from the lamp at the top and bright where it turns into
+   it at the bottom. Concave polarity — the other way round and every cap on
+   the rail reads as a bump. */
+.pencap::before{
+  content:''; position:absolute; inset:-1.5px; border-radius:8.5px;
+  pointer-events:none; padding:1.5px; background:var(--chamfer);
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
           mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor; mask-composite:exclude;
-  filter:blur(.5px);
+  filter:blur(.4px);
+}
+/* HOVER COMES PART WAY UP OUT OF THE TRAY — the walls shallow out and the rim
+   catches a little light. Not all the way: it is not selected. */
+.pencap:hover{
+  filter:brightness(.85) saturate(.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.45),
+    inset 0 1px 2px rgba(0,0,0,.6),
+    inset 0 -1px 0 rgba(255,255,255,.12),
+    0 0 0 1px rgba(255,255,255,.12),
+    0 1px 0 rgba(255,255,255,.06);
+}
+/* ── SELECTED IS THE LAMP, AND ONLY THE LAMP ──────────────────────────────
+   Every cap on the rail is the same object at the same size in the same hole.
+   One has a light round it, and that is the whole of the difference.
+
+   THREE OTHER SIGNALS WERE TRIED AND ALL THREE WERE REDUNDANT: the selected
+   cap was bigger, it was brighter, and its core was inverted. Each is a second
+   thing to notice that means the thing you already noticed, and the cost is
+   not clutter — it is that the rail stops being a row of nine like objects. A
+   pen case is nine identical slots; which pen is in your hand is a fact about
+   you, not about the slot, so it is said with light and nothing else.
+
+   IT IS THE PANEL'S LAMP COLOUR, NOT THE INK'S: an indicator that changed
+   colour with the thing it indicates stops being an indicator. */
+.pencap.on{
+  filter:none;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 2.4px 1.2px rgba(0,0,0,.88),
+    inset 0 7px 11px -3px rgba(0,0,0,.72),
+    inset 3.5px 0 4px -3px rgba(0,0,0,.6),
+    inset -3.5px 0 4px -3px rgba(0,0,0,.6),
+    inset 0 -3px 5px -2px rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(255,255,255,.16),
+    0 0 0 1.5px rgba(255,106,0,.85),
+    0 0 7px rgba(255,106,0,.45),
+    0 0 15px rgba(255,106,0,.20),
+    0 1px 0 rgba(255,255,255,.085);
 }
 /* the native input is the value, never the surface — the cap is what you see */
 .ink-src{
@@ -2237,7 +2280,7 @@ input:focus-visible{ outline-offset:3px; }
    its own. Deeper than it is wide-looking, with the two hairlines every other
    recess in this language has, and no colour at all because it has none yet. */
 .pencap.empty{
-  border-radius:9px;
+  border-radius:7px;
   background:linear-gradient(180deg,#101317,#181b20);
   box-shadow:inset 0 3px 6px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.05),
              0 1px 0 rgba(255,255,255,.055);

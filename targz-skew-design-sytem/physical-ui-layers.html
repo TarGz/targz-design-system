@@ -2103,15 +2103,22 @@ let HANDS;
 
   /* ── the turret, and the three straight controls beside it ────────────── */
   /* ── THE TAB STRIP, AND THE SWITCH IS PART OF IT ─────────────────────────
-     Six surfaces on one bar that can only hold one down — the same interlock
+     Six surfaces in one well that can only hold one down — the same interlock
      the page switcher uses, because it is the same fact: these are
      alternatives, and a row of keys where two could be down is lying about
      that.
 
-     ALL SITS ON THE SAME BAR, past a milled channel. The channel does real
-     work: without it ALL reads as a seventh surface, and with it the bar says
+     ALL SITS IN THE SAME WELL, past a milled channel. The channel does real
+     work: without it ALL reads as a seventh surface, and with it the strip says
      two things — which surface you are on, and how wide the next change goes.
-     Those belong together because they are the same question asked twice. */
+     Those belong together because they are the same question asked twice.
+
+     THREE ACROSS AND TWICE DOWN, WHICH IS A STYLESHEET DECISION AND NOT ONE
+     MADE HERE. The markup is what it always was — six keys, the channel, ALL —
+     and the CSS places the last two in their own column across both rows so the
+     keys flow into the three that are left. One line demanded 420px of face
+     before anything with a value on it was consulted; the well says the same
+     thing about the same six keys at 230. */
   const tabs = el('div', 'piano sm hb-tabs');
   const tabKeys = SURFACES.map((sf, i) => pkey(sf.n, {
     down: i === surf,

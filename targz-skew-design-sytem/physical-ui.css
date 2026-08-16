@@ -1965,30 +1965,89 @@ input:focus-visible{ outline-offset:3px; }
    block that should prove the language, and it needs a chassis idea the
    language did not have: a bay whose members feed a display INSIDE it.
    ═══════════════════════════════════════════════════════════════════════════ */
-/* 520 of face plus the 52 the lobe sticks out to the left, so the CONTENT is
-   the same width it was before the bay grew a boss. .box.bulge sets 370 for
-   the editor; this rule is later and more specific to the bay, and both are
-   the same arithmetic: face + lobe. */
-.box.hatchbay{ width:572px; flex:0 0 572px; }
-.hb-body{ display:flex; flex-direction:column; gap:11px; }
+/* ── THE BAY IS SIZED TO A LAPTOP, AND THE TAB STRIP IS WHAT PAID FOR IT ───
+   405 of face plus the 55 the lobe sticks out to the left. .box.bulge sets 370
+   for the editor; this rule is later and more specific to the bay, and both are
+   the same arithmetic: face + lobe.
+
+   IT WAS 572, AND THE STRIP WAS THE REASON. Six captions and a master on ONE
+   LINE need about 420px before anything else in the bay is consulted — so the
+   widest row in the panel was the one carrying no values, and every other row
+   was built out to meet it. On a 1280 or 1440 laptop that is a third of the
+   screen spent on a panel that sits over the drawing it is editing.
+
+   Two lines of three fixes it at the source: the strip's demand drops to ~230
+   and the binding row becomes the one that actually holds the controls — the
+   turret beside three knobs, with the pen case under them. That is what 405 is
+   measured from, and it is the honest floor. Below it the case starts wrapping.
+
+   THE COST IS 26px OF HEIGHT AND IT IS WORTH IT, because the strip is the one
+   block in the bay whose height is not carrying a reading. Everything else that
+   came down — the sheets, the case, the well — came down by the same
+   proportion the face did, so the panel is the same panel at a smaller size
+   rather than a squeezed one. */
+.box.hatchbay{ width:460px; flex:0 0 460px; }
+/* The rhythm follows the face. 12/12 was set against a 520 face and reads as a
+   margin at 405; the bay is a dense instrument and its gutters are what say so. */
+.box.hatchbay > .box-body{ padding:10px; }
+.hb-body{ display:flex; flex-direction:column; gap:9px; }
 
 /* ── THE TAB STRIP, AND THE ENABLE ON THE SAME BAR ────────────────────────
    Six keys and a switch in one well. The keys share the width evenly because
    they are peers; the switch does not, because it is not one — it is what the
-   channel to its left says it is, a different question on the same bar. */
-.hb-tabs{ display:flex; align-items:center; gap:5px; padding:5px; width:100%; }
-.hb-tabs .pkey{
-  flex:1 1 0; min-width:0; padding:0 4px; height:26px;
+   channel to its left says it is, a different question on the same bar.
+
+   ── THREE ACROSS, TWICE, AND ALL DOWN THE SIDE ────────────────────────────
+   ONE BAR IS NOT THE SAME CLAIM AS ONE LINE. What the strip has to say is that
+   these six are ALTERNATIVES and the seventh is a reach — and a well with six
+   keys in it says that whether they are in one row or two. What one line
+   additionally said was "the bay is at least 420px wide", which is not a fact
+   about hatching.
+
+   ALL SPANS BOTH ROWS, past the same milled channel it always sat behind. That
+   is the load-bearing part: it is now the one key on the bar with a different
+   SHAPE, which is exactly what it is — not a seventh surface but the question
+   of how wide the next change goes, asked about all six at once. A half-height
+   ALL in the corner would read as the surface nobody named.
+
+   IT IS PLACED, NOT REFLOWED, and nothing in the markup moved. The channel and
+   ALL are pinned to columns 4 and 5 across both rows; grid places explicit
+   items first, so the six keys auto-flow into the three free columns and skip
+   the two occupied ones — 1,2,3 then 4,5,6, in DOM order, reading left to
+   right and top to bottom, which is the order the list is written in. Any host
+   that builds this strip the reference's way gets the two lines for free. */
+.piano.sm.hb-tabs{
+  display:grid; grid-template-columns:repeat(3,1fr) auto auto;
+  /* THE TWO ROWS ARE EXPLICIT, and that is not tidiness. `grid-row: 1 / span 2`
+     is spelled as a span rather than as `1 / -1` because a negative line counts
+     back from the end of the EXPLICIT grid — with the rows left implicit there
+     is only line 1 to count back to, so `-1` resolves to the start line and the
+     span collapses to one row. The channel and ALL would silently sit in the top
+     row with the keys flowing round them. */
+  grid-template-rows:repeat(2,24px); align-items:stretch;
+  column-gap:5px; row-gap:4px; padding:5px; width:100%;
+}
+/* `.piano.sm .pkey` IS THREE CLASSES AND THIS HAS TO BEAT IT. It was written as
+   `.hb-tabs .pkey`, which is two — so the bay's own size override lost to the
+   generic small-key rule on every property they share, and the strip has been
+   drawing 26px caps at 9px with 6px of padding while this rule asked for
+   something else. Silent, because both are plausible sizes for a tab. The
+   modifier goes on the same element as the size class it is overriding. */
+.piano.sm.hb-tabs .pkey{
+  min-width:0; padding:0 4px; height:auto; flex:none;
   font-size:8.5px; letter-spacing:.06em;
 }
-.hb-tabs .chan{ margin:0 4px; height:20px; }
+/* Full height of the well rather than a fixed 20: the channel is a CUT in the
+   plate, and a cut that stops short of the two rows it separates is a scratch. */
+.hb-tabs .chan{ grid-column:4; grid-row:1 / span 2; margin:0 3px; height:auto; }
 /* ALL SAYS ALL. A glyph was a quarter of the width and cost more than it
    saved: every other key on this bar is a WORD, so a lone mark among six names
    reads as a different KIND of thing rather than as the same kind with a wider
    reach — which is the one thing it must not say. It is narrow because it is
    set tight, not because it is abbreviated. */
 .hb-tabs .hb-all{
-  flex:0 0 auto; width:auto; height:26px; min-width:0; padding:0 9px; border-radius:7px;
+  grid-column:5; grid-row:1 / span 2;
+  width:auto; height:auto; min-width:0; padding:0 9px; border-radius:7px;
   font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.08em;
 }
 
@@ -2070,8 +2129,22 @@ input:focus-visible{ outline-offset:3px; }
   /* TALL ENOUGH FOR A SUBJECT. A 118px strip could only ever hold an even
      field of hatch, which shows the spacing and hides the thing hatching is
      actually for. A ball needs room to be a ball, and its shadow needs room
-     to leave it. */
-  height:196px; border-radius:4px; position:relative; overflow:hidden;
+     to leave it.
+
+     160 RATHER THAN 196, AND THE SHEET KEEPS ITS PROPORTION. This is the one
+     block in the bay where a pixel is a MILLIMETRE — the specimen is 1:1 — so
+     the honest way to state the change is in paper: each sheet was 63 × 52mm
+     and is now 47 × 42mm, and `KIT.scene` sizes the ball `min(w × .34,
+     h × .295)`, which is height-bound at both, so a 25mm ball where there was
+     a 30mm one. That is a smaller specimen and it is still a specimen: at the
+     1–4mm pitches this bay sets, a 25mm ball is ten to twenty strokes across,
+     which is what you are reading.
+
+     KEEPING 196 ON A 179-WIDE SHEET WOULD HAVE BEEN THE WORSE ANSWER, and it
+     is what a straight width cut would have left: the pair was landscape and
+     would have gone portrait, with the ball no bigger than it is here — the
+     height is what binds either way — and 36px of margin above and below it. */
+  height:160px; border-radius:4px; position:relative; overflow:hidden;
   background:var(--paper);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 8px rgba(0,0,0,.4);
 }
@@ -2129,7 +2202,14 @@ input:focus-visible{ outline-offset:3px; }
    these are alternatives is in the object rather than in the reading. The
    names are long — "Hand hatched" is not shortenable without lying about what
    it is — so the column is wider than the dial needs. */
-.hb-turret{ flex:0 0 178px; display:flex; flex-direction:column; gap:6px; }
+/* 136, NOT 178, AND IT IS MEASURED OFF THE LONGEST NAME. The dial's centre sits
+   at --rcx (−23px, out in the lobe) and `rotary` prints its labels at LAB_X=56
+   from that centre, so the column is used from x=33 rightward: "Hand random" at
+   9.5px monospace with .1em of tracking is ~85px of cap, ending at 118. The 60px
+   the column used to carry past that was the panel being built out to a strip
+   that no longer needs it. Anything longer than eleven characters wants this
+   number checked, not the panel widened. */
+.hb-turret{ flex:0 0 136px; display:flex; flex-direction:column; gap:6px; }
 .hb-sel.rotary{ flex:1 1 auto; height:132px; }
 
 /* the three knobs share one row */
@@ -2172,8 +2252,16 @@ input:focus-visible{ outline-offset:3px; }
    of the document, a hairline of light on the top edge, a dark one under it,
    and the specular OFF CENTRE because a centred highlight reads as a sticker.
    ─────────────────────────────────────────────────────────────────────────── */
-.pens{ display:flex; align-items:center; justify-content:space-between;
-       gap:4px; padding:6px 0 4px; height:46px; }
+/* THE CASE WRAPS RATHER THAN OVERFLOWS, and that is the one thing a rail of
+   fixed-width slots must be told. `.pencap` is `flex:0 0 22px` — it cannot
+   shrink — so on any face too narrow for the row the caps ran off the panel
+   instead of taking a second line. A pen case with two rows of slots is a pen
+   case; nine slots trailing off the edge of one is a bug. It still sits on one
+   line at the shipped width, and the height follows the content rather than
+   being declared, or a wrapped second row would be clipped by the number that
+   was right for one. */
+.pens{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+       gap:4px; padding:5px 0 3px; }
 /* GLASS SHADING WAS TRIED HERE AND REVERTED, once. Bright walls, a hard
    specular and the ink as a core — the recipe that is correct for a tube and
    is wrong for a 28px square, because at that size the two lit walls and the
@@ -2299,12 +2387,20 @@ input:focus-visible{ outline-offset:3px; }
    current panel is sad, so the two that do not belong in the rhythm of the
    four that matter go down a step, into their own well. */
 .hb-deep{
-  margin-top:2px; padding:7px 9px 9px; border-radius:8px;
+  margin-top:2px; padding:6px 9px 7px; border-radius:8px;
   background:linear-gradient(180deg,#131519,#191c20);
   box-shadow:inset 0 3px 7px rgba(0,0,0,.88), inset 0 -1px 0 rgba(255,255,255,.045),
              0 1px 0 rgba(255,255,255,.05);
 }
 .hb-deep .fader{ padding:1px 0; }
+/* THE SLOT IS THE ONE THING IN THIS WELL THAT DID NOT COME DOWN, and it was
+   tried: 30 → 26 looks like 8px of free height across the two rows. It is not
+   free. `.fticks` is absolutely positioned at top:25px, so at 26 the scale
+   hangs 3px out of its own slot and into the row below, and pulling it up to
+   clear that puts it under a 24px cap — which is the exact fault `.fslot` is
+   30px to avoid, written four rules above. A fader is a track, a cap AND a
+   scale; shrinking the housing without the other two is how a control loses
+   the third one silently. */
 .hb-deep .fader .flab{ flex:0 0 74px; color:#4e535b; }
 .hb-deep .bay-cap{ margin-bottom:5px; }
 

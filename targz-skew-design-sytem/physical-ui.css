@@ -2314,12 +2314,26 @@ input:focus-visible{ outline-offset:3px; }
 .drum-grip{
   flex:0 0 24px; position:relative; border-radius:0 7px 7px 0;
   cursor:ns-resize; touch-action:none;
+  /* THE TEETH ARE ON THE WHEEL, THE LIGHT IS IN THE ROOM. Two background
+     layers and only the first one moves: the knurl is a property of the
+     cylinder and travels with it, the crown highlight is where the lamp
+     happens to fall and stays put however far the thing has turned. Slide
+     both and it stops being a wheel and becomes a conveyor belt.
+
+     THE PITCH IS 3.2px AND NOT 3px ON PURPOSE. One detent rolls the surface
+     R·θ = 17.9px; at a 3px pitch that is exactly six teeth and the pattern
+     lands identical every time, so the only movement you would ever see is
+     during the tween. At 3.2 it lands two thirds of a tooth out, so a wheel
+     that has been turned once looks turned. */
   background:
     repeating-linear-gradient(180deg,
-      rgba(255,255,255,.17) 0 1px, rgba(0,0,0,.44) 1px 3px),
+      rgba(255,255,255,.17) 0 1px, rgba(0,0,0,.44) 1px 3.2px),
     linear-gradient(180deg,
       #191d22 0%, #232830 8%, #2f353e 20%, #3f4650 36%, #454d58 45%,
       #2e343c 63%, #191d22 85%, #0d1013 100%);
+  background-position:0 var(--roll, 0px), 0 0;
+  /* the same spring the names settle on — one mechanism, one motion */
+  transition:background-position .17s cubic-bezier(.22,1.7,.36,1);
   /* THE SLOT IT TURNS IN. The wheel was butted straight against the window,
      which reads as two panels side by side rather than as a cylinder coming up
      through a cut in the case. A wheel that protrudes has to protrude THROUGH

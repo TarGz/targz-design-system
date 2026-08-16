@@ -1,6 +1,15 @@
-export const version = '1.16.0';
+export const version = '1.17.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.17.0',
+    date: '2026-08-16',
+    changes: [
+      'THE WHEEL ROLLS WITH THE DRUM. It was a still picture of a knurl beside a list that moved, which is the one thing a wheel must not be — the surface travels R·θ per detent, 17.9px at an 18px pitch and 18°, so the teeth now move exactly as far as the names do, on the same spring the names settle on. A wheel and the thing it drives have to agree or neither is believable',
+      'ONLY THE TEETH MOVE. Two background layers and the split is the whole point: the knurl is a property of the CYLINDER and travels with it, the crown highlight is where the LAMP falls and stays put however far the thing has turned. Slide both and it stops being a wheel and becomes a conveyor belt',
+      'THE TOOTH PITCH IS 3.2px AND NOT 3px, on purpose. One detent rolls the surface 17.85px, which at a 3px pitch is very nearly six whole teeth — the pattern would land identical every time, so the only movement you could ever see was during the tween and a wheel turned five times would look untouched. At 3.2 it crosses 5.58 teeth and lands 1.85px out, two thirds of a tooth, so the motion reads AND the resting state remembers it',
+    ],
+  },
   {
     version: '1.16.0',
     date: '2026-08-16',

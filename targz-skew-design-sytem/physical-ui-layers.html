@@ -1545,6 +1545,11 @@ function drum({ options, index = 0, label, onChange }) {
 
   let i = index;
   const paint = () => {
+    /* AND THE WHEEL ROLLS WITH IT. The surface travels R·θ per detent, which
+       for an 18px pitch at 18° is 17.9px — near enough the row height that one
+       number does both, and the teeth move exactly as far as the names do,
+       which is the only way a wheel and the thing it drives can agree. */
+    grip.style.setProperty('--roll', `${(-i * DRUM_ROW).toFixed(1)}px`);
     items.forEach((it, n) => {
       const a = (n - i) * DRUM_STEP;
       /* Anything past 84° is on the far side of the drum and must not be

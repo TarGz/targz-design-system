@@ -1,6 +1,24 @@
-export const version = '1.24.0';
+export const version = '1.25.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.25.0',
+    date: '2026-08-17',
+    changes: [
+      'THE KNOB HAS FIVE LAYOUTS AND THEY ARE NOW WRITTEN DOWN. It had two, stack and row, documented nowhere, so the only way to find out row existed was to read the factory. SYSTEM §06 is all five side by side and live, and they fall out of two questions rather than a list: which way does it stack, and does it sit on its own plate. stack is vertical on bare metal, TILE is vertical on a proud plate, row is horizontal on a plate, compact is horizontal on bare metal, and bare ducks both',
+      'A TILE IS A MODULE RATHER THAN A CONTROL, which is what the plate buys: it is the edge that says where one channel stops and the next begins, so it is what a GRID of knobs wants where a column of them wants the row strip. Same plate recipe as the strip, because they are one decision in two orientations. And 270°, a lit arc and a pointer in every layout, with size, detents, bipolar, fmt, arc and .set() working in all five. Picking a layout is a question about the surroundings, never about the control',
+      'FIX — the row strip had no floor under its width. It is width:100%, so a parent narrower than the strip needs squeezes the row until the label and the value climb onto the dial, and what that looks like is a broken knob rather than a container that is too small. Its intrinsic width is 178px and it now refuses to go under it; the §06 demo cell had been giving it 150',
+      'And it was crushing the dial as well. The value arc sits at r=43 of 50 with a 3px glow in rendered pixels, so on a 40px knob the light spills about 1.6px outside the element; at 4px of padding against a 9px corner radius the plate edge cut diagonally through that spill. 9px of air and a 13px radius',
+      'The place bay opts out of the floor and takes the padding: it runs a narrower value window and shares a 318px box with a rotary, so 178 would push it out of its own panel. It had also overridden the padding straight back down to 4, so it had the same crush',
+      'COMPACT AND BARE EXIST BECAUSE CALLERS WERE FAKING THEM. The pen bank built a stack and then deleted .klab and .kval by hand, which is a caller that breaks the day the markup changes and which silently kept the stack\'s 46px and its column gap. It asks for layout:bare now',
+      'Both copies of the kit got the change, which is the first time the debt written into physical-ui-machine.html and physical-ui-kit.js has actually been paid rather than declared',
+      'THE SETTINGS DRAWER MOVED TO SYSTEM, whole: the aside, the tab, both panes and 383 lines of builder. A settings panel is not a design problem, it is a sorting problem — quantity to a knob, short list to a switch, long list to a drum, two exclusive things to paired keys, a computed value to a readout — and that sorting is the language, not the app. It is §07 there, live, with the spec and the tab mark it already had',
+      'The extract needed nothing from the page it left: every call in it resolves against physical-ui-kit.js, and the three suspicious identifiers turned out to be words in comments. Layers is ten sections now and the pointer it used to carry into SYSTEM §07 is gone with the section that carried it',
+      'THE NAV GOES WITH THE PAGE when the drawer opens. It is a sibling of .wrap and not a child, so the rule that only moved .wrap left the bar sitting still while everything under it slid, which reads as the bar belonging to the drawer',
+      'THE PORT SECTION IS GONE FROM THE MACHINE, and its own opening line said why: "nothing invented, and that is the section". A section on an app page whose entire content is a decision the language already made is a section on the wrong page. Both halves of that decision are already on SYSTEM: a long list is a drum, and a rotary has a hard ceiling of six because its fan is a fixed 80°',
+      'THE CONTROL STAYED, next to the console it is the way into. You open a port and then the tape talks, so the drum, CONNECT and the baud window sit on the same stage as the roll rather than in a section of their own. The machine is ten sections now',
+    ],
+  },
   {
     version: '1.24.0',
     date: '2026-08-17',

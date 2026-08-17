@@ -115,12 +115,7 @@
     <div id="serp" class="box handbay"></div>
   </div>
 
-  <h2>09 <span>/</span> The settings panel <span>·</span> which primitive, for each parameter</h2>
-  <p class="sub">
-    Nothing new invented. The design is <em>which primitive</em>: quantity → knob, short list → switch, long list → drum, two exclusive things → paired keys, computed value → readout.<br><br>The drawer is <a href="physical-ui-system.html">SYSTEM &sect;07</a>. This page is what goes <em>inside</em> one. Pull the tab on the right.
-  </p>
-
-  <h2>10 <span>/</span> Windows <span>·</span> close or reduce, never both</h2>
+  <h2>09 <span>/</span> Windows <span>·</span> close or reduce, never both</h2>
   <p class="sub">
     <b>Close or reduce, never both.</b> They answer the same question, so a title bar with both makes you choose between two ways of doing one thing, forever. One you can do without closes. One the app needs reduces. Drag by the title bar.
   </p>
@@ -130,7 +125,7 @@
     <div class="win-dock" id="windock"></div>
   </div>
 
-  <h2>11 <span>/</span> The bill</h2>
+  <h2>10 <span>/</span> The bill</h2>
   <p class="sub">
     What it buys and what it costs.
   </p>
@@ -173,31 +168,6 @@
 
   <footer>targz design system · skew · exploration 01 · physical-ui-layers.html</footer>
 </div>
-
-<!-- ── THE DRAWER ────────────────────────────────────────────────────────────
-     Outside .wrap on purpose: the wrap is what gets pushed, so the thing doing
-     the pushing cannot live inside it. -->
-<aside class="drawer" id="drawer" aria-label="Settings" aria-hidden="true">
-  <button class="drawer-tab" id="drawertab" type="button"
-          aria-controls="drawer" aria-expanded="false" aria-label="Open settings">
-    <span class="sliders"><i><b></b></i><i><b></b></i><i><b></b></i></span>
-  </button>
-  <!-- CANVAS FIRST. The sheet is the outer fact — how big it is and which way
-       up — and everything in SETTINGS is a mark made ON it. A panel ordered the
-       other way asks you to choose a pen before you have chosen the paper. -->
-  <!-- THE DRAWER'S OWN HEAD. Not a panel head — the two panes below have
-       those. This names what the drawer is and carries the one way out that
-       does not involve reaching back to the edge. -->
-  <div class="drawer-head">
-    <span class="jewel" style="--lyr:#FF6A00"></span>
-    <span class="nm">SETTINGS</span>
-  </div>
-  <div class="drawer-body">
-    <div id="setglobal" class="box"></div>
-    <div id="setpanel" class="box"></div>
-  </div>
-</aside>
-
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
    The icon set is Portrait-Typo's own — same paths, same stroke language.
@@ -858,9 +828,16 @@ function typeable(el, read, write) {
 
 function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
                 layout = 'stack', size, bipolar = false, detents = null, onChange }) {
-  const row = layout === 'row';
-  if (size == null) size = row ? 40 : 46;
-  const wrap = el('div', 'kwrap' + (row ? ' inline' : ''));
+  /* FOUR LAYOUTS, one control. They differ only in what is AROUND the dial:
+     stack (caption, dial, value), row (a param strip on a plate), compact
+     (dial and value, no plate) and bare (the dial alone). SYSTEM §06. */
+  const row     = layout === 'row';
+  const tile    = layout === 'tile';
+  const compact = layout === 'compact';
+  const bare    = layout === 'bare';
+  if (size == null) size = row ? 40 : compact || bare ? 34 : 46;
+  const wrap = el('div', 'kwrap' + (row ? ' inline' : tile ? ' tile'
+                                  : compact ? ' compact' : bare ? ' bare' : ''));
   const k = el('div', 'knob' + (bipolar ? ' bi' : ''));
   k.style.setProperty('--kd', size + 'px');
   k.style.setProperty('--arc', arc);
@@ -968,8 +945,10 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   typeable(val, () => v, set);
   // In a row the knob leads, because the knob is the control; stacked, the
   // caption leads, because three of them side by side need naming first.
-  if (row) wrap.append(k, el('div', 'klab', label), val);
-  else wrap.append(el('div', 'klab', label), k, val);
+  if (bare)         wrap.append(k);
+  else if (compact) wrap.append(k, val);
+  else if (row)     wrap.append(k, el('div', 'klab', label), val);
+  else              wrap.append(el('div', 'klab', label), k, val);   // stack and tile
   wrap.set = nv => set(nv, true);        // a host drives this control SILENTLY
   return wrap;
 }
@@ -4066,391 +4045,7 @@ function windowise(box, { title, mode = 'reduce', onClose } = {}) {
 windowise.top = 10;
 
 /* ══════════════════════════════════════════════════════════════════════════
-   THE DRAWER — a rack unit that slides out of the right edge
-
-   IT PUSHES RATHER THAN COVERS, and that is the whole reason it is worth
-   building. A drawer that lies over the page hides the thing you are adjusting
-   at the exact moment you adjust it — you slide it out, lose sight of the
-   drawing, change a number, slide it back, and only then find out what you
-   did. Pushing keeps both on screen: the page narrows, the panel arrives, and
-   every control you touch is next to the thing it changes.
-
-   THE TAB IS PART OF THE DRAWER, NOT PART OF THE PAGE. It rides on the
-   drawer's left edge, so when the drawer is away the tab is the one bump of it
-   still showing — a unit not quite pushed home, with the case's own bevel
-   round it. That is why there is no separate control floating in the corner:
-   the handle belongs to the thing it opens, and a handle that stays put while
-   its drawer moves is a handle for nothing.
-
-   MOTION IS ONE TRANSFORM ON EACH SIDE and nothing else animates. Two elements
-   sliding is a machine opening; six things easing at once is a website. Both
-   run on the same curve so they read as one movement — ease-out going in,
-   which is a drawer being pulled and stopping against its stop.
-   ══════════════════════════════════════════════════════════════════════════ */
-(function drawer() {
-  const el2 = document.getElementById('drawer');
-  const tab = document.getElementById('drawertab');
-  if (!el2 || !tab) return;
-  let open = false;
-
-  const set = to => {
-    open = to;
-    document.body.classList.toggle('drawer-open', open);
-    handles.forEach(h => {
-      h.setAttribute('aria-expanded', String(open));
-      h.setAttribute('aria-label', open ? 'Close settings' : 'Open settings');
-    });
-    el2.setAttribute('aria-hidden', String(!open));
-    SFX?.flip?.();
-  };
-  /* TWO HANDLES, ONE DRAWER. The tab on the edge and the specimen in section
-     09 are the same control shown twice — so they share a state and both keep
-     their own aria in step, rather than one of them being a picture of the
-     other that happens to work. */
-  const twin = document.getElementById('setopen');
-  const handles = [tab, twin].filter(Boolean);
-  handles.forEach(h => h.addEventListener('click', () => set(!open)));
-
-  /* THE TAB IS THE ONLY WAY OUT, AND IT SHOWS WHICH WAY IT IS POINTING. A
-     second × in the head was one control too many: two buttons a thumb's width
-     apart, both closing the same drawer, and the top one already had to be
-     there because it is what opened it.
-
-     So the mark on the tab IS the state. Shut, it is three sliders — what is
-     behind it. Open, the tracks fold into a cross and the handles go, because
-     what the same press will now do is close. One object, two positions, and
-     nothing on screen that is only ever half useful. */
-
-  /* ESCAPE CLOSES IT, and only when it is open — a global key handler that
-     fires on a shut drawer is a key that does nothing, which is worse than one
-     that is not bound at all because it trains you to expect nothing. */
-  addEventListener('keydown', e => {
-    if (e.key === 'Escape' && open && !e.target.closest('.kedit')) { e.preventDefault(); set(false); }
-  });
-
-  /* AND A CLICK ON THE PAGE PUTS IT AWAY. Going back to what you were doing
-     IS the instruction to close it — a drawer that makes you dismiss it first,
-     then repeat the click you already made, is charging you twice for one
-     decision.
-
-     THE PICKER IS THE EXCEPTION AND IT HAS TO BE. Its plate is a child of
-     <body>, not of the drawer, so a click on a swatch's own colour field is
-     technically "outside" — and closing the drawer under a picker the drawer
-     opened would be the panel eating its own popup.
-
-     POINTERDOWN, NOT CLICK, and captured: a control that rebuilds its own row
-     on release leaves the pointer over an element no longer in the drawer, so
-     by the time click fires the test for "was that inside" is being asked of a
-     node that has been thrown away. */
-  addEventListener('pointerdown', e => {
-    if (!open) return;
-    if (e.target.closest('.drawer, .picker, .tab-demo')) return;
-    set(false);
-  }, true);
-})();
-
-/* ══════════════════════════════════════════════════════════════════════════
-   09 · THE SETTINGS PANEL — a whole Tweakpane, rebuilt
-
-   NOTHING NEW IS INVENTED HERE. Every control is one already on this page, and
-   that is the point: the work of this section is not drawing, it is CHOOSING.
-   A pane of sliders and dropdowns hides that choice by having only two kinds
-   of thing in it, so every parameter comes out looking like every other one
-   and the panel tells you nothing about what you are actually setting.
-
-   THE FIVE DECISIONS, and they cover almost everything a generative tool has:
-
-     · A QUANTITY IS A KNOB.  Depth, count, gamma, margin — things with a
-       range you sweep looking for a value you cannot name in advance.
-     · A SHORT LIST IS A SWITCH.  Four or fewer named alternatives, all of
-       them worth seeing at once, is a rotary: it shows the whole set and
-       points at one.
-     · A LONG LIST IS A DRUM.  Fonts, paper sizes. Past six the switch stops
-       being aimable, so you show the neighbourhood and admit the rest is
-       round the back.
-     · TWO EXCLUSIVE THINGS ARE TWO KEYS that cannot both be down. Portrait
-       and landscape is not a dropdown; it is an interlock, and a bar that can
-       only hold one down says so without being read.
-     · A NUMBER THE APP WORKS OUT IS A READOUT.  Width and height come FROM
-       the paper size. A slider there is an invitation to fight the app for a
-       value it is going to overwrite, which is the worst control on any panel
-       and the most common.
-   ══════════════════════════════════════════════════════════════════════════ */
-(function settingsPanel() {
-  const box = document.getElementById('setpanel');
-  const st = {
-    depth: 400, count: 153,
-    speed: 1, gravity: 0, viewFrom: 0, plotFrom: 0,
-    font: 3, adv: false,
-    seed: 42, collide: 0.040, friction: 0.80, bounce: 0.050,
-  };
-
-  const head = el('div', 'box-head');
-  const lamp = el('span', 'jewel');
-  lamp.style.setProperty('--lyr', '#FF6A00');
-  /* THE DRAWER IS SETTINGS. This is a group inside it, so it cannot be called
-     SETTINGS too, and it cannot be called LETTERS either because one of its
-     own bays is. It is the letter drop: how deep the box, how many at once,
-     which way up, which font. DROP. */
-  head.append(lamp, el('span', 'nm', 'DROP'));
-  const body = el('div', 'box-body set-body');
-
-  /* a bay is a folder, and it says so with a cap and a hairline rather than
-     with a header bar you can collapse — five collapsed folders is a panel
-     that has hidden itself */
-  const bay = (cap, engIcon) => {
-    const b = el('div', 'bay set-bay');
-    b.append(el('div', 'bay-cap', `${engIcon || ''}<span>${cap}</span>`));
-    return b;
-  };
-
-  // ── BOX ──────────────────────────────────────────────────────────────────
-  const box1 = bay('BOX', ENG.spacing);
-  const kr = el('div', 'knobrow');
-  kr.append(
-    knob({ label: 'Depth', min: 50, max: 900, step: 10, value: st.depth, size: 44,
-           fmt: v => v + ' mm', onChange: v => { st.depth = v; } }),
-    knob({ label: 'At once', min: 1, max: 400, step: 1, value: st.count, size: 44,
-           onChange: v => { st.count = v; } }),
-  );
-  box1.append(kr);
-  /* DROP SPEED AND GRAVITY ARE FOUR NAMED THINGS EACH, so they are switches.
-     A dropdown here would hide three of four options to save a control's worth
-     of height, on a panel that has plenty. */
-  const twoUp = el('div', 'set-two');
-  twoUp.append(
-    wrapSel('DROP SPEED', rotary({ compact: true, options: ['Slow', 'Fast', 'Faster', 'Instant'],
-      index: st.speed, onChange: (_, i) => { st.speed = i; } })),
-    wrapSel('GRAVITY', rotary({ compact: true, options: ['Stack', 'Scatter', 'Fall', 'Float'],
-      index: st.gravity, onChange: (_, i) => { st.gravity = i; } })),
-  );
-  box1.append(twoUp);
-
-  // ── VIEW ─────────────────────────────────────────────────────────────────
-  const box2 = bay('VIEW', ENG.angle);
-  /* THESE TWO DO NOT PAIR. A half-width bay leaves about 60px for a name once
-     the dial and its leaders have taken theirs, and "Same as view" wants 75 —
-     so the label ran out of the panel entirely. Two switches sit side by side
-     when their names are SHORT and stack when they are not; the alternative is
-     abbreviating a name to fit a layout, which is the layout winning an
-     argument it should not have been in. */
-  /* SIDE BY SIDE, AND THE COPY GAVE WAY. "Same as view" and "Last drop" are
-     the only two names on this panel that could not share a row, and a whole
-     column of empty floor is a steep price for four extra letters. "As view"
-     and "Last" say the same thing in a bay half the height — the words are
-     serving the panel here, not the other way round.
-
-     What did NOT give way is which primitive it is. Shortening a name is a
-     copy edit; turning a switch into a dropdown to save the same space would
-     have been the panel losing the argument. */
-  const twoDn = el('div', 'set-two');
-  twoDn.append(
-    wrapSel('VIEW FROM', rotary({ compact: true, options: ['Front', 'Right', 'Top', 'Last'],
-      index: st.viewFrom, onChange: (_, i) => { st.viewFrom = i; } })),
-    wrapSel('PLOT FROM', rotary({ compact: true, options: ['As view', 'Front', 'Top'],
-      index: st.plotFrom, onChange: (_, i) => { st.plotFrom = i; } })),
-  );
-  box2.append(twoDn);
-  /* THE ONE DESTRUCTIVE THING GETS THE ONE LIT KEY. Everything else on this
-     panel changes a number you can change back; this throws a camera away. */
-
-  // ── LETTERS ──────────────────────────────────────────────────────────────
-  const box3 = bay('LETTERS', ENG.nib);
-  const fonts = ['Archivo', 'Bodoni Moda', 'Bowlby One', 'Cormorant', 'DM Serif',
-                 'Fraunces', 'Inter Tight', 'Playfair', 'Space Grotesk', 'Syne'];
-  box3.append(wrapSel('FONT', drum({ options: fonts, index: st.font,
-    label: 'Font', onChange: (_, i) => { st.font = i; } }), true));
-
-  /* ADVANCED IS A DRAWER, and the chevron is the one already on the layer
-     rows: a folder that hides is fine when what it hides is genuinely rare. */
-  const adv = el('div', 'set-adv');
-  const advHead = el('div', 'bay-cap set-advcap', '<span>ADVANCED</span>');
-  const chev = chevBtn(st.adv, 'the advanced settings', () => {
-    st.adv = !st.adv; adv.classList.toggle('open', st.adv);
-  });
-  advHead.append(chev);
-
-  /* WHAT IS ALLOWED BEHIND A CHEVRON. Not "the settings we ran out of room
-     for" — these four are the ones you set when the simulation is misbehaving
-     and then never touch again, which is the only honest reason to hide
-     anything. Everything above the drawer is something you change while
-     looking at the drawing. */
-  const advBody = el('div', 'set-advbody');
-
-  /* A SEED IS NOT A QUANTITY, so it does not get a knob. You do not sweep a
-     seed looking for a value — there is no "warmer" or "more"; 41 and 43 are
-     no more alike than 41 and 9000. It is an IDENTITY: a lit window you can
-     type an exact one into when you want to go back to a drawing you liked,
-     and a key that throws a new one when you do not care. A slider here is
-     the classic mistake, and it is the one control on a panel where dragging
-     is genuinely meaningless. */
-  const seedOut = el('div', 'lcd', String(st.seed));
-  typeable(seedOut, () => st.seed, v => { st.seed = Math.round(v); seedOut.textContent = st.seed; });
-  const roll = key('ROLL', { cls: 'act aux set-roll', title: 'Throw a new seed',
-    onClick: () => { st.seed = 1 + Math.floor(Math.random() * 99999); seedOut.textContent = st.seed; } });
-  const seedRow = el('div', 'set-seed');
-  seedRow.append(el('span', 'hb-optlab', 'SEED'), seedOut, roll);
-  advBody.append(seedRow);
-
-  /* THE THREE THAT ARE QUANTITIES GET KNOBS, and they share one row because
-     they are one subject: how the pieces behave when they hit each other. */
-  const phys = el('div', 'knobrow');
-  phys.append(
-    knob({ label: 'Collider', min: .005, max: .2, step: .005, value: st.collide, size: 40,
-           fmt: v => v.toFixed(3), onChange: v => { st.collide = v; } }),
-    knob({ label: 'Friction', min: 0, max: 1, step: .01, value: st.friction, size: 40,
-           fmt: v => v.toFixed(2), onChange: v => { st.friction = v; } }),
-    knob({ label: 'Bounce', min: 0, max: 1, step: .005, value: st.bounce, size: 40,
-           fmt: v => v.toFixed(3), onChange: v => { st.bounce = v; } }),
-  );
-  advBody.append(phys);
-  adv.append(advHead, advBody);
-
-  body.append(box1, box2, box3, adv);
-  box.append(head, body);
-
-  /* ── THE SECOND PANE ─────────────────────────────────────────────────── */
-  const gbox = document.getElementById('setglobal');
-  const PAPER = { A5: [14.8, 21.0], A4: [21.0, 29.7], A3: [29.7, 42.0],
-                  A2: [42.0, 59.4], A1: [59.4, 84.1], A0: [84.1, 118.9],
-                  Custom: null };
-  const sizes = Object.keys(PAPER);
-  /* SQUARE IS AN ORIENTATION, NOT A FORMAT. It was in the format list, which
-     put it in the wrong argument entirely: A2 is a quantity of paper and
-     portrait is what you do with it, and "Square" answers the second question
-     while sitting in the list that answers the first. Squaring an A2 is still
-     an A2 — you have cut it down, and how much of it is left is exactly the
-     kind of thing you then want to nudge. So it joins the interlock, and it
-     brings its own knob. */
-  const gst = { paper: 3, orient: 'landscape', margin: 5, w: 42.0, h: 42.0, side: 42.0 };
-
-  const ghead = el('div', 'box-head');
-  const glamp = el('span', 'jewel');
-  glamp.style.setProperty('--lyr', '#4CE04C');
-  /* IT IS THE CANVAS. "Global" says where a setting reaches — everywhere —
-     which is a fact about scope and not about what the panel is FOR. This one
-     is a sheet of paper: a size, a way up and a margin. Naming a panel after
-     its scope is how you end up with two panels called Global and neither of
-     them findable. */
-  ghead.append(glamp, el('span', 'nm', 'CANVAS'),
-               el('div', 'lcd dim', 'v9.5.0'));
-  const gbody = el('div', 'box-body set-body');
-
-  const gb = bay('SHEET', ENG.spacing);
-  /* THE NAME AND THE SIZE ON ONE LINE. "A4" alone is a name you have to
-     already know, and a drum row is a wide strip with one short word in it —
-     so the row was mostly empty AND mostly useless at the same time. The
-     millimetres are the part you are actually choosing between; the letter is
-     just what it is called. Custom says what it is instead of a size, because
-     it has not got one yet. */
-  const fmtLabels = sizes.map(n => {
-    const d = PAPER[n];
-    return d ? `${n} · ${d[0].toFixed(1)} × ${d[1].toFixed(1)}` : `${n} · set below`;
-  });
-  const fmtDrum = drum({ options: fmtLabels, index: gst.paper,
-    label: 'Paper format', onChange: (_, i) => { gst.paper = i; sheet(); } });
-  gb.append(wrapSel('FORMAT', fmtDrum, true));
-
-  /* PORTRAIT AND LANDSCAPE ARE AN INTERLOCK. Two things, exactly one true, and
-     a bar that can only hold one key down says that without being read. */
-  const orient = el('div', 'piano sm set-orient');
-  const ORI = ['portrait', 'landscape', 'square'];
-  const oKeys = ['PORTRAIT', 'LANDSCAPE', 'SQUARE'].map((n, i) => pkey(n, {
-    down: ORI[i] === gst.orient,
-    title: `${n} — ${ORI[i] === 'square' ? 'cut square, and set the side' : 'the sheet as it comes'}`,
-    onClick: () => {
-      gst.orient = ORI[i];
-      oKeys.forEach((k, m) => k.classList.toggle('is-down', ORI[m] === gst.orient));
-      sheet();
-    },
-  }));
-  orient.append(...oKeys);
-  gb.append(orient);
-
-  /* WIDTH AND HEIGHT ARE NOT INPUTS. They come from the format and the
-     orientation, and a slider on a derived number is an invitation to fight
-     the app for a value it is about to overwrite. Lit windows, and they move
-     when the two controls above them do — which is the panel showing its own
-     arithmetic instead of asking you to do it. */
-  /* ── THREE KNOBS, ALWAYS, ON ONE LINE ────────────────────────────────────
-     WIDTH, HEIGHT AND MARGIN ARE ONE ROW because they are one question: how
-     big is the sheet and how much of it do you leave alone. They were two lit
-     windows, a Side knob and a pair of Custom knobs swapping in and out of the
-     same slot — three layouts for three states, and the panel changed SHAPE as
-     you worked. A control that moves house depending on the mode is a control
-     you have to find again every time.
-
-     SO THE KNOBS ARE ALWAYS THERE AND THE MODE CHANGES WHAT THEY DO. On a
-     named format they REPORT: pick A2 and they swing to 42.0 and 59.4, because
-     that is what the sheet is. Turn one and you have said the sheet is
-     something else — so the format rolls to Custom and keeps your number. The
-     act of turning is the act of claiming, exactly as typing into them is.
-
-     ON SQUARE THEY ARE TIED. Turn either and both follow, because a square has
-     one dimension and two knobs that could disagree about it would be offering
-     you a way to make a square that is not one. */
-  let syncing = false;
-  const claim = (which, v) => {
-    if (syncing) return;
-    if (gst.orient === 'square') { gst.side = v; sheet(); return; }
-    const d = dimsNow();
-    gst.w = which === 'w' ? v : d.w;
-    gst.h = which === 'h' ? v : d.h;
-    gst.paper = customIdx;
-    fmtDrum.set(customIdx);
-    sheet();
-  };
-  const wKnob = knob({ label: 'Width', min: 5, max: 150, step: .1, value: gst.w, size: 42,
-                       fmt: v => v.toFixed(1), onChange: v => claim('w', v) });
-  const hKnob = knob({ label: 'Height', min: 5, max: 150, step: .1, value: gst.h, size: 42,
-                       fmt: v => v.toFixed(1), onChange: v => claim('h', v) });
-  const mKnob = knob({ label: 'Margin', min: 0, max: 40, step: .5, value: gst.margin, size: 42,
-                       fmt: v => v.toFixed(1), onChange: v => { gst.margin = v; } });
-  const dimRow = el('div', 'knobrow set-dimrow');
-  dimRow.append(wKnob, hKnob, mKnob);
-  gb.append(dimRow, el('div', 'set-units', '<span>cm</span><span>cm</span><span>mm</span>'));
-
-  const customIdx = sizes.indexOf('Custom');
-  const dimsNow = () => {
-    const spec = PAPER[sizes[gst.paper]];
-    if (!spec) return { w: gst.w, h: gst.h };
-    if (gst.orient === 'square') return { w: gst.side, h: gst.side };
-    return gst.orient === 'landscape' ? { w: spec[1], h: spec[0] } : { w: spec[0], h: spec[1] };
-  };
-
-  let lastPaper = gst.paper;
-  const sheet = () => {
-    const spec = PAPER[sizes[gst.paper]];
-    const isCustom = !spec;
-    /* CUSTOM ALREADY IS AN ORIENTATION — two free knobs make any shape, so
-       asking which way up it goes is a question with no answer. */
-    orient.classList.toggle('inert', isCustom);
-    if (gst.orient === 'square' && !isCustom && gst.paper !== lastPaper) {
-      gst.side = Math.min(spec[0], spec[1]);          // biggest square out of the new sheet
-    }
-    lastPaper = gst.paper;
-    const d = dimsNow();
-    /* SILENT WRITE-BACK. .set() fires onChange, and onChange claims Custom —
-       so a plain sync would turn every format change into a claim and the
-       format list would be unusable. */
-    syncing = true; wKnob.set(d.w); hKnob.set(d.h); syncing = false;
-  };
-  sheet();
-
-  gbody.append(gb);
-  gbox.append(ghead, gbody);
-
-  /* one caption, one control, one column — the label is engraved on the case
-     above the thing rather than floating beside it in a form row */
-  function wrapSel(cap, ctl, tall) {
-    const w = el('div', 'set-sel' + (tall ? ' tall' : ''));
-    w.append(el('div', 'set-cap', cap), ctl);
-    return w;
-  }
-})();
-
-/* ══════════════════════════════════════════════════════════════════════════
-   10 · WINDOWS — the demonstration
+   09 · WINDOWS — the demonstration
 
    Three panels on a floor. TWO OF THEM CLOSE and one REDUCES, and which is
    which is the argument: the two that close are things you consult — a colour

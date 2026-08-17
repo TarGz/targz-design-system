@@ -1175,13 +1175,47 @@ input:focus-visible{ outline-offset:3px; }
    knob strip was silently inheriting its plate, its hover and its grain.) */
 .kwrap.inline{
   flex-direction:row; align-items:center; gap:12px; width:100%;
-  padding:4px 8px 4px 4px; border-radius:9px;
+  /* THE DIAL IS BIGGER THAN ITS BOX. The value arc sits at r=43 of 50 with a
+     3px glow in rendered pixels, so on a 40px knob the light spills about
+     1.6px outside the element. At 4px of padding against a 9px corner radius
+     the plate's own edge was cutting diagonally through that spill, which is
+     what a knob crammed into a slot looks like. 9px of air and a radius that
+     follows the knob rather than fighting it. */
+  padding:9px 13px 9px 10px; border-radius:13px;
+  /* A STRIP HAS AN INTRINSIC WIDTH AND MUST NOT GO UNDER IT. width:100% with
+     nothing holding the floor lets a narrow parent squeeze the row until the
+     label and the value climb onto the dial, which reads as a broken knob
+     rather than as a container that is too small. */
+  min-width:178px;
   background:linear-gradient(180deg,#25282c,#1c1e21);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.65),
              0 1px 2px rgba(0,0,0,.5);
 }
 .kwrap.inline .klab{ flex:1; text-align:left; }
 .kwrap.inline .kval{ min-width:58px; }
+
+/* TILE — the stack on a PROUD PLATE, which makes it a module rather than a
+   control. Same plate recipe as the inline strip, because they are the same
+   decision in two orientations: a lit hairline on top, a dark one under, and a
+   short cast shadow. The plate is the edge that says where one channel stops
+   and the next begins, so this is what a GRID of knobs wants. */
+.kwrap.tile{
+  gap:7px; padding:11px 13px 10px; border-radius:11px;
+  background:linear-gradient(180deg,#25282c,#1c1e21);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.65),
+             0 2px 4px rgba(0,0,0,.55);
+}
+
+/* COMPACT — dial and value, no caption, and no plate under it either: a strip
+   earns its plate by being one of several in a column, and a single control
+   sitting inside a row that already names it does not. */
+.kwrap.compact{ flex-direction:row; align-items:center; gap:9px; }
+.kwrap.compact .kval{ min-width:52px; }
+
+/* BARE — the dial alone. Not a stack with its parts deleted: a caller that
+   removes .klab and .kval by hand is a caller that has to be updated when the
+   markup changes, and there were two of those before this existed. */
+.kwrap.bare{ gap:0; }
 .klab{
   font-family:var(--font); font-size:8.5px; letter-spacing:.16em; text-transform:uppercase;
   color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09); line-height:1;
@@ -1415,7 +1449,12 @@ input:focus-visible{ outline-offset:3px; }
    stacked blocks is one. */
 .placebay{ display:flex; align-items:center; gap:6px; min-height:116px; }
 .placebay .knobcol{ flex:1 1 auto; min-width:0; }
-.placebay .kwrap.inline{ gap:9px; padding:4px 6px 4px 4px; }
+/* the place bay is tighter than the default strip, but not tighter than the
+   glow: same 9px of vertical air, less on the sides */
+/* THE PLACE BAY IS THE ONE TIGHT CALLER, so it opts out of the floor: it
+   already runs a narrower value window and it shares a 318px box with a
+   rotary, so 178 would push it out of its own panel. */
+.placebay .kwrap.inline{ gap:9px; padding:9px 9px 9px 8px; min-width:0; }
 .placebay .kwrap.inline .kval{ min-width:52px; }
 
 .rotary{ position:relative; height:116px; flex:0 0 106px; --rcx:-5px; }
@@ -2692,8 +2731,13 @@ input:focus-visible{ outline-offset:3px; }
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{ --drawer-w:404px; --drawer-tab:38px; --drawer-ease:cubic-bezier(.22,.68,.24,1); }
 
-.wrap{ transition:transform .28s var(--drawer-ease); will-change:transform; }
-body.drawer-open .wrap{ transform:translateX(calc(-1 * var(--drawer-w))); }
+.wrap,
+.navdock{ transition:transform .28s var(--drawer-ease); will-change:transform; }
+/* THE NAV GOES WITH THE PAGE. It is a sibling of .wrap, not a child, so a
+   rule that only moves .wrap leaves the bar sitting still while everything
+   under it slides, which reads as the bar being part of the drawer. */
+body.drawer-open .wrap,
+body.drawer-open .navdock{ transform:translateX(calc(-1 * var(--drawer-w))); }
 
 .drawer{
   position:fixed; top:0; right:0; bottom:0; width:var(--drawer-w); z-index:200;
@@ -2889,7 +2933,7 @@ body.drawer-open .sliders i:nth-child(3),
 /* MOTION IS A PREFERENCE. Everything still works with it off — the drawer
    arrives, it just does not travel. */
 @media (prefers-reduced-motion: reduce){
-  .wrap, .drawer, .sliders i, .sliders i b{ transition:none; }
+  .wrap, .navdock, .drawer, .sliders i, .sliders i b{ transition:none; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

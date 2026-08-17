@@ -464,11 +464,33 @@ function typeable(el, read, write) {
   });
 }
 
+/* FOUR LAYOUTS, one control. They differ only in what is around the dial and
+   how it is stacked, because the dial is never the thing in question:
+
+     stack    caption, dial, value in a column, on bare metal. The default,
+              and what three knobs side by side need, since a row of them has
+              to be named before it can be read.
+     tile     the same column on a PROUD PLATE. A module rather than a control:
+              what a grid of them wants, because the plate is the edge that
+              says where one channel stops and the next begins.
+     row      a PARAM STRIP on its own small plate: dial, caption, value on one
+              line. A column of these reads as a rack of channels.
+     compact  dial and value, no caption. For when the row around it already
+              says what the number is.
+     bare     the dial alone. For when the value has its own window somewhere
+              else, which is what the pen bank does.
+
+   Every one of them is the same dial at the same angles; picking one is a
+   question about the SURROUNDINGS, never about the control. */
 function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
                 layout = 'stack', size, bipolar = false, detents = null, onChange }) {
-  const row = layout === 'row';
-  if (size == null) size = row ? 40 : 46;
-  const wrap = el('div', 'kwrap' + (row ? ' inline' : ''));
+  const row     = layout === 'row';
+  const tile    = layout === 'tile';
+  const compact = layout === 'compact';
+  const bare    = layout === 'bare';
+  if (size == null) size = row ? 40 : compact || bare ? 34 : 46;
+  const wrap = el('div', 'kwrap' + (row ? ' inline' : tile ? ' tile'
+                                  : compact ? ' compact' : bare ? ' bare' : ''));
   const k = el('div', 'knob' + (bipolar ? ' bi' : ''));
   k.style.setProperty('--kd', size + 'px');
   k.style.setProperty('--arc', arc);
@@ -576,8 +598,10 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   typeable(val, () => v, set);
   // In a row the knob leads, because the knob is the control; stacked, the
   // caption leads, because three of them side by side need naming first.
-  if (row) wrap.append(k, el('div', 'klab', label), val);
-  else wrap.append(el('div', 'klab', label), k, val);
+  if (bare)         wrap.append(k);
+  else if (compact) wrap.append(k, val);
+  else if (row)     wrap.append(k, el('div', 'klab', label), val);
+  else              wrap.append(el('div', 'klab', label), k, val);   // stack and tile
   wrap.set = nv => set(nv, true);        // a host drives this control SILENTLY
   return wrap;
 }

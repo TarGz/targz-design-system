@@ -90,25 +90,17 @@
     <div id="job" class="box wide"></div>
   </div>
 
-  <h2>08 <span>/</span> The port <span>·</span> a long list is a drum</h2>
+  <h2>08 <span>/</span> The tape <span>·</span> the console as a roll, not a text area</h2>
   <p class="sub">
-    Nothing invented, and that is the section. Past about six names a rotary stops being aimable, so the list goes on a drum. CONNECT latches, because being connected is something you <em>are</em>.
-  </p>
-  <div class="stage">
-    <div class="stage-note">drum · latching key · jewel dark until alive</div>
-    <div id="port" class="box"></div>
-  </div>
-
-  <h2>09 <span>/</span> The tape <span>·</span> the console as a roll, not a text area</h2>
-  <p class="sub">
-    The log comes up from the bottom, newest at the tear edge, older lines darker because they are further into the machine. It is the only place here where colour is data. Type into the slot and press SEND.
+    The log comes up from the bottom, newest at the tear edge, older lines darker because they are further into the machine. It is the only place here where colour is data. Open the port, then type into the slot and press SEND.
   </p>
   <div class="stage">
     <div class="stage-note">newest at the tear edge · colour is the direction</div>
+    <div id="port" class="box"></div>
     <div id="tape" class="box xwide"></div>
   </div>
 
-  <h2>10 <span>/</span> The status rail <span>·</span> the chassis, and it is not a control</h2>
+  <h2>09 <span>/</span> The status rail <span>·</span> the chassis, and it is not a control</h2>
   <p class="sub">
     The app’s status bar wears the same borders and hovers as its toolbars, so it reads as a row of things you might click. None of them do anything. Milled into the case instead.
   </p>
@@ -117,7 +109,7 @@
     <div id="rail"></div>
   </div>
 
-  <h2>11 <span>/</span> The bill</h2>
+  <h2>10 <span>/</span> The bill</h2>
   <p class="sub">
     What the second document changes about the argument.
   </p>
@@ -770,7 +762,8 @@ buildDro(document.getElementById('droB'), { stacked: true, demo: true }); // abo
     /* THE KNOB SETS THE HEIGHT, the window reports it, and the window takes a
        typed value — three ways in, one number, and no popover anywhere. */
     const kn = knob({
-      label: '', min: -30, max: 10, step: 0.1, value: M.pen[id], size: 34,
+      label: `${label} height`, layout: 'bare',
+      min: -30, max: 10, step: 0.1, value: M.pen[id], size: 34,
       /* THE DETENT IS AT THE DEFAULT. The app's heights come out of
          localStorage with 5 / 0 / −2 as the isNaN fallback, so those numbers
          already exist; what does not exist there is any way BACK to them once
@@ -782,9 +775,6 @@ buildDro(document.getElementById('droB'), { stacked: true, demo: true }); // abo
       fmt: v => v.toFixed(1),
       onChange: v => { M.pen[id] = v; paint(); },
     });
-    kn.style.cssText = 'gap:0';
-    kn.querySelector('.klab').remove();
-    kn.querySelector('.kval').remove();
 
     const paint = () => { win.textContent = M.pen[id].toFixed(1); };
     paint();
@@ -1092,7 +1082,7 @@ const SEGS = 40;
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════
-   09 · THE PORT
+   08 · THE PORT, which is the console's way in
    ══════════════════════════════════════════════════════════════════════════ */
 (function buildPort() {
   const box = document.getElementById('port');
@@ -1147,7 +1137,7 @@ const SEGS = 40;
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════
-   10 · THE TAPE
+   08 · THE TAPE
    ══════════════════════════════════════════════════════════════════════════ */
 (function buildTape() {
   const head = el('div', 'box-head');
@@ -1192,11 +1182,11 @@ const SEGS = 40;
   });
 
   print('PenPlotter Control · skew build', 'sys');
-  print('select a port in §08 and press CONNECT', 'in');
+  print('select a port above and press CONNECT', 'in');
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════
-   11 · THE STATUS RAIL
+   09 · THE STATUS RAIL
    ══════════════════════════════════════════════════════════════════════════ */
 (function buildRail() {
   const rail = el('div', 'rail');

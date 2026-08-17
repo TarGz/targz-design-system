@@ -34,7 +34,7 @@
       no:   '00',
       kick: 'the language',
       line: 'The <b>parts</b>, and the rules that make them one language.',
-      parts: ['tokens', 'the light', 'primitives', 'factories', 'nav bar', 'traps'],
+      parts: ['tokens', 'the light', 'primitives', 'factories', 'nav bar', 'settings', 'traps'],
     },
     {
       file: 'physical-ui-layers.html',
@@ -44,7 +44,7 @@
       kick: 'exploration 01 · an app',
       line: 'The <b>drawing</b> side. Portrait-Typo rebuilt as hardware, down to a hatch bay that '
           + 'plots in real millimetres.',
-      parts: ['layer dock', 'viewport', 'launchpad', 'hatch bay', 'drawer', 'windows'],
+      parts: ['layer dock', 'viewport', 'launchpad', 'hatch bay', 'filling', 'windows'],
     },
     {
       file: 'physical-ui-machine.html',

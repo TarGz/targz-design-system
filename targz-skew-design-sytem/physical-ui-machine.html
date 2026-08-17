@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skew · Machine — the targz language at the plotter</title>
+<link rel="stylesheet" href="physical-ui.css">
+<link rel="stylesheet" href="physical-ui-machine.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <p class="kicker">targz-skew-design-system · exploration 02 · not adopted</p>
+    <h1>Machine —<br>the same language, at the plotter</h1>
+    <p class="lede">
+      Exploration 01 took the <b>drawing</b> side of targz — layers, viewport, hatch, Launchpad —
+      and rebuilt it as hardware. This is the other half: <b>TargzPenPlotterCtrl</b>, the app that
+      actually drives the machine. The anatomy is the real one, read off
+      <code>app/index.html</code> and <code>css/commanddeck.css</code>: the position strip, the jog
+      grid, the pen heights, the three overrides, the run block, the alarm banner, the job card,
+      the port picker, the console and the status bar.
+    </p>
+    <p class="lede">
+      <b>The page is a comparison, not a redesign.</b> Every control here is asked the same
+      question first — <em>does the kit already have this part?</em> Most of them, it does: a step
+      size is a piano bar, a port list is a drum, an override is a knob, a log's command line is a
+      slot, a panel is a box with a head. <b>Nine things it did not have</b>, and each one is
+      here because no existing primitive could say it: a coordinate under glass, a direction pad,
+      a key that carries its own height, a stick, a guarded destructive key, the mushroom, an
+      annunciator, a segment meter and a status rail.
+    </p>
+    <p class="lede">
+      Everything works, and everything is wired to everything else. Jog the pad and the readout
+      moves, the tape prints the G-code and the queue on the rail counts it. Trip a limit and the
+      run block dies. Press the mushroom and the whole panel does what the machine does.
+    </p>
+  </div>
+
+  <div class="warn">
+    <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    <div>
+      <b><code>TargzPenPlotterCtrl</code> is read-only here and untouched</b>, and so is
+      <code>index.html</code>. The shared parts were lifted out of exploration 01 into
+      <code>physical-ui-kit.js</code> <em>verbatim</em> — that page still carries its own inline
+      copy, which is a debt this document is declaring rather than paying.
+      <br><br>
+      <b>One thing did move.</b> The jog section — the keypad, the stick, and all of their CSS —
+      was §11 of <code>physical-ui-layers.html</code> and lived in <code>physical-ui.css</code>.
+      Nothing in Portrait-Typo jogs anything, so it was in the wrong document; it is §02 and §03 here now,
+      whole, and rewired to this page's machine. <code>physical-ui.css</code> is back to carrying
+      only what both documents use.
+    </div>
+  </div>
+
+  <h2>01 <span>/</span> What the kit already had <span>·</span> and what it did not</h2>
+  <p class="sub">
+    The whole exercise in one table. Left, the control as the app ships it; middle, whether the
+    skew kit could already draw it; right, what it is made of here. <b>Twenty-three controls,
+    fourteen of them free.</b> A language is only a language if the second thing you build with
+    it is mostly parts from the first.
+  </p>
+
+  <table class="inv">
+    <thead>
+      <tr><th>In the app</th><th>Kit</th><th>Made of</th></tr>
+    </thead>
+    <tbody>
+      <tr class="have"><td>Panel section + title</td><td>had it</td><td><code>.box</code> · <code>.box-head</code> · <code>.nm</code></td></tr>
+      <tr class="have"><td>Tabs (MACHINE / SETTINGS)</td><td>had it</td><td><code>pkey()</code> on a <code>.piano</code> bar — the page switcher</td></tr>
+      <tr class="have"><td>Step size 0.1 / 1 / 10 / 100</td><td>had it</td><td><code>.piano.sm</code> — mechanical interlock, one key down</td></tr>
+      <tr class="have"><td>Units MM / INCH</td><td>had it</td><td>the same bar, two keys</td></tr>
+      <tr class="have"><td>Serial port <code>&lt;select&gt;</code></td><td>had it</td><td><code>drum()</code> — a long list is a drum, decided in 01</td></tr>
+      <tr class="have"><td>CONNECT button</td><td>had it</td><td><code>key({latch:true})</code> — it <em>is</em> something, so it stays down</td></tr>
+      <tr class="have"><td>Connection dot</td><td>had it</td><td><code>.jewel</code> · <code>.pilot</code> when dead</td></tr>
+      <tr class="have"><td>Command line</td><td>had it</td><td><code>.slot</code> — the Launchpad's search field</td></tr>
+      <tr class="have"><td>Utility buttons (PROBE Z, GO TO XY0…)</td><td>had it</td><td><code>key()</code>, momentary — they <em>did</em> something</td></tr>
+      <tr class="have"><td>PARK AT END toggle</td><td>had it</td><td><code>swBtn()</code> — a backlit switch</td></tr>
+      <tr class="have"><td>Layer list, tick to plot</td><td>had it</td><td>the layer dock, unchanged — exploration 01 §01</td></tr>
+      <tr class="have"><td>Layer colour swatch</td><td>had it</td><td><code>.pipe</code> light pipe + <code>openPicker()</code></td></tr>
+      <tr class="have"><td>Abort confirm modal</td><td>had it</td><td><code>windowise()</code> — a panel that closes</td></tr>
+      <tr class="have"><td>Tool rail (pick / brush / box / range)</td><td>had it</td><td><code>.strip</code> of latching keys — the nav bar, stood up</td></tr>
+      <tr class="new"><td>Position strip · X Y Z</td><td>missing</td><td><code>.dro</code> — a coordinate under glass, one per axis</td></tr>
+      <tr class="new"><td>Jog grid + HOME</td><td>missing</td><td><code>.jog-grid</code> — the arrangement is the value</td></tr>
+      <tr class="new"><td>— <em>(no stick in the app)</em></td><td>missing</td><td><code>.stick</code> — the continuous half of the same job</td></tr>
+      <tr class="new"><td>PEN UP / DOWN / PUMP</td><td>missing</td><td><code>.penbank</code> — a key carrying the height it goes to</td></tr>
+      <tr class="new"><td>ABORT</td><td>missing</td><td><code>.guard</code> — a hinged cover, the only new mechanism</td></tr>
+      <tr class="new"><td>E-Stop (a ribbon button today)</td><td>missing</td><td><code>.estop</code> — a latching mushroom in a collar</td></tr>
+      <tr class="new"><td>Alarm banner</td><td>missing</td><td><code>.annun</code> — eight dark legends, one lights</td></tr>
+      <tr class="new"><td>Progress bar + job stats</td><td>missing</td><td><code>.meter</code> — segments, because a fill cannot tick</td></tr>
+      <tr class="new"><td>Status bar</td><td>missing</td><td><code>.rail</code> — milled into the case, nothing to press</td></tr>
+    </tbody>
+  </table>
+
+  <h2>02 <span>/</span> Option A <span>·</span> jog by keys</h2>
+  <p class="sub">
+    The first of two answers to one question, and each answer gets its own section because each is
+    a whole arrangement rather than a control — a jog control is only judgeable next to the numbers
+    it moves, so the readout is here, above it, where it sits in the real window.
+    <br><br>
+    <b>A DRO is not a card, it is a window.</b> The app draws each axis as a card — a coloured
+    letter, a 26px number, a WCS caption and a thin bar — which is the right information drawn as
+    <em>content</em>, three panels of text in a row competing with the toolbars either side. Here
+    the number lives behind glass, the axis colour is a <em>lamp</em> rather than a tint on the
+    digits (a tinted coordinate is a coordinate you read slower), and SET&nbsp;0 sits on the bezel
+    rather than in the glass, because it is a control and the glass is a display. <b>The strip
+    under each number is a travel, not a fill</b> — an engraved channel with a stop cut at each end
+    and a lit pip riding it, because a coordinate is a place and not a quantity.
+    <br><br>
+    <b>Keys are discrete:</b> one press, one step, and the step is a number you chose in advance —
+    which is what you want when you are 0.1mm off and you know it. <b>The pad is laid out like the
+    axes, not like a list.</b> X runs across, Y runs up, HOME sits in the middle because it is the
+    only key that goes somewhere absolute, and it is recessed rather than raised because it is a
+    destination and not a nudge. <b>Z stands on its own column</b>: a different axis in a different
+    plane, and the one that ends a job badly.
+  </p>
+  <div class="stage">
+    <div class="stage-note">discrete · one press, one step</div>
+    <div class="jogopt">
+      <div id="droA" class="box jogbox"></div>
+      <div id="jog" class="box jogbox"></div>
+    </div>
+  </div>
+
+  <h2>03 <span>/</span> Option B <span>·</span> jog by stick</h2>
+  <p class="sub">
+    The same job, the other way, and the same readout above it so the two sections are read against
+    each other rather than against nothing. <b>Everything below the XY control is identical</b> —
+    same readout, same step bar, same units, same utility keys — because only the XY control is in
+    question, and if the two arrangements differed everywhere you could not tell which difference
+    was the one being argued about.
+    <br><br>
+    <b>A stick is continuous:</b> it has a direction and an amount, and it keeps going while you
+    hold it — which is what you want when you are 40mm off and do not care about the number.
+    Neither replaces the other, and a machine with only one of them is annoying in a way you can
+    predict.
+    <br><br>
+    <b>Z is not on the stick.</b> Two axes is what a stick has: push it and you get a bearing and a
+    distance at once, which is exactly what X and Y are together. Z stays two keys you have to
+    mean. <b>HOME is not in the well either</b> — a rapid to machine zero triggered by the same
+    thumb that is jogging is the one input you must not be able to make by accident — so it sits
+    above the socket, the biggest key on the panel, because it is the first thing you press in a
+    session and the last.
+  </p>
+  <div class="stage">
+    <div class="stage-note">continuous · direction and amount, while you hold it</div>
+    <div class="jogopt">
+      <div id="droB" class="box jogbox"></div>
+      <div id="jogstick" class="box jogbox"></div>
+    </div>
+  </div>
+
+  <h2>04 <span>/</span> The pen bank <span>·</span> a key that carries its own height</h2>
+  <p class="sub">
+    The one control in this app that exists nowhere else in targz, and the one the current UI
+    splits in two: a button that sends the pen to a height, plus a little pencil beside it that
+    opens a popover to change that height. Two objects, one fact, and the number you are editing
+    is not visible while you edit it.
+    <br><br>
+    <b>One part.</b> The height is a lit window set into the key's own face, the knob beside it
+    turns the height, and the window takes a typed value on double-click — which is the popover
+    deleted rather than restyled. Press a key and the readouts in §02 and §03 go there.
+  </p>
+  <div class="stage">
+    <div class="stage-note">3 heights · window in the cap · double-click to type</div>
+    <div id="pen" class="box wide"></div>
+  </div>
+
+  <h2>05 <span>/</span> The overrides <span>·</span> a percentage is a quantity, so it is a knob</h2>
+  <p class="sub">
+    Three vertical sliders in the app, each with a −/+ pair, a readout and a RESET underneath: five
+    controls per value, three times over. Exploration 01's rule settles it in one line —
+    <b>a quantity is a knob, and only a length keeps a track</b>. 100% is not a length.
+    <br><br>
+    <b>The detent is what the RESET key was for.</b> A notch cut at 100 means the finger finds
+    unity on the way past without aiming, and it clacks when it drops in. RESET stays anyway,
+    because slamming back to 100 with the job running is the gesture the part exists for and no
+    knob is fast at it — that is the one honest thing sliders had, and it is one key rather than
+    an extra track.
+  </p>
+  <div class="stage">
+    <div class="stage-note">1–500% · notch at 100 · shift = fine</div>
+    <div id="ovr" class="box"></div>
+  </div>
+
+  <h2>06 <span>/</span> Run <span>·</span> and the one that hurts goes under a cover</h2>
+  <p class="sub">
+    START, PAUSE, STOP and ABORT sit in one block today, the same size, distinguished by tint.
+    ABORT drops the controller into ALARM: motion stops where it is, the job is gone, and the way
+    back is an unlock and a re-home. <b>Colour is not a guard.</b> It is one pixel of pointer
+    travel from the two keys you press fifty times a session.
+    <br><br>
+    <b>A hinged cover is a guard</b>, and it is the only genuinely new <em>mechanism</em> on this
+    page: two deliberate actions, the first reversible, the second impossible until the first has
+    happened. It shuts itself after six seconds, the way a real one is sprung.
+    <br><br>
+    <b>The mushroom is mounted, not posted.</b> It is not in the app at all — it is a ribbon
+    button called E-Stop. The first pass here drew it at 104px on a yellow hazard plate with
+    EMERGENCY STOP printed across the cap, which is a picture of an e-stop rather than one: a real
+    cap carries no text, the stripes belong to an enclosure door, and at twice the size of
+    anything else on the panel it read as loud rather than as important. It is a 58px cap in a
+    machined collar now, seated with the rest of the hardware, with the legend cut into the panel
+    beside it. It is still the biggest cap here and it still latches.
+  </p>
+  <div class="stage">
+    <div class="stage-note">flip the cover · the mushroom latches · twist to release</div>
+    <div id="run" class="box"></div>
+  </div>
+
+  <h2>07 <span>/</span> The annunciator <span>·</span> which one tripped</h2>
+  <p class="sub">
+    The app has one alarm: a red bar that appears with a sentence in it. A machine does not have
+    one alarm — it has a dozen inputs, and the question at the moment it halts is <em>which</em>.
+    A sentence answers that in prose, one at a time, and only while it is showing.
+    <br><br>
+    <b>Every legend is engraved and dark, permanently.</b> So the panel is a map you have already
+    learnt by the time you need it, and the one that lights is the one that tripped. A lamp panel
+    that only draws its active cells teaches you nothing and reads as an empty box. <b>New alarms
+    flash until acknowledged</b>, then hold: a lamp that came on while you were looking away and
+    one that has been on ten minutes are different facts. Press any legend to trip it.
+  </p>
+  <div class="stage">
+    <div class="stage-note">8 legends · dark by default · UNLOCK acknowledges</div>
+    <div id="annun" class="box xwide"></div>
+  </div>
+
+  <h2>08 <span>/</span> The job meter <span>·</span> segments, because a fill cannot tick</h2>
+  <p class="sub">
+    A progress bar is a rectangle that grows, and the thing it is worst at is the question actually
+    being asked of it at 2am: <em>is it still moving</em>. A fill creeping 0.3% a minute is
+    indistinguishable from a fill that stopped.
+    <br><br>
+    <b>Segments quantise it.</b> The lit count is a number you can read from the doorway and the
+    next one arriving is an <em>event</em> — same data, and it ticks. The percentage keeps its own
+    glass beside it, because segments are for watching and a number is for reporting. Start a job
+    in §06 and this fills.
+  </p>
+  <div class="stage">
+    <div class="stage-note">40 segments · the head one is hot · 4 engraved fields</div>
+    <div id="job" class="box wide"></div>
+  </div>
+
+  <h2>09 <span>/</span> The port <span>·</span> a long list is a drum</h2>
+  <p class="sub">
+    Nothing invented, and that is the section. The app replaced its <code>&lt;select&gt;</code>
+    with a custom button and a popup menu — a good fix for a flat UI, and a decision exploration 01
+    had already made for a different list: <b>past about six names, a rotary stops being aimable
+    and the list goes on a drum</b>. Roll it. CONNECT latches, because being connected is
+    something you <em>are</em>.
+  </p>
+  <div class="stage">
+    <div class="stage-note">drum · latching key · jewel dark until alive</div>
+    <div id="port" class="box"></div>
+  </div>
+
+  <h2>10 <span>/</span> The tape <span>·</span> the console as a roll, not a text area</h2>
+  <p class="sub">
+    The log comes <em>up</em> from the bottom, the newest line is at the tear edge, and what has
+    gone past is still there and darker because it is further into the machine. That is what a
+    machine log has always physically been, and a dark scrolling div is the one part of this app
+    that had no object at all behind it.
+    <br><br>
+    <b>It is also the only place on the panel where colour is data</b> — sent lines in the
+    phosphor, replies dimmer, errors red, notices in the lamp colour. Three states in one column
+    and no icons. Type into the slot and press SEND, or jog the pad in §02 and watch it print.
+  </p>
+  <div class="stage">
+    <div class="stage-note">newest at the tear edge · colour is the direction</div>
+    <div id="tape" class="box xwide"></div>
+  </div>
+
+  <h2>11 <span>/</span> The status rail <span>·</span> the chassis, and it is not a control</h2>
+  <p class="sub">
+    State, port, baud, queue, machine position. The app's status bar is drawn with the same
+    borders, paddings and hover colours as its toolbars, so it reads as a row of things you might
+    click; none of them do anything. <b>Here it is milled into the case.</b> Engraved cells, a
+    hairline between them, no cap on anything — you can see there is nothing to press.
+  </p>
+  <div class="stage" style="display:block">
+    <div class="stage-note">read-only by construction</div>
+    <div id="rail"></div>
+  </div>
+
+  <h2>12 <span>/</span> The bill</h2>
+  <p class="sub">
+    What this second document changes about the argument, given the first one already made it.
+  </p>
+  <div class="bill">
+    <div class="card good">
+      <h3>What the machine half genuinely buys</h3>
+      <ul>
+        <li><b>The language survived a second app, and mostly for free.</b> Fourteen of
+            twenty-two controls needed no new part. That is the only real test of a design
+            language and it is the one result here worth keeping.</li>
+        <li><b>A guarded key is a safety property, not a style.</b> ABORT and DELETE LAYER are the
+            two irreversible things in targz and both are currently a red tint. A cover cannot be
+            hit by accident, and it is eleven lines of CSS.</li>
+        <li><b>The annunciator is strictly more information than the banner</b>, in less space,
+            and it is legible before anything is wrong — you learn the panel while it is dark.</li>
+        <li><b>A machine is the one place skeuomorphism is not a costume.</b> The plotter has a
+            physical E-stop, physical limit switches and a physical pen carriage; a UI that draws
+            them as objects is agreeing with the thing on the desk, not decorating.</li>
+        <li><b>The dark chassis stops being a problem here.</b> The objection in 01 was that the
+            apps' canvas is paper-white and the panel would fight the drawing. The control app's
+            job is a machine, not a drawing — and it is looked at in a room, from a distance,
+            usually late.</li>
+      </ul>
+    </div>
+    <div class="card bad">
+      <h3>What it costs</h3>
+      <ul>
+        <li><b>It is a second copy of the kit.</b> <code>physical-ui-kit.js</code> and the inline
+            copy in <code>physical-ui-layers.html</code> are identical today and will not stay
+            identical. One of them has to become the other's import.</li>
+        <li><b>The real app is Metro4 and jQuery.</b> Nothing here is a re-skin of a shipping
+            widget the way the layer dock was — it is the app's <em>anatomy</em> rebuilt, so
+            adopting any of it means replacing the widget underneath first.</li>
+        <li><b>A DRO at 27px in a 158px window</b> is bigger than the app's whole position strip
+            per axis. The panel gets more readable and the window gets less full.</li>
+        <li><b>Everything here has to survive being wrong.</b> A drawing tool that draws a bad
+            hatch wastes paper. A control panel that mis-reports ALARM state costs a plot, a pen,
+            or a gantry — which is a testing burden the first exploration never had.</li>
+        <li><b>The mushroom is a lie unless it is wired.</b> A software E-stop that draws itself
+            as the real part and is one <code>socket.emit</code> away from doing nothing is worse
+            than a plain red button. If it does not stop the machine, it must not look like the
+            thing that does.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>targz design system · exploration 02 · physical-ui-machine.html · read from TargzPenPlotterCtrl, which is unchanged</footer>
+</div>
+
+<script src="physical-ui-kit.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   THE MACHINE PAGE. Every part comes from physical-ui-kit.js; what is written
+   here is the WIRING — which is the point, because a panel of controls that do
+   not drive each other is a picture of a panel.
+
+   ONE STATE OBJECT, and every section reads it. Jog writes position, position
+   writes the rail, run writes the meter, the annunciator kills run, and every
+   motion prints a line on the tape. That is what the real app does, and it is
+   the only way to find out whether the parts can carry it.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── ONE ICON THIS PAGE ADDS ────────────────────────────────────────────────
+   HOME. The key was borrowing `ICON.settle` — an arrow dropping onto a line,
+   which is the mark for "park" or "land" and says nothing about going
+   anywhere. It was then the axis triad with the three arrowheads turned in to
+   face the origin, which is the technically correct drawing of what the key
+   DOES and the wrong drawing for what the key IS: six marks converging on one
+   point, at 15px, on the most-pressed cap on the panel. The most-pressed cap
+   is the one you must never have to look at twice.
+
+   So it is the house, and the house wins on the only ground that matters here
+   — it is read rather than decoded. Five strokes, no interior detail, legible
+   at any size this panel will ever use it at. The precision it gives up is
+   recovered by the key sitting on a machine panel, next to a jog pad, above a
+   Z column: nothing here could plausibly mean any other home.
+
+   It lives in this page and not in physical-ui-kit.js on purpose — the kit is
+   a verbatim extract of exploration 01 and a machine-only glyph does not
+   belong in it. Same stroke language: 24 grid, no fill, round joins. */
+const ICON_ORIGIN = svg(
+  // the roof, as one unbroken line from eave to eave
+  '<path d="M3 10.6 12 3.4l9 7.2"/>' +
+  // the two walls, dropped from under the eaves to the floor
+  '<path d="M5.4 12.4V20a1 1 0 0 0 1 1h11.2a1 1 0 0 0 1-1v-7.6"/>' +
+  // and the door, because a house with no opening is a shed
+  '<path d="M9.9 21v-5.1a1 1 0 0 1 1-1h2.2a1 1 0 0 1 1 1V21"/>');
+
+/* the roots `engage` walks up to when it re-finds a rebuilt button */
+window.ENGAGE_ROOTS = '#droA, #droB, #jog, #jogstick, #pen, #ovr, #run, #annun, #job, #port, #tape';
+
+/* ── the machine ────────────────────────────────────────────────────────── */
+const M = {
+  pos:   { X: 0, Y: 0, Z: 0 },           // work coordinates, always mm
+  limit: { X: [0, 594], Y: [0, 420], Z: [-30, 10] },   // A2 bed, 40mm of Z
+  units: 'mm',
+  step:  1,
+  pen:   { up: 5, down: 0, pump: -2 },
+  ovr:   { jog: 100, feed: 100, tool: 100 },
+  port:  1,
+  connected: false,
+  run:   'idle',                          // idle | running | paused | alarm
+  progress: 0,
+  line:  0,
+  queue: 0,
+  elapsed: 0,
+  alarms: {},                             // key -> true while lit
+  acked: false,
+};
+
+const PORTS = ['/dev/tty.usbmodem1101', '/dev/tty.usbserial-A50285BI', '/dev/tty.SLAB_USBtoUART',
+               '/dev/tty.wchusbserial14230', '/dev/tty.Bluetooth-Incoming-Port', '/dev/cu.usbmodem2201',
+               'ws://plotter.local:8000', '— no port —'];
+
+const ALARMS = [
+  ['xlimit', 'X LIMIT',  'hard stop',    '#FF2D2D'],
+  ['ylimit', 'Y LIMIT',  'hard stop',    '#FF2D2D'],
+  ['zlimit', 'Z LIMIT',  'hard stop',    '#FF2D2D'],
+  ['estop',  'E-STOP',   'latched',      '#FF2D2D'],
+  ['hold',   'FEED HOLD','paused',       '#FFC400'],
+  ['door',   'DOOR',     'open',         '#FFC400'],
+  ['probe',  'PROBE',    'triggered',    '#FFC400'],
+  ['home',   'NOT HOMED','position lost', '#FF6A00'],
+];
+
+/* ── unit conversion happens at the GLASS, never in the state ───────────── */
+const toU  = mm => M.units === 'in' ? mm / 25.4 : mm;
+const fmtP = mm => toU(mm).toFixed(M.units === 'in' ? 4 : 3);
+
+const listeners = [];
+const onChange = fn => listeners.push(fn);
+const changed  = () => listeners.forEach(f => f());
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE TAPE — declared first because everything else prints on it
+   ══════════════════════════════════════════════════════════════════════════ */
+const tapeBox = document.getElementById('tape');
+let tapeRoll = null;
+const CLOCK0 = 41_100;                 // 11:25:00, so the first line is not 00:00:00
+let tick = 0;
+const stamp = () => {
+  const s = CLOCK0 + Math.floor(tick += 1.7);
+  return `${String(Math.floor(s / 3600) % 24).padStart(2, '0')}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+};
+function print(msg, kind = 'out') {
+  if (!tapeRoll) return;
+  const l = el('div', `tape-line ${kind}`);
+  l.append(el('span', 't', stamp()), el('span', 'm', msg));
+  tapeRoll.append(l);
+  while (tapeRoll.children.length > 60) tapeRoll.firstElementChild.remove();
+  tapeRoll.scrollTop = tapeRoll.scrollHeight;
+}
+/* A COMMAND GETS AN ANSWER, because half of what a log tells you is whether
+   the other end is still there. `ok` on a delay, an error if the controller
+   is asleep — the same two replies grbl actually gives. */
+function send(gcode) {
+  if (!M.connected) { print(gcode, 'out'); print('error: port not open', 'err'); return; }
+  print(gcode, 'out');
+  M.queue++; changed();
+  setTimeout(() => { M.queue = Math.max(0, M.queue - 1); print('ok', 'in'); changed(); }, 260);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   02 · THE POSITION STRIP
+
+   ONE BUILDER, TWO PANELS, AND NO LONE SPECIMEN. There was a third — the
+   readout on its own stage, wide, three across, the shape the app ships — and
+   it is deleted. A control shown by itself is a specimen: it proves the part
+   exists and tells you nothing about whether it works, because what you
+   actually have to judge is the ARRANGEMENT. The readout now appears only
+   where it really lives, directly above the control that drives it, once per
+   option. Both are built here and both register their own repaint against the
+   same `M`, so they cannot drift: type into one and the other follows in the
+   same frame.
+   ══════════════════════════════════════════════════════════════════════════ */
+function buildDro(box, { stacked = false, demo: withDemo = false } = {}) {
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'POSITION'));
+  const wcs = el('div', 'lcd', 'G54');
+  head.append(wcs);
+  box.append(head);
+
+  const body = el('div', 'box-body');
+  /* ACROSS when it is a strip along the top of a window, DOWN when it is a
+     panel in a column. Same three cells either way — the only thing that
+     changes is which way the flex runs, because that is the only thing that
+     actually differs between the two situations. */
+  const strip = el('div', stacked ? 'dro-col' : null);
+  if (!stacked) strip.style.cssText = 'display:flex;gap:9px';
+
+  const AX = [['X', '#EF4444'], ['Y', '#22C55E'], ['Z', '#5B6CFF']];
+  const cells = {};
+  AX.forEach(([ax, col]) => {
+    const d = el('div', 'dro');
+    d.style.setProperty('--ax', col);
+    const h = el('div', 'dro-head');
+    h.append(el('span', 'dro-lab', ax));
+    const num = el('div', 'dro-num', '0.000');
+    const bar = el('div', 'dro-bar', '<i></i>');
+    const z = el('button', 'dro-zero', 'SET 0');
+    z.type = 'button';
+    z.title = `Zero ${ax} here`;
+    z.addEventListener('click', () => {
+      send(`G10 P0 L20 ${ax}0`);
+      M.pos[ax] = 0; changed();
+    });
+    clicky(z, SFX.tap, SFX.lift);
+    d.append(h, num, bar, z);
+    /* THE COORDINATE IS TYPEABLE, same as every other lit window in the kit.
+       A DRO you can type into is how you tell the machine where it already is
+       — which is what SET 0 does for one value, generalised. */
+    typeable(num, () => fmtP(M.pos[ax]), v => {
+      M.pos[ax] = M.units === 'in' ? v * 25.4 : v;
+      changed();
+    });
+    cells[ax] = { d, num, fill: bar.querySelector('i') };
+    strip.append(d);
+  });
+
+  /* FEED, and it is not a fourth axis: it is what the machine is doing, not
+     where it is. Same glass, half the size, no lamp of its own. It rides with
+     each column, because each column is a complete arrangement and a complete
+     arrangement includes the machine's own feed. Two DEMO keys on one page is
+     not a duplicate: it is the same key on two panels being compared. */
+  const feed = el('div', null);
+  feed.style.cssText = 'display:flex;align-items:center;gap:9px';
+  const feedOut = el('div', 'readout', '0');
+  feedOut.style.minWidth = '74px';
+  feed.append(el('span', 'cut', 'FEED'), feedOut, el('span', 'tagcut', 'mm/min'));
+
+  /* DEMO — a momentary key that drives the strip, so the readout can be seen
+     doing the one thing a readout is for. It is on THIS panel and not in the
+     page furniture because it is a machine input like any other. */
+  const demo = key('DEMO', { cls: 'act aux', title: 'Hold: drive the axes' });
+  demo.style.cssText = 'height:26px;padding:0 12px;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:.12em';
+  let raf = null, t0 = 0;
+  const spin = ts => {
+    if (!t0) t0 = ts;
+    const t = (ts - t0) / 1000;
+    M.pos.X = 297 + Math.sin(t * 1.1) * 240;
+    M.pos.Y = 210 + Math.cos(t * 0.7) * 170;
+    M.pos.Z = M.pen.down;
+    M.feed = 2400 + Math.round(Math.sin(t * 3) * 900);
+    changed();
+    raf = requestAnimationFrame(spin);
+  };
+  const stop = () => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = null; t0 = 0; M.feed = 0; changed();
+  };
+  demo.addEventListener('pointerdown', () => { if (!raf) raf = requestAnimationFrame(spin); });
+  demo.addEventListener('pointerup', stop);
+  demo.addEventListener('pointerleave', stop);
+  feed.append(demo);
+
+  body.append(strip);
+  if (withDemo) body.append(feed);
+  box.append(body);
+
+  onChange(() => {
+    'XYZ'.split('').forEach(ax => {
+      const c = cells[ax], [lo, hi] = M.limit[ax];
+      c.num.querySelector('input') || (c.num.textContent = fmtP(M.pos[ax]));
+      /* the pip's PLACE on the travel, inset by its own half-width at both
+         ends so it stops flush with the end stop rather than half outside it */
+      const t = Math.max(0, Math.min(1, (M.pos[ax] - lo) / (hi - lo)));
+      c.fill.style.left = `calc(${t * 100}% + ${(0.5 - t) * 5}px)`;
+      c.d.classList.toggle('live', !!raf || M.run === 'running');
+    });
+    feedOut.textContent = M.feed || 0;
+    wcs.textContent = M.units === 'in' ? 'G54 · IN' : 'G54';
+  });
+}
+
+buildDro(document.getElementById('droA'), { stacked: true, demo: true }); // above the keys
+buildDro(document.getElementById('droB'), { stacked: true, demo: true }); // above the stick
+
+/* ══════════════════════════════════════════════════════════════════════════
+   03 · JOG — a keypad and a stick, both driving the same machine
+   ══════════════════════════════════════════════════════════════════════════ */
+(function buildJog() {
+  /* TWO PANELS, ONE SET OF ROWS. Step, units and the utility keys are built by
+     the same function twice, because they are the same question in both — and
+     they are wired to the same `M`, so changing STEP on one panel changes it on
+     the other. Two panels with two step sizes would be two machines. */
+  const heads = [];
+  const head = (box, name) => {
+    const h = el('div', 'box-head');
+    const lcd = el('div', 'lcd', '1.000 mm');
+    heads.push(lcd);
+    h.append(el('span', 'nm', name), lcd);
+    box.append(h);
+  };
+
+  const jogTo = (ax, dir) => {
+    const [lo, hi] = M.limit[ax];
+    const nv = Math.max(lo, Math.min(hi, M.pos[ax] + dir * M.step));
+    /* HITTING A SOFT LIMIT IS AN EVENT, not a clamp. The app clamps silently,
+       which is how you end up believing the machine moved. */
+    if (nv === M.pos[ax]) { trip(ax.toLowerCase() + 'limit'); return; }
+    M.pos[ax] = nv;
+    send(`$J=G91 ${ax}${dir * M.step} F${Math.round(30 * M.ovr.jog)}`);
+    changed();
+  };
+
+  const home = () => {
+    send('$H');
+    M.pos.X = M.pos.Y = 0; M.pos.Z = M.pen.up;
+    clear('home'); clear('xlimit'); clear('ylimit'); clear('zlimit');
+    changed();
+  };
+
+  /* ── everything below the XY control, built once and used twice ───────── */
+  const STEPS = [0.1, 1, 10, 100];
+  const sBars = [], uBars = [];
+
+  const commonRows = body => {
+    /* STEP — the page switcher, one size down. One key down, mechanically. */
+    const sbar = el('div', 'piano sm jog-bar');
+    sbar.setAttribute('role', 'radiogroup');
+    const skeys = STEPS.map(s => pkey(String(s), {
+      down: s === M.step,
+      onClick: () => { M.step = s; changed(); },
+    }));
+    sbar.append(...skeys);
+    sBars.push(skeys);
+    body.append(el('div', 'bay-cap', '<span>STEP</span>'), sbar);
+
+    /* UNITS — the same bar, two keys. The state stays mm; only the glass changes. */
+    const ubar = el('div', 'piano sm jog-bar');
+    ubar.setAttribute('role', 'radiogroup');
+    const ukeys = ['mm', 'in'].map(u => pkey(u.toUpperCase(), {
+      down: u === M.units,
+      onClick: () => { M.units = u; send(u === 'mm' ? 'G21' : 'G20'); changed(); },
+    }));
+    ubar.append(...ukeys);
+    uBars.push(ukeys);
+    body.append(el('div', 'bay-cap', '<span>UNITS</span>'), ubar);
+
+    /* THE UTILITIES ARE MOMENTARY KEYS AND NOTHING ELSE. Three things that DID
+       something, so they spring back — the distinction 01 built the nav bar to
+       make, applied without a new part. */
+    const util = el('div', 'jog-util');
+    [['PROBE Z', 'G38.2 Z-40 F60'],
+     ['GO TO XY0', 'G90 G0 X0 Y0'],
+     ['CHECK SIZE', 'G90 G0 X0 Y0 X594 Y420 X0 Y0']].forEach(([t, g]) => {
+      const k = key(t, { cls: 'act aux jog-u', title: g });
+      k.addEventListener('click', () => send(g));
+      util.append(k);
+    });
+    body.append(el('div', 'bay-cap', '<span>UTILITY</span>'), util);
+  };
+
+  /* ── A · THE KEYPAD ───────────────────────────────────────────────────── */
+  (function pad() {
+    const box = document.getElementById('jog');
+    head(box, 'JOG');
+    const body = el('div', 'box-body jog-body');
+
+    const grid = el('div', 'jog-grid');
+    const cell = (cls, label, title, fn) => {
+      const k = key(label, { cls: 'jog-k ' + cls, title, onClick: fn });
+      grid.append(k);
+      return k;
+    };
+    cell('yp', 'Y+', 'Jog Y positive', () => jogTo('Y', 1));
+    cell('zp', 'Z+', 'Jog Z positive', () => jogTo('Z', 1));
+    cell('xm', 'X−', 'Jog X negative', () => jogTo('X', -1));
+    /* THE SAME GLYPH ON BOTH HOMES. The keypad's was text alone while the
+       stick's carried the origin mark, which made one key look like a
+       different function on the other panel — and these two panels exist to be
+       compared, so anything that differs between them is read as an argument.
+       Stacked here rather than beside, because the cell is 44px square. */
+    cell('home', `${ICON_ORIGIN}<span>HOME</span>`, 'Go to machine zero', home)
+      .classList.add('jog-home');
+    cell('xp', 'X+', 'Jog X positive', () => jogTo('X', 1));
+    cell('ym', 'Y−', 'Jog Y negative', () => jogTo('Y', -1));
+    cell('zm', 'Z−', 'Jog Z negative', () => jogTo('Z', -1));
+    body.append(grid);
+    commonRows(body);
+    box.append(body);
+  })();
+
+  /* ── B · THE STICK ────────────────────────────────────────────────────── */
+  (function stick() {
+    const box = document.getElementById('jogstick');
+    head(box, 'JOG · STICK');
+    const body = el('div', 'box-body jog-body');
+
+    const rig = el('div', 'stick-rig');
+    const st2 = el('div', 'stick');
+    /* THE CAP IS EXTRUDED — twelve slices of barrel under one top face, so the
+       thing tilts like a cylinder instead of like a coin. See the note in
+       physical-ui-machine.css; nothing here drives them, they are geometry. */
+    const SLICES = 16;
+    const body3d = el('span', 'stick-body',
+      Array.from({ length: SLICES }, (_, i) => `<i style="--i:${i + 1}"></i>`).join(''));
+    const cap = el('div', 'stick-cap');
+    /* four dimples on the cross — the thumb finds X and Y by feel, and they
+       sit in the same order as the chevrons and the letters outside the well */
+    const dots = ['n', 'e', 's', 'w'].map(d => `<span class="stick-dot ${d}"></span>`).join('');
+    cap.append(body3d, el('span', 'stick-top', `<span class="stick-face">${dots}</span>`));
+    /* seat → ball → collar → cap, and that is the assembly order of the real
+       part as well as the paint order. `.stick` has perspective but NOT
+       preserve-3d, so its children are flattened and painted in sequence: the
+       ball sits in the socket, the collar rim laps over its edge, and the cap
+       swings above it. */
+    st2.append(el('span', 'stick-seat'), el('span', 'stick-ball'),
+               el('span', 'stick-mouth'), el('span', 'stick-ring'), cap);
+    ['n', 'e', 's', 'w'].forEach(d => st2.append(el('span', 'stick-ch ' + d)));
+    /* the letters outside the bearings — N is Y+ because Y+ is away from you,
+       which is the same statement the keypad makes with its layout */
+    const AXL = { n: 'Y+', s: 'Y−', w: 'X−', e: 'X+' };
+    Object.entries(AXL).forEach(([d, t]) => st2.append(el('span', 'stick-ax ' + d, t)));
+    rig.append(st2);
+
+    /* Z IS NOT ON THE STICK. Two axes is what a stick has — push it and you get
+       a bearing and a distance, both at once, which is exactly what X and Y
+       are together. Z is the one that ends a job badly, so it stays two keys
+       you have to mean. */
+    const zcol = el('div', 'stick-z');
+    zcol.append(el('div', 'bay-cap', '<span>Z</span>'),
+                key('Z+', { cls: 'jog-k', title: 'Jog Z positive', onClick: () => jogTo('Z', 1) }),
+                key('Z−', { cls: 'jog-k', title: 'Jog Z negative', onClick: () => jogTo('Z', -1) }));
+    rig.append(zcol);
+
+    /* HOME — the most-pressed key on the panel, and this panel shipped without
+       one. It goes ABOVE the well, not below: it is the first thing you press
+       in a session and the last, and a panel reads top down. Big, lit, and on
+       its own — see the note in the CSS for why it is not in the well. */
+    const hrow = el('div', 'stick-home');
+    hrow.append(key(`${ICON_ORIGIN}<span>HOME</span>`, {
+      cls: 'stick-homekey', title: 'Rapid to machine zero', onClick: home }));
+    body.append(hrow, rig);
+
+    /* ── THE 3D ─────────────────────────────────────────────────────────────
+       IT IS A REAL TILT, not a picture that slides. The cap is a plane in a
+       perspective, rotated about X and Y by how far off centre your pointer
+       is, so the far edge foreshortens and the near edge comes at you. That is
+       the whole difference between an object that pivots in a socket and a
+       sticker being dragged across a circle: a slide has no far edge.
+
+       AND THE TILT IS THE VALUE. A stick reports a bearing and an amount, and
+       both are already in the drag — angle from centre and distance from it,
+       clamped at the rim. Nothing is quantised, because a stick that moved in
+       steps would be a keypad with a worse hit area.
+
+       ON THIS PAGE IT DRIVES THE REAL AXES. In the layers document it counted
+       up an invented `dist`, because that document had no machine in it. Here
+       there is one: the deflection is a FEED RATE in mm/s, integrated per
+       frame into M.pos, clamped at the same soft limits the keypad hits — so
+       the two panels are provably doing the same job to the same machine,
+       which is the only way the comparison means anything. */
+    /* THE PIVOT IS DEEP, AND THAT IS THE WHOLE ANSWER TO "IT LEANS BUT IT DOES
+       NOT MOVE". Travel and tilt are not two settings — they are locked
+       together by one number, the shaft: travel = SHAFT × sin(MAX). A pivot
+       46px under the cap is a short stub, and a short stub can only buy travel
+       by turning a long way, which is why the first pass had to run to 26° and
+       still only moved 20px. It was a lid being rolled over on its own rim.
+
+       A REAL STICK'S BALL IS UNDER THE PANEL, not under the cap — 40 or 50mm
+       down, at the bottom of a rod. The top of a long rod SWEEPS: it goes a
+       long way sideways and barely turns while it does, which is exactly what
+       your hand feels and exactly what the eye reads as a joystick rather than
+       as a dial. So the rod is 130px now and the limit is 9°, and the same one
+       formula gives 20px of travel — more than the 26° version had — with a
+       third of the rotation and a 1.6px dip.
+
+       Nothing was added to do this. There is no separate slide term and no
+       fudge factor: the arc is still just the rotation, and the only edit is
+       where its centre is. */
+    const R = 34, MAX = 9, VMAX = 90;       // px, degrees, mm/s at full deflection
+    let held = false, vx = 0, vy = 0, raf = 0, last = 0, said = 0;
+    const chev = {}, axl = {};
+    st2.querySelectorAll('.stick-ch').forEach(c => { chev[c.classList[1]] = c; });
+    st2.querySelectorAll('.stick-ax').forEach(c => { axl[c.classList[1]] = c; });
+
+    /* THE LAMP IS FIXED AND THE PART IS NOT. Everything on this page is lit
+       from above left — 158° in the stylesheet — so that is a direction in the
+       ROOM, and the cap has to be relit every frame against it rather than
+       carrying its highlight around. `dot` is the face's normal against the
+       lamp: +1 leaning into it, −1 leaning away. */
+    const LAMP = [-0.50, -0.87];              // unit vector, up and to the left
+    const top = cap.querySelector('.stick-top');
+    const relight = () => {
+      const dot = vx * LAMP[0] + vy * LAMP[1];
+      /* the hot spot slides ACROSS the face opposite to the lean — tilt the
+         near edge down and the lamp lands lower on it */
+      top.style.setProperty('--sx', (34 - vx * 30) + '%');
+      top.style.setProperty('--sy', (26 - vy * 30) + '%');
+      top.style.setProperty('--lit', (1 + dot * 0.55).toFixed(3));
+      /* THE DOME UNDER IT GOES WITH THE SHAFT, BUT ONLY BY MOVING. Its light
+         is not touched here and must not be: see the note on `.stick-ball` —
+         a sphere that turns does not change how it is lit, and animating its
+         gradient is what made it read as deforming rather than rotating. What
+         it gets is travel, about a third of the cap's, in the same direction
+         at the same moment. */
+      st2.style.setProperty('--btx', (vx * 7).toFixed(1) + 'px');
+      st2.style.setProperty('--bty', (vy * 7).toFixed(1) + 'px');
+    };
+
+    /* IT PIVOTS ON A SHAFT, IT DOES NOT SPIN ON ITS OWN FACE.
+       The cap was rotating about its own centre with 5px of translation bolted
+       on after, which is a lid being turned in place — the silhouette leaned
+       and the part stayed exactly where it was. A stick is a cap on the end of
+       a rod with a ball joint UNDER it, so leaning it swings the cap out along
+       an arc: it moves in the direction of the lean and dips as it goes,
+       because the far end of a rod does not travel in a straight line.
+
+       That is the whole of `translateZ(-SHAFT) … translateZ(SHAFT)` — rotate
+       about a point 130px behind the face rather than about the face. At the
+       9° limit it puts 20px of travel in the lean direction and 1.6px of dip,
+       against 24px of clearance to the ball's rim, so the part sweeps to just
+       inside the socket and never through it. Nothing is animated by hand: the
+       arc IS the rotation, once the centre is in the right place. */
+    const SHAFT = 130;
+    const paint = () => {
+      cap.style.transform =
+        `translateZ(${-SHAFT}px) ` +
+        `rotateX(${(-vy * MAX).toFixed(2)}deg) rotateY(${(vx * MAX).toFixed(2)}deg) ` +
+        `translateZ(${SHAFT}px)`;
+      relight();
+      const m = Math.hypot(vx, vy);
+      /* the lit chevron is the one you are actually asking for, and both light
+         on a diagonal because a diagonal is both. THE LETTER LIGHTS WITH ITS
+         BEARING — they are one legend in two marks, and lighting the arrow
+         while leaving the axis dark would say direction without saying which
+         axis, which is the gap the letters were added to close. */
+      const on = { e: vx > 0.28, w: vx < -0.28, s: vy > 0.28, n: vy < -0.28 };
+      Object.entries(on).forEach(([d, v]) => {
+        chev[d].classList.toggle('on', v);
+        axl[d].classList.toggle('on', v);
+      });
+      st2.classList.toggle('live', m > 0.06);
+    };
+
+    const tick = ts => {
+      if (!held) return;
+      const dt = last ? Math.min(0.1, (ts - last) / 1000) : 0;
+      last = ts;
+      const m = Math.hypot(vx, vy);
+      if (m > 0.06) {
+        // squared: gentle near centre, quick at the rim — and the jog override
+        // scales it, because it is the same override the keypad's feed uses
+        const k = m * VMAX * (M.ovr.jog / 100) * dt / m;
+        const [xl, xh] = M.limit.X, [yl, yh] = M.limit.Y;
+        const nx = Math.max(xl, Math.min(xh, M.pos.X + vx * m * k));
+        const ny = Math.max(yl, Math.min(yh, M.pos.Y - vy * m * k));
+        if (nx === M.pos.X && vx) trip('xlimit');
+        if (ny === M.pos.Y && vy) trip('ylimit');
+        M.pos.X = nx; M.pos.Y = ny;
+        /* THE TAPE IS NOT PER FRAME. A stick held for two seconds is one
+           continuous move, not 120 lines — grbl gets a jog command every
+           250ms while it is deflected, which is what the real one does. */
+        if (ts - said > 250) {
+          said = ts;
+          send(`$J=G90 X${M.pos.X.toFixed(2)} Y${M.pos.Y.toFixed(2)} F${Math.round(VMAX * 60 * M.ovr.jog / 100)}`);
+        }
+        changed();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    const from = e => {
+      const r = st2.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const d = Math.hypot(dx, dy), k = d > R ? R / d : 1;
+      vx = (dx * k) / R; vy = (dy * k) / R;
+      paint();
+    };
+    st2.addEventListener('pointerdown', e => {
+      st2.setPointerCapture(e.pointerId); held = true; st2.classList.add('grabbed');
+      from(e); SFX.grab(); last = 0; said = 0; raf = requestAnimationFrame(tick); e.preventDefault();
+    });
+    st2.addEventListener('pointermove', e => { if (held) from(e); });
+    /* IT SPRINGS BACK, because a stick that stayed where you left it is a
+       lever, and a lever that commands motion is a machine you cannot stop by
+       letting go. */
+    const release = () => {
+      if (!held) return;
+      held = false; st2.classList.remove('grabbed');
+      cancelAnimationFrame(raf);
+      vx = vy = 0; paint(); SFX.drop();
+      changed();
+    };
+    st2.addEventListener('pointerup', release);
+    st2.addEventListener('pointercancel', release);
+    /* LETTING GO ANYWHERE LETS GO. Pointer capture is supposed to deliver the
+       release back to the element that took it, and mostly it does — but it is
+       lost on a great many ordinary things: dragging out over an iframe, a
+       context menu, the window losing focus, the browser deciding a gesture
+       became a scroll. Every one of those left the stick leaning at full
+       deflection with the axes still counting up, which on a real machine is
+       the failure that matters: a jog input that keeps commanding motion after
+       your hand is off it.
+       So the release is caught in four more places, and `release` is
+       idempotent — it returns immediately if it is already let go, so firing
+       three times costs nothing. A spring-return control has exactly one job
+       and it is this. */
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
+    window.addEventListener('blur', release);
+    st2.addEventListener('lostpointercapture', release);
+    paint();
+
+    commonRows(body);
+    box.append(body);
+  })();
+
+  /* ONE REPAINT FOR BOTH PANELS. Every bar on either panel is redrawn from M,
+     so pressing 10 on the left moves the right one too. */
+  onChange(() => {
+    const txt = M.units === 'in'
+      ? `${(M.step / 25.4).toFixed(4)} in` : `${M.step.toFixed(3)} mm`;
+    heads.forEach(l => { l.textContent = txt; });
+    sBars.forEach(ks => ks.forEach((k, i) => {
+      const on = STEPS[i] === M.step;
+      k.classList.toggle('is-down', on); k.setAttribute('aria-checked', String(on));
+    }));
+    uBars.forEach(ks => ks.forEach((k, i) => {
+      const on = ['mm', 'in'][i] === M.units;
+      k.classList.toggle('is-down', on); k.setAttribute('aria-checked', String(on));
+    }));
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   04 · THE PEN BANK
+   ══════════════════════════════════════════════════════════════════════════ */
+(function buildPen() {
+  const box = document.getElementById('pen');
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'PEN'));
+  head.append(el('span', 'tagcut', 'Z · mm'));
+  box.append(head);
+
+  const body = el('div', 'box-body');
+  const bank = el('div', 'penbank');
+
+  const ARROW = {
+    up:   ICON.upload,
+    down: svg('<path d="M12 3v14"/><polyline points="7 12 12 17 17 12"/><line x1="4" y1="21" x2="20" y2="21"/>'),
+    pump: svg('<path d="M12 4v9"/><polyline points="8 9.5 12 13.5 16 9.5"/><path d="M5 17c2.4 2 4.6 2 7 0s4.6-2 7 0"/>'),
+  };
+
+  [['up', 'PEN UP'], ['down', 'PEN DOWN'], ['pump', 'PUMP']].forEach(([id, label]) => {
+    const row = el('div', 'penrow');
+    const win = el('div', 'pen-win');
+    const k = key(`${ARROW[id]}<span>${label}</span>`, {
+      title: `Send Z to the ${label} height`,
+      onClick: () => { M.pos.Z = M.pen[id]; send(`G90 G0 Z${M.pen[id].toFixed(1)}`); changed(); },
+    });
+    k.append(win);
+    /* THE KNOB SETS THE HEIGHT, the window reports it, and the window takes a
+       typed value — three ways in, one number, and no popover anywhere. */
+    const kn = knob({
+      label: '', min: -30, max: 10, step: 0.1, value: M.pen[id], size: 34,
+      fmt: v => v.toFixed(1),
+      onChange: v => { M.pen[id] = v; win.textContent = v.toFixed(1); },
+    });
+    kn.style.cssText = 'gap:0';
+    kn.querySelector('.klab').remove();
+    kn.querySelector('.kval').remove();
+    win.textContent = M.pen[id].toFixed(1);
+    typeable(win, () => M.pen[id].toFixed(1), v => {
+      M.pen[id] = Math.max(-30, Math.min(10, v));
+      win.textContent = M.pen[id].toFixed(1);
+      kn.set(M.pen[id]);
+    });
+    row.append(k, kn);
+    bank.append(row);
+  });
+
+  body.append(bank);
+  box.append(body);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   05 · THE OVERRIDES
+   ══════════════════════════════════════════════════════════════════════════ */
+(function buildOvr() {
+  const box = document.getElementById('ovr');
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'OVERRIDE'));
+  box.append(head);
+
+  const body = el('div', 'box-body');
+  const row = el('div', null);
+  row.style.cssText = 'display:flex;gap:16px;justify-content:center;padding:4px 0 2px';
+
+  [['jog', 'JOG'], ['feed', 'FEED'], ['tool', 'TOOL']].forEach(([id, label]) => {
+    const col = el('div', 'ovrcol');
+    const kn = knob({
+      label, min: 1, max: 500, step: 1, value: M.ovr[id], size: 52,
+      detents: [100],                       // the notch that used to be a RESET
+      fmt: v => v + '%',
+      onChange: v => { M.ovr[id] = v; changed(); },
+    });
+    const rst = el('button', 'micro', 'RST');
+    rst.type = 'button';
+    rst.title = 'Back to 100%';
+    rst.addEventListener('click', () => { kn.set(100); M.ovr[id] = 100; SFX.clack(); changed(); });
+    clicky(rst, SFX.tap, SFX.lift);
+    col.append(kn, rst);
+    row.append(col);
+  });
+
+  body.append(row);
+  box.append(body);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   06 · RUN, THE GUARD, AND THE MUSHROOM
+   ══════════════════════════════════════════════════════════════════════════ */
+let setRun = () => {};
+(function buildRun() {
+  const box = document.getElementById('run');
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'RUN'));
+  const st = el('div', 'lcd dim', 'IDLE');
+  head.append(st);
+  box.append(head);
+
+  const body = el('div', 'box-body');
+  const bank = el('div', 'runbank');
+
+  const start = key(`<span class="lens"></span>${ICON.play}<span>START</span>`, {
+    cls: 'act go big',
+    onClick: () => {
+      if (M.run === 'alarm') { print('error: machine is in ALARM — unlock first', 'err'); return; }
+      if (M.run === 'paused') { M.run = 'running'; send('~'); }
+      else { M.run = 'running'; M.progress = 0; M.line = 0; M.elapsed = 0;
+             print('run: portrait-ribbons-a2.gcode · 18 412 lines', 'sys'); send('M3'); }
+      changed();
+    },
+  });
+  const pause = key(`<span class="lens"></span><span>PAUSE</span>`, {
+    cls: 'act halt', title: 'Feed hold',
+    onClick: () => {
+      if (M.run !== 'running') return;
+      M.run = 'paused'; send('!'); trip('hold'); changed();
+    },
+  });
+  const stop = key(`${ICON.stop}<span>STOP</span>`, {
+    cls: 'act aux', title: 'End the job cleanly',
+    onClick: () => {
+      if (M.run === 'idle') return;
+      M.run = 'idle'; M.progress = 0; send('M5'); clear('hold');
+      print('job ended', 'sys'); changed();
+    },
+  });
+  [start, pause, stop].forEach(b => b.classList.add('big'));
+
+  const row2 = el('div', 'row2');
+  row2.append(pause, stop);
+
+  /* THE GUARD. The cover is the control until it is open; the key underneath
+     cannot be reached through it (pointer-events), and it shuts itself after
+     six seconds the way a sprung cover does. */
+  const gw = el('div', 'guardwrap');
+  const abort = key(`${ICON.close}<span>ABORT</span>`, {
+    cls: 'act halt big',
+    onClick: () => {
+      M.run = 'alarm'; M.progress = 0; send('\x18');
+      print('ALARM:1 — abort during motion. Position is lost.', 'err');
+      trip('home'); changed();
+      gw.classList.remove('open');
+    },
+  });
+  const cover = el('button', 'guard', 'LIFT · ABORT');
+  cover.type = 'button';
+  cover.title = 'Lift the cover to reach ABORT';
+  let shut = null;
+  cover.addEventListener('click', () => {
+    gw.classList.add('open');
+    clearTimeout(shut);
+    shut = setTimeout(() => gw.classList.remove('open'), 6000);
+  });
+  clicky(cover, SFX.flip, SFX.release);
+  gw.append(abort, cover);
+
+  bank.append(start, row2, gw);
+  body.append(bank);
+  box.append(body);
+
+  setRun = () => {
+    st.textContent = M.run.toUpperCase();
+    st.classList.toggle('dim', M.run === 'idle');
+    start.classList.toggle('is-down', M.run === 'running');
+    pause.classList.toggle('is-down', M.run === 'paused');
+  };
+  onChange(setRun);
+
+  /* ── THE MUSHROOM, mounted in the run panel with the rest of the hardware.
+     No cap text and no legend plate: the name is engraved in the panel beside
+     it, which is where it is on the machine. */
+  const mount = el('div', 'estop-mount');
+  const collar = el('div', 'estop-collar');
+  const mush = el('button', 'estop');
+  mush.type = 'button';
+  mush.setAttribute('aria-label', 'Emergency stop');
+  mush.title = 'Hit to latch · twist to release';
+  mush.addEventListener('click', () => {
+    const held = mush.classList.toggle('latched');
+    mount.classList.toggle('held', held);
+    if (held) {
+      M.run = 'alarm'; M.progress = 0;
+      print('ALARM:10 — E-STOP. Motion halted.', 'err');
+      trip('estop'); trip('home');
+    } else {
+      print('e-stop released — re-home before running', 'sys');
+      clear('estop');
+    }
+    changed();
+  });
+  clicky(mush, SFX.press, SFX.drop);
+  collar.append(mush);
+  const leg = el('div', 'estop-leg', '<b>E-STOP</b><span>TWIST TO RELEASE</span>');
+  mount.append(collar, leg);
+  body.append(mount);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   07 · THE ANNUNCIATOR
+   ══════════════════════════════════════════════════════════════════════════ */
+let trip = () => {}, clear = () => {};
+(function buildAnnun() {
+  const box = document.getElementById('annun');
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'STATUS'));
+  const j = el('span', 'jewel');
+  j.style.setProperty('--lyr', '#2a2d33');
+  head.append(j);
+  box.append(head);
+
+  const body = el('div', 'box-body');
+  const grid = el('div', 'annun');
+  const cells = {};
+
+  ALARMS.forEach(([id, label, sub, lamp]) => {
+    const c = el('button', 'ann', `${label}<small>${sub}</small>`);
+    c.type = 'button';
+    c.style.setProperty('--lamp', lamp);
+    c.title = `Trip ${label}`;
+    c.addEventListener('click', () => (M.alarms[id] ? clear(id) : trip(id)));
+    clicky(c, SFX.flip, SFX.release);
+    cells[id] = c;
+    grid.append(c);
+  });
+
+  /* UNLOCK acknowledges — it stops the flashing and clears what can be
+     cleared. A latched E-stop is NOT one of them: the lamp is reporting a
+     switch that is still held in, and a button that turns off a lamp without
+     changing what the lamp is reporting is the worst object on any panel. */
+  const foot = el('div', null);
+  foot.style.cssText = 'display:flex;gap:9px;align-items:center';
+  const unlock = key('UNLOCK ALARM', { cls: 'act aux' });
+  unlock.style.cssText = 'height:30px;padding:0 13px;font-family:var(--font);font-size:9.5px;font-weight:700;letter-spacing:.12em';
+  unlock.addEventListener('click', () => {
+    M.acked = true;
+    const held = document.querySelector('.estop.latched');
+    Object.keys(M.alarms).forEach(k => {
+      if (k === 'estop' && held) return;
+      if (k === 'home') return;                     // still not homed. Homing clears it.
+      delete M.alarms[k];
+    });
+    if (!Object.keys(M.alarms).some(k => k !== 'home')) M.run = 'idle';
+    send('$X');
+    changed();
+  });
+  const note = el('span', 'tagcut', 'ESTOP + NOT HOMED SURVIVE IT');
+  foot.append(unlock, note);
+
+  body.append(grid, foot);
+  box.append(body);
+
+  trip = id => {
+    if (M.alarms[id]) return;
+    M.alarms[id] = true; M.acked = false;
+    if (['xlimit', 'ylimit', 'zlimit', 'estop'].includes(id)) { M.run = 'alarm'; M.progress = 0; }
+    SFX.clack();
+    changed();
+  };
+  clear = id => { delete M.alarms[id]; changed(); };
+
+  onChange(() => {
+    let any = false;
+    ALARMS.forEach(([id]) => {
+      const on = !!M.alarms[id];
+      any = any || on;
+      cells[id].classList.toggle('lit', on);
+      cells[id].classList.toggle('newalarm', on && !M.acked);
+    });
+    j.style.setProperty('--lyr', any ? (M.run === 'alarm' ? '#FF2D2D' : '#FFC400') : '#2a2d33');
+    j.style.opacity = any ? 1 : .35;
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   08 · THE JOB METER
+   ══════════════════════════════════════════════════════════════════════════ */
+const SEGS = 40;
+(function buildJob() {
+  const box = document.getElementById('job');
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'JOB'));
+  const pct = el('div', 'readout', '0.0%');
+  pct.style.minWidth = '62px';
+  head.append(pct);
+  box.append(head);
+
+  const body = el('div', 'box-body');
+  const name = el('div', 'tagcut', 'portrait-ribbons-a2.gcode · 18 412 lines · 214 m');
+  name.style.alignSelf = 'flex-start';
+
+  const meter = el('div', 'meter');
+  const segs = Array.from({ length: SEGS }, () => el('i'));
+  meter.append(...segs);
+
+  const stats = el('div', 'stats');
+  const mk = lab => { const s = el('div', 'stat', `<b>${lab}</b>`); const v = el('span', '—'); s.append(v); stats.append(s); return v; };
+  const vEl = mk('ELAPSED'), vRem = mk('REMAINING'), vLine = mk('LINE'), vTrav = mk('TRAVEL');
+
+  body.append(name, meter, stats);
+  box.append(body);
+
+  const hms = s => `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(Math.floor(s) % 60).padStart(2, '0')}`;
+
+  onChange(() => {
+    const lit = Math.round(M.progress * SEGS);
+    segs.forEach((s, i) => {
+      s.classList.toggle('on', i < lit);
+      s.classList.toggle('head', i === lit - 1 && M.run === 'running');
+    });
+    meter.classList.toggle('done', M.progress >= 1);
+    pct.textContent = (M.progress * 100).toFixed(1) + '%';
+    vEl.textContent   = M.run === 'idle' && !M.progress ? '—' : hms(M.elapsed);
+    vRem.textContent  = M.run === 'running' && M.progress > .002
+      ? hms(M.elapsed * (1 - M.progress) / M.progress) : '—';
+    vLine.textContent = M.line.toLocaleString('en-GB');
+    vTrav.textContent = `${(M.progress * 214).toFixed(1)} m`;
+  });
+
+  /* THE CLOCK. One interval for the whole page: the job advances, the tape
+     prints a block now and then, and the elapsed field counts. Feed override
+     is in it, because an override that does not change how long the job takes
+     is a control that does nothing. */
+  setInterval(() => {
+    if (M.run !== 'running') return;
+    M.elapsed += 0.25;
+    M.progress = Math.min(1, M.progress + 0.0016 * (M.ovr.feed / 100));
+    M.line = Math.round(M.progress * 18412);
+    if (Math.random() < .18) {
+      const x = (Math.random() * 594).toFixed(2), y = (Math.random() * 420).toFixed(2);
+      M.pos.X = +x; M.pos.Y = +y;
+      print(`G1 X${x} Y${y} F${Math.round(2400 * M.ovr.feed / 100)}`, 'out');
+    }
+    if (M.progress >= 1) {
+      M.run = 'idle';
+      print('job complete · 214.0 m · park at end', 'sys');
+    }
+    changed();
+  }, 250);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   09 · THE PORT
+   ══════════════════════════════════════════════════════════════════════════ */
+(function buildPort() {
+  const box = document.getElementById('port');
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'PORT'));
+  const j = el('span', 'jewel');
+  j.style.setProperty('--lyr', '#2a2d33');
+  j.style.opacity = .35;
+  head.append(j);
+  box.append(head);
+
+  const body = el('div', 'box-body');
+
+  /* THE DRUM IS THE KIT'S, at its own size, with the port names on it. The
+     only thing this section adds is a decision that had already been made. */
+  const d = drum({
+    options: PORTS.map(p => p.replace('/dev/tty.', '').replace('/dev/cu.', '')),
+    index: M.port,
+    label: 'Serial port',
+    onChange: i => { M.port = i; changed(); },
+  });
+  body.append(d);
+
+  const row = el('div', null);
+  row.style.cssText = 'display:flex;gap:9px;align-items:center';
+  /* A LATCHING KEY DOES NOT LATCH ITSELF — key() hands the class to the host,
+     because in the layer page every latch redraws its whole bar from state.
+     There is one key here and no bar, so the host is this line. */
+  const conn = key('CONNECT', {
+    cls: 'act aux', latch: true, title: 'Open the port',
+    onClick: b => {
+      b.classList.toggle('is-down');
+      b.setAttribute('aria-pressed', String(b.classList.contains('is-down')));
+      M.connected = b.classList.contains('is-down');
+      b.innerHTML = M.connected ? 'DISCONNECT' : 'CONNECT';
+      print(M.connected ? `Grbl 1.1h ['$' for help] · ${PORTS[M.port]} · 115200` : 'port closed',
+            M.connected ? 'sys' : 'in');
+      if (M.connected) trip('home');            // a freshly opened port has never homed
+      changed();
+    },
+  });
+  conn.style.cssText = 'height:30px;padding:0 14px;font-family:var(--font);font-size:9.5px;font-weight:700;letter-spacing:.12em';
+  const baud = el('div', 'lcd', '115200');
+  row.append(conn, baud);
+  body.append(row);
+  box.append(body);
+
+  onChange(() => {
+    j.style.setProperty('--lyr', M.connected ? '#7CFFB0' : '#2a2d33');
+    j.style.opacity = M.connected ? 1 : .35;
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   10 · THE TAPE
+   ══════════════════════════════════════════════════════════════════════════ */
+(function buildTape() {
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'CONSOLE'));
+  const q = el('div', 'lcd dim', 'QUEUE 0');
+  head.append(q);
+  tapeBox.append(head);
+
+  const body = el('div', 'box-body');
+  tapeRoll = el('div', 'tape');
+  body.append(tapeRoll);
+
+  const row = el('div', null);
+  row.style.cssText = 'display:flex;gap:9px;align-items:center';
+  const slot = el('div', 'slot', ICON.term);
+  slot.style.maxWidth = 'none';
+  const inp = el('input');
+  inp.type = 'text';
+  inp.placeholder = 'G-code or a grbl command…';
+  inp.setAttribute('aria-label', 'Command');
+  slot.append(inp);
+
+  const fire = () => {
+    const v = inp.value.trim();
+    if (!v) return;
+    send(v.toUpperCase());
+    inp.value = '';
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') fire(); });
+
+  const sendKey = key(`${ICON.play}<span>SEND</span>`, { cls: 'act go', onClick: fire });
+  const clr = key(ICON.clear, { cls: 'act aux', title: 'Clear the roll',
+                                onClick: () => { tapeRoll.innerHTML = ''; } });
+  clr.style.width = '32px';
+  row.append(slot, sendKey, clr);
+  body.append(row);
+  tapeBox.append(body);
+
+  onChange(() => {
+    q.textContent = `QUEUE ${M.queue}`;
+    q.classList.toggle('dim', !M.queue);
+  });
+
+  print('PenPlotter Control · skew build', 'sys');
+  print('select a port in §09 and press CONNECT', 'in');
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   11 · THE STATUS RAIL
+   ══════════════════════════════════════════════════════════════════════════ */
+(function buildRail() {
+  const rail = el('div', 'rail');
+  const cell = html => { const c = el('div', 'rail-cell', html); rail.append(c); return c; };
+  const state = cell('<span class="pilot"></span><span></span>');
+  const port  = cell('PORT <b>—</b>');
+  const baud  = cell('BAUD <b>—</b>');
+  const queue = cell('QUEUE <b>0</b>');
+  rail.append(el('div', 'rail-gap'));
+  const mpos  = cell('MPOS <b>X0 Y0 Z0</b>');
+  document.getElementById('rail').append(rail);
+
+  const LAMP = { idle: '#7CFFB0', running: '#FF6A00', paused: '#FFC400', alarm: '#FF2D2D' };
+
+  onChange(() => {
+    const lamp = state.firstElementChild, txt = state.lastElementChild;
+    const live = M.connected;
+    const st = live ? M.run : 'offline';
+    txt.textContent = st.toUpperCase();
+    if (live) {
+      lamp.className = 'jewel';
+      lamp.style.setProperty('--lyr', LAMP[M.run] || '#7CFFB0');
+      lamp.style.width = lamp.style.height = '9px';
+      lamp.style.flex = '0 0 9px';
+    } else {
+      lamp.className = 'pilot';
+      lamp.removeAttribute('style');
+    }
+    port.innerHTML  = `PORT <b>${live ? PORTS[M.port].replace('/dev/tty.', '') : 'not connected'}</b>`;
+    baud.innerHTML  = `BAUD <b>${live ? '115200' : '—'}</b>`;
+    queue.innerHTML = `QUEUE <b>${M.queue}</b>`;
+    mpos.innerHTML  = `MPOS <b>X${fmtP(M.pos.X)} Y${fmtP(M.pos.Y)} Z${fmtP(M.pos.Z)}</b>`;
+  });
+})();
+
+/* ── first paint ────────────────────────────────────────────────────────── */
+M.feed = 0;
+changed();
+</script>
+</body>
+</html>

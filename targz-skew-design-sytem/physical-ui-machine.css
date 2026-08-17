@@ -1,0 +1,1037 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHYSICAL UI · MACHINE — the parts the plotter needed and the kit did not have.
+
+   This file is an ADDITION, never an override. physical-ui.css is loaded first
+   and untouched: every key, switch, knob, fader, drum, rotary, jewel, lamp,
+   window, bay and readout on the machine page is that file's, at a size. What
+   is here is the nine things a MACHINE has that a drawing tool does not — and
+   the test each one had to pass is that no existing primitive could say it.
+
+   THE JOG PARTS ARRIVED BY MOVING, not by being written: they were §11 of the
+   layers document and its stylesheet, which is the wrong home for them —
+   nothing in Portrait-Typo jogs anything. They came across whole.
+
+     .dro       a coordinate under glass, per axis, with its own colour
+     .jog-grid  a direction pad — keys arranged so the arrangement IS the axis
+     .stick     the continuous XY control the pad's keys are the discrete half of
+     .penbank   a key that carries the height it will go to
+     .runbank   start / pause / stop, with the destructive one under a guard
+     .estop     the mushroom
+     .annun     the annunciator — legends that are dark until they are not
+     .meter     a bargraph: progress as a column of lit segments
+     .tape      the log as a printed roll
+     .rail      the status rail along the bottom of the chassis
+
+   The rest of the page — step size, units, the port list, the command line,
+   the panel head, every window — is reused verbatim and has no CSS here. That
+   is the result the page is reporting.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── page furniture this document adds ──────────────────────────────────── */
+
+/* THE INVENTORY. Not a component — the answer to "what was missing", which is
+   the question the page exists to answer, so it is at the top and it is a
+   table rather than a paragraph. */
+.inv{
+  width:100%; border-collapse:collapse; margin:26px 0 0;
+  font-size:12.5px; line-height:1.5;
+}
+.inv th{
+  font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:#5f646d; font-weight:600; text-align:left;
+  padding:0 12px 9px 0; border-bottom:1px solid #212327;
+}
+.inv td{
+  padding:9px 12px 9px 0; border-bottom:1px solid #17181b;
+  color:#8b909a; vertical-align:top;
+}
+.inv td:first-child{ color:#d3d6dc; font-weight:600; white-space:nowrap; }
+.inv td code{
+  font-family:var(--font); font-size:11px; color:#9aa0aa;
+  background:#141518; padding:1px 5px; border-radius:4px;
+}
+.inv .have td:nth-child(2){ color:#7CFFB0; }
+.inv .new  td:nth-child(2){ color:var(--led); }
+.inv tr.new td:first-child::before{
+  content:'+ '; color:var(--led);
+}
+
+/* A rack of stages that stack rather than sit side by side. */
+.stage.col{ flex-direction:column; align-items:center; gap:34px; }
+
+/* An engraved caption over a group inside a panel. Same cut as .tagcut, but
+   it names a REGION rather than tagging an object, so it is a rule with a
+   word in it rather than a chip. */
+.cut{
+  display:flex; align-items:center; gap:9px;
+  font-family:var(--font); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+  color:#5c616a; text-shadow:0 1px 0 rgba(255,255,255,.055);
+  margin:2px 0 1px;
+}
+.cut::after{
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg, rgba(0,0,0,.7), rgba(0,0,0,0));
+  box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DRO — a coordinate under glass
+
+   WHY NOT `.readout`. The kit's readout is a value beside its control: 22px,
+   green, one line, and it means "this knob is at 45". A machine position is
+   not that. It is the ONE number you look at from across the room while your
+   hands are on the work, it belongs to an AXIS rather than to a control, and
+   it has to be legible as a coordinate — sign, three decimals, tabular, never
+   reflowing as digits come and go. So it is a bigger part with the same glass.
+
+   THE COLOUR IS THE AXIS AND NOTHING ELSE. The app already paints X red,
+   Y green, Z blue (--pc-axis-*), which is the one convention every machine
+   in the room shares. Here it is a LAMP: the legend and the bar under the
+   glass are lit in the axis colour, the numerals stay the same phosphor for
+   all three. Tinting the numbers would trade the one thing a DRO must do —
+   read at a glance — for a decoration.
+
+   THE BAR IS TRAVEL, not decoration: where this axis is inside its own soft
+   limits. It is the only part of the app's position strip that was already a
+   picture rather than a number, and it survives as a lit strip in the glass. */
+.dro{
+  position:relative; flex:1 1 0; min-width:0;
+  padding:9px 11px 8px; border-radius:9px;
+  background:linear-gradient(180deg,#07090a,#101314);
+  box-shadow:
+    inset 0 3px 8px rgba(0,0,0,.95),
+    inset 0 -1px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.07);
+  display:flex; flex-direction:column; gap:4px;
+}
+/* THE HEAD IS THE LEGEND AND NOTHING ELSE. It carried a WCS caption too, which
+   the SET 0 key on the bezel then sat on top of — and the caption was already
+   a lie by repetition: the panel's own head says G54 once, for all three axes,
+   which is where a work offset belongs. It is one fact about the machine, not
+   three facts about three axes. */
+.dro-head{ display:flex; align-items:center; gap:8px; height:16px; }
+.dro-lab{
+  font-family:var(--font); font-size:12px; font-weight:700; letter-spacing:.14em;
+  color:var(--ax); text-shadow:0 0 8px color-mix(in srgb,var(--ax) 65%,transparent);
+}
+.dro-num{
+  font-family:var(--font); font-size:25px; font-weight:700; letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums; line-height:1.05;
+  color:#7CFFB0; text-shadow:0 0 9px rgba(124,255,176,.6), 0 0 22px rgba(124,255,176,.25);
+}
+/* MOVING IS A STATE OF THE READOUT. A DRO that is being driven and one that
+   has settled look identical on any screen, and on the real part they do not:
+   the digits are chattering. One class, a slightly hotter phosphor. */
+.dro.live .dro-num{ color:#B6FFD3; text-shadow:0 0 12px rgba(124,255,176,.85), 0 0 28px rgba(124,255,176,.4); }
+/* A FILL IS THE WRONG PART, and it was the first thing this page got wrong.
+   A bar that grows from the left answers HOW MUCH, and a coordinate is not a
+   quantity — it is a PLACE on a travel that has two ends. Drawn as a fill,
+   X and Y sitting at zero drew nothing at all (so two of the three axes looked
+   broken), while Z at zero sat three quarters along its −30…+10 travel and
+   drew a full blue bar, which reads as "Z is nearly finished" about something
+   Z is not doing. Same data, opposite readings, and neither of them true.
+
+   So it is a TRAVEL SCALE: an engraved channel the width of the axis, a stop
+   cut at each end, and a lit pip riding it. Zero is wherever zero is on that
+   axis — off to the left on X and Y, three quarters along on Z — which is the
+   fact, and it is the same fact in all three cells. */
+.dro-bar{
+  height:5px; border-radius:3px; margin-top:4px; position:relative;
+  background:linear-gradient(180deg,#040506,#0b0e0f);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.95), inset 0 -1px 0 rgba(255,255,255,.06);
+}
+/* the two end stops — the channel has to have visible ENDS or the pip is
+   floating on a line rather than travelling between limits */
+.dro-bar::before, .dro-bar::after{
+  content:''; position:absolute; top:1px; bottom:1px; width:1px;
+  background:rgba(255,255,255,.16);
+}
+.dro-bar::before{ left:1px; }
+.dro-bar::after{ right:1px; }
+.dro-bar i{
+  position:absolute; top:-1px; bottom:-1px; left:0; width:5px; margin-left:-2.5px;
+  border-radius:2px;
+  background:var(--ax);
+  box-shadow:
+    0 0 6px color-mix(in srgb,var(--ax) 85%,transparent),
+    0 0 12px color-mix(in srgb,var(--ax) 45%,transparent),
+    inset 0 1px 0 rgba(255,255,255,.35);
+  transition:left .12s linear;
+}
+/* the zero key sits ON the glass bezel, not in the glass */
+.dro-zero{
+  position:absolute; top:7px; right:9px;
+  height:16px; padding:0 6px; border:0; border-radius:4px; cursor:pointer;
+  font-family:var(--font); font-size:8px; font-weight:700; letter-spacing:.12em;
+  color:#8d929b;
+  background:linear-gradient(180deg,#2e3137,#1f2125);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 1px 0 #0d0e10, 0 2px 3px rgba(0,0,0,.6);
+}
+.dro-zero:hover{ color:var(--led); }
+.dro-zero:active{
+  transform:translateY(1px);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.9), 0 0 0 1px rgba(255,106,0,.4);
+}
+
+/* AN OPTION IS A COLUMN, NOT A PANEL. §03 compares two ways to jog, and a jog
+   control is only judgeable next to the numbers it moves — so each side of the
+   comparison is the whole arrangement, readout above control, the way it would
+   be stacked in the real window. The caption is engraved on the plate above
+   each stack rather than being a heading, because these are two racks standing
+   next to each other and not two paragraphs. */
+/* SEPARATED BY BEING SEPARATE. The two ways to jog were first one stage with
+   two columns in it, then one stage with a divider down the middle and twice
+   the gap — both of which are a layout trying to say what a HEADING says for
+   free. They are two answers to one question; a page already has an object for
+   that and it is a section. So each option has its own numbered section, its
+   own argument above it and its own stage, and the comparison is made by
+   scrolling from one to the next rather than by sweeping across a rack of four
+   panels and guessing which two go together.
+
+   What is left here is the column itself: readout above control, tight,
+   because those two ARE one arrangement and the proximity is doing real work. */
+.jogopt{ display:flex; flex-direction:column; align-items:center; gap:13px; flex:0 0 auto; }
+/* the stacked readout: three cells down a column instead of across a strip */
+.dro-col{ display:flex; flex-direction:column; gap:7px; }
+.dro-col .dro{ flex:0 0 auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   JOG — a keypad and a stick, same job
+
+   MOVED HERE FROM physical-ui.css, WHOLE AND UNEDITED. It was written as §11
+   of the layers document, which is the wrong document for it: nothing in
+   Portrait-Typo jogs anything. A jog control belongs to the machine, so it
+   belongs to the machine page, and the parts belong in the machine page's
+   stylesheet — physical-ui.css is now back to carrying only what BOTH
+   documents use.
+
+   It also replaces the `.jogpad` this page had invented, which was the same
+   idea with filler cells and a spacer column instead of grid-areas. Two pads
+   on one page was one pad too many and this is the better-built one; the
+   axis-coloured legends that pad had are gone with it, which is the rule from
+   01 either way — colour here is a lamp, not a fill.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.box.jogbox{ width:330px; flex:0 0 330px; }
+.jog-body{ gap:9px; }
+.jog-bar{ width:100%; }
+.jog-bar .pkey{ flex:1 1 0; min-width:0; height:28px; font-size:10px; letter-spacing:.08em; }
+.jog-util{ display:flex; gap:6px; }
+.jog-u{ flex:1 1 0; min-width:0; height:28px; padding:0 6px;
+        font-family:var(--font); font-size:9px; font-weight:700; letter-spacing:.06em;
+        justify-content:center; }
+
+/* THE PAD IS LAID OUT LIKE THE AXES. X across, Y up, Z on its own column,
+   because Z is a different axis in a different plane and putting it in the
+   same cross would say it is not. */
+.jog-grid{
+  display:grid; grid-template-columns:repeat(5, 1fr); grid-auto-rows:44px; gap:7px;
+  padding:11px; border-radius:9px;
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.055);
+}
+.jog-k{ width:auto; height:44px; border-radius:9px;
+        font-family:var(--font); font-size:11px; font-weight:700; letter-spacing:.06em; }
+.jog-grid .yp{ grid-area:1/2; } .jog-grid .zp{ grid-area:1/4; }
+.jog-grid .xm{ grid-area:2/1; } .jog-grid .home{ grid-area:2/2; } .jog-grid .xp{ grid-area:2/3; }
+.jog-grid .ym{ grid-area:3/2; } .jog-grid .zm{ grid-area:3/4; }
+/* HOME is the one that goes somewhere absolute, so it is not the same cap as
+   the six that go a step. Recessed: it is a destination, not a nudge. */
+.jog-home{ font-size:7.5px; letter-spacing:.08em; color:#8d929b;
+  flex-direction:column; gap:1px;
+  background:linear-gradient(180deg,#151719,#1e2024);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.06); }
+.jog-grid .jog-home svg{ width:15px; height:15px; flex:0 0 15px; stroke-width:1.7; }
+.jog-home:hover{ color:#d7dae0; }
+
+/* ── THE STICK ────────────────────────────────────────────────────────────
+   A REAL TILT, NOT A SLIDE. The cap is a plane inside a perspective, rotated
+   about X and Y by how far off centre the pointer is, so the far edge
+   foreshortens and the near edge comes at you. A sticker dragged across a
+   circle has no far edge, and the eye knows within one frame. */
+.stick-rig{ display:flex; align-items:center; gap:14px; padding:4px 0 2px; }
+/* THE BOX GREW FROM 150 TO 176 to make room for the axis letters outside the
+   chevrons. The throw did not: `R` in the script is still 34px from centre, so
+   the control feels identical and the extra 13px a side is bezel. */
+/* THE EYE CAME BACK DOWN TO ALMOST LEVEL, AND THE WALL IS NOW THE PART'S JOB.
+   It was at 24% — a long way above the socket — which did put the barrel in
+   view at rest, and bought it with an asymmetry you could see: a vanishing
+   point that far off centre makes UP and DOWN different projections, so
+   pushing the stick away showed a band of wall and pulling it back showed
+   almost none. Same 9° of rotation, two different pictures, and nothing in the
+   mechanism to justify it.
+
+   The camera was the wrong place to fix that, and half-fixing it did not work
+   either: measured as the deepest slice's projected offset from the top face,
+   24% gave 1.8px of barrel pushing UP against 13.5px pushing DOWN, and moving
+   the eye to 43% only narrowed that to 6.1 against 9.2 — still two different
+   pictures, just less so. Dead centre is the ONLY value where all four
+   directions agree, and they agree exactly: 7.6px each.
+
+   Wall visible at rest is a fact about the CAP, not about the camera. A cap
+   whose skirt stands slightly proud of its top face shows a rim all the way
+   round, evenly, from any angle — so the taper on the slices below does that
+   job (see `.stick-body`) and the eye can sit level, where up and down are the
+   same move. */
+.stick{
+  position:relative; width:216px; height:216px; flex:0 0 216px; margin:0 auto;
+  perspective:290px; perspective-origin:50% 50%;
+  touch-action:none; cursor:grab;
+}
+.stick.grabbed{ cursor:grabbing; }
+/* ── THE WELL HAS A FLOOR, AND THE FLOOR IS GREY AT THE BOTTOM ──────────────
+   It was near-black all the way round, which meant the cap was casting its
+   shadow onto nothing: a shadow is only visible as the difference between lit
+   and unlit, and there was no lit. So the part floated in a hole instead of
+   sitting in a socket.
+
+   The gradient is the recess rule this file already states for `--chamfer`,
+   at a bigger size: dark under the top wall where the surface turns AWAY from
+   the lamp, and grey along the bottom where the far wall turns INTO it and
+   bounces. That grey is the only thing the cast shadow below has to work
+   against, and it is what makes the depth read. */
+.stick-seat{
+  position:absolute; inset:40px; border-radius:50%;
+  background:
+    linear-gradient(178deg,
+      #07080a 0%, #0b0d10 34%, #14181d 62%, #262b32 88%, #303640 100%),
+    #0d0e10;
+  box-shadow:inset 0 7px 14px rgba(0,0,0,.95),
+             inset 0 -2px 3px rgba(255,255,255,.10),
+             0 1px 0 rgba(255,255,255,.06);
+}
+
+/* ── THE BALL, AND IT IS NOT A SHADOW ───────────────────────────────────────
+   THIS WAS THE WRONG OBJECT, TWICE. The dark ring around the cap was first a
+   near-black hole, then a blurred ellipse offset down-right — a cast shadow
+   laid OVER the well. Both are the same misreading of the reference. What is
+   under the cap in a real stick is not a shadow at all: it is the BALL of the
+   ball joint, a polished sphere seated in the socket with the shaft coming out
+   of its top. It is a solid, it has a lit side and a dark side and a
+   terminator between them, and no amount of blur makes a shadow do that.
+
+   THE GIVEAWAY IS THE POLARITY. A cast shadow is darkest nearest what casts it
+   and fades outward. A sphere is BRIGHT at the top-left, falls through a
+   terminator, and goes black at the bottom-right — and then picks up a cool
+   bounce off the socket floor underneath it, which is the one highlight that
+   is not the lamp. That bounce is what makes it read as a ball rather than as
+   a disc with a gradient on it.
+
+   ITS LIGHT DOES NOT MOVE, AND THAT WENT ROUND THE HOUSES TWICE. Pinned first,
+   then unpinned to sell the idea that the dome is attached to the shaft — and
+   unpinned it looked like a blob being squeezed rather than a ball turning.
+   The physics says why, and it is worth writing down because it is not
+   obvious: A ROTATING SPHERE SHOWS NO SHADING CHANGE. The terminator and the
+   hot spot are fixed by the LAMP, not by the object; only surface FEATURES
+   move when a sphere turns, and a polished dome has none. So dragging the
+   gradient across it is the one thing that cannot happen, and the eye reads
+   the impossible version as the surface itself deforming.
+
+   THE ATTACHMENT READS THROUGH TRAVEL INSTEAD. The dome is captive, so it gets
+   about a third of the cap's swing — but it does swing, it swings the same way
+   at the same moment, and it slides under a socket shadow that stays put. That
+   is three separate things all saying "one assembly", and none of them require
+   lighting a sphere in a way a sphere cannot be lit.
+
+   The contact shadow that travels properly is the one on the cap's deepest
+   slice, which is already there and is where a contact shadow belongs. */
+/* A SPHERE HAS NO OUTLINE. It had a 1px black one, which is what was making it
+   read as a dark disc pasted into the well rather than as a ball sitting in
+   one — an outline is a statement that the object ENDS at that line, and a
+   sphere does not end anywhere, it turns away until you cannot see it any
+   more. So there is no border, no ring and no stroke on this element at all;
+   every boundary it has is a change of tone.
+
+   AND THE OCCLUSION GOES ALL THE WAY ROUND. A ball dropped into a socket is
+   shaded twice over: by the lamp, which is directional, and by the SOCKET,
+   which is not — the rim steals light from every side at once, so the outer
+   few millimetres of the sphere go dark whichever way you look at it. That is
+   the ring of shadow around it, and it is inset and soft, which is also what
+   dissolves the element's own circular edge into the socket wall behind it. */
+.stick-ball{
+  position:absolute; inset:46px; border-radius:50%; pointer-events:none;
+  background:
+    /* the bounce off the socket floor — cool, low, and much weaker than the lamp */
+    radial-gradient(circle at 60% 92%, rgba(146,164,190,.15), transparent 42%),
+    /* the sphere, lit once and never relit: lamp up-left, terminator, dark */
+    radial-gradient(circle at 34% 25%,
+      #7b838f 0%, #5a616b 14%, #3d434b 30%, #262b31 46%,
+      #171b20 62%, #0d1013 78%, #08090b 100%);
+  /* a light self-occlusion only — the socket's own shadow is `.stick-mouth`
+     below, because that one must not move and this element does */
+  box-shadow:inset 0 0 6px 2px rgba(0,0,0,.35);
+  /* captive in the socket, but it goes with the shaft — about a third of the
+     cap's twenty pixels, which is the whole of what says these are one part */
+  transform:translate(var(--btx,0px), var(--bty,0px));
+  transition:transform .22s cubic-bezier(.22,1.5,.36,1);
+}
+.stick.grabbed .stick-ball{ transition:none; }
+
+/* ── THE MOUTH: A FIXED SHADOW, BECAUSE IT BELONGS TO THE HOLE ──────────────
+   The occlusion round the dome was an inset shadow on the DOME, so when the
+   dome started tipping with the shaft the shadow tipped with it — and a
+   shadow cast by a hole that travels with the thing inside it is the one cue
+   that tells you there is no hole. The wall stopped reading as a wall and the
+   whole assembly floated.
+
+   A socket is a fixed piece of the chassis. Light stops at its rim, always in
+   the same place, whatever is moving underneath — so the shadow is its own
+   element, it sits over the ball and under the collar, it has no transform on
+   it and it never gets one. The dome now slides beneath a shadow that stays
+   put, which is exactly what you see looking into a real socket, and it is
+   what puts the wall unmistakably INSIDE.
+
+   It is soft and it is deep, and it is deepest UNDER THE TOP LIP: the near
+   wall of a bore is the part the lamp cannot reach at all, so the ring is not
+   even — it is heavier at the top, the way the recess rule states for every
+   cut in this language. */
+.stick-mouth{
+  position:absolute; inset:43px; border-radius:50%; pointer-events:none;
+  box-shadow:
+    inset 0 0 13px 7px rgba(0,0,0,.88),
+    inset 0 7px 16px 1px rgba(0,0,0,.72),
+    inset 0 0 28px 2px rgba(0,0,0,.45),
+    inset 0 -2px 2px rgba(255,255,255,.05);
+}
+/* ── THE HARD EDGE IS THE PANEL'S, AND ONLY THE PANEL'S ─────────────────────
+   The collar was sitting at inset 32 — a crisp 1px black ring drawn exactly
+   where the ball's rim is — so the sphere had a cut-out silhouette stamped
+   round it. That is the one line a ball must not have: a machined edge is a
+   plate that stops, and a sphere never stops, it turns away. Two different
+   objects were sharing one contour and the sharp one won.
+
+   So the collar moves OUT to the mouth of the socket, coincident with the cut
+   in the faceplate, where a hard edge is not only allowed but wanted: that is
+   aluminium meeting air and it should be a knife line. Everything inboard of
+   it — socket wall, then ball — is tone only. */
+.stick-ring{
+  position:absolute; inset:39px; border-radius:50%; pointer-events:none;
+  box-shadow:
+    inset 0 2px 3px rgba(0,0,0,.9),
+    inset 0 -2px 3px rgba(255,255,255,.09),
+    0 0 0 1px rgba(0,0,0,.72),
+    0 1px 0 rgba(255,255,255,.07);
+}
+
+/* ── THE CAP HAS A BODY, AND IT HAD TO ──────────────────────────────────────
+   The cap was ONE disc rotated in a perspective. That is a plane, and a plane
+   has no side: tilt it and the silhouette narrows, but nothing comes into
+   view, so at full deflection you are looking at a slightly squashed circle
+   rather than at a cylinder leaning towards you. It reads flat because it IS
+   flat, and no amount of gradient fixes a missing dimension.
+
+   So the cap is EXTRUDED: twelve discs at 2px of translateZ apart inside the
+   same preserve-3d, each a shade darker and a hair narrower than the one above
+   it. Upright you see only the top, exactly as before. Tilted, the stack's
+   edge turns into view and you see 24px of barrel wall on the near side while
+   the far side disappears behind the face — which is what a thumb stick does,
+   and it costs twelve empty spans and no script.
+
+   THE SLICES ARE LIT FROM THE SAME LAMP as everything else, so the wall is
+   bright where it faces up-left and dies round the other side; that gradient
+   is what makes the stack read as one turned part rather than as a pile. */
+.stick-cap{
+  position:absolute; inset:70px; border-radius:50%;
+  transform-style:preserve-3d;
+  transition:transform .22s cubic-bezier(.22,1.5,.36,1);
+}
+.stick-body{ position:absolute; inset:0; transform-style:preserve-3d; }
+/* THE WALL IS A WALL, so it is nowhere near the value of the top. The first
+   extrusion ramped from #454b55 down over twelve slices, which put the top of
+   the barrel within a few percent of the face above it — a chamfer, not a
+   side. A turned aluminium cap catches the lamp along its top edge and then
+   falls off a cliff, because the wall is vertical and the light is not. So:
+   sixteen slices over 38px, the first two bright as the lit rim, everything
+   below them in shade, and the bottom third effectively black. */
+.stick-body i{
+  position:absolute; inset:0; border-radius:50%;
+  /* THE SKIRT STANDS PROUD OF THE FACE. The stack used to start at exactly the
+     top face's diameter and taper in, so the only way to see any of it was to
+     view the cap from off-axis — which is what the raised camera was for, and
+     what made up and down look like different rotations. A real cap is
+     chamfered: the widest point is a few millimetres BELOW the top, so a rim
+     of barrel shows all the way round whatever angle you are at. Scale runs
+     1.05 at the first slice down to 0.97 at the last, which is a belly, and a
+     belly is what makes it symmetric. */
+  transform:translateZ(calc(var(--i) * -2.4px)) scale(calc(1.055 - var(--i) * 0.0053));
+  background:linear-gradient(158deg,
+    color-mix(in srgb, #6a727e calc(100% - var(--i) * 6.5%), #08090b) 0%,
+    color-mix(in srgb, #3a4049 calc(100% - var(--i) * 7%),   #06070a) 46%,
+    color-mix(in srgb, #14171b calc(100% - var(--i) * 4%),   #050506) 100%);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.28);
+}
+/* the deepest slice carries the drop shadow — it is the bottom of the part,
+   and the shadow it throws on the well is how you know the cap is above it */
+.stick-body i:last-child{
+  box-shadow:0 7px 14px -2px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.75);
+}
+
+/* ── THE LAMP DOES NOT TURN WITH THE PART ───────────────────────────────────
+   This is the rotary teardrop's mistake, made again on a bigger object. A
+   specular highlight painted into the element rotates WITH the element, so a
+   cap "lit from above left" spends half its travel lit from below right — and
+   the eye reads that instantly as a sticker being dragged around rather than
+   as a solid turning under a fixed light. It is the single thing that was
+   making this look painted rather than lit.
+
+   So the highlight is a POSITION, updated every frame against the tilt: lean
+   the cap towards the lamp and the hot spot slides down the face and swells,
+   lean it away and it slips off the far edge and the whole face drops into
+   shade. Three custom properties, one line each in paint(), no extra element.
+   `--lit` is the cosine of the face against the lamp; the other two are where
+   the lamp lands on it. */
+.stick-top{
+  --sx:34%; --sy:26%; --lit:1;
+  position:absolute; inset:0; border-radius:50%;
+  transform:translateZ(1px);
+  background:
+    radial-gradient(56% 46% at var(--sx) var(--sy),
+      rgba(255,255,255,calc(.26 * var(--lit))), transparent 64%),
+    linear-gradient(168deg,#3c424b 0%,#2a2f36 46%,#1c2025 78%,#141719 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,calc(.24 * var(--lit))),
+    inset 0 -2px 4px rgba(0,0,0,.7),
+    0 0 0 1px rgba(0,0,0,.7);
+  /* the face as a whole gains and loses light with its angle */
+  filter:brightness(calc(.78 + .3 * var(--lit)));
+}
+.stick.grabbed .stick-cap{ transition:none; }
+/* the dished face and its three dimples — a thumb rest, and the reason your
+   thumb knows where it is without looking */
+/* ── THE DISH RELIGHTS TOO, AND IT LIGHTS THE OTHER WAY ─────────────────────
+   The thumb rest was the last fixed highlight on the part: the cap's face was
+   being relit every frame while the dish inside it kept a hot spot painted at
+   32% 28% forever, so the middle of the control stayed lit from a lamp that
+   was no longer there. It inherits `--sx`, `--sy` and `--lit` from the face
+   above it — custom properties inherit, so there is nothing to wire.
+
+   BUT IT IS CONCAVE, so it does not take the same numbers. A dome is bright on
+   the side facing the lamp; a dish is bright on the wall OPPOSITE it, because
+   that is the wall the light falls on — which is the same concave-polarity
+   rule `--chamfer` states for every recess in this language, and getting it
+   backwards is what makes a dish read as a bump. So: the position is mirrored
+   through the centre, `calc(100% - …)`, and nothing else changes. */
+.stick-face{
+  position:absolute; inset:7px; border-radius:50%;
+  background:
+    radial-gradient(circle at calc(100% - var(--sx,34%)) calc(100% - var(--sy,26%)),
+      rgba(255,255,255,calc(.17 * var(--lit,1))), transparent 60%),
+    radial-gradient(circle at 50% 58%, #191d21 0%, #23282e 62%, #2b3138 100%);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.09);
+}
+
+/* ── FOUR DIMPLES, ON THE AXES ──────────────────────────────────────────────
+   It was two, side by side, which is a face — and once you have seen the two
+   dots as eyes you cannot stop, which is not what you want on a machine
+   control. Four, and on the CROSS, so the thumb finds X and Y by feel before
+   it has moved anything: the pattern is the axes, in the same order the
+   chevrons and the letters outside the well are in, and it turns with the cap
+   because it is moulded into it.
+
+   THEY ARE DIMPLES, NOT STUDS, so they take the recess polarity: hard dark
+   under the top edge, a hairline of light along the bottom. The light line
+   rides `--lit` with everything else, so they go flat as the cap turns away
+   from the lamp — which is most of what tells you they are cut IN. */
+.stick-dot{
+  position:absolute; width:5.5px; height:5.5px; border-radius:50%;
+  background:radial-gradient(circle at 50% 72%, #363c44, #13161a 80%);
+  box-shadow:
+    inset 0 1.2px 1.6px rgba(0,0,0,.9),
+    inset 0 -1px 0 rgba(255,255,255,calc(.20 * var(--lit,1))),
+    0 1px 0 rgba(255,255,255,calc(.10 * var(--lit,1)));
+}
+.stick-dot.n{ top:11%;    left:50%; margin-left:-2.75px; }
+.stick-dot.s{ bottom:11%; left:50%; margin-left:-2.75px; }
+.stick-dot.w{ left:11%;   top:50%;  margin-top:-2.75px; }
+.stick-dot.e{ right:11%;  top:50%;  margin-top:-2.75px; }
+
+/* the four bearings, engraved, lit only for the one you are asking for */
+.stick-ch{
+  position:absolute; width:11px; height:11px; pointer-events:none;
+  border-left:2px solid #2f343b; border-top:2px solid #2f343b; border-radius:2px;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.07));
+  transition:border-color .1s, filter .1s;
+}
+.stick-ch.n{ top:20px;  left:50%; margin-left:-5.5px; transform:rotate(45deg); }
+.stick-ch.s{ bottom:20px; left:50%; margin-left:-5.5px; transform:rotate(225deg); }
+.stick-ch.w{ left:20px;  top:50%; margin-top:-5.5px; transform:rotate(-45deg); }
+.stick-ch.e{ right:20px; top:50%; margin-top:-5.5px; transform:rotate(135deg); }
+.stick-ch.on{
+  border-color:var(--led);
+  filter:drop-shadow(0 0 5px rgba(255,130,30,.75));
+}
+
+/* ── THE AXIS LETTERS ───────────────────────────────────────────────────────
+   A chevron says THAT WAY. It does not say which axis that way is, and on a
+   machine that is the whole question — the pad answers it in six places and
+   the stick was answering it nowhere, so the two panels were not actually
+   showing the same control with two XY parts. They are silkscreened outside
+   the bearings, engraved and dark like every other name on the panel, and the
+   pair lights with the chevron it belongs to. */
+.stick-ax{
+  position:absolute; pointer-events:none;
+  font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.1em;
+  color:#4b5058; text-shadow:0 1px 0 rgba(255,255,255,.06);
+  transition:color .1s, text-shadow .1s;
+}
+/* THE BEZEL IS WHAT THE LEGENDS NEEDED, and it is why the box went from 190 to
+   216 while the socket stayed exactly the same size. Every inset below grew by
+   13px, so the well, the ball and the cap are unchanged and the whole increase
+   went into the FACEPLATE around them — the legends were crowding the socket
+   because there was nowhere else for them to be, not because they were badly
+   placed. Letter, gap, arrow, gap, socket: 8px and 9px, even, all four sides.
+
+   A control needs a margin of blank plate for the same reason a word needs a
+   margin of paper: the marks around it are only legible as SEPARATE marks if
+   there is quiet between them. */
+.stick-ax.n{ top:2px;    left:50%; transform:translateX(-50%); }
+.stick-ax.s{ bottom:2px; left:50%; transform:translateX(-50%); }
+.stick-ax.w{ left:1px;   top:50%;  transform:translateY(-50%); }
+.stick-ax.e{ right:1px;  top:50%;  transform:translateY(-50%); }
+.stick-ax.on{ color:var(--led); text-shadow:0 0 7px rgba(255,130,30,.6); }
+
+.stick-z{ display:flex; flex-direction:column; gap:7px; flex:0 0 62px; }
+.stick-z .jog-k{ width:100%; }
+.stick-z .bay-cap{ margin-bottom:1px; }
+
+/* HOME IS NOT ON THE STICK, AND IT IS NOT OPTIONAL EITHER.
+   It is the most-pressed key on the panel, and the stick panel shipped without
+   one — which is not a simplification, it is a panel you cannot start a job
+   from. But it does not go in the well: a rapid to machine zero triggered by
+   the same thumb that is jogging is the one input you must not be able to make
+   by accident.
+
+   IT SITS ABOVE THE WELL, AND IT IS THE BIGGEST KEY ON THE PANEL. Below, it
+   was a footnote to the jog control; it is not one. It is the first thing you
+   press in a session and the last, and a panel reads top down. So: full width,
+   44px, its own glyph, and the only backlit legend on this panel that is lit
+   while the machine is idle rather than while something is happening — the
+   difference between a key that reports and a key that INVITES. */
+.stick-home{ display:flex; }
+.stick-homekey{
+  flex:1; height:44px; gap:10px; border-radius:9px;
+  font-family:var(--font); font-size:11.5px; font-weight:700; letter-spacing:.18em;
+  color:#c3c8d1;
+  background:linear-gradient(180deg,#41464f,#2b2f35 52%,#1f2226);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 4px 0 #0d0e10,
+    0 6px 12px rgba(0,0,0,.7);
+}
+/* THE ORIGIN GLYPH NEEDS THE ROOM. Three axes and three arrowheads inside 16px
+   is six marks converging on one point, and at that size they close up into a
+   blob — it is the most detailed icon on the panel and it gets the most space.
+   Slightly thinner stroke than the panel's other glyphs for the same reason:
+   the detail is in the gaps. */
+.stick-homekey svg{ width:19px; height:19px; flex:0 0 19px; stroke-width:1.7; }
+.stick-homekey:hover{ color:#fff; background:linear-gradient(180deg,#4a505a,#32373e 52%,#23262b); }
+.stick-homekey:active{
+  transform:translateY(3px);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.1),
+             0 1px 0 #0d0e10;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .stick-cap{ transition:none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE PEN BANK — a key that carries the height it goes to
+
+   The one control in this app that has no analogue anywhere else in targz.
+   PEN UP / PEN DOWN / PUMP are three named Z heights, and the app draws them
+   as a button with a small number in it plus a separate pencil button that
+   opens a popover to change that number. Two objects for one fact.
+
+   Here it is one part: a key with a lit window set into its face. Press the
+   key and the pen goes there; turn the knob beside it and the window follows.
+   The window is `typeable`, so the number is reachable by keyboard without any
+   popover existing at all — which is the whole popover deleted. */
+.penbank{ display:flex; flex-direction:column; gap:8px; }
+.penrow{ display:flex; align-items:center; gap:9px; }
+.penrow .key{
+  flex:1; height:42px; gap:9px; padding:0 11px; justify-content:flex-start;
+  font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:.1em;
+}
+.penrow .key svg{ width:15px; height:15px; flex:0 0 15px; }
+.pen-win{
+  margin-left:auto; min-width:56px; height:20px; padding:0 8px;
+  display:flex; align-items:center; justify-content:flex-end;
+  border-radius:4px;
+  background:linear-gradient(180deg,#080a09,#101312);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), inset 0 -1px 0 rgba(255,255,255,.06);
+  font-family:var(--font); font-size:11px; font-weight:700;
+  font-variant-numeric:tabular-nums;
+  color:#7CFFB0; text-shadow:0 0 6px rgba(124,255,176,.65);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RUN — and the guard over the one that hurts
+
+   THE GUARD IS THE ARGUMENT. ABORT drops the controller into ALARM: motion
+   stops where it is, the job is gone, and getting back needs an unlock and a
+   re-home. The app draws it as a button the same size as PAUSE with a red
+   tint on it, one pixel of pointer travel away from the two keys you press
+   fifty times a session. Colour is not a guard. A hinged cover is: it takes
+   two deliberate actions, the first of which is reversible, and the second is
+   physically impossible until the first has happened.
+
+   The kit has no guarded anything. It is the only genuinely NEW mechanism on
+   this page — everything else is an existing part in a new arrangement. */
+.runbank{ display:flex; flex-direction:column; gap:9px; }
+.runbank .key.big{
+  height:44px; gap:9px; font-family:var(--font); font-size:12px;
+  font-weight:700; letter-spacing:.12em;
+}
+.runbank .row2{ display:flex; gap:9px; }
+.runbank .row2 > *{ flex:1; }
+
+.guardwrap{
+  position:relative; border-radius:9px; padding:0;
+  perspective:420px;
+}
+/* the cover: a smoked polycarbonate flap on a hinge along its top edge */
+.guard{
+  position:absolute; inset:0; z-index:3; cursor:pointer;
+  border:0; border-radius:9px; padding:0;
+  transform-origin:top center;
+  transition:transform .34s cubic-bezier(.3,1.1,.5,1), box-shadow .34s;
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(255,106,0,.16) 0 7px, rgba(0,0,0,.30) 7px 14px),
+    linear-gradient(180deg, rgba(120,130,145,.30), rgba(40,44,50,.44));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.34),
+    inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 7px rgba(0,0,0,.65);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.16em;
+  color:#dfe3ea; text-shadow:0 1px 2px rgba(0,0,0,.9);
+}
+.guard::after{  /* the hinge pin */
+  content:''; position:absolute; left:8px; right:8px; top:-2px; height:3px;
+  border-radius:2px;
+  background:linear-gradient(180deg,#4b5058,#232629);
+  box-shadow:0 1px 0 rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.3);
+}
+.guardwrap.open .guard{
+  transform:rotateX(-108deg);
+  box-shadow:0 14px 22px -10px rgba(0,0,0,.9);
+}
+/* while the cover is down the key under it cannot be reached at all — this is
+   pointer-events, not a disabled attribute, because the key is not disabled:
+   it is COVERED, and those are different facts. Open, the cover is out of the
+   way and out of the pointer's way too, or a lifted flap would still be
+   catching the clicks aimed at the key it just uncovered. */
+.guardwrap:not(.open) .key{ pointer-events:none; }
+.guardwrap.open .guard{ pointer-events:none; }
+.guardwrap .key{ width:100%; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   E-STOP — a part, not a poster
+
+   THE FIRST ONE WAS A COSTUME AND IT IS WORTH SAYING WHY. It was 104px of
+   bright red on a yellow hazard plate with EMERGENCY STOP printed across the
+   cap and two engraved captions under it. Three separate mistakes, and all
+   three are the same mistake — drawing the SIGNAGE around a machine instead of
+   the machine:
+
+     · a real mushroom has NO TEXT ON THE CAP. The shape is the legend. Text
+       on it is what a picture of an e-stop has, because a picture has to
+       explain itself and a part does not;
+     · the hazard stripes belong to the ENCLOSURE, on a door somebody might
+       open. Putting them under one button is a warning about nothing;
+     · and at 104px on a panel whose largest control is a 52px knob it was not
+       emphatic, it was out of scale — which reads as loud rather than as
+       important, and the two are opposites.
+
+   What is left is the part: a 58px cap in a machined collar, seated in the run
+   panel with the rest of the hardware, dark red rather than pillar-box, and
+   the legend ENGRAVED IN THE PANEL beside it the way it is on the real thing.
+   It is still the biggest single cap here and it still latches. */
+.estop-mount{
+  display:flex; align-items:center; gap:13px;
+  padding:10px 12px; border-radius:10px;
+  background:linear-gradient(180deg,#141619,#1b1e22);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.055);
+}
+/* the collar: the cutout the shaft comes through, and the only reason the cap
+   reads as MOUNTED rather than as a circle drawn on the panel */
+.estop-collar{
+  width:70px; height:70px; flex:0 0 70px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(160deg,#2b2e33,#15171a);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.9),
+    inset 0 -1px 0 rgba(255,255,255,.10),
+    0 1px 0 rgba(255,255,255,.06);
+}
+.estop{
+  width:58px; height:58px; border-radius:50%; border:0; padding:0; cursor:pointer;
+  position:relative; flex:0 0 58px; font-size:0;
+  background:
+    radial-gradient(circle at 38% 28%, #d8564a 0%, #B01A15 38%, #7d0d0a 78%, #560705 100%);
+  box-shadow:
+    inset 0 -4px 9px rgba(0,0,0,.55),
+    inset 0 2px 4px rgba(255,255,255,.18),
+    0 5px 0 #3a0403,
+    0 7px 12px rgba(0,0,0,.7);
+  transition:box-shadow .09s, transform .09s;
+}
+.estop::after{  /* the moulded ring pressed into the top of the cap */
+  content:''; position:absolute; inset:9px; border-radius:50%;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.3);
+}
+.estop.latched{
+  transform:translateY(4px);
+  box-shadow:
+    inset 0 -2px 6px rgba(0,0,0,.65),
+    inset 0 2px 5px rgba(0,0,0,.45),
+    0 1px 0 #3a0403,
+    0 3px 7px rgba(0,0,0,.8);
+}
+/* the legend is CUT INTO THE PANEL beside the cap, like every other name here */
+.estop-leg{
+  display:flex; flex-direction:column; gap:3px;
+  font-family:var(--font); letter-spacing:.16em;
+  color:#5c616a; text-shadow:0 1px 0 rgba(255,255,255,.055);
+}
+.estop-leg b{ font-size:9.5px; font-weight:700; }
+.estop-leg span{ font-size:8px; letter-spacing:.1em; color:#474c54; }
+/* latched, the legend is the only thing that lights — the cap is already down */
+.estop-mount.held .estop-leg b{ color:var(--led-red); text-shadow:0 0 8px rgba(255,45,45,.55); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE ANNUNCIATOR — legends that are dark until they are not
+
+   The app has ONE alarm banner: a red bar that appears with a sentence in it.
+   A machine does not have one alarm, it has a dozen inputs, and the question
+   at the moment it halts is WHICH — limits, door, probe, hold, e-stop. A
+   sentence answers that in prose, one alarm at a time, and only while it is
+   showing.
+
+   An annunciator answers it as a shape. Every legend is engraved and DARK,
+   permanently, so the panel is a map you have already learnt by the time you
+   need it — and the one that lights is the one that tripped. Reading it is
+   not reading. The dark legends are the whole design: a lamp panel that only
+   draws the active cells teaches you nothing and reads as an empty box. */
+.annun{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:7px;
+  padding:9px; border-radius:11px;
+  background:linear-gradient(180deg,#141619,#1b1e22);
+  box-shadow:
+    inset 0 3px 8px rgba(0,0,0,.85),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.06);
+}
+.ann{
+  height:46px; border:0; border-radius:6px; cursor:pointer; padding:0 6px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  font-family:var(--font); font-size:9px; font-weight:700; letter-spacing:.1em;
+  /* UNLIT: the legend is a CUT in a dark cell, not grey text on a button */
+  color:#3d4148; text-shadow:0 1px 0 rgba(255,255,255,.05);
+  background:linear-gradient(180deg,#0d0f11,#141719);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.9),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.05);
+  transition:color .08s, background .08s, box-shadow .08s, text-shadow .08s;
+}
+.ann small{ font-size:7.5px; letter-spacing:.08em; opacity:.8; font-weight:600; }
+.ann:hover{ color:#565b64; }
+/* LIT. The cell fills with the lamp behind it, which is what a legend lamp
+   does — the whole rectangle glows, not the letters. */
+.ann.lit{
+  color:#1a0f06;
+  text-shadow:0 1px 0 rgba(255,255,255,.28);
+  background:linear-gradient(180deg, var(--lamp), color-mix(in srgb,var(--lamp) 72%,#000));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.4),
+    inset 0 -2px 5px color-mix(in srgb,var(--lamp) 45%,#000),
+    0 0 14px color-mix(in srgb,var(--lamp) 55%,transparent),
+    0 0 30px color-mix(in srgb,var(--lamp) 25%,transparent);
+}
+/* A NEW alarm flashes until it is acknowledged, and then holds steady. That
+   is not decoration either: a lamp that came on while you were looking away
+   and a lamp that has been on for ten minutes are different facts.
+
+   BUT A REAL ANNUNCIATOR'S FLASH DOES NOT SURVIVE BEING PUT ON A SCREEN AS-IS.
+   The first one was the honest transcription — 1.6Hz, hard edges, half on and
+   half at a third brightness — and on a 46px cell of saturated orange sitting
+   40cm from your face that is not a warning lamp, it is a strobe. You cannot
+   read the panel around it and you want it gone, which is the exact opposite
+   of what the lamp is for: an alarm you silence by looking away has failed.
+
+   THE RHYTHM IS WHAT CARRIES THE MEANING, NOT THE DEPTH. So the beat stays
+   hard-edged and machine-like, and slows to about 0.8Hz; what shrinks is the
+   amplitude and the duty — a short dip rather than half the cycle dark, and
+   down to 62% rather than to nearly out. It still reads instantly as "this one
+   is new" in peripheral vision, and you can still read the cell while it does
+   it. Amplitude was the wrong axis to be faithful on. */
+@keyframes annflash{
+  0%, 74%  { filter:brightness(1); }
+  75%, 100%{ filter:brightness(.62); }
+}
+.ann.lit.newalarm{ animation:annflash 1.25s steps(1,end) infinite; }
+/* AND IT STOPS ON ITS OWN. A lamp that flashes forever is one nobody presses
+   UNLOCK for — they just stop seeing it. Ten cycles is long enough to catch
+   an eye coming back to the panel, after which it holds lit, which is still
+   the whole message. */
+.ann.lit.newalarm{ animation-iteration-count:10; }
+@media (prefers-reduced-motion: reduce){
+  .ann.lit.newalarm{ animation:none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE METER — progress as lit segments, not as a filled rectangle
+
+   A progress bar is a rectangle that grows, and the thing it is worst at is
+   the question actually being asked of it, which is "is it still moving". A
+   fill creeping 0.3% a minute is indistinguishable from a fill that stopped.
+   Segments quantise it: the lit count is a number you can read in the dark and
+   the next one arriving is an EVENT. Same data, and it ticks.
+
+   The percentage keeps its own glass beside the meter, because segments are
+   for watching and a number is for reporting. */
+.meter{
+  display:flex; gap:2px; height:22px; padding:4px; border-radius:7px;
+  background:linear-gradient(180deg,#0a0c0d,#121517);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.92), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.06);
+}
+.meter i{
+  flex:1; border-radius:1.5px;
+  background:rgba(255,255,255,.05);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.7);
+  transition:background .1s, box-shadow .1s;
+}
+.meter i.on{
+  background:var(--led);
+  box-shadow:0 0 6px rgba(255,106,0,.75), inset 0 1px 0 rgba(255,255,255,.35);
+}
+/* the last lit segment is the one arriving, so it is the hot one */
+.meter i.on.head{ background:var(--led-hot); box-shadow:0 0 10px rgba(255,178,115,.95); }
+.meter.done i.on{ background:#7CFFB0; box-shadow:0 0 7px rgba(124,255,176,.8); }
+
+/* four engraved fields under the meter: elapsed / remaining / line / travel */
+.stats{ display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.stat{
+  padding:6px 9px 7px; border-radius:7px;
+  background:linear-gradient(180deg,#141619,#1a1d20);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.055);
+}
+.stat b{
+  display:block; font-family:var(--font); font-size:8px; letter-spacing:.16em;
+  color:#5b6069; font-weight:600; text-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+.stat span{
+  display:block; margin-top:3px;
+  font-family:var(--font); font-size:13px; font-weight:700;
+  font-variant-numeric:tabular-nums;
+  color:#c6cad2;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE TAPE — the console as a roll of paper, not a text area
+
+   The app's console is a dark div that scrolls. Everything in this language is
+   a physical part, and the physical part a machine log has always been is a
+   printer roll behind a window: it comes UP from the bottom, the newest line
+   is at the tear edge, and what has gone past is still there and slightly
+   darker because it is further into the machine.
+
+   IT IS ALSO THE ONE PLACE ON THE PANEL WHERE COLOUR IS DATA. Sent lines are
+   the phosphor, replies are dimmer, errors are red. That is three states in
+   one column and no icons. */
+.tape{
+  height:186px; overflow:hidden; position:relative;
+  padding:10px 12px 4px; border-radius:9px;
+  background:linear-gradient(180deg,#07090a 0%,#0d1011 40%,#0a0c0d 100%);
+  box-shadow:inset 0 3px 9px rgba(0,0,0,.95), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.06);
+  display:flex; flex-direction:column; justify-content:flex-end; gap:2px;
+  font-family:var(--font); font-size:10.5px; line-height:1.5;
+}
+.tape::before{  /* the roller shadow at the top — the paper comes out of it */
+  content:''; position:absolute; left:0; right:0; top:0; height:26px; pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,0));
+}
+.tape-line{ display:flex; gap:9px; white-space:pre; }
+.tape-line .t{ color:#3f444b; flex:0 0 auto; }              /* the time column */
+.tape-line.out .m{ color:#7CFFB0; text-shadow:0 0 6px rgba(124,255,176,.4); }
+.tape-line.in  .m{ color:#6e757e; }
+.tape-line.err .m{ color:#FF6B6B; text-shadow:0 0 7px rgba(255,45,45,.45); }
+.tape-line.sys .m{ color:var(--led); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE STATUS RAIL — the chassis edge, and it is not a control
+
+   Along the bottom of the case: state, port, baud, queue, machine position.
+   Nothing on it can be pressed, which is why it is a strip of engraved cells
+   rather than a strip of keys — the app's status bar is drawn with the same
+   borders and paddings as its toolbars and reads as a row of things you might
+   click. Here it is milled INTO the case and it never moves. */
+.rail{
+  display:flex; align-items:center; gap:0; width:100%;
+  border-radius:9px; padding:0 2px; height:34px;
+  background:linear-gradient(180deg,#121417,#191c20);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.06);
+  font-family:var(--font); font-size:9.5px; letter-spacing:.1em;
+}
+.rail-cell{
+  display:flex; align-items:center; gap:7px; padding:0 14px; height:20px;
+  color:#7d828c; white-space:nowrap;
+  border-right:1px solid rgba(0,0,0,.55);
+  box-shadow:1px 0 0 rgba(255,255,255,.04);
+}
+.rail-cell:last-child{ border-right:0; box-shadow:none; }
+.rail-cell b{ color:#c6cad2; font-weight:700; font-variant-numeric:tabular-nums; }
+.rail-gap{ flex:1; }
+
+/* ── small shared bits ──────────────────────────────────────────────────── */
+
+/* a knob column with its own reset key under it — the overrides */
+.ovrcol{ display:flex; flex-direction:column; align-items:center; gap:9px; }
+.ovrcol .micro{ width:auto; padding:0 9px; font-family:var(--font); font-size:8px;
+                letter-spacing:.12em; font-weight:700; }
+
+/* TYPING INTO THE NEW WINDOWS. `typeable()` is the kit's and works on any
+   element; the input it opens is only STYLED inside .kval and .lcd, so the two
+   lit windows this page invents have to claim the same rule or a double-click
+   drops a white browser field into the middle of a DRO. Same declarations, and
+   they are copied rather than generalised because physical-ui.css is not being
+   edited by this document. */
+.dro-num input.kedit,
+.pen-win input.kedit{
+  width:100%; min-width:0; border:0; padding:0; margin:0; background:none;
+  text-align:inherit; font:inherit; color:inherit; text-shadow:inherit;
+  font-variant-numeric:tabular-nums; letter-spacing:inherit;
+  caret-color:#7CFFB0;
+}
+.dro-num input.kedit:focus,
+.pen-win input.kedit:focus{ outline:none; }
+.dro-num:has(input.kedit),
+.pen-win:has(input.kedit){
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 0 0 1px rgba(124,255,176,.35),
+             0 0 7px rgba(124,255,176,.20);
+}
+
+/* the machine page's boxes are wider than the layer dock's 318px: a DRO row
+   and a jog pad next to a Z column do not fit in a phone-width panel, and
+   pretending they do is how the app's own left column ended up 210px of
+   stacked accordions.
+
+   THE POSITION PANEL IS SIZED FROM THE WIDEST COORDINATE IT CAN EVER SHOW, not
+   from the tidy ones. `-594.000` at 25px mono is ~120px of glass; three of
+   those plus the gaps and the padding is 512, and anything narrower clips the
+   one reading you actually need to trust. It was 392 and the third axis hung
+   over the edge of the case. */
+.box.wide{ width:392px; flex:0 0 392px; }
+.box.xwide{ width:452px; flex:0 0 452px; }
+.box.dro-strip{ width:512px; flex:0 0 512px; }
+
+/* the head's own lamp, for a panel whose subject has a state */
+.head .lamp{ margin-left:auto; }

@@ -546,12 +546,19 @@ const SFX = (() => {
      That is the only reason `MASTER` is inside `strike` rather than on a master
      GainNode across the whole bank.
 
+     0.55 IS TUNED BY EAR AND IT WENT DOWN BEFORE IT WENT UP. It was 1.0 while
+     the voices were still oscillators, cut to 0.34 the moment they became
+     impacts — a noise burst through a bandpass carries far more perceived
+     level than a chirp at the same peak — and that overshot: the panel became
+     something you had to listen FOR. Discreet is not the same as inaudible.
+     The number is here, alone, precisely so this is one edit and not fourteen.
+
      AND THE BODY IS CUT HARDER THAN THE TRANSIENT, because loudness at these
      levels is almost all in the low end: an equal cut leaves a click that
      measures quiet and still THUDS. The transient is what says the object is
      hard; the body is what says it is heavy, and a discreet panel is one whose
      parts are hard and light. */
-  const MASTER = .34;
+  const MASTER = .55;
 
   /* AN IMPACT: a slice of noise shaped by what it hit, over an optional thud. */
   const strike = (f, q, dur, g0, body, bodyG, bodyDur) => {

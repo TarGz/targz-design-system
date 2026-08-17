@@ -48,7 +48,7 @@ project-local CLAUDE.md. Then:
 
 ## This project
 
-- `index.html` is the design system. It is a **self-contained bundle**: the real markup is
+- `old/index.html` is the shipping design system, the light-palette one. It is a **self-contained bundle**: the real markup is
   JSON-escaped onto a single line inside `<script type="__bundler/template">`. To edit it, decode that line
   with `JSON.parse`, change the HTML, then re-encode with `JSON.stringify(...).replace(/\//g, '\\u002F')` —
   escaping every `/` is what stops a literal `</script>` from breaking out of the host tag. Verify the

@@ -1,0 +1,165 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKEW — HOME. The door, and the nav bar that is its own spec.
+
+   Loaded after physical-ui.css, which supplies every part used here: .strip is
+   the nav chassis, .chan the milled divider, .piano/.pkey the page switcher,
+   .lcd the lit window, .box the card, .key the OPEN control. Nothing in this
+   file invents a control; it docks parts that already exist and lays out a
+   grid of cards.
+
+   THE NAV BLOCK BELOW MIGRATES. It lives here only because the other two
+   documents do not carry the bar yet. The moment one of them does, the block
+   marked NAV moves to physical-ui.css whole and this file keeps the layout.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAV — migrates to physical-ui.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* THE DOCK IS FULL WIDTH AND THE BAR IS NOT, which is the whole reason the
+   dock has pointer-events:none. A sticky rail spanning the viewport with a
+   180px bar floating in the middle of it is an invisible 1160px lid over the
+   top of every page: the first row of anything below it stops taking clicks
+   and nothing on screen says why. The bar puts them back on for itself. */
+.navdock{
+  position:sticky; top:14px; z-index:40;
+  display:flex; justify-content:center;
+  margin:14px 0 -46px; padding:0 32px;
+  pointer-events:none;
+}
+.navdock > .strip{ pointer-events:auto; gap:8px; padding:8px 11px; }
+
+/* SEATED. Past the first scroll the bar is over content rather than over the
+   room, so it deepens its cast shadow and takes an outline. Both halves of
+   that matter: the shadow says it is above, the outline stops it dissolving
+   into a panel of the same metal passing underneath. */
+.navdock > .strip{ transition:box-shadow .18s ease; }
+.navdock.seated > .strip{
+  box-shadow:
+    0 40px 56px -22px rgba(0,0,0,.96),
+    0 10px 18px -6px rgba(0,0,0,.85),
+    0 0 0 1px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -1px 0 rgba(0,0,0,.9);
+}
+/* the sentinel the observer watches. 1px, at the top, and never seen. */
+.nav-sentinel{ height:1px; margin:0; }
+
+/* the wordmark is .demo-etch at nav size: engraved, not printed */
+.nav-mark{ font-size:12.5px; letter-spacing:.2em; padding:0 8px 0 5px; }
+
+.nav-pages{ padding:5px; gap:6px; }
+/* AN ANCHOR, NOT A BUTTON. These go to documents, so the part underneath has
+   to be the part that goes to documents: middle-click opens a tab, the status
+   bar shows where it lands, and none of that survives a button with an
+   onclick. .pkey is a look; <a> is the mechanism. */
+.nav-link{
+  height:28px; min-width:0; padding:0 15px;
+  font-size:10px; letter-spacing:.14em; text-decoration:none;
+}
+/* THE PAGE YOU ARE ON IS A SPAN. A link to here is a link to nowhere, and a
+   key that is already down is not a control. It keeps .pkey.is-down for the
+   travel and the lamp, and loses the cursor and the href. */
+span.nav-link{ cursor:default; }
+.nav-ver{ margin-left:2px; }
+
+@media (prefers-reduced-motion: reduce){
+  .navdock > .strip{ transition:none; }
+}
+
+/* under 620px the switcher is the bar: the wordmark and the version window go,
+   because three destinations are the only part of it that is load-bearing */
+@media (max-width:620px){
+  .navdock{ padding:0 12px; }
+  .nav-mark, .nav-ver, .navdock .chan{ display:none; }
+  .nav-link{ padding:0 11px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DOCUMENT CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+.doc-grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(336px,1fr));
+  gap:18px; margin-top:26px;
+}
+/* .box is a fixed 318px because every other caller of it is a panel on a
+   stage. In a grid the track is the width. */
+.doc{ width:auto; flex:0 0 auto; user-select:auto; }
+.doc-body{ padding:14px 16px 15px; position:relative; z-index:2;
+           display:flex; flex-direction:column; gap:11px; }
+.doc-kick{ font-family:var(--font); font-size:9px; letter-spacing:.16em;
+           text-transform:uppercase; color:var(--led); margin:0; }
+.doc-line{ font-size:13px; line-height:1.6; color:#8b909a; margin:0; }
+.doc-line b{ color:#c6cad1; font-weight:600; }
+.doc-list{ margin:0; padding:0; list-style:none;
+           display:flex; flex-wrap:wrap; gap:5px; }
+.doc-list li{ font-family:var(--font); font-size:9px; letter-spacing:.08em;
+              color:#797e88; padding:3px 7px; border-radius:4px;
+              background:linear-gradient(180deg,#171a1c,#1e2124);
+              box-shadow:inset 0 1px 3px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.06); }
+.doc-foot{ display:flex; align-items:center; gap:9px; margin-top:2px; }
+/* .act already sets the height, padding, gap and legend. An anchor only needs
+   its underline taken off. */
+.doc-open{ text-decoration:none; }
+.doc-file{ margin-left:auto; }
+
+/* ── the papers: a milled well of engraved rows, because a .md is a document
+      you open and not a panel you operate ─────────────────────────────────── */
+.paper-lab{
+  margin:34px 0 8px; font-family:var(--font); font-size:9px;
+  letter-spacing:.18em; text-transform:uppercase; color:#5a5f68;
+}
+.papers{
+  padding:9px; border-radius:11px;
+  background:linear-gradient(180deg,#141618,#1a1d20);
+  box-shadow:inset 0 3px 8px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.06);
+  display:flex; flex-direction:column; gap:1px;
+}
+.paper{
+  display:flex; align-items:center; gap:11px; padding:9px 11px;
+  border-radius:7px; text-decoration:none; color:#9aa0aa;
+  font-size:12.5px; transition:background .12s, color .12s;
+}
+.paper:hover{ color:#e2e5ea; background:linear-gradient(180deg,#232629,#1c1f22); }
+.paper svg{ width:14px; height:14px; flex:0 0 14px;
+            fill:none; stroke:#0d0f12; stroke-width:1.7;
+            stroke-linecap:round; stroke-linejoin:round;
+            filter:drop-shadow(0 1px 0 rgba(255,255,255,.11)); }
+.paper:hover svg{ stroke:#0a0b0c; }
+.paper b{ color:#c6cad1; font-weight:600; }
+.paper .tagcut{ margin-left:auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SPEC TABLE — reference rows, not prose
+   ═══════════════════════════════════════════════════════════════════════════ */
+.spec{
+  width:100%; border-collapse:collapse; margin-top:26px;
+  font-size:13px; line-height:1.6;
+}
+.spec th{
+  text-align:left; padding:9px 12px; border-bottom:1px solid #212327;
+  font-family:var(--font); font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+  color:#5a5f68; font-weight:600;
+}
+.spec td{ padding:11px 12px; border-bottom:1px solid #17191c; color:#8b909a; vertical-align:top; }
+.spec tr:last-child td{ border-bottom:0; }
+.spec td:first-child{
+  width:24%; min-width:150px; color:#c6cad1;
+  font-family:var(--font); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+}
+.spec td b{ color:#c6cad1; font-weight:600; }
+.spec code{
+  font-family:var(--font); font-size:11.5px; color:#a9b0ba;
+  background:#121417; padding:1.5px 5px; border-radius:4px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.7);
+}
+/* the rows a dev gets wrong. Amber, because it is a caution and not a failure:
+   every one of them is code that runs and then behaves oddly six weeks later. */
+.spec tr.trap td{ background:rgba(255,196,0,.045); }
+.spec tr.trap td:first-child{ color:#E3B45E; box-shadow:inset 2px 0 0 rgba(255,196,0,.5); }
+
+@media (max-width:620px){
+  .spec td:first-child{ width:auto; min-width:0; }
+  .spec, .spec td{ font-size:12px; }
+}

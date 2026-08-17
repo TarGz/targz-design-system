@@ -1,6 +1,23 @@
-export const version = '1.20.0';
+export const version = '1.21.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.21.0',
+    date: '2026-08-17',
+    changes: [
+      'THE REPO HAS A FRONT DOOR: index.html, a home that lists the documents instead of being one. Two explorations and the shipping system were three files you had to already know the names of, and "we may have more pages later" is the condition under which that stops working. One PAGES registry builds the switcher and the cards, so adding a document is adding a line',
+      'THE NAV BAR IS ITS OWN SPEC. Section 02 documents the bar at the top of the page by building a second one from the same navBar() function onto a stage. A spec whose specimen is an independent caller of the thing it describes cannot drift from it, which is the failure mode of every component page that draws its examples by hand',
+      'AND IT IS AN ASSEMBLY, NOT A NEW PART. .strip was already introduced in physical-ui.css as "the nav bar, a control strip screwed to the desk"; the dividers are .chan, the switcher is .piano, the version window is .lcd. Two things are new: .navdock, the sticky rail, and .nav-mark, which is .demo-etch at nav size',
+      'THE DESTINATIONS ARE ANCHORS AND THE PAGE YOU ARE ON IS A SPAN. A .pkey button with an onclick that sets location looks identical and loses middle-click, cmd-click, the status bar preview and copy-link: .pkey is a look, the anchor is the mechanism. And a link to where you already are is a link to nowhere, so it stops being a link and keeps only the travel, the recess and the lamp',
+      'THE DOCK CARRIES pointer-events:none because it spans the viewport and the bar does not. Without it a sticky nav is an invisible full-width lid: the top row of every page below stops taking clicks and nothing on screen says why. The strip switches them back on for itself',
+      'The seated state is one IntersectionObserver on a 1px sentinel, not a scroll listener: two callbacks in the life of the page instead of sixty a second. The version window reads version.js by dynamic import, because a number written into two files drifts on the first commit that only remembers one, and a failure is then a dim window rather than a dead script',
+      'LAUNCHPAD COULD NEVER HAVE RUN THIS. live-server was declared in devDependencies with no node_modules and no lockfile, and the launcher does not install anything: it spawns sh -c with node_modules/.bin on PATH, that directory does not exist, the shell answers "command not found", and startProject returns ok anyway and opens a dead page. It was one npm install away from working on exactly one machine',
+      'So the dependency is gone and server.js is zero-dependency: nothing to install, instant start, identical on any checkout. Port precedence is flag, then PORT, then 2860, and both --port 2860 and --port=2860 parse because the launcher rewrites the flag to the = spelling when it assigns one. All four cases tested',
+      'THE SHIPPING SYSTEM MOVED TO old/index.html, which is the only genuinely old thing in the repo. version.js is not: it is one changelog across both eras, 1.1.0 to 1.3.0 the light system and 1.4.0 onward Skew. BUGS.md is not either, its open entry is a live crash in the layers document. / is a 302 to the home and not a silent rewrite, so the address bar reads the real path and no URL quietly means two documents',
+      'Removed explorations/, two empty directories left behind when physical-ui-layers.html moved out of them at 1.4.0. Added .gitignore for .DS_Store, node_modules and *.bak',
+      'Not mine, committed at request with the rest: the SFX master gain, 0.34 to 0.55. It had been cut too far when the voices became impacts and the panel turned into something you had to listen for',
+    ],
+  },
   {
     version: '1.20.0',
     date: '2026-08-17',

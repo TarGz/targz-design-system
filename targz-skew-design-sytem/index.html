@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skew · the targz language, machined</title>
+<link rel="stylesheet" href="physical-ui.css">
+<link rel="stylesheet" href="physical-ui-home.css">
+</head>
+<body>
+
+<div class="nav-sentinel"></div>
+<nav class="navdock" id="navdock" aria-label="Documents"></nav>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <p class="kicker">targz-skew-design-system · home</p>
+    <h1>Skew<br>the targz language, machined</h1>
+    <p class="lede">
+      One question, asked twice: <b>if the targz visual language were built as hardware</b>,
+      anodised chassis, backlit keys, jewel LEDs, engraved plates, what would the apps look like?
+      Each document takes a real app, rebuilds its anatomy out of machined parts, and says what
+      that buys and what it costs.
+    </p>
+    <p class="lede">
+      The parts are shared. <code>physical-ui.css</code> carries every primitive both documents
+      use, and each document adds only what is its own. A language is only a language if the
+      second thing you build with it is mostly parts from the first.
+    </p>
+  </div>
+
+  <div class="warn">
+    <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    <div>
+      <b>Nothing here is adopted.</b> The shipping design system is <code>old/index.html</code>,
+      which is untouched and is the third card below, and so is every app these explorations read
+      from. Skew is a proposal you can operate, which is the only honest way to judge one.
+    </div>
+  </div>
+
+  <h2>01 <span>/</span> The documents</h2>
+  <p class="sub">
+    Each one is a whole app rebuilt, live, with every control wired to the others. Open one and
+    drive it. A panel of controls that do not drive each other is a picture of a panel.
+  </p>
+  <div class="doc-grid" id="docs"></div>
+
+  <p class="paper-lab">Papers</p>
+  <div class="papers" id="papers"></div>
+
+  <h2>02 <span>/</span> The nav bar <span>·</span> and this is its spec</h2>
+  <p class="sub">
+    The bar at the top of this page is the specimen. Below is the same component, seated on a
+    stage so you can see it whole, and the reference a dev needs to put it on the next document.
+  </p>
+  <div class="stage">
+    <div class="stage-note">the same builder · dock off</div>
+    <div id="navspec"></div>
+  </div>
+
+  <table class="spec">
+    <thead>
+      <tr><th>Field</th><th>Contract</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Markup</td>
+        <td><code>&lt;nav class="navdock"&gt;&lt;div class="strip nav-strip"&gt;…&lt;/div&gt;&lt;/nav&gt;</code>,
+            preceded by <code>&lt;div class="nav-sentinel"&gt;</code> as the first node in
+            <code>&lt;body&gt;</code>. Both are required: the dock positions, the sentinel reports.</td>
+      </tr>
+      <tr>
+        <td>Parts</td>
+        <td><code>.strip</code> chassis, <code>.demo-etch.nav-mark</code> wordmark,
+            <code>.chan</code> milled divider, <code>.piano.nav-pages</code> switcher,
+            <code>.lcd.nav-ver</code> version window. Every one of them already existed.
+            The bar adds a dock and a wordmark size.</td>
+      </tr>
+      <tr class="trap">
+        <td>Anchors, not buttons</td>
+        <td>Destinations are <code>&lt;a class="pkey nav-link"&gt;</code>. A <code>&lt;button&gt;</code>
+            with an <code>onclick</code> that sets <code>location</code> looks identical and loses
+            middle-click, cmd-click, the status bar preview and copy-link. <b>.pkey is a look; the
+            anchor is the mechanism.</b></td>
+      </tr>
+      <tr>
+        <td>Current page</td>
+        <td>A <code>&lt;span&gt;</code>, not an anchor: <code>class="pkey nav-link is-down"</code> plus
+            <code>aria-current="page"</code>. It keeps the 2px of travel, the recess and the
+            lamp, and has no href because a link to here goes nowhere.</td>
+      </tr>
+      <tr class="trap">
+        <td>Not a tablist</td>
+        <td>No <code>role="tablist"</code>, no roving <code>tabindex</code>. These load documents;
+            they do not switch panels inside one. <code>&lt;nav aria-label&gt;</code> plus anchors is
+            already the right thing, and anchors are tabbable without help.</td>
+      </tr>
+      <tr class="trap">
+        <td>The dock eats clicks</td>
+        <td>The dock spans the viewport and the bar does not, so the dock carries
+            <code>pointer-events:none</code> and the strip puts them back on for itself. Skip that
+            and you have an invisible full-width lid: the top row of every page below stops
+            responding and nothing on screen says why.</td>
+      </tr>
+      <tr>
+        <td>Seated state</td>
+        <td><code>.navdock.seated</code> deepens the cast shadow and adds a 1px outline once the
+            page has scrolled. Driven by an <code>IntersectionObserver</code> on the 1px sentinel,
+            never a scroll listener: one callback at the crossing instead of one per frame.</td>
+      </tr>
+      <tr>
+        <td>Position</td>
+        <td><code>position:sticky; top:14px</code>. Sticky and not fixed, so the bar starts in the
+            flow and the page does not need a padding that has to be kept in step with the bar's
+            height.</td>
+      </tr>
+      <tr>
+        <td>z-index</td>
+        <td><b>40</b> nav · <b>80</b> floating plate (the picker) · <b>99</b> room grain ·
+            <b>200 / 201</b> off-canvas drawer and its tab. The nav is deliberately under the
+            grain: the grain is the room, and the room is over everything.</td>
+      </tr>
+      <tr>
+        <td>Tokens</td>
+        <td><code>--led</code> for the key that is down, <code>--grain</code> for the strip
+            texture, <code>--font</code> for every legend. The version window is
+            <code>.lcd</code> phosphor and takes <code>.dim</code> when the version fails to
+            load, because a display reading nothing is powered, not dark.</td>
+      </tr>
+      <tr>
+        <td>Registry</td>
+        <td>One <code>PAGES</code> array builds the switcher and the cards in 01. Adding a
+            document is one entry. It lives in this page's script today and moves to a shared
+            module the first time a second document carries the bar.</td>
+      </tr>
+      <tr>
+        <td>Under 620px</td>
+        <td>The wordmark, the dividers and the version window go. The switcher stays: the
+            destinations are the only load-bearing part of a nav bar.</td>
+      </tr>
+      <tr>
+        <td>Reduced motion</td>
+        <td>The seat transition is the only animation in the component, and
+            <code>prefers-reduced-motion</code> removes it.</td>
+      </tr>
+      <tr>
+        <td>Not in scope</td>
+        <td>No actions, no search, no menu. A bar that carries both destinations and verbs makes
+            you read it to find out which is which. Verbs belong on the panel that owns them.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <footer id="foot">targz design system · skew · physical-ui.css is the shared part</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   THE HOME. Two things happen here: a registry becomes a nav bar and a grid
+   of cards, and the nav bar documents itself by being built twice from one
+   builder. A spec whose specimen is a second, independent caller is a spec
+   that cannot drift from the thing it describes.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const el = (tag, cls, html) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (html != null) n.innerHTML = html;
+  return n;
+};
+const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ICON = {
+  open:  svg('<path d="M5 12h13"/><polyline points="12 6 18 12 12 18"/>'),
+  paper: svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/>'),
+};
+
+/* ── THE REGISTRY. One entry per document, and it builds both the switcher
+      and the cards. Adding a page is adding a line. ───────────────────────── */
+const HERE = (location.pathname.split('/').pop() || 'index.html');
+
+const PAGES = [
+  {
+    file: 'index.html',
+    nav:  'HOME',
+    no:   '00',
+    name: 'HOME',
+    kick: 'this page',
+    line: 'The door, and the nav bar spec.',
+    parts: ['registry', 'nav bar'],
+    inGrid: false,                   // a card that links to the page you are on
+  },
+  {
+    file: 'physical-ui-layers.html',
+    nav:  'LAYERS',
+    no:   '01',
+    name: 'LAYERS',
+    kick: 'exploration 01 · not adopted',
+    line: 'The <b>drawing</b> side. Portrait-Typo\'s layer panel rebuilt as hardware, then the '
+        + 'viewport, the Launchpad rack, a hatch bay that plots in real millimetres, a whole '
+        + 'Tweakpane, an off-canvas drawer and windows that reduce.',
+    parts: ['layer dock', 'hatch bay', 'drum', 'picker', 'drawer', 'windows', 'materials'],
+  },
+  {
+    file: 'physical-ui-machine.html',
+    nav:  'MACHINE',
+    no:   '02',
+    name: 'MACHINE',
+    kick: 'exploration 02 · not adopted',
+    line: 'The <b>machine</b> side. TargzPenPlotterCtrl rebuilt: the position strip, the jog pad '
+        + 'and its stick, the pen bank, three overrides, a guarded abort, the mushroom, the '
+        + 'annunciator and the console as a roll.',
+    parts: ['DRO', 'jog', 'pen bank', 'guard', 'e-stop', 'annunciator', 'meter', 'tape'],
+  },
+  {
+    file: '../old/index.html',
+    nav:  'SYSTEM',
+    no:   '—',
+    name: 'SYSTEM',
+    kick: 'shipping · adopted',
+    line: 'The <b>real</b> design system, the one the apps are built from. Light canvas, ruled '
+        + 'grid, <code>--tg-orange</code>. It is here so nothing above is mistaken for what '
+        + 'ships, and because the two palettes have drifted and that is worth being able to see '
+        + 'side by side.',
+    parts: ['tokens', 'components', 'practices'],
+    /* NOT IN THE SWITCHER. The bar moves between skew documents, which share a
+       palette and will share the bar itself. This one is a different language
+       with no way back, so it is a card you choose and not a key you land on. */
+    inNav: false,
+  },
+];
+
+const PAPERS = [
+  ['ADOPTING-SKEW-1.14.md', 'Adopting Skew', 'what an app on the kit has to pick up'],
+  ['HATCH-API.md',          'Hatch API',     'the fill generators, in millimetres'],
+  ['FEATURES-REQUEST.md',   'Requests',      'what is asked for and not built'],
+];
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE NAV BAR — one builder, called twice
+   ══════════════════════════════════════════════════════════════════════════ */
+function navBar({ current, dock = true } = {}) {
+  const strip = el('div', 'strip nav-strip');
+
+  strip.append(el('span', 'demo-etch nav-mark', 'SKEW'), el('span', 'chan'));
+
+  const bar = el('div', 'piano nav-pages');
+  PAGES.filter(p => p.inNav !== false).forEach(p => {
+    /* THE PAGE YOU ARE ON IS NOT A LINK. Everything else is an anchor and
+       nothing else: no click handler, no location assignment, so every thing a
+       browser does with a link keeps working. */
+    const here = p.file === current;
+    const k = el(here ? 'span' : 'a', 'pkey nav-link' + (here ? ' is-down' : ''), p.nav);
+    if (here) k.setAttribute('aria-current', 'page');
+    else { k.href = p.file; k.title = p.name; }
+    bar.append(k);
+  });
+  strip.append(bar, el('span', 'chan'));
+
+  const ver = el('div', 'lcd nav-ver dim', 'v—');
+  strip.append(ver);
+
+  /* THE VERSION IS READ, NOT TYPED. A number written into two files drifts on
+     the first commit that only remembers one of them. It is a dynamic import
+     so a failure is a dim window rather than a dead script. */
+  import('../version.js')
+    .then(m => { ver.textContent = 'v' + m.version; ver.classList.remove('dim'); })
+    .catch(() => { ver.textContent = 'v—'; });
+
+  if (!dock) return strip;
+  const nav = el('nav', 'navdock');
+  nav.setAttribute('aria-label', 'Documents');
+  nav.append(strip);
+  return nav;
+}
+
+/* the docked one replaces the placeholder in the markup */
+document.getElementById('navdock').replaceWith(navBar({ current: HERE }));
+/* and the specimen is a second, independent caller of the same function */
+document.getElementById('navspec').replaceWith(navBar({ current: HERE, dock: false }));
+
+/* SEATED — one observer on a 1px sentinel, not a scroll listener. The callback
+   fires twice in the life of the page instead of sixty times a second. */
+const dock = document.querySelector('.navdock');
+const sentinel = document.querySelector('.nav-sentinel');
+new IntersectionObserver(
+  ([e]) => dock.classList.toggle('seated', !e.isIntersecting),
+  { threshold: 0 },
+).observe(sentinel);
+
+/* ══════════════════════════════════════════════════════════════════════════
+   01 · THE CARDS, from the same registry
+   ══════════════════════════════════════════════════════════════════════════ */
+(function buildDocs() {
+  const grid = document.getElementById('docs');
+
+  PAGES.filter(p => p.inGrid !== false).forEach(p => {
+    const box = el('div', 'box doc');
+
+    const head = el('div', 'box-head');
+    head.append(el('span', 'nm', p.name), el('div', 'lcd', p.no));
+    box.append(head);
+
+    const body = el('div', 'doc-body');
+    body.append(el('p', 'doc-kick', p.kick), el('p', 'doc-line', p.line));
+
+    const parts = el('ul', 'doc-list');
+    p.parts.forEach(t => parts.append(el('li', null, t)));
+    body.append(parts);
+
+    const foot = el('div', 'doc-foot');
+    const open = el('a', 'key act go doc-open', `<span class="lens"></span>OPEN${ICON.open}`);
+    open.href = p.file;
+    foot.append(open, el('span', 'tagcut doc-file', p.file));
+    body.append(foot);
+
+    box.append(body);
+    grid.append(box);
+  });
+})();
+
+/* ── the papers ─────────────────────────────────────────────────────────── */
+(function buildPapers() {
+  const well = document.getElementById('papers');
+  PAPERS.forEach(([file, name, line]) => {
+    const a = el('a', 'paper', `${ICON.paper}<b>${name}</b>`);
+    a.href = file;
+    a.append(el('span', null, line), el('span', 'tagcut', file));
+    well.append(a);
+  });
+})();
+
+/* the footer states the version too, and reads it from the same place */
+import('../version.js')
+  .then(m => {
+    document.getElementById('foot').textContent =
+      `targz design system · skew · v${m.version} · physical-ui.css is the shared part`;
+  })
+  .catch(() => {});
+</script>
+</body>
+</html>

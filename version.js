@@ -1,6 +1,27 @@
-export const version = '1.22.0';
+export const version = '1.23.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.23.0',
+    date: '2026-08-17',
+    changes: [
+      'FOUR PAGES AND ONE RULE FOR WHICH IS WHICH. HOME is a door and specifies nothing. SYSTEM holds anything that belongs to no app: if a part shows up in both explorations it lives there. LAYERS and MACHINE hold one real app each, and a control stays on its page when it only makes sense next to that app\'s anatomy. Every page that had to answer "what are the parts" now links to the page that does',
+      'physical-ui-system.html, and it is DARK like the rest of Skew: the light at 158° and everything that agrees with it, recess against proud as four hairlines, the token table, every primitive at its real size, the factory API, the nav bar spec and six traps',
+      'THE PRIMITIVES MOVED OUT OF LAYERS. Materials was §11 of an app document and was the one section there not about that app. It came across whole, and layers is eleven sections now instead of twelve',
+      'AND THAT CLOSED THE ONE OPEN BUG. mat-count had no element to write into since the §11 paragraph lost its span, so the last statement of the layers script threw on every load. The section moved to a page whose heading carries the span, so the count writes itself again and the crash has no code left to run in',
+      'THE NAV IS ON EVERY PAGE, from physical-ui-nav.js. A page adds a bar with one script tag as the first node in body plus id="main" on its wrapper; the module writes the skip link, the sentinel and the dock. The registry moved in with it, so the bar and the home cards read one array and cannot disagree about what exists',
+      'A SKIP LINK, because four destinations in front of the content on every page is four tabs before the first heading. Off screen until focused, then it lands on the metal like anything else',
+      'THE NAV CSS AND THE SPEC TABLE MOVED TO physical-ui.css. Both are furniture every document uses now, and a component whose styles live in one page\'s stylesheet is a component that page owns',
+      'old/index.html IS DISCONTINUED, not shipping and not a peer. It is one dashed line at the foot of the home, never a key on the bar: a card would put a dead document in the same row as three live ones. It stays reachable because deleting the thing a decision was made against loses the decision',
+      'Skew is what is adopted, so "not adopted" is gone from both explorations and so are the claims that index.html is untouched, which stopped being true when index.html became the home',
+      'THE DRAWER IS A SYSTEM PART, so its spec left the app that happened to be using it. The markup contract, the handles, the tokens, the tab mark and the three closing routes are SYSTEM §07; layers §09 keeps what goes INSIDE a drawer for that app, which is a sheet, its margins and the marks on it',
+      'REMOVED — the machine page\'s inventory table, and the machine is eleven sections now with its five cross-references renumbered. What the kit already had is a claim about the language, and the language has a page',
+      'A PROSE PASS ACROSS ALL FOUR: the machine\'s section intros 1502 words to 414, layers 654 to 392. Nothing was dropped that the demo underneath does not already show',
+      'THE MASTHEADS ARE A NAME AND AT MOST ONE LINE. System 4 words, layers 19, machine 25, the whole home 23. A subtitle explaining what a page is for is written for someone who does not own the thing, and nobody who does reads it twice',
+      'THE WARNING BLOCKS ARE GONE from all four. Every one of them was declaring a position to an imagined reader: what is untouched, what is a debt, what the entry rule is. The facts that mattered are in version.js, which is where a fact that outlives a page belongs',
+      'The em dash was the tell again. Nearly every one was gluing a justification onto a fact the specimen already proves, so cutting them forced the cuts. One survives, in the windows caption, where it is the reduce glyph and not punctuation',
+    ],
+  },
   {
     version: '1.22.0',
     date: '2026-08-17',

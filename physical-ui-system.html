@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skew · System</title>
+<link rel="stylesheet" href="physical-ui.css">
+</head>
+<body>
+<script src="physical-ui-nav.js"></script>
+
+<div class="wrap" id="main">
+
+  <div class="masthead">
+    <p class="kicker">skew · 00</p>
+    <h1>System</h1>
+  </div>
+
+  <h2>01 <span>/</span> The light <span>·</span> one lamp, and nothing argues with it</h2>
+  <p class="sub">
+    Above and to the left, at <b>158°</b>. Every bevel, chamfer, specular and cast shadow is derived from it. Light one surface from somewhere else and the panel stops reading as objects.
+  </p>
+  <div class="stage">
+    <div class="stage-note">158° · the same lamp on four surfaces</div>
+    <div id="lightrow"></div>
+  </div>
+  <table class="spec">
+    <tbody>
+      <tr>
+        <td>Top edge</td>
+        <td>Lit. A 1px inset white hairline, because the top of a raised body faces the lamp.</td>
+      </tr>
+      <tr>
+        <td>Bottom edge</td>
+        <td>Dark. A 1px inset near-black, the face turning away.</td>
+      </tr>
+      <tr>
+        <td>Specular</td>
+        <td><b>Never centred.</b> A highlight in the middle of a face reads as a sticker printed on
+            it. Put it up and left, at roughly 34% / 28%.</td>
+      </tr>
+      <tr class="trap">
+        <td>Rotating parts</td>
+        <td>A specular painted into a cap <b>rotates with the cap</b>. Relight it every frame against the
+            fixed lamp, or give the part no orientation at all. A circle has none, which is why the
+            rotary's lever became a round knob.</td>
+      </tr>
+      <tr class="trap">
+        <td>Spheres</td>
+        <td>The opposite, and it looks like the same bug. A polished dome shows <b>no</b> shading change
+            as it turns: only surface features move, and a dome has none. Sliding its gradient reads
+            as the surface deforming.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>02 <span>/</span> Recess against proud <span>·</span> four hairlines, not one shadow</h2>
+  <p class="sub">
+    The most reused decision here, and the one most often got wrong by adding an inset shadow to the raised recipe. That gives a proud cap with a smudge on it. <b>The eye believes the hairlines, not the blur.</b>
+  </p>
+  <div class="stage">
+    <div class="stage-note">proud · recessed · the same metal</div>
+    <div id="proudrow"></div>
+  </div>
+  <table class="spec">
+    <tbody>
+      <tr><td>Proud, top</td><td>Lit hairline <b>inside</b> the top edge.</td></tr>
+      <tr><td>Proud, bottom</td><td>Dark hairline inside the bottom, plus a skirt and a cast shadow.</td></tr>
+      <tr><td>Recessed, top</td><td>Hard near-black <b>inside</b> the top edge, walls shading down from it.</td></tr>
+      <tr><td>Recessed, bottom</td><td>Faint light inside the bottom, the one wall the room reaches.</td></tr>
+      <tr class="trap">
+        <td>Recessed, outside</td>
+        <td>A lit lip <b>below</b> the cutout, and <b>no cast shadow at all</b>. A hole does not
+            throw one. This is the line that decides it.</td>
+      </tr>
+      <tr>
+        <td>In one token</td>
+        <td><code>--recess</code> is all four walls and the lip. <code>--chamfer</code> is the broken
+            edge, <b>concave</b>: dark at the top, bright at the bottom. Backwards and the control
+            reads as a bump, every time.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>03 <span>/</span> The tokens</h2>
+  <p class="sub">
+    <b>Colour is a lamp, not a fill.</b> The accent is light coming out of a part, never a tint on a surface, which is why there is one accent and no scale of it.
+  </p>
+  <table class="spec">
+    <thead><tr><th>Token</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tok" style="background:#0b0b0d"></span>--room</td><td>The desk it sits on. <code>#0b0b0d</code></td></tr>
+      <tr><td><span class="tok" style="background:#191a1d"></span>--case</td><td>Anodised aluminium chassis. <code>#191a1d</code>, with <code>--case-lo</code> and <code>--case-hi</code> as the two halves of every bevel</td></tr>
+      <tr><td><span class="tok" style="background:#0e0f11"></span>--bay</td><td>The well things sit in. Darker than the surface it is cut into, <b>never black</b>: a key's skirt is nearly black, and on a black floor the part that proves a cap has a body disappears</td></tr>
+      <tr><td><span class="tok" style="background:#232529"></span>--plate</td><td>A raised key or module face</td></tr>
+      <tr><td><span class="tok" style="background:#08090a"></span>--groove</td><td>A milled channel</td></tr>
+      <tr><td><span class="tok" style="background:#d3d6dc"></span>--txt</td><td>Laser-etched white infill, with <code>--txt-dim</code> and <code>--txt-etch</code> for engraved-into-metal</td></tr>
+      <tr><td><span class="tok" style="background:#FF6A00"></span>--led</td><td>The accent, and it is a <b>lamp</b>. <code>#FF6A00</code>, <code>--led-hot</code> for the lit core, <code>--led-red</code> for alarm</td></tr>
+      <tr><td>--recess</td><td>All four walls of a cutout plus the lit lip, in one shadow list. One place to change, one place to read</td></tr>
+      <tr><td>--chamfer</td><td>The broken edge of a cutout, lit directionally at 152°</td></tr>
+      <tr><td>--grain</td><td>One fractal-noise texture, reused everywhere. Real metal is never flat, and a gradient with no grain reads as plastic inside about two seconds</td></tr>
+      <tr><td>--font</td><td>Monospace for every legend and number. <code>--font-ui</code> is the system sans, and it appears in prose only</td></tr>
+    </tbody>
+  </table>
+
+  <h2>04 <span>/</span> The primitives <span>·</span> <span id="mat-count">every</span> parts, at their real size</h2>
+  <p class="sub">
+    Every control in both explorations is one of these at a size. All live, because a sample you cannot operate is a photograph.
+  </p>
+  <div class="mats" id="mats"></div>
+
+  <h2>05 <span>/</span> The factories</h2>
+  <p class="sub">
+    <b>A quantity is a knob, a length is a fader, a short list is a switch, a long list is a drum, and a number the app works out is a readout.</b> Almost every panel decision falls out of that.
+  </p>
+  <table class="spec">
+    <thead><tr><th>Call</th><th>What it is for</th></tr></thead>
+    <tbody>
+      <tr><td>knob(…)</td><td>A <b>quantity</b>. 270° of travel, a lit arc, a pointer. Takes <code>detents:[…]</code> to notch at places a value is approached deliberately, and <code>.set(v)</code> so another control can move it</td></tr>
+      <tr><td>fader(…)</td><td>A <b>length</b>, which is a straight thing, so it keeps a track. <code>mode:'center'</code> for a trim, because a trim is not "how much" but "how far off"</td></tr>
+      <tr><td>rangeFader(…)</td><td>A <b>span</b>, the one thing a knob cannot say. Two caps in one slot with the band lit between them</td></tr>
+      <tr><td>drum(…)</td><td>A <b>long list</b>. Past about six names a rotary stops being aimable, so the names go on a real cylinder</td></tr>
+      <tr><td>rotary(…)</td><td>A <b>short list</b> where every position must be visible at once. Hard ceiling of six: the fan is a fixed 80°, so detents fall from 27° to 9°</td></tr>
+      <tr><td>key(…) · pkey(…)</td><td>Momentary <b>did</b> something, latching <b>is</b> something. <code>pkey</code> adds the mechanical interlock: pressing one pops the others out</td></tr>
+      <tr><td>swBtn(…) · chevBtn(…)</td><td>A backlit switch, and a knurled chevron for a thing you flick rather than press</td></tr>
+      <tr><td>typeable(el, read, write)</td><td>Makes any lit window take a typed value on <b>double</b> click. A knob is for looking for a value; a keyboard is for knowing one</td></tr>
+      <tr><td>openPicker(…)</td><td>Replaces <code>input[type=color]</code>, whose popup is browser chrome no CSS reaches</td></tr>
+      <tr><td>windowise(box, …)</td><td>Makes a panel draggable and closeable. <b>Close or reduce, never both</b></td></tr>
+      <tr><td>navBar({current, dock})</td><td>The bar at the top of this page. Section 06</td></tr>
+      <tr class="trap">
+        <td>Two copies exist</td>
+        <td><code>physical-ui-kit.js</code> and the inline copy inside
+            <code>physical-ui-layers.html</code> are identical today and will not stay identical.
+            One of them has to become the other's import. Written down in both files rather than
+            quietly carried.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>06 <span>/</span> The nav bar <span>·</span> and this is its spec</h2>
+  <p class="sub">
+    The bar at the top of every page. Below is the same component on a stage, from a second call to the same <code>navBar()</code>, so the spec cannot drift from what it documents.
+  </p>
+  <div class="stage">
+    <div class="stage-note">the same builder · dock off</div>
+    <div id="navspec"></div>
+  </div>
+  <table class="spec">
+    <thead><tr><th>Field</th><th>Contract</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Adding it</td>
+        <td><code>&lt;script src="physical-ui-nav.js"&gt;&lt;/script&gt;</code> as the first node in
+            <code>&lt;body&gt;</code>, and <code>id="main"</code> on the content wrapper. The module
+            writes the skip link, the sentinel and the dock itself. That is the whole integration.</td>
+      </tr>
+      <tr>
+        <td>Registry</td>
+        <td>One <code>PAGES</code> array in that file. The bar and the home's cards both read it, so
+            adding a document is adding an entry and the two cannot disagree about what exists.</td>
+      </tr>
+      <tr>
+        <td>Parts</td>
+        <td><code>.strip</code> chassis, <code>.demo-etch.nav-mark</code> wordmark,
+            <code>.chan</code> milled divider, <code>.piano.nav-pages</code> switcher,
+            <code>.lcd.nav-ver</code> version window. Every one already existed. The bar adds a dock
+            and a wordmark size, and nothing else.</td>
+      </tr>
+      <tr class="trap">
+        <td>Anchors, not buttons</td>
+        <td>Destinations are <code>&lt;a class="pkey nav-link"&gt;</code>. A <code>&lt;button&gt;</code>
+            with an <code>onclick</code> that sets <code>location</code> looks identical and loses
+            middle-click, cmd-click, the status bar preview and copy-link. <b>.pkey is a look; the
+            anchor is the mechanism.</b></td>
+      </tr>
+      <tr>
+        <td>Current page</td>
+        <td>A <code>&lt;span&gt;</code>, not an anchor: <code>class="pkey nav-link is-down"</code> plus
+            <code>aria-current="page"</code>. It keeps the 2px of travel, the recess and the lamp,
+            and has no href because a link to here goes nowhere.</td>
+      </tr>
+      <tr class="trap">
+        <td>Not a tablist</td>
+        <td>No <code>role="tablist"</code>, no roving <code>tabindex</code>. These load documents;
+            they do not switch panels inside one. <code>&lt;nav aria-label&gt;</code> plus anchors is
+            already right, and anchors are tabbable without help.</td>
+      </tr>
+      <tr class="trap">
+        <td>The dock eats clicks</td>
+        <td>The dock spans the viewport and the bar does not, so the dock carries
+            <code>pointer-events:none</code> and the strip puts them back on for itself. Skip it and
+            you have an invisible full-width lid over every page.</td>
+      </tr>
+      <tr>
+        <td>Skip link</td>
+        <td>Four destinations in front of the content on every page is four tabs before the first
+            heading. <code>.skip</code> is off screen until focused, then lands on the metal like
+            anything else, and targets <code>#main</code>.</td>
+      </tr>
+      <tr>
+        <td>Seated state</td>
+        <td><code>.navdock.seated</code> deepens the cast shadow and adds a 1px outline once the page
+            has scrolled. One <code>IntersectionObserver</code> on a 1px sentinel, never a scroll
+            listener: two callbacks in the life of the page instead of sixty a second.</td>
+      </tr>
+      <tr>
+        <td>Position</td>
+        <td><code>position:sticky; top:14px</code>. Sticky and not fixed, so the bar starts in the
+            flow and no page needs a padding kept in step with the bar's height.</td>
+      </tr>
+      <tr>
+        <td>z-index</td>
+        <td><b>40</b> nav · <b>60</b> skip link · <b>80</b> floating plate · <b>99</b> room grain ·
+            <b>200 / 201</b> off-canvas drawer and its tab. The nav sits under the grain on purpose:
+            the grain is the room, and the room is over everything.</td>
+      </tr>
+      <tr>
+        <td>Version window</td>
+        <td>Read from <code>version.js</code> by dynamic import. A number written into two files
+            drifts on the first commit that only remembers one, and a failure here is a
+            <code>.dim</code> window rather than a dead script.</td>
+      </tr>
+      <tr>
+        <td>Under 620px</td>
+        <td>The wordmark, the dividers and the version window go. The destinations stay: they are
+            the only load-bearing part of a nav bar.</td>
+      </tr>
+      <tr>
+        <td>Not in scope</td>
+        <td>No actions, no search, no menu. A bar carrying both destinations and verbs makes you
+            read it to work out which is which. Verbs belong on the panel that owns them.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>07 <span>/</span> Traps <span>·</span> read this even if you take no code</h2>
+  <p class="sub">
+    Each one cost real time here. All of them are code that runs, then behaves oddly later.
+  </p>
+  <table class="spec">
+    <tbody>
+      <tr class="trap">
+        <td>background resets</td>
+        <td>The <code>background</code> shorthand wipes <code>background-image</code>. Restating a
+            state with only the colour layer strips every other layer off the one element you are
+            looking at. This file has been bitten twice, once erasing a knurl, once a specular.</td>
+      </tr>
+      <tr class="trap">
+        <td>clip-path clips shadows</td>
+        <td>A clipped silhouette loses its <code>box-shadow</code> entirely. Use
+            <code>filter: drop-shadow()</code>, which follows the shape, which is what a shadow
+            does anyway.</td>
+      </tr>
+      <tr class="trap">
+        <td>Canvas has no pseudo-elements</td>
+        <td>Any glass, dome or reflection over a <code>&lt;canvas&gt;</code> needs a wrapper div. Not
+            obvious until the reflection silently fails to appear.</td>
+      </tr>
+      <tr class="trap">
+        <td>SVG inner rotation</td>
+        <td>Rotating a child rather than the whole <code>&lt;svg&gt;</code> needs
+            <code>transform-box: view-box</code>. Rotating the whole svg instead turns its lighting
+            with it, which is section 01's problem wearing a different hat.</td>
+      </tr>
+      <tr class="trap">
+        <td>Rebuilding a list under an open popup</td>
+        <td>Filling a slot from inside a picker's callback redrew the rail, throwing away
+            <b>the button the open picker still pointed at</b>. Every later drag then wrote to a
+            detached node.</td>
+      </tr>
+      <tr class="trap">
+        <td>Substring selectors</td>
+        <td><code>.pencap.on</code> is a substring of <code>.pk-well .pencap.on</code>. A scripted edit
+            anchored on the short one sliced out a whole CSS section, and the verification check
+            then matched the same wrong rule and reported it fine. Anchor to line start.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <footer>targz design system · skew · 00 · physical-ui-system.html</footer>
+</div>
+
+<script src="physical-ui-kit.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   SYSTEM. `el`, `svg`, `ICON` and every factory come from physical-ui-kit.js,
+   so nothing is redeclared here.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* the roots `engage` walks up to when it re-finds a rebuilt button */
+window.ENGAGE_ROOTS = '#mats, #lightrow, #proudrow';
+
+/* ── 01 · the same lamp on four surfaces ────────────────────────────────── */
+(function light() {
+  const row = document.getElementById('lightrow');
+  row.style.cssText = 'display:flex; gap:26px; align-items:center; flex-wrap:wrap';
+  row.append(
+    el('span', 'demo-plate'),
+    el('span', 'demo-well'),
+    key('KEY', { cls: 'act aux' }),
+    el('span', 'jewel'),
+  );
+  row.querySelector('.jewel').style.setProperty('--lyr', '#FF6A00');
+  row.querySelector('.key').style.cssText =
+    'height:34px; padding:0 15px; font-family:var(--font); font-size:10px; letter-spacing:.12em';
+})();
+
+/* ── 02 · proud against recessed, the same metal ────────────────────────── */
+(function proud() {
+  const row = document.getElementById('proudrow');
+  row.style.cssText = 'display:flex; gap:34px; align-items:center; flex-wrap:wrap';
+  const lab = (t, node) => {
+    const c = el('span', null);
+    c.style.cssText = 'display:flex; flex-direction:column; gap:9px; align-items:center';
+    c.append(node, el('span', 'tagcut', t));
+    return c;
+  };
+  row.append(lab('PROUD', el('span', 'demo-plate')),
+             lab('RECESSED', el('span', 'demo-well')));
+})();
+
+/* ── 04 · THE PRIMITIVES. Moved here whole from layers §11: a grid of parts
+      that belong to no app was the one section on that page which was not
+      about that app. ─────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   MATERIALS
+   ══════════════════════════════════════════════════════════════════════════ */
+(function materials() {
+  const box = document.getElementById('mats');
+  const tiles = [
+    ['Chassis / plate',
+     '<span class="demo-plate"></span>',
+     'A raised body. Two inset hairlines do the bevel — <code>rgba(255,255,255,.14)</code> on top, <code>rgba(0,0,0,.85)</code> below — plus a wide cast shadow and a tight contact shadow.'],
+    ['Milled well',
+     '<span class="demo-well"></span>',
+     'The same two hairlines, swapped: a deep <code>inset</code> from the top edge, a 1px light OUTSIDE the bottom. The floor is the case <em>minus some light</em>, never black — a key\'s skirt is nearly black, and on a black floor the cap loses the part that proves it has a body. Everything that holds other controls is a well.'],
+    ['Backlit key',
+     `<span class="sw on">${ICON.eye}</span><span class="sw">${ICON.eyeOff}</span><span class="sw mixed">${ICON.cells}</span>`,
+     'On, off, mixed. The cap is <em>up</em> or <em>down</em> — that is the state — and the legend says which kind of down: white for some, orange for all. A brightness difference, so it survives with no colour vision.'],
+    ['Jewel LED',
+     '<span class="jewel" style="--lyr:#FF6A00"></span><span class="jewel" style="--lyr:#2C6BFF"></span><span class="jewel" style="--lyr:#4CE04C"></span>',
+     'A lens, not a dot: off-centre white specular at 34%/28%, the colour at mid-radius, a dark rim, and two glow rings outside.'],
+    ['Light pipe',
+     '<span style="display:flex;gap:12px;height:56px"><span class="pipe" style="--lyr:#FF6A00"></span><span class="pipe" style="--lyr:#E4123F"></span><span class="pipe" style="--lyr:#4CE04C"></span></span>',
+     'Edge-lit acrylic. A hot white core blurred 1px, the colour around it, and the bloom spilling onto the metal. This replaces the 3px flat colour bar.'],
+    ['Engraving',
+     '<span class="demo-etch">LAYERS</span>',
+     'Cut into the metal: the glyph is <em>darker</em> than the surface with a 1px light line under it — the lit far wall of the cut. Never white text on grey.'],
+    ['Readout',
+     '<span class="lcd">3 RUNNING</span><span class="lcd dim">0 SHOWN</span>',
+     'A lit window, not a label — the answer to every place a number wanted to be text. The glass is cut into the case, so it sits below the panel the way the well does. Digits are phosphor: colour plus a 6px glow, tabular so nothing shifts when the count changes. Off state is <code>.dim</code> — the same green with the glow taken away, because a display reading zero is powered, not dark.'],
+    ['Rotary knob',
+     '<span id="mat-knob"></span>',
+     '270° of travel, a lit arc for the value, a pointer you read at a glance. Replaces every slider that sets a <em>quantity</em>. Drag, wheel, arrows; <code>shift</code> for fine. <em>Where it is wrong:</em> "from here to there" is a LENGTH, and a length is a straight thing — those stay faders, the four tiles below.'],
+    ['Fader · one cap',
+     '<span id="mat-fader1"></span>',
+     'The plain form. The lit fill runs from the end of the slot to the cap, so the value is <em>how much of the track is on</em> — readable without the number. Drag the line, wheel it, or tab to the cap and use the arrows.',
+     'wide'],
+    ['Fader · centre detent',
+     '<span id="mat-faderbi"></span>',
+     'A trim is not "how much", it is "how far off" — so the fill starts at the middle and runs out to whichever side. Full-height tick at zero, and the cap <em>notches</em> into it inside 3%, the way a real centre-detent pot does. Zero is a place you can find without looking.',
+     'wide'],
+    ['Fader · vertical bank',
+     '<span id="mat-fbank"></span>',
+     'The same control stood up — not a style choice: a bank of caps makes a <em>profile</em> you read across at a glance, which is why every mixer is built this way. Legend at the foot, readout on top, because your hand covers the middle.',
+     'tall'],
+    ['Range fader',
+     '<span id="mat-fader"></span>',
+     'What a knob cannot say: a <em>span</em>. Two caps in one slot with the band lit between them, so the value is a distance you see rather than two numbers you compare. The caps cannot cross, and the track hands every pointer event to whichever end is nearer — you click the line, you do not aim at a 17px thumb.',
+     'wide'],
+    ['Drum selector',
+     '<span id="mat-drum"></span>',
+     'What to reach for when a list outgrows the dial. The rotary\'s fan is a fixed 80°, so its detents go from 27° apart at four names to 9° at ten — a real selector switch detents at about 30°, and the positions stop being aimable well before the names stop fitting. Past six, this. It gives up the rotary\'s claim to show <em>every</em> position and gives it up honestly: the names sit on a real cylinder, rotated about its axis and pushed out to its radius, so they compress towards the edges and fall away over the top the way a drum\'s do. A <code>&lt;select&gt;</code> is a list that hides; this is a list you are looking at part of, with the rest visibly still there round the back. Drag it, wheel it, or tab to it and use the arrows.',
+     'wide'],
+    ['Colour picker',
+     '<span id="mat-pick"></span>',
+     'The one surface the OS used to draw. <code>input[type=color]</code> puts its popup in browser chrome where no CSS reaches it — a bright system sheet on a machined panel. So it is not themed, it is <em>replaced</em>: a floating plate in the panel\'s own metal, the field behind display glass, hue on a real fader with a scale at the six primaries, one lit <code>.lcd</code> window instead of three form boxes. The native input stays as the <em>value</em>, never the surface. Dark on purpose — the only saturated thing inside is the colour you are picking. Click the cap.',
+     'wide'],
+    ['Momentary vs latching',
+     '<span id="mat-keys"></span>',
+     'Left springs back and pulses — it <em>did</em> something. Right is held down by the mechanism with its lamp on — it <em>is</em> something. Flat UI has no way to say this. Both are live: press them.'],
+    ['Micro key',
+     '<span id="mat-micro"></span>',
+     'Duplicate and delete, at 22px and <em>recessed</em> rather than raised: they must not invite the thumb the way a switch does. The well\'s two hairlines, sunk instead of proud. Delete is the only control that goes red, and only under the pointer — a warning you meet on the way to it, not one it wears sitting still. Hover both.'],
+    ['Knurled chevron',
+     '<span id="mat-chev"></span>',
+     'Grip texture, because this is a thing you <em>flick</em>, not a thing you press. Shown at its real 20px, since the size <em>is</em> the difficulty: a 3px knurl and an 11px glyph are the same spatial frequency, so the grip stays a whisper at <code>.05</code> and the glyph carries a dark halo. Open, it turns 90°, drops into its chamfered recess and goes to the lamp colour. To its left, <code>.sep</code> — a 1px cut and its lit far wall, doing the separating a gap cannot. Click it.'],
+    ['Illuminated key',
+     `<span class="key skirt act go" style="height:32px;padding:0 13px;gap:8px;font-family:var(--font);font-size:10.5px;font-weight:700"><span class="lens"></span>${ICON.play}<span>LAUNCH</span></span>`,
+     'The lamp lens is <em>inside</em> the cap, left of the label, the way a real illuminated pushbutton is built — so the state is in the button, not next to it.'],
+  ];
+  box.innerHTML = tiles.map(([t, demo, d, cls = '']) => `
+    <div class="mat ${cls}">
+      <div class="mat-stage">${demo}</div>
+      <div class="mat-body"><p class="mat-t">${t}</p><p class="mat-d">${d}</p></div>
+    </div>`).join('');
+  // the knob tile gets a live one
+  document.getElementById('mat-knob')
+          .replaceWith(knob({ label: '', min: 0, max: 100, value: 62, size: 58 }));
+
+  /* AND SO DOES THE FADER TILE. It is the editor's own Zone row, same
+     factory, same numbers: a sample of a control that cannot be dragged is a
+     photograph of one. */
+  document.getElementById('mat-fader1').replaceWith(fader({
+    label: 'Level', min: 0, max: 100, step: 1, value: 62, fmt: v => String(v),
+  }));
+  document.getElementById('mat-faderbi').replaceWith(fader({
+    label: 'Trim', min: -50, max: 50, step: 1, value: 18, mode: 'center',
+    fmt: v => (v > 0 ? '+' : '') + v,
+  }));
+  const bank = el('div', 'fbank');
+  [['Low', 34], ['Mid', 71], ['High', 52]].forEach(([l, v]) => bank.append(fader({
+    label: l, min: 0, max: 100, step: 1, value: v, vert: true, fmt: x => String(x),
+  })));
+  document.getElementById('mat-fbank').replaceWith(bank);
+
+  document.getElementById('mat-fader').replaceWith(rangeFader({
+    label: 'Zone', min: 0, max: 1, from: 0.24, to: 0.72,
+    fmt: v => v.toFixed(2),
+  }));
+
+  /* AND SO DOES THE MOMENTARY / LATCHING TILE. It was two <span>s wearing the
+     key classes, under a caption promising that one springs back and the
+     other holds — a sample that cannot do the thing it is a sample of. They
+     are real keys now, from the same factory as the nav bar's. */
+  const keys = el('span', 'mat-keys');
+  keys.append(
+    key(ICON.upload, { title: 'Momentary · springs back' }),
+    key(ICON.sun, {
+      title: 'Latching · stays on', latch: true, down: true,
+      onClick: (b) => {
+        b.classList.toggle('is-down');
+        b.setAttribute('aria-pressed', String(b.classList.contains('is-down')));
+      },
+    }),
+  );
+  document.getElementById('mat-keys').replaceWith(keys);
+
+  /* AND THE DRUM IS LIVE TOO, with a list long enough to be the argument: ten
+     names is where the rotary has already given up, so the tile shows the case
+     the component exists for rather than a comfortable four. */
+  const dr = drum({
+    label: 'Place from',
+    options: ['Subject', 'Edges', 'Detail', 'Room', 'Density',
+              'Tone', 'Contrast', 'Depth', 'Motion', 'Grain'],
+    index: 2,
+  });
+  dr.querySelector('.drum').style.width = '190px';
+  document.getElementById('mat-drum').replaceWith(dr);
+
+  /* THE PICKER TILE IS A LIVE PEN CAP, because a picker that cannot be opened
+     is a screenshot of one — and the thing being demonstrated is a surface
+     that OPENS. Same cap object the ink rail uses, same openPicker() the
+     hatch bay calls: the tile proves it is a primitive by being a second,
+     unrelated caller of it. */
+  const swatch = el('span', 'mat-row');
+  let matInk = '#FF6A00';
+  const cap = el('button', 'pencap on');
+  cap.type = 'button';
+  cap.style.setProperty('--ink', matInk);
+  cap.title = 'Open the picker';
+  cap.setAttribute('aria-label', 'Open the colour picker');
+  cap.addEventListener('click', () => openPicker(cap, matInk, hx => {
+    matInk = hx;
+    cap.style.setProperty('--ink', hx);
+    lamp.style.setProperty('--lyr', hx);
+    read.textContent = hx.toUpperCase();
+  }));
+  const lamp = el('span', 'jewel');
+  lamp.style.setProperty('--lyr', matInk);
+  const read = el('span', 'lcd', matInk.toUpperCase());
+  swatch.append(cap, lamp, read);
+  document.getElementById('mat-pick').replaceWith(swatch);
+
+  /* AND SO DO THE MICRO KEYS AND THE CHEVRON. Both are controls whose entire
+     content is a state change — the micro key's is the hover, the chevron's is
+     the flick — so a static one shows the half that does not matter. Same
+     factory as the layer rows', same 20/22px, deliberately not scaled up: the
+     chevron's knurl is tuned against an 11px glyph and enlarging it would show
+     a texture this document does not have. */
+  const micro = el('span', 'mat-row');
+  ['copy', 'trash'].forEach((ic, n) => {
+    const b = el('button', 'micro' + (n ? ' del' : ''), ICON[ic]);
+    b.type = 'button';
+    b.title = n ? 'Delete — red on hover only' : 'Duplicate';
+    b.setAttribute('aria-label', b.title);
+    micro.append(b);
+  });
+  document.getElementById('mat-micro').replaceWith(micro);
+
+  const chevRow = el('span', 'mat-row');
+  const chev = chevBtn(false, 'this sample', () => {
+    chev.classList.toggle('open');
+    const open = chev.classList.contains('open');
+    chev.setAttribute('aria-expanded', String(open));
+    chev.title = open ? 'Close' : 'Open';
+  });
+  chev.title = 'Open';
+  chevRow.append(el('span', 'sep'), chev);
+  document.getElementById('mat-chev').replaceWith(chevRow);
+
+  /* THE COUNT WRITES ITSELF. The lede said "nine primitives" while the grid
+     held ten, then thirteen — a claim about completeness that nobody thinks to
+     re-count when they add a tile. Now adding one to the array above is the
+     only edit there is. */
+  const WORDS = ['no', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight',
+                 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen',
+                 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty'];
+  document.getElementById('mat-count').textContent = WORDS[tiles.length] || tiles.length;
+})();
+
+/* ── 06 · THE SPECIMEN. A second, independent call to the same builder. ─── */
+document.getElementById('navspec').replaceWith(navBar({ dock: false }));
+</script>
+</body>
+</html>

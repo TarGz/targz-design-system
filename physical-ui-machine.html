@@ -3,117 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Skew · Machine — the targz language at the plotter</title>
+<title>Skew · Machine</title>
 <link rel="stylesheet" href="physical-ui.css">
 <link rel="stylesheet" href="physical-ui-machine.css">
 </head>
 <body>
+<script src="physical-ui-nav.js"></script>
 
-<div class="wrap">
+<div class="wrap" id="main">
 
   <div class="masthead">
-    <p class="kicker">targz-skew-design-system · exploration 02 · not adopted</p>
-    <h1>Machine —<br>the same language, at the plotter</h1>
+    <p class="kicker">skew · 02</p>
+    <h1>Machine</h1>
     <p class="lede">
-      Exploration 01 took the <b>drawing</b> side of targz — layers, viewport, hatch, Launchpad —
-      and rebuilt it as hardware. This is the other half: <b>TargzPenPlotterCtrl</b>, the app that
-      actually drives the machine. The anatomy is the real one, read off
-      <code>app/index.html</code> and <code>css/commanddeck.css</code>: the position strip, the jog
-      grid, the pen heights, the three overrides, the run block, the alarm banner, the job card,
-      the port picker, the console and the status bar.
-    </p>
-    <p class="lede">
-      <b>The page is a comparison, not a redesign.</b> Every control here is asked the same
-      question first — <em>does the kit already have this part?</em> Most of them, it does: a step
-      size is a piano bar, a port list is a drum, an override is a knob, a log's command line is a
-      slot, a panel is a box with a head. <b>Nine things it did not have</b>, and each one is
-      here because no existing primitive could say it: a coordinate under glass, a direction pad,
-      a key that carries its own height, a stick, a guarded destructive key, the mushroom, an
-      annunciator, a segment meter and a status rail.
-    </p>
-    <p class="lede">
-      Everything works, and everything is wired to everything else. Jog the pad and the readout
-      moves, the tape prints the G-code and the queue on the rail counts it. Trip a limit and the
-      run block dies. Press the mushroom and the whole panel does what the machine does.
+      TargzPenPlotterCtrl as hardware. Everything is wired to everything: jog and the readout
+      moves, trip a limit and the run block dies.
     </p>
   </div>
 
-  <div class="warn">
-    <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-    <div>
-      <b><code>TargzPenPlotterCtrl</code> is read-only here and untouched</b>, and so is
-      <code>index.html</code>. The shared parts were lifted out of exploration 01 into
-      <code>physical-ui-kit.js</code> <em>verbatim</em> — that page still carries its own inline
-      copy, which is a debt this document is declaring rather than paying.
-      <br><br>
-      <b>One thing did move.</b> The jog section — the keypad, the stick, and all of their CSS —
-      was §11 of <code>physical-ui-layers.html</code> and lived in <code>physical-ui.css</code>.
-      Nothing in Portrait-Typo jogs anything, so it was in the wrong document; it is §02 and §03 here now,
-      whole, and rewired to this page's machine. <code>physical-ui.css</code> is back to carrying
-      only what both documents use.
-    </div>
-  </div>
-
-  <h2>01 <span>/</span> What the kit already had <span>·</span> and what it did not</h2>
+  <h2>01 <span>/</span> Option A <span>·</span> jog by keys</h2>
   <p class="sub">
-    The whole exercise in one table. Left, the control as the app ships it; middle, whether the
-    skew kit could already draw it; right, what it is made of here. <b>Twenty-three controls,
-    fourteen of them free.</b> A language is only a language if the second thing you build with
-    it is mostly parts from the first.
-  </p>
-
-  <table class="inv">
-    <thead>
-      <tr><th>In the app</th><th>Kit</th><th>Made of</th></tr>
-    </thead>
-    <tbody>
-      <tr class="have"><td>Panel section + title</td><td>had it</td><td><code>.box</code> · <code>.box-head</code> · <code>.nm</code></td></tr>
-      <tr class="have"><td>Tabs (MACHINE / SETTINGS)</td><td>had it</td><td><code>pkey()</code> on a <code>.piano</code> bar — the page switcher</td></tr>
-      <tr class="have"><td>Step size 0.1 / 1 / 10 / 100</td><td>had it</td><td><code>.piano.sm</code> — mechanical interlock, one key down</td></tr>
-      <tr class="have"><td>Units MM / INCH</td><td>had it</td><td>the same bar, two keys</td></tr>
-      <tr class="have"><td>Serial port <code>&lt;select&gt;</code></td><td>had it</td><td><code>drum()</code> — a long list is a drum, decided in 01</td></tr>
-      <tr class="have"><td>CONNECT button</td><td>had it</td><td><code>key({latch:true})</code> — it <em>is</em> something, so it stays down</td></tr>
-      <tr class="have"><td>Connection dot</td><td>had it</td><td><code>.jewel</code> · <code>.pilot</code> when dead</td></tr>
-      <tr class="have"><td>Command line</td><td>had it</td><td><code>.slot</code> — the Launchpad's search field</td></tr>
-      <tr class="have"><td>Utility buttons (PROBE Z, GO TO XY0…)</td><td>had it</td><td><code>key()</code>, momentary — they <em>did</em> something</td></tr>
-      <tr class="have"><td>PARK AT END toggle</td><td>had it</td><td><code>swBtn()</code> — a backlit switch</td></tr>
-      <tr class="have"><td>Layer list, tick to plot</td><td>had it</td><td>the layer dock, unchanged — exploration 01 §01</td></tr>
-      <tr class="have"><td>Layer colour swatch</td><td>had it</td><td><code>.pipe</code> light pipe + <code>openPicker()</code></td></tr>
-      <tr class="have"><td>Abort confirm modal</td><td>had it</td><td><code>windowise()</code> — a panel that closes</td></tr>
-      <tr class="have"><td>Tool rail (pick / brush / box / range)</td><td>had it</td><td><code>.strip</code> of latching keys — the nav bar, stood up</td></tr>
-      <tr class="new"><td>Position strip · X Y Z</td><td>missing</td><td><code>.dro</code> — a coordinate under glass, one per axis</td></tr>
-      <tr class="new"><td>Jog grid + HOME</td><td>missing</td><td><code>.jog-grid</code> — the arrangement is the value</td></tr>
-      <tr class="new"><td>— <em>(no stick in the app)</em></td><td>missing</td><td><code>.stick</code> — the continuous half of the same job</td></tr>
-      <tr class="new"><td>PEN UP / DOWN / PUMP</td><td>missing</td><td><code>.penbank</code> — a key carrying the height it goes to</td></tr>
-      <tr class="new"><td>ABORT</td><td>missing</td><td><code>.guard</code> — a hinged cover, the only new mechanism</td></tr>
-      <tr class="new"><td>E-Stop (a ribbon button today)</td><td>missing</td><td><code>.estop</code> — a latching mushroom in a collar</td></tr>
-      <tr class="new"><td>Alarm banner</td><td>missing</td><td><code>.annun</code> — eight dark legends, one lights</td></tr>
-      <tr class="new"><td>Progress bar + job stats</td><td>missing</td><td><code>.meter</code> — segments, because a fill cannot tick</td></tr>
-      <tr class="new"><td>Status bar</td><td>missing</td><td><code>.rail</code> — milled into the case, nothing to press</td></tr>
-    </tbody>
-  </table>
-
-  <h2>02 <span>/</span> Option A <span>·</span> jog by keys</h2>
-  <p class="sub">
-    The first of two answers to one question, and each answer gets its own section because each is
-    a whole arrangement rather than a control — a jog control is only judgeable next to the numbers
-    it moves, so the readout is here, above it, where it sits in the real window.
-    <br><br>
-    <b>A DRO is not a card, it is a window.</b> The app draws each axis as a card — a coloured
-    letter, a 26px number, a WCS caption and a thin bar — which is the right information drawn as
-    <em>content</em>, three panels of text in a row competing with the toolbars either side. Here
-    the number lives behind glass, the axis colour is a <em>lamp</em> rather than a tint on the
-    digits (a tinted coordinate is a coordinate you read slower), and SET&nbsp;0 sits on the bezel
-    rather than in the glass, because it is a control and the glass is a display. <b>The strip
-    under each number is a travel, not a fill</b> — an engraved channel with a stop cut at each end
-    and a lit pip riding it, because a coordinate is a place and not a quantity.
-    <br><br>
-    <b>Keys are discrete:</b> one press, one step, and the step is a number you chose in advance —
-    which is what you want when you are 0.1mm off and you know it. <b>The pad is laid out like the
-    axes, not like a list.</b> X runs across, Y runs up, HOME sits in the middle because it is the
-    only key that goes somewhere absolute, and it is recessed rather than raised because it is a
-    destination and not a nudge. <b>Z stands on its own column</b>: a different axis in a different
-    plane, and the one that ends a job badly.
+    Keys are discrete: one press, one step, picked in advance. The readout sits above because a jog control is only judgeable next to the numbers it moves. A coordinate is a place, so the strip under it is a travel with a pip on it, not a fill.
   </p>
   <div class="stage">
     <div class="stage-note">discrete · one press, one step</div>
@@ -123,25 +33,9 @@
     </div>
   </div>
 
-  <h2>03 <span>/</span> Option B <span>·</span> jog by stick</h2>
+  <h2>02 <span>/</span> Option B <span>·</span> jog by stick</h2>
   <p class="sub">
-    The same job, the other way, and the same readout above it so the two sections are read against
-    each other rather than against nothing. <b>Everything below the XY control is identical</b> —
-    same readout, same step bar, same units, same utility keys — because only the XY control is in
-    question, and if the two arrangements differed everywhere you could not tell which difference
-    was the one being argued about.
-    <br><br>
-    <b>A stick is continuous:</b> it has a direction and an amount, and it keeps going while you
-    hold it — which is what you want when you are 40mm off and do not care about the number.
-    Neither replaces the other, and a machine with only one of them is annoying in a way you can
-    predict.
-    <br><br>
-    <b>Z is not on the stick.</b> Two axes is what a stick has: push it and you get a bearing and a
-    distance at once, which is exactly what X and Y are together. Z stays two keys you have to
-    mean. <b>HOME is not in the well either</b> — a rapid to machine zero triggered by the same
-    thumb that is jogging is the one input you must not be able to make by accident — so it sits
-    above the socket, the biggest key on the panel, because it is the first thing you press in a
-    session and the last.
+    A stick is continuous: a direction, an amount, and it keeps going while you hold it. Everything below the XY control is identical, so the only difference is the one being argued about. Z stays on keys.
   </p>
   <div class="stage">
     <div class="stage-note">continuous · direction and amount, while you hold it</div>
@@ -151,185 +45,116 @@
     </div>
   </div>
 
-  <h2>04 <span>/</span> The pen bank <span>·</span> a key that carries its own height</h2>
+  <h2>03 <span>/</span> The pen bank <span>·</span> a key that carries its own height</h2>
   <p class="sub">
-    The one control in this app that exists nowhere else in targz, and the one the current UI
-    splits in two: a button that sends the pen to a height, plus a little pencil beside it that
-    opens a popover to change that height. Two objects, one fact, and the number you are editing
-    is not visible while you edit it.
-    <br><br>
-    <b>One part.</b> The height is a lit window set into the key's own face, the knob beside it
-    turns the height, and the window takes a typed value on double-click — which is the popover
-    deleted rather than restyled. Press a key and the readouts in §02 and §03 go there.
+    Today it is two objects for one fact: a key that sends the pen to a height, and a pencil that opens a popover to change it. Here the height is a window in the key’s own face. The knob turns it, double-click types it.
   </p>
   <div class="stage">
     <div class="stage-note">3 heights · window in the cap · double-click to type</div>
     <div id="pen" class="box wide"></div>
   </div>
 
-  <h2>05 <span>/</span> The overrides <span>·</span> a percentage is a quantity, so it is a knob</h2>
+  <h2>04 <span>/</span> The overrides <span>·</span> a percentage is a quantity, so it is a knob</h2>
   <p class="sub">
-    Three vertical sliders in the app, each with a −/+ pair, a readout and a RESET underneath: five
-    controls per value, three times over. Exploration 01's rule settles it in one line —
-    <b>a quantity is a knob, and only a length keeps a track</b>. 100% is not a length.
-    <br><br>
-    <b>The detent is what the RESET key was for.</b> A notch cut at 100 means the finger finds
-    unity on the way past without aiming, and it clacks when it drops in. RESET stays anyway,
-    because slamming back to 100 with the job running is the gesture the part exists for and no
-    knob is fast at it — that is the one honest thing sliders had, and it is one key rather than
-    an extra track.
+    Five controls per value in the app, three times over. A quantity is a knob; only a length keeps a track, and 100% is not a length. The notch at 100 is what RESET was for. RESET stays anyway: no knob is fast at slamming back mid-job.
   </p>
   <div class="stage">
     <div class="stage-note">1–500% · notch at 100 · shift = fine</div>
     <div id="ovr" class="box"></div>
   </div>
 
-  <h2>06 <span>/</span> Run <span>·</span> and the one that hurts goes under a cover</h2>
+  <h2>05 <span>/</span> Run <span>·</span> and the one that hurts goes under a cover</h2>
   <p class="sub">
-    START, PAUSE, STOP and ABORT sit in one block today, the same size, distinguished by tint.
-    ABORT drops the controller into ALARM: motion stops where it is, the job is gone, and the way
-    back is an unlock and a re-home. <b>Colour is not a guard.</b> It is one pixel of pointer
-    travel from the two keys you press fifty times a session.
-    <br><br>
-    <b>A hinged cover is a guard</b>, and it is the only genuinely new <em>mechanism</em> on this
-    page: two deliberate actions, the first reversible, the second impossible until the first has
-    happened. It shuts itself after six seconds, the way a real one is sprung.
-    <br><br>
-    <b>The mushroom is mounted, not posted.</b> It is not in the app at all — it is a ribbon
-    button called E-Stop. The first pass here drew it at 104px on a yellow hazard plate with
-    EMERGENCY STOP printed across the cap, which is a picture of an e-stop rather than one: a real
-    cap carries no text, the stripes belong to an enclosure door, and at twice the size of
-    anything else on the panel it read as loud rather than as important. It is a 58px cap in a
-    machined collar now, seated with the rest of the hardware, with the legend cut into the panel
-    beside it. It is still the biggest cap here and it still latches.
+    ABORT sits with START and STOP, same size, different tint. <b>Colour is not a guard.</b> A hinged cover is: two deliberate actions, and it springs shut after six seconds. The mushroom latches.
   </p>
   <div class="stage">
     <div class="stage-note">flip the cover · the mushroom latches · twist to release</div>
     <div id="run" class="box"></div>
   </div>
 
-  <h2>07 <span>/</span> The annunciator <span>·</span> which one tripped</h2>
+  <h2>06 <span>/</span> The annunciator <span>·</span> which one tripped</h2>
   <p class="sub">
-    The app has one alarm: a red bar that appears with a sentence in it. A machine does not have
-    one alarm — it has a dozen inputs, and the question at the moment it halts is <em>which</em>.
-    A sentence answers that in prose, one at a time, and only while it is showing.
-    <br><br>
-    <b>Every legend is engraved and dark, permanently.</b> So the panel is a map you have already
-    learnt by the time you need it, and the one that lights is the one that tripped. A lamp panel
-    that only draws its active cells teaches you nothing and reads as an empty box. <b>New alarms
-    flash until acknowledged</b>, then hold: a lamp that came on while you were looking away and
-    one that has been on ten minutes are different facts. Press any legend to trip it.
+    One red bar with a sentence in it is not an alarm panel. A machine has a dozen inputs and the question when it halts is <em>which</em>. Every legend is engraved and dark, so you learn the panel before you need it. New ones flash until acknowledged.
   </p>
   <div class="stage">
     <div class="stage-note">8 legends · dark by default · UNLOCK acknowledges</div>
     <div id="annun" class="box xwide"></div>
   </div>
 
-  <h2>08 <span>/</span> The job meter <span>·</span> segments, because a fill cannot tick</h2>
+  <h2>07 <span>/</span> The job meter <span>·</span> segments, because a fill cannot tick</h2>
   <p class="sub">
-    A progress bar is a rectangle that grows, and the thing it is worst at is the question actually
-    being asked of it at 2am: <em>is it still moving</em>. A fill creeping 0.3% a minute is
-    indistinguishable from a fill that stopped.
-    <br><br>
-    <b>Segments quantise it.</b> The lit count is a number you can read from the doorway and the
-    next one arriving is an <em>event</em> — same data, and it ticks. The percentage keeps its own
-    glass beside it, because segments are for watching and a number is for reporting. Start a job
-    in §06 and this fills.
+    At 2am the question is whether it is still moving, and a fill creeping 0.3% a minute looks exactly like a fill that stopped. Segments tick. The percentage keeps its own glass, because segments are for watching and a number is for reporting.
   </p>
   <div class="stage">
     <div class="stage-note">40 segments · the head one is hot · 4 engraved fields</div>
     <div id="job" class="box wide"></div>
   </div>
 
-  <h2>09 <span>/</span> The port <span>·</span> a long list is a drum</h2>
+  <h2>08 <span>/</span> The port <span>·</span> a long list is a drum</h2>
   <p class="sub">
-    Nothing invented, and that is the section. The app replaced its <code>&lt;select&gt;</code>
-    with a custom button and a popup menu — a good fix for a flat UI, and a decision exploration 01
-    had already made for a different list: <b>past about six names, a rotary stops being aimable
-    and the list goes on a drum</b>. Roll it. CONNECT latches, because being connected is
-    something you <em>are</em>.
+    Nothing invented, and that is the section. Past about six names a rotary stops being aimable, so the list goes on a drum. CONNECT latches, because being connected is something you <em>are</em>.
   </p>
   <div class="stage">
     <div class="stage-note">drum · latching key · jewel dark until alive</div>
     <div id="port" class="box"></div>
   </div>
 
-  <h2>10 <span>/</span> The tape <span>·</span> the console as a roll, not a text area</h2>
+  <h2>09 <span>/</span> The tape <span>·</span> the console as a roll, not a text area</h2>
   <p class="sub">
-    The log comes <em>up</em> from the bottom, the newest line is at the tear edge, and what has
-    gone past is still there and darker because it is further into the machine. That is what a
-    machine log has always physically been, and a dark scrolling div is the one part of this app
-    that had no object at all behind it.
-    <br><br>
-    <b>It is also the only place on the panel where colour is data</b> — sent lines in the
-    phosphor, replies dimmer, errors red, notices in the lamp colour. Three states in one column
-    and no icons. Type into the slot and press SEND, or jog the pad in §02 and watch it print.
+    The log comes up from the bottom, newest at the tear edge, older lines darker because they are further into the machine. It is the only place here where colour is data. Type into the slot and press SEND.
   </p>
   <div class="stage">
     <div class="stage-note">newest at the tear edge · colour is the direction</div>
     <div id="tape" class="box xwide"></div>
   </div>
 
-  <h2>11 <span>/</span> The status rail <span>·</span> the chassis, and it is not a control</h2>
+  <h2>10 <span>/</span> The status rail <span>·</span> the chassis, and it is not a control</h2>
   <p class="sub">
-    State, port, baud, queue, machine position. The app's status bar is drawn with the same
-    borders, paddings and hover colours as its toolbars, so it reads as a row of things you might
-    click; none of them do anything. <b>Here it is milled into the case.</b> Engraved cells, a
-    hairline between them, no cap on anything — you can see there is nothing to press.
+    The app’s status bar wears the same borders and hovers as its toolbars, so it reads as a row of things you might click. None of them do anything. Milled into the case instead.
   </p>
   <div class="stage" style="display:block">
     <div class="stage-note">read-only by construction</div>
     <div id="rail"></div>
   </div>
 
-  <h2>12 <span>/</span> The bill</h2>
+  <h2>11 <span>/</span> The bill</h2>
   <p class="sub">
-    What this second document changes about the argument, given the first one already made it.
+    What the second document changes about the argument.
   </p>
   <div class="bill">
     <div class="card good">
-      <h3>What the machine half genuinely buys</h3>
+      <h3>Buys</h3>
       <ul>
-        <li><b>The language survived a second app, and mostly for free.</b> Fourteen of
-            twenty-two controls needed no new part. That is the only real test of a design
-            language and it is the one result here worth keeping.</li>
+        <li><b>The language survived a second app, mostly for free.</b> Fourteen of twenty-two
+            controls needed no new part. That is the only real test of a design language.</li>
         <li><b>A guarded key is a safety property, not a style.</b> ABORT and DELETE LAYER are the
-            two irreversible things in targz and both are currently a red tint. A cover cannot be
-            hit by accident, and it is eleven lines of CSS.</li>
-        <li><b>The annunciator is strictly more information than the banner</b>, in less space,
-            and it is legible before anything is wrong — you learn the panel while it is dark.</li>
-        <li><b>A machine is the one place skeuomorphism is not a costume.</b> The plotter has a
-            physical E-stop, physical limit switches and a physical pen carriage; a UI that draws
-            them as objects is agreeing with the thing on the desk, not decorating.</li>
-        <li><b>The dark chassis stops being a problem here.</b> The objection in 01 was that the
-            apps' canvas is paper-white and the panel would fight the drawing. The control app's
-            job is a machine, not a drawing — and it is looked at in a room, from a distance,
-            usually late.</li>
+            two irreversible things in targz and both are a red tint today. A cover cannot be hit by
+            accident, and it is eleven lines of CSS.</li>
+        <li><b>The annunciator is legible before anything is wrong.</b> You learn the panel while it
+            is dark.</li>
+        <li><b>Here, skeuomorphism is not a costume.</b> The plotter has a physical e-stop, physical
+            limit switches and a physical carriage.</li>
+        <li><b>The dark chassis stops being a problem.</b> A control app's job is a machine, not a
+            drawing, and it is looked at from across a room, late.</li>
       </ul>
     </div>
     <div class="card bad">
-      <h3>What it costs</h3>
+      <h3>Costs</h3>
       <ul>
-        <li><b>It is a second copy of the kit.</b> <code>physical-ui-kit.js</code> and the inline
-            copy in <code>physical-ui-layers.html</code> are identical today and will not stay
-            identical. One of them has to become the other's import.</li>
-        <li><b>The real app is Metro4 and jQuery.</b> Nothing here is a re-skin of a shipping
-            widget the way the layer dock was — it is the app's <em>anatomy</em> rebuilt, so
+        <li><b>A second copy of the kit.</b> <code>physical-ui-kit.js</code> and the inline copy in
+            the layers document will not stay identical. One has to become the other's import.</li>
+        <li><b>The real app is Metro4 and jQuery.</b> This is its anatomy rebuilt, not a re-skin, so
             adopting any of it means replacing the widget underneath first.</li>
-        <li><b>A DRO at 27px in a 158px window</b> is bigger than the app's whole position strip
-            per axis. The panel gets more readable and the window gets less full.</li>
-        <li><b>Everything here has to survive being wrong.</b> A drawing tool that draws a bad
-            hatch wastes paper. A control panel that mis-reports ALARM state costs a plot, a pen,
-            or a gantry — which is a testing burden the first exploration never had.</li>
-        <li><b>The mushroom is a lie unless it is wired.</b> A software E-stop that draws itself
-            as the real part and is one <code>socket.emit</code> away from doing nothing is worse
-            than a plain red button. If it does not stop the machine, it must not look like the
-            thing that does.</li>
+        <li><b>Space.</b> One DRO is bigger than the app's whole position strip.</li>
+        <li><b>It has to survive being wrong.</b> A bad hatch wastes paper. A mis-reported ALARM
+            costs a plot, a pen, or a gantry.</li>
+        <li><b>The mushroom is a lie unless it is wired.</b> If it does not stop the machine, it must
+            not look like the thing that does.</li>
       </ul>
     </div>
   </div>
 
-  <footer>targz design system · exploration 02 · physical-ui-machine.html · read from TargzPenPlotterCtrl, which is unchanged</footer>
+  <footer>targz design system · skew · exploration 02 · physical-ui-machine.html · read from TargzPenPlotterCtrl, which is unchanged</footer>
 </div>
 
 <script src="physical-ui-kit.js"></script>
@@ -1349,7 +1174,7 @@ const SEGS = 40;
   });
 
   print('PenPlotter Control · skew build', 'sys');
-  print('select a port in §09 and press CONNECT', 'in');
+  print('select a port in §08 and press CONNECT', 'in');
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════

@@ -142,8 +142,11 @@
     The bar at the top of every page. Below is the same component on a stage, from a second call to the same <code>navBar()</code>, so the spec cannot drift from what it documents.
   </p>
   <div class="stage">
-    <div class="stage-note">the same builder · dock off</div>
-    <div id="navspec"></div>
+    <div class="stage-note">view mode · nothing navigates</div>
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center">
+      <div id="navspec"></div>
+      <div class="lcd" id="navspec-out">VIEW A</div>
+    </div>
   </div>
   <table class="spec">
     <thead><tr><th>Field</th><th>Contract</th></tr></thead>
@@ -153,6 +156,13 @@
         <td><code>&lt;script src="physical-ui-nav.js"&gt;&lt;/script&gt;</code> as the first node in
             <code>&lt;body&gt;</code>, and <code>id="main"</code> on the content wrapper. The module
             writes the skip link, the sentinel and the dock itself. That is the whole integration.</td>
+      </tr>
+      <tr>
+        <td>Two modes</td>
+        <td><code>mode:'doc'</code> loads documents: anchors, <code>aria-current</code>, no tablist,
+            four tab stops. <code>mode:'view'</code> swaps a view inside one page: buttons, a real
+            tablist, roving tabindex, arrow keys, and nothing navigates. <b>The question that picks
+            one is whether the thing behind the key is a document or a view.</b></td>
       </tr>
       <tr>
         <td>Registry</td>
@@ -180,10 +190,13 @@
             and has no href because a link to here goes nowhere.</td>
       </tr>
       <tr class="trap">
-        <td>Not a tablist</td>
-        <td>No <code>role="tablist"</code>, no roving <code>tabindex</code>. These load documents;
-            they do not switch panels inside one. <code>&lt;nav aria-label&gt;</code> plus anchors is
-            already right, and anchors are tabbable without help.</td>
+        <td>Tablist, but only one way</td>
+        <td>In <code>doc</code> mode there is no <code>role="tablist"</code> and no roving
+            <code>tabindex</code>: these load documents, and four anchors are already four correct
+            tab stops. In <code>view</code> mode it is the opposite and it is a real tablist,
+            because those keys reveal panels already in the document. <b>The two common bugs are one
+            bug in two directions:</b> a router faking links with click handlers, or a view switcher
+            reloading the document to change a panel.</td>
       </tr>
       <tr class="trap">
         <td>The dock eats clicks</td>
@@ -510,7 +523,16 @@ window.ENGAGE_ROOTS = '#mats, #lightrow, #proudrow';
 })();
 
 /* ── 06 · THE SPECIMEN. A second, independent call to the same builder. ─── */
-document.getElementById('navspec').replaceWith(navBar({ dock: false }));
+/* VIEW MODE, so the specimen cannot take you off the page you are reading its
+   spec on. It is not a defanged copy either: this is the second of the bar's
+   two real modes, and pressing a key here does what it does in a single-page
+   app, which is swap a view and go nowhere. */
+document.getElementById('navspec').replaceWith(navBar({
+  dock: false,
+  mode: 'view',
+  items: [{ nav: 'VIEW A' }, { nav: 'VIEW B' }, { nav: 'VIEW C' }],
+  onSelect: (i, v) => { document.getElementById('navspec-out').textContent = v.nav; },
+}));
 </script>
 </body>
 </html>

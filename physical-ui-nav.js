@@ -80,26 +80,83 @@
     return n;
   };
 
-  /* ── THE BAR ──────────────────────────────────────────────────────────────
-     Exported so the SYSTEM page can build a second one on a stage. A spec
-     whose specimen is an independent caller of the same function cannot drift
-     from the thing it documents. */
-  function navBar({ current = HERE, dock = true } = {}) {
+  /* ── THE BAR, IN TWO MODES ────────────────────────────────────────────────
+     Same object, same metal, two different mechanisms underneath, and which
+     one you get is decided by ONE question: is the thing behind a key a
+     DOCUMENT or a VIEW of the page you are already on?
+
+       mode:'doc'   loads documents. Anchors, aria-current, no tablist.
+       mode:'view'  swaps a view inside one page. Buttons, a real tablist,
+                    roving tabindex, and nothing navigates.
+
+     Getting this backwards is the common bug in both directions: a router
+     that fakes links with click handlers, or a single-page switcher that
+     reloads the document to change a panel. */
+  function navBar({ current = HERE, dock = true, mode = 'doc',
+                    items = PAGES, onSelect } = {}) {
     const strip = mk('div', 'strip nav-strip');
     strip.append(mk('span', 'demo-etch nav-mark', 'SKEW'), mk('span', 'chan'));
 
     const bar = mk('div', 'piano nav-pages');
-    PAGES.forEach(p => {
-      /* THE PAGE YOU ARE ON IS A SPAN. Everything else is an anchor and only
-         an anchor: no click handler, no location assignment, so middle-click,
-         cmd-click, the status bar preview and copy-link all keep working.
-         .pkey is a look; the anchor is the mechanism. */
-      const here = p.file === current;
-      const k = mk(here ? 'span' : 'a', 'pkey nav-link' + (here ? ' is-down' : ''), p.nav);
-      if (here) k.setAttribute('aria-current', 'page');
-      else { k.href = p.file; k.title = p.name; }
+    const view = mode === 'view';
+    const keys = [];
+
+    items.forEach((p, i) => {
+      const sel = view ? i === 0 : p.file === current;
+
+      if (!view) {
+        /* THE PAGE YOU ARE ON IS A SPAN. Everything else is an anchor and only
+           an anchor: no click handler, no location assignment, so middle-click,
+           cmd-click, the status bar preview and copy-link all keep working.
+           .pkey is a look; the anchor is the mechanism. */
+        const k = mk(sel ? 'span' : 'a', 'pkey nav-link' + (sel ? ' is-down' : ''), p.nav);
+        if (sel) k.setAttribute('aria-current', 'page');
+        else { k.href = p.file; k.title = p.name; }
+        bar.append(k);
+        return;
+      }
+
+      /* A VIEW SWITCHER IS A TABLIST, and here that is not a contradiction of
+         the rule above but the other half of it: these keys reveal panels that
+         are already in the document, so they are tabs and they get everything
+         tabs get. No href, because there is nowhere to go. */
+      const k = mk('button', 'pkey nav-link' + (sel ? ' is-down' : ''), p.nav);
+      k.type = 'button';
+      k.setAttribute('role', 'tab');
+      k.setAttribute('aria-selected', String(sel));
+      k.tabIndex = sel ? 0 : -1;          // roving: one stop for the whole bar
+      k.addEventListener('click', () => select(i));
+      keys.push(k);
       bar.append(k);
     });
+
+    function select(n) {
+      keys.forEach((k, i) => {
+        const on = i === n;
+        k.classList.toggle('is-down', on);
+        k.setAttribute('aria-selected', String(on));
+        k.tabIndex = on ? 0 : -1;
+      });
+      onSelect?.(n, items[n]);
+    }
+
+    if (view) {
+      bar.setAttribute('role', 'tablist');
+      /* ARROWS MOVE, because a tablist is one tab stop and the arrows are how
+         you get around inside it. The doc mode deliberately has none of this:
+         four links are four tab stops and that is already correct. */
+      bar.addEventListener('keydown', e => {
+        const d = { ArrowRight: 1, ArrowLeft: -1, Home: -99, End: 99 }[e.key];
+        if (d === undefined) return;
+        e.preventDefault();
+        const at = keys.findIndex(k => k.tabIndex === 0);
+        const to = d === -99 ? 0 : d === 99 ? keys.length - 1
+                 : (at + d + keys.length) % keys.length;
+        select(to);
+        keys[to].focus();
+      });
+    }
+
     strip.append(bar, mk('span', 'chan'));
 
     const ver = mk('div', 'lcd nav-ver dim', 'v—');
@@ -114,7 +171,7 @@
 
     if (!dock) return strip;
     const nav = mk('nav', 'navdock');
-    nav.setAttribute('aria-label', 'Documents');
+    nav.setAttribute('aria-label', view ? 'Views' : 'Documents');
     nav.append(strip);
     return nav;
   }

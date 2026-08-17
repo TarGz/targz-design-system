@@ -47,11 +47,11 @@
 
   <h2>03 <span>/</span> The pen bank <span>·</span> a key that carries its own height</h2>
   <p class="sub">
-    Today it is two objects for one fact: a key that sends the pen to a height, and a pencil that opens a popover to change it. Here the height is a window in the key’s own face. The knob turns it, double-click types it.
+    Today it is two objects for one fact: a key that sends the pen to a height, and a pencil that opens a popover to change it. Here the height is a window in the key’s own face. The knob turns it, double-click types it, and it notches at the default on the way past.
   </p>
   <div class="stage">
-    <div class="stage-note">3 heights · window in the cap · double-click to type</div>
-    <div id="pen" class="box wide"></div>
+    <div class="stage-note">3 heights · window in the cap · notch at the default</div>
+    <div id="pen" class="box penbox"></div>
   </div>
 
   <h2>04 <span>/</span> The overrides <span>·</span> a percentage is a quantity, so it is a knob</h2>
@@ -74,7 +74,7 @@
 
   <h2>06 <span>/</span> The annunciator <span>·</span> which one tripped</h2>
   <p class="sub">
-    One red bar with a sentence in it is not an alarm panel. A machine has a dozen inputs and the question when it halts is <em>which</em>. Every legend is engraved and dark, so you learn the panel before you need it. New ones flash until acknowledged.
+    One red bar with a sentence in it is not an alarm panel. A machine has a dozen inputs and the question when it halts is <em>which</em>. Every legend is engraved and dark, so you learn the panel before you need it.
   </p>
   <div class="stage">
     <div class="stage-note">8 legends · dark by default · UNLOCK acknowledges</div>
@@ -205,7 +205,7 @@ const M = {
   limit: { X: [0, 594], Y: [0, 420], Z: [-30, 10] },   // A2 bed, 40mm of Z
   units: 'mm',
   step:  1,
-  pen:   { up: 5, down: 0, pump: -2 },
+  pen:   { up: 5, down: 0, pump: -2 },   // the app's isNaN fallback, verbatim
   ovr:   { jog: 100, feed: 100, tool: 100 },
   port:  1,
   connected: false,
@@ -217,6 +217,12 @@ const M = {
   alarms: {},                             // key -> true while lit
   acked: false,
 };
+
+/* THE DEFAULTS, and they are the real ones. TargzPenPlotterCtrl reads the
+   heights out of localStorage under penUpZ / penDownZ / penPumpZ and falls
+   back to 5 / 0 / −2 when nothing is stored. Frozen, because a default that
+   can be reassigned at runtime is not a default, it is just another value. */
+const PEN_DEFAULT = Object.freeze({ up: 5, down: 0, pump: -2 });
 
 const PORTS = ['/dev/tty.usbmodem1101', '/dev/tty.usbserial-A50285BI', '/dev/tty.SLAB_USBtoUART',
                '/dev/tty.wchusbserial14230', '/dev/tty.Bluetooth-Incoming-Port', '/dev/cu.usbmodem2201',
@@ -765,19 +771,32 @@ buildDro(document.getElementById('droB'), { stacked: true, demo: true }); // abo
        typed value — three ways in, one number, and no popover anywhere. */
     const kn = knob({
       label: '', min: -30, max: 10, step: 0.1, value: M.pen[id], size: 34,
+      /* THE DETENT IS AT THE DEFAULT. The app's heights come out of
+         localStorage with 5 / 0 / −2 as the isNaN fallback, so those numbers
+         already exist; what does not exist there is any way BACK to them once
+         you have dragged past. A notch is the whole answer: the finger finds
+         the default on the way through without aiming and it clacks when it
+         drops in, and it costs no room on the panel. Same as the overrides'
+         notch at 100. */
+      detents: [PEN_DEFAULT[id]],
       fmt: v => v.toFixed(1),
-      onChange: v => { M.pen[id] = v; win.textContent = v.toFixed(1); },
+      onChange: v => { M.pen[id] = v; paint(); },
     });
     kn.style.cssText = 'gap:0';
     kn.querySelector('.klab').remove();
     kn.querySelector('.kval').remove();
-    win.textContent = M.pen[id].toFixed(1);
+
+    const paint = () => { win.textContent = M.pen[id].toFixed(1); };
+    paint();
+
     typeable(win, () => M.pen[id].toFixed(1), v => {
       M.pen[id] = Math.max(-30, Math.min(10, v));
-      win.textContent = M.pen[id].toFixed(1);
       kn.set(M.pen[id]);
+      paint();
     });
-    row.append(k, kn);
+    /* KNOB FIRST. You set the height before you send the pen to it, so the
+       control that sets it comes before the key that acts on it. */
+    row.append(kn, k);
     bank.append(row);
   });
 
@@ -958,7 +977,7 @@ let trip = () => {}, clear = () => {};
     grid.append(c);
   });
 
-  /* UNLOCK acknowledges — it stops the flashing and clears what can be
+  /* UNLOCK acknowledges and clears what can be
      cleared. A latched E-stop is NOT one of them: the lamp is reporting a
      switch that is still held in, and a button that turns off a lamp without
      changing what the lamp is reporting is the worst object on any panel. */
@@ -999,7 +1018,6 @@ let trip = () => {}, clear = () => {};
       const on = !!M.alarms[id];
       any = any || on;
       cells[id].classList.toggle('lit', on);
-      cells[id].classList.toggle('newalarm', on && !M.acked);
     });
     j.style.setProperty('--lyr', any ? (M.run === 'alarm' ? '#FF2D2D' : '#FFC400') : '#2a2d33');
     j.style.opacity = any ? 1 : .35;

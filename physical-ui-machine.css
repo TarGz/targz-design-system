@@ -649,7 +649,10 @@
    The window is `typeable`, so the number is reachable by keyboard without any
    popover existing at all — which is the whole popover deleted. */
 .penbank{ display:flex; flex-direction:column; gap:8px; }
-.penrow{ display:flex; align-items:center; gap:9px; }
+/* 30px OF AIR BETWEEN THE KNOB AND THE KEY. They are two different jobs, one
+   sets the height and one goes to it, and at a 9px gap they read as one
+   compound widget. The gap is what says they are separate objects. */
+.penrow{ display:flex; align-items:center; gap:30px; }
 .penrow .key{
   flex:1; height:42px; gap:9px; padding:0 11px; justify-content:flex-start;
   font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:.1em;
@@ -853,36 +856,11 @@
     0 0 14px color-mix(in srgb,var(--lamp) 55%,transparent),
     0 0 30px color-mix(in srgb,var(--lamp) 25%,transparent);
 }
-/* A NEW alarm flashes until it is acknowledged, and then holds steady. That
-   is not decoration either: a lamp that came on while you were looking away
-   and a lamp that has been on for ten minutes are different facts.
-
-   BUT A REAL ANNUNCIATOR'S FLASH DOES NOT SURVIVE BEING PUT ON A SCREEN AS-IS.
-   The first one was the honest transcription — 1.6Hz, hard edges, half on and
-   half at a third brightness — and on a 46px cell of saturated orange sitting
-   40cm from your face that is not a warning lamp, it is a strobe. You cannot
-   read the panel around it and you want it gone, which is the exact opposite
-   of what the lamp is for: an alarm you silence by looking away has failed.
-
-   THE RHYTHM IS WHAT CARRIES THE MEANING, NOT THE DEPTH. So the beat stays
-   hard-edged and machine-like, and slows to about 0.8Hz; what shrinks is the
-   amplitude and the duty — a short dip rather than half the cycle dark, and
-   down to 62% rather than to nearly out. It still reads instantly as "this one
-   is new" in peripheral vision, and you can still read the cell while it does
-   it. Amplitude was the wrong axis to be faithful on. */
-@keyframes annflash{
-  0%, 74%  { filter:brightness(1); }
-  75%, 100%{ filter:brightness(.62); }
-}
-.ann.lit.newalarm{ animation:annflash 1.25s steps(1,end) infinite; }
-/* AND IT STOPS ON ITS OWN. A lamp that flashes forever is one nobody presses
-   UNLOCK for — they just stop seeing it. Ten cycles is long enough to catch
-   an eye coming back to the panel, after which it holds lit, which is still
-   the whole message. */
-.ann.lit.newalarm{ animation-iteration-count:10; }
-@media (prefers-reduced-motion: reduce){
-  .ann.lit.newalarm{ animation:none; }
-}
+/* NO FLASH. A lamp on this panel is either lit or it is not, and that is the
+   whole state. The flash was carrying a second fact, "this one is new", on top
+   of the one the lamp already carries, and a cell that changes twice a second
+   is a cell you cannot read while it does it. UNLOCK still acknowledges and
+   still clears what can be cleared; it just no longer has a blink to stop. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE METER — progress as lit segments, not as a filled rectangle
@@ -1030,6 +1008,9 @@
    one reading you actually need to trust. It was 392 and the third axis hung
    over the edge of the case. */
 .box.wide{ width:392px; flex:0 0 392px; }
+/* THE PEN BANK SIZES TO ITS ROW. Once the key stopped being full width the
+   392px chassis was carrying about 130px of empty metal on the right. */
+.box.penbox{ width:292px; flex:0 0 292px; }
 .box.xwide{ width:452px; flex:0 0 452px; }
 .box.dro-strip{ width:512px; flex:0 0 512px; }
 

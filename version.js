@@ -1,6 +1,19 @@
-export const version = '1.23.0';
+export const version = '1.24.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.24.0',
+    date: '2026-08-17',
+    changes: [
+      'THE PEN HEIGHTS HAVE A DEFAULT AND A WAY BACK TO IT. TargzPenPlotterCtrl reads them out of localStorage under penUpZ / penDownZ / penPumpZ and falls back to 5 / 0 / −2 when nothing is stored, so the numbers already existed; what did not exist is any route back once you have dragged past one. PEN_DEFAULT is frozen, because a default that can be reassigned at runtime is not a default',
+      'A notch at the default on each knob, the same answer as the overrides\' notch at 100: the finger finds it on the way through without aiming and it clacks when it drops in. It was briefly a notch plus a key printed with the number, which was a second control saying what the lit window already says',
+      'THE KNOB MOVED LEFT OF THE KEY, because you set a height before you send the pen to it, with 30px between them. They are two different jobs, one sets the height and one goes to it, and at a 9px gap they read as a single compound widget. The chassis came down from 392 to 292: once the key stopped being full width it was carrying 130px of empty metal',
+      'THE NAV BAR HAS TWO MODES, and one question picks between them: is the thing behind a key a DOCUMENT or a VIEW of the page you are on? doc gives anchors, aria-current, no tablist and four tab stops. view gives buttons, a real tablist, roving tabindex, arrow keys, and nothing navigates',
+      'That is not a contradiction of the "not a tablist" rule, it is the other half of it, and the two common bugs are one bug in two directions: a router faking links with click handlers, or a single-page switcher reloading the document to change a panel',
+      'THE SPECIMEN ON SYSTEM §06 IS THE VIEW VARIANT, so a spec you are reading cannot navigate you off the page it describes. It is not a defanged copy either: it is the bar\'s second real mode, doing what it does in a single-page app',
+      'THE ANNUNCIATOR NO LONGER FLASHES. A lamp is lit or it is not, and that is the whole state; the flash was carrying a second fact on top of the one the lamp already carries, and a cell changing twice a second is a cell you cannot read while it does it. UNLOCK still acknowledges and still clears what can be cleared, it just has no blink left to stop',
+    ],
+  },
   {
     version: '1.23.0',
     date: '2026-08-17',

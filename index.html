@@ -213,7 +213,7 @@ const PAGES = [
     parts: ['DRO', 'jog', 'pen bank', 'guard', 'e-stop', 'annunciator', 'meter', 'tape'],
   },
   {
-    file: '../old/index.html',
+    file: 'old/index.html',
     nav:  'SYSTEM',
     no:   '—',
     name: 'SYSTEM',
@@ -263,7 +263,7 @@ function navBar({ current, dock = true } = {}) {
   /* THE VERSION IS READ, NOT TYPED. A number written into two files drifts on
      the first commit that only remembers one of them. It is a dynamic import
      so a failure is a dim window rather than a dead script. */
-  import('../version.js')
+  import('./version.js')
     .then(m => { ver.textContent = 'v' + m.version; ver.classList.remove('dim'); })
     .catch(() => { ver.textContent = 'v—'; });
 
@@ -331,7 +331,7 @@ new IntersectionObserver(
 })();
 
 /* the footer states the version too, and reads it from the same place */
-import('../version.js')
+import('./version.js')
   .then(m => {
     document.getElementById('foot').textContent =
       `targz design system · skew · v${m.version} · physical-ui.css is the shared part`;

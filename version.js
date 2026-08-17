@@ -1,6 +1,16 @@
-export const version = '1.21.0';
+export const version = '1.22.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.22.0',
+    date: '2026-08-17',
+    changes: [
+      'SKEW IS THE REPO NOW. The three documents, the kit, the shared stylesheet, the three papers and ref/ came out of targz-skew-design-sytem/ to the root, moved with git mv so the history follows. The home was one folder deep and the launcher had to 302 into it; / serves index.html directly and HOME is back to a single slash',
+      'The folder name went with it, and it was misspelled the whole time: targz-skew-design-sytem, no second s in system. A directory nobody could type is one more reason not to have had it',
+      'old/ holds the one thing that is actually old. Everything else at the root is either current or infrastructure: version.js spans both eras, BUGS.md tracks a live crash in the layers document, server.js is what Launchpad runs',
+      'Removed physical-ui.css.bak, a 98KB copy taken during the August 15 restore. The file it backs up has been in git with full history ever since, which is the same guarantee in a place that cannot go stale',
+    ],
+  },
   {
     version: '1.21.0',
     date: '2026-08-17',

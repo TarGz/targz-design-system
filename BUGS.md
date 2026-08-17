@@ -13,7 +13,7 @@ This file tracks known bugs in the repo. Keep it up to date so any agent working
 
 ### `physical-ui-layers.html` — the Materials count crashes the end of the script
 
-`targz-skew-design-sytem/physical-ui-layers.html` ends with
+`physical-ui-layers.html` ends with
 
 ```js
 document.getElementById('mat-count').textContent = WORDS[tiles.length] || tiles.length;

@@ -24,12 +24,12 @@ const path = require('path');
 const ROOT         = __dirname;
 const DEFAULT_PORT = 2860;
 
-/* THE LANDING PAGE. `/` is the one URL the launcher opens, so it goes to the
-   home, and the home is the skew document that lists everything else. It is a
-   302 and not a silent rewrite: the address bar then reads the page's real
-   path, so /index.html still means the file at the repo root and there is no
-   URL that quietly means two different documents. One line to repoint. */
-const HOME = '/targz-skew-design-sytem/';
+/* THE LANDING PAGE. `/` is the one URL the launcher opens, and the home is now
+   the root document, so there is nothing to redirect to and the directory
+   branch serves it. Point this at a subfolder and `/` becomes a 302 to it
+   rather than a silent rewrite, so the address bar keeps reading the page's
+   real path. One line either way. */
+const HOME = '/';
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',

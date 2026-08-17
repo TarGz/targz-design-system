@@ -364,6 +364,170 @@ hang on that one answer, and right now each was solved separately.
 
 ---
 
+<!-- ── FROM THE PORTRAIT-RIBBONS ADOPTION, 2026-08-17 ────────────────
+     Everything from here to "## Not wanted" was found by BUILDING against the
+     kit rather than by reading it: Portrait-Ribbons replaced Tweakpane with Skew
+     (133 parameters, 20 bays, 6 panels) and these are the parts the language did
+     not have when the panel needed them. Each says what the app shipped instead,
+     so promoting one means deleting that code rather than guessing at a spec.
+     ──────────────────────── -->
+
+### `[design system]` A BODY THAT SCROLLS — the first thing a real app hits
+Every `.box` in the language is sized to its contents, because every panel the language
+was grown on is a dozen controls at a fixed size. Portrait-Ribbons is **133 bound
+parameters across 20 bays in 6 panels**, and the tallest is several times any window.
+
+**Why it is not a one-liner in the adopting app.** It nearly is, and that is the problem:
+the obvious `overflow-y:auto` goes on the `.box`, which scrolls the `.box-head` off the
+top — and the head is the only thing saying which panel you are in once six of them
+exist. It has to go on `.box-body`, with `min-height:0` on the box, and then the browser
+scrollbar is the same intrusion `input[type=color]` was: an OS surface on a machined
+panel. Ribbons ships `.sp-scroll` — body-only, `overscroll-behavior:contain`, and a
+milled channel with a bevelled thumb in place of the OS bar. That is 20 lines that every
+adopter will write, slightly differently, until the language has them.
+
+**The related decision the language has not made:** density. 133 knobs at 46px is not a
+panel, it is a wall. The five knob layouts (SYSTEM 06) are the start of the answer and
+they stop at five variants of one control; there is no guidance on what a bay of twelve
+numbers should look like, and Ribbons guessed (`knobs()` puts up to three on a
+`.knobrow`, everything else stacks).
+
+---
+
+### `[design system]` A LABELLED SWITCH — `swBtn` is icon-only and most booleans have no icon
+`swBtn(on, label, icon, state, onClick)` puts the label in the `aria-label` and the
+`title`, never on screen, because in `physical-ui-layers.html` it lives on a layer row
+where the row already carries the name. Off that row there is nothing saying what the
+switch does.
+
+Ribbons has **19 booleans** and about three of them have an honest icon — `eye` for a
+preview, `outline` for the ribbons, `shade` for the shading. The rest are "Weave
+crossings", "Apply edits", "Invert tone", "Fill background". There is no glyph for those,
+and handing them an arbitrary one is worse than none: an eye on a switch that has nothing
+to do with seeing.
+
+**What Ribbons did, and why it should be upstream rather than in an app.** Composed from
+parts the language already has — `.actrow` for the geometry, `.set-cap` for the engraved
+name, `swBtn` with an empty icon string for the cap. It works and it looks right, which is
+exactly why it should not be re-derived by every adopter: four apps composing the same
+molecule four ways is how a language stops being one.
+
+**One trap worth writing into whatever gets built.** `swBtn` bakes its state into the
+class, the aria and the `title` at construction, so toggling a class by hand leaves the
+title saying "Show" while the lamp says on. It has to be REBUILT on change. That is safe —
+`engage()` is explicitly written for it, noting the index before the callback and finding
+the element again after — but only if the container is in `ENGAGE_ROOTS`, and nothing
+says so at the point where you would get it wrong.
+
+---
+
+### `[design system]` A SWATCH FOR `openPicker` TO OPEN AGAINST
+`openPicker(anchor, value, onChange, swatches)` takes an anchor and the language does not
+provide one. The hatch bay's pen caps are the only callers today and they are pen caps —
+a `.pencap` is a specific object with a specific meaning, not the general "here is a
+colour, press it to change it" the argument list implies.
+
+Ribbons has **five** colours (ribbon, shading, infill, drop shadow, preview ground) and
+none of them is a pen in a case. It ships `.sp-swatch`: a lit chip in a milled well, the
+ink read as a CORE through the cutout rather than as a painted face, which is what stops
+it reading as a sticker on the panel. Small, obvious, and the fifth app will write it
+again.
+
+---
+
+### `[design system]` A KEY THAT CARRIES A WORD
+`.key` is cut for a 14px icon. Ribbons needs `GENERATE`, `BAKE`, `CLEAR`, `LOAD`, `SAVE`,
+`RESET EDITS` — commands with no glyph and no room for one — and had to add tracking, a
+font size and a min-width to make a legend sit in a key without looking like a mistake.
+
+**Why this is not "just use `.pkey`".** A pkey is a piano key: latching, and its bar holds
+one down at a time. These are momentary commands that spring back. The two are different
+controls and the word-carrying one does not exist.
+
+---
+
+### `[design system]` THE MENU — `.plate` is the surface and there is no mechanism
+Eight of the nine Portrait apps have an icon-only top bar with hover dropdowns, `<kbd>`
+shortcut hints and separators. `.plate`'s own documentation says "menus, tooltips and any
+popup inherit it" — the SURFACE is there and nothing else is: no open/close, no Escape,
+no click-outside, no focus trap, no keyboard walk. `navBar` is a piano of destinations,
+which is a different object.
+
+Ribbons' nav bar is therefore a **reskin, not an adoption** — its own markup, its own
+open/close, wearing the kit's tokens. That is stated plainly in `assets/skew.css` under a
+`§ CHROME` heading precisely so it can be deleted when this exists. It is the single
+biggest piece of the language that a Portrait app cannot use.
+
+---
+
+### `[design system]` THE ASSET ROW — load a file and say what is loaded
+Load button, hidden `<input type=file>`, a name readout, a source readout, a disable
+toggle. Ribbons has this **three times over**, one per map slot, and eight of the nine
+apps have at least one. Grep the system for `type=file` and it returns nothing.
+
+**Why it is a part and not a molecule the app should compose.** The disable toggle is the
+`select ≠ active` pattern the language already argues for in prose (§3, "Two facts need
+two channels"): a slot you have loaded an image into but switched off is a real and useful
+state, and every app currently gets it slightly wrong in its own way.
+
+---
+
+### `[design system]` THE RENDER OVERLAY — a blocking layer with a cancel route
+All nine apps have one and all nine drew it themselves. A message, a progress track, and a
+way out ("Press Space to cancel"). The job meter (MACHINE 07) is the closest part and it is
+a *segmented meter on a panel*, not a modal — grep for "modal", "overlay" and "toast" in
+the system and all three return nothing.
+
+This is the one gap where the apps are not merely re-composing: they are each inventing a
+blocking-interaction pattern, which is the kind of thing a language exists to settle once.
+
+---
+
+### `[design system]` RULERS AND ZOOM, at page scale rather than control scale
+Four apps (Typo, Y, Cubes, ribbons) draw millimetre rulers around the paper; three have
+zoom controls. `.fticks` is the engraved scale under a fader and is the only ruler-shaped
+thing in the language. Zero mentions of "ruler" or "zoom" anywhere.
+
+Lower priority than the four above — a ruler is genuinely app-specific in a way a menu is
+not — but worth recording, because the *engraved tick* is a language decision and four
+apps are currently making it separately.
+
+---
+
+### `[design system]` CORRECTION — `GAP-ANALYSIS.md` is wrong about `.set()`
+`GAP-ANALYSIS.md` (2026-08-17) says, under "The structural gap": *"`knob` has `.set(v)`,
+Typo added `rangeFader.set(x, y)`, and `fader`, `rotary` and `drum` still have none. That
+is the same hole four times."* It then makes taking `.set()` upstream **item 1** of "what
+I would do next".
+
+**SETTLED AT v1.26.0, and both halves of the argument were half right.** Checked factory by
+factory against `skew-kit.js`:
+
+| Factory | `.set()` | at v1.25.0 |
+|---|---|---|
+| `knob` | `wrap.set = nv => set(nv, true)` | had it |
+| `fader` | `row.set = x => set(x, true)` | had it |
+| `rotary` | `row.set = n => { … paint(); }` | had it |
+| `drum` | `bay.set = n => { … paint(); }` | had it |
+| `rangeFader` | `row.set = (x, y) => { … paint(); }` | **did not** |
+
+So the correction was right that four of five already had the handle, and wrong that the
+fifth did: the `row.set = x => set(x, true)` it attributed to `rangeFader` is the line
+inside `fader`, one factory further down. A grep for `row.set` returns both and the two
+factories are adjacent, which is how the reading happened.
+
+The gap analysis was right that a hole existed and wrong about its size — one factory, not
+four. Portrait-Typo had already written the method for itself, which is the one place an
+adoption was ahead of the language, and v1.26.0 takes it upstream with the two arguments
+this entry asked about: a span is two numbers, and the far cap is clamped by `MIN_SPAN` the
+same way a drag clamps it, so a stored pair that crossed cannot put the control in a state
+a hand could not reach.
+
+Nothing left open. Kept as a record because the underlying claim is load-bearing:
+Portrait-ribbons built its config-load path on `.set()` existing on everything.
+
+---
+
 ## Not wanted
 
 ### The bright skin — DECLINED

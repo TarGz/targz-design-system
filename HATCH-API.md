@@ -1,6 +1,6 @@
 # The hatch generators — API
 
-Everything in sections 07 and 08 of `physical-ui-layers.html` draws through the same three
+Everything in sections 07 and 08 of `skew-layers.html` draws through the same three
 layers. This is the reference for porting them into an app; the sections themselves are the
 argument for *why* each choice is what it is, and you do not need to read them to use this.
 

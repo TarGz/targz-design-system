@@ -7,7 +7,7 @@
    entry to PAGES below: the bar and the home's card grid both read it, which
    is what stops the two from disagreeing about what exists.
 
-   Scoped in an IIFE because physical-ui-kit.js owns `el`, `svg` and `ICON` at
+   Scoped in an IIFE because skew-kit.js owns `el`, `svg` and `ICON` at
    the window level and this file loads before it.
    ══════════════════════════════════════════════════════════════════════════ */
 (function () {
@@ -28,16 +28,16 @@
       inGrid: false,
     },
     {
-      file: 'physical-ui-system.html',
+      file: 'skew-system.html',
       nav:  'SYSTEM',
       name: 'SYSTEM',
       no:   '00',
       kick: 'the language',
       line: 'The <b>parts</b>, and the rules that make them one language.',
-      parts: ['tokens', 'the light', 'primitives', 'factories', 'nav bar', 'settings', 'traps'],
+      parts: ['tokens', 'the light', 'primitives', 'factories', 'nav bar', 'settings', 'hatch', 'traps'],
     },
     {
-      file: 'physical-ui-layers.html',
+      file: 'skew-layers.html',
       nav:  'LAYERS',
       name: 'LAYERS',
       no:   '01',
@@ -47,7 +47,7 @@
       parts: ['layer dock', 'viewport', 'launchpad', 'hatch bay', 'filling', 'windows'],
     },
     {
-      file: 'physical-ui-machine.html',
+      file: 'skew-machine.html',
       nav:  'MACHINE',
       name: 'MACHINE',
       no:   '02',

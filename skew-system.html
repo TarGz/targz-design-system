@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skew · System</title>
-<link rel="stylesheet" href="physical-ui.css">
+<link rel="stylesheet" href="skew.css">
 </head>
 <body>
-<script src="physical-ui-nav.js"></script>
+<script src="skew-nav.js"></script>
 
 <div class="wrap" id="main">
 
@@ -129,8 +129,8 @@
       <tr><td>navBar({current, dock})</td><td>The bar at the top of this page. Section 06</td></tr>
       <tr class="trap">
         <td>Two copies exist</td>
-        <td><code>physical-ui-kit.js</code> and the inline copy inside
-            <code>physical-ui-layers.html</code> are identical today and will not stay identical.
+        <td><code>skew-kit.js</code> and the inline copy inside
+            <code>skew-layers.html</code> are identical today and will not stay identical.
             One of them has to become the other's import. Written down in both files rather than
             quietly carried.</td>
       </tr>
@@ -209,7 +209,7 @@
     <tbody>
       <tr>
         <td>Adding it</td>
-        <td><code>&lt;script src="physical-ui-nav.js"&gt;&lt;/script&gt;</code> as the first node in
+        <td><code>&lt;script src="skew-nav.js"&gt;&lt;/script&gt;</code> as the first node in
             <code>&lt;body&gt;</code>, and <code>id="main"</code> on the content wrapper. The module
             writes the skip link, the sentinel and the dock itself. That is the whole integration.</td>
       </tr>
@@ -377,7 +377,61 @@
     </div>
   </div>
 
-  <h2>09 <span>/</span> Traps <span>·</span> read this even if you take no code</h2>
+  <h2>09 <span>/</span> The hatch <span>·</span> the one part that makes marks instead of light</h2>
+  <p class="sub">
+    <b>Everything else here draws a control. This draws the artwork.</b> A pen plotter cannot
+    shade, it can only put a line down or not, so every grey in a plot is a decision about
+    spacing, angle and how many passes. That decision is the same in every app that ends at a
+    plotter, which is why it is in the language and not in one of them. Full reference in
+    <a href="HATCH-API.md">HATCH-API.md</a>; the bay that drives it is
+    <a href="skew-layers.html">LAYERS §07</a>.
+  </p>
+
+  <table class="spec">
+    <thead><tr><th>Layer</th><th>What it is for</th></tr></thead>
+    <tbody>
+      <tr><td>KIT</td><td>The subjects and the primitives: <code>scene</code>, <code>blob</code>, the line families, <code>carve</code>. Shared, and the reason two fills of one idea cannot drift apart</td></tr>
+      <tr><td>HANDS</td><td>The three hand fills. <code>HANDS.draw(kind, w, h, seed, opt)</code> where kind is <code>hand</code>, <code>cross</code> or <code>random</code></td></tr>
+      <tr><td>machine fills</td><td>Parallel and serpentine. <code>join:false</code> lifts the pen at the end of every pass, <code>join:true</code> turns and comes back</td></tr>
+      <tr class="trap">
+        <td>Everything is millimetres</td>
+        <td>There is no pixel anywhere below the DOM. A caller measures its element, converts at
+            <code>96 / 25.4</code>, and passes <code>w, h</code>. One unit out is one millimetre
+            on paper, so the SVG needs no rescale. Get this wrong and every number in the API
+            means nothing, and it will still run.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="sub">
+    <b>A region is a function <code>tone(x, y) → number</code>, and that one contract is what
+    makes a style cheap to add.</b> A fill does not know what it is filling. It asks a point how
+    dark it should be and decides whether to put a line there, so a new hand is a new answer to
+    <em>where do the marks go</em> and nothing else has to change. Same seed in, same drawing
+    out, always: a plot you cannot reproduce is a plot you cannot fix.
+  </p>
+
+  <p class="sub">
+    <b>Three parameters belong to the caller and the rest fall out of them.</b>
+    <code>nib</code> is the pen width in millimetres, <code>spacing</code> defaults from it, and
+    <code>angle</code> is the base direction every pass offsets from. Spacing defaulting from
+    the nib is the part worth keeping: pitch and nib are one decision, and a panel that lets you
+    set them independently lets you ask for a fill the pen cannot draw.
+  </p>
+
+  <p class="sub">
+    <b>This is the part of the language most likely to grow, and the way to grow it is a written
+    request rather than a new generator.</b> A style added quietly is a style nobody else can
+    reach and a second implementation of something <code>KIT</code> already has. Open
+    <a href="FEATURES-REQUEST.md">FEATURES-REQUEST.md</a> and say what the marks should look
+    like and what tone is supposed to do to them. Three things are already sitting there and are
+    worth reading before adding a fourth: <b>the machine fills are not exported</b>, so the bay's
+    Serpentine position runs its own copy; <b>chaining is per pass and never across passes</b>,
+    which is most of the pen lifts on a plot; and <b>a shaded region cannot use a wall walk</b>
+    until someone extracts its isoline, which is unbuilt on purpose.
+  </p>
+
+  <h2>10 <span>/</span> Traps <span>·</span> read this even if you take no code</h2>
   <p class="sub">
     Each one cost real time here. All of them are code that runs, then behaves oddly later.
   </p>
@@ -421,7 +475,7 @@
     </tbody>
   </table>
 
-  <footer>targz design system · skew · 00 · physical-ui-system.html</footer>
+  <footer>targz design system · skew · 00 · skew-system.html</footer>
 </div>
 
 <!-- ── THE DRAWER ────────────────────────────────────────────────────────────
@@ -448,10 +502,10 @@
   </div>
 </aside>
 
-<script src="physical-ui-kit.js"></script>
+<script src="skew-kit.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
-   SYSTEM. `el`, `svg`, `ICON` and every factory come from physical-ui-kit.js,
+   SYSTEM. `el`, `svg`, `ICON` and every factory come from skew-kit.js,
    so nothing is redeclared here.
    ══════════════════════════════════════════════════════════════════════════ */
 

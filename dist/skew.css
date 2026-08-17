@@ -1,3 +1,38 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   skew.css — GENERATED. DO NOT HAND-EDIT.
+
+     source   ../skew.css
+     at       Skew v1.26.0
+     rebuild  node tools/build-dist.mjs --write
+
+   A patch applied here disappears at the next build, silently, and the way you
+   find out is that a control stops matching the reference. Change the source.
+   ───────────────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   EVERYTHING BELOW IS IN @layer skew, AND THAT IS THE ONE LINE AN ADOPTER
+   CARES ABOUT.
+
+   An unlayered rule beats a layered one no matter what the specificity says.
+   So an app that has its own `.card`, `.row`, `.box`, `.key`, `.head`, `.page`
+   or `.wrap` — and every app has some of those — keeps its own, without
+   renaming anything and without a single `!important`.
+
+   It also disarms the trap this file's own notes describe three times over:
+   `[data-skin=light] .sw` out-ranking `.sw.on`, a material rule silently
+   un-pressing a key. Layers order by DECLARATION, not by specificity, so the
+   state rules an app writes on top can no longer lose to a material rule
+   underneath.
+
+   The app declares the order it wants, once, before it loads anything:
+
+       @layer skew, app;
+
+   Omit it and the browser orders layers by first appearance, which puts skew
+   first anyway. So the default is already right; declaring it is how you say
+   it on purpose.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer skew {
+
 /* ═══════════════════════════════════════════════════════════════════════════
    PHYSICAL UI — an exploration, not the design system.
 
@@ -85,11 +120,6 @@ body::after{  /* room grain over everything, very light */
   content:''; position:fixed; inset:0; pointer-events:none; z-index:99;
   background-image:var(--grain); opacity:.035; mix-blend-mode:overlay;
 }
-
-/* ── page furniture ──────────────────────────────────────────────────────── */
-.wrap{ max-width:1160px; margin:0 auto; padding:56px 32px 120px; }
-
-.masthead{ margin-bottom:14px; }
 .kicker{
   font-family:var(--font); font-size:10px; letter-spacing:.22em; text-transform:uppercase;
   color:var(--led); margin:0 0 14px;
@@ -98,8 +128,6 @@ h1{
   font-size:clamp(30px,5vw,52px); line-height:1.02; margin:0 0 16px;
   font-weight:700; letter-spacing:-.02em; color:#f2f4f7;
 }
-.lede{ font-size:15px; line-height:1.65; color:#9ba0aa; max-width:62ch; margin:0 0 8px; }
-.lede b{ color:#d3d6dc; font-weight:600; }
 
 .warn{
   display:flex; gap:12px; align-items:flex-start;
@@ -116,7 +144,6 @@ h2{
   padding-bottom:10px; border-bottom:1px solid #212327;
 }
 h2 span{ color:#3d4149; }
-.sub{ font-size:14px; line-height:1.65; color:#8b909a; max-width:70ch; margin:16px 0 28px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE STAGE — a lit desk. The light comes from above-left and every bevel,
@@ -2730,9 +2757,7 @@ input:focus-visible{ outline-offset:3px; }
    plate over the drawer that opened it is not.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{ --drawer-w:404px; --drawer-tab:38px; --drawer-ease:cubic-bezier(.22,.68,.24,1); }
-
-.wrap,
-.navdock{ transition:transform .28s var(--drawer-ease); will-change:transform; }
+.navdock { transition:transform .28s var(--drawer-ease); will-change:transform; }
 /* THE NAV GOES WITH THE PAGE. It is a sibling of .wrap, not a child, so a
    rule that only moves .wrap leaves the bar sitting still while everything
    under it slides, which reads as the bar being part of the drawer. */
@@ -2823,42 +2848,6 @@ body.drawer-open .drawer{ transform:translateX(0); }
     -6px 3px 10px -3px rgba(0,0,0,.75);
   transition:background .14s;
 }
-/* THE SAME TAB, STOOD ON THE PAGE. It is absolutely positioned on the drawer
-   because it rides on its edge; here it is the specimen, so it sits still and
-   gets both its corners back — same metal, same engraved bars, same size, so
-   what you press in the section is what you press at the edge. */
-.tab-demo{
-  position:static; border-radius:9px; width:44px; height:52px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.13),
-    inset 0 -1px 0 rgba(0,0,0,.8),
-    inset 1px 0 0 rgba(255,255,255,.06),
-    inset -1px 0 0 rgba(0,0,0,.5),
-    0 4px 0 #0d0e10,
-    0 7px 12px rgba(0,0,0,.7);
-}
-.tab-demo:active{ transform:translateY(2px); box-shadow:var(--recess); }
-
-/* ── BOTH POSITIONS, SIDE BY SIDE ─────────────────────────────────────────
-   A control whose mark changes has two specimens, or the section documents
-   half of it. The left one is LIVE and the right one is the same tab frozen
-   open — not a picture of it: the same element, the same class, the same
-   engraved tracks, with the fold applied by hand instead of by the drawer.
-   Anything else would be a drawing that could drift from the thing it draws.
-
-   THE FROZEN ONE IS NOT A BUTTON. It is a div and it is aria-hidden, because
-   a control that looks pressable and does nothing is worse than no control —
-   and a screen reader hearing two Open Settings buttons would be told the page
-   has two drawers. */
-.tab-pair{ display:flex; gap:52px; align-items:flex-start; }
-.tab-cell{ display:flex; flex-direction:column; align-items:center; gap:9px; }
-.tab-cell .tab-demo{ cursor:default; }
-.tab-cell .tab-demo#setopen{ cursor:pointer; }
-.tab-cap{
-  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; color:#5d626b;
-  text-shadow:0 1px 0 rgba(255,255,255,.09);
-}
-.tab-sub{ font-size:11px; color:#6b7079; margin-top:-5px; }
 .drawer-tab:hover{ background:linear-gradient(96deg,#33373d 0%,#272b31 55%,#1d2024 100%); }
 .drawer-tab:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 
@@ -2933,7 +2922,10 @@ body.drawer-open .sliders i:nth-child(3),
 /* MOTION IS A PREFERENCE. Everything still works with it off — the drawer
    arrives, it just does not travel. */
 @media (prefers-reduced-motion: reduce){
-  .wrap, .navdock, .drawer, .sliders i, .sliders i b{ transition:none; }
+.navdock,
+.drawer,
+.sliders i,
+.sliders i b { transition:none; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -3034,31 +3026,6 @@ body.drawer-open .sliders i:nth-child(3),
   font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.1em;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   MATERIALS — the primitives, so this is a language and not one drawing
-   ═══════════════════════════════════════════════════════════════════════════ */
-.mats{ display:grid; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)); gap:16px; margin-top:26px; }
-.mat{
-  border:1px solid #212327; border-radius:12px; overflow:hidden;
-  background:linear-gradient(180deg,#141518,#0f1012);
-}
-/* THE STAGE IS CASE METAL, not a dark backdrop. A well cut into #101114 is
-   lighter than the thing it is cut into, which is not a well, it is a tile.
-   These samples are pieces of the panel, so they have to sit on the panel's
-   own material: then the plate reads as above it and the well as below it,
-   which is the entire content of this section. */
-.mat-stage{
-  height:104px; display:flex; align-items:center; justify-content:center; gap:10px;
-  background:radial-gradient(70% 80% at 30% 10%, rgba(255,255,255,.06), transparent 65%),
-             linear-gradient(176deg,#26282d 0%,#1d1e22 42%,#191a1e 100%);
-  border-bottom:1px solid #141518;
-  box-shadow:inset 0 -1px 0 rgba(255,255,255,.05);
-}
-.mat-body{ padding:12px 14px 14px; }
-.mat-t{ font-family:var(--font); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#d3d6dc; margin:0 0 6px; }
-.mat-d{ font-size:12px; line-height:1.55; color:#7f848e; margin:0; }
-.mat-d code{ font-family:var(--font); font-size:11px; color:#9aa0aa; background:#1a1c20; padding:1px 4px; border-radius:3px; }
-
 /* demo objects in the material tiles */
 /* A GLYPH IS NOT THE CAP. 24px of icon in a 38px cap leaves 7px of face, and
    on the lit one the sun's rays ran into the walls: the orange stopped being
@@ -3072,11 +3039,6 @@ body.drawer-open .sliders i:nth-child(3),
 .mats .mat.tall .mat-stage{ height:206px; }
 .mats .mat.wide .mat-stage{ padding:0 18px; }
 .mats .mat.wide .fader{ width:100%; }
-/* The small controls are sampled at the size the row uses them — same 5px gap,
-   no scaling. The chevron's knurl is tuned against an 11px glyph; blow it up
-   and the tile shows a material that is nowhere in the document. */
-.mat-row{ display:flex; align-items:center; gap:5px; }
-.mat-keys{ display:flex; gap:11px; }
 .mat-keys .key{ width:38px; height:38px; border-radius:9px; }
 .mat-keys .key svg{ width:18px; height:18px; }
 .demo-plate{ width:90px; height:44px; border-radius:8px;
@@ -3334,41 +3296,5 @@ span.nav-link{ cursor:default; }
 }
 .skip:focus{ left:0; }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE SPEC TABLE — reference rows, not prose
-   ═══════════════════════════════════════════════════════════════════════════ */
-.spec{
-  width:100%; border-collapse:collapse; margin-top:26px;
-  font-size:13px; line-height:1.6;
-}
-.spec th{
-  text-align:left; padding:9px 12px; border-bottom:1px solid #212327;
-  font-family:var(--font); font-size:9px; letter-spacing:.16em; text-transform:uppercase;
-  color:#5a5f68; font-weight:600;
-}
-.spec td{ padding:11px 12px; border-bottom:1px solid #17191c; color:#8b909a; vertical-align:top; }
-.spec tr:last-child td{ border-bottom:0; }
-.spec td:first-child{
-  width:24%; min-width:150px; color:#c6cad1;
-  font-family:var(--font); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
-}
-.spec td b{ color:#c6cad1; font-weight:600; }
-.spec code{
-  font-family:var(--font); font-size:11.5px; color:#a9b0ba;
-  background:#121417; padding:1.5px 5px; border-radius:4px;
-  box-shadow:inset 0 1px 2px rgba(0,0,0,.7);
-}
-/* the rows a dev gets wrong. Amber, because it is a caution and not a failure:
-   every one of them is code that runs and then behaves oddly six weeks later. */
-.spec tr.trap td{ background:rgba(255,196,0,.045); }
-.spec tr.trap td:first-child{ color:#E3B45E; box-shadow:inset 2px 0 0 rgba(255,196,0,.5); }
 
-@media (max-width:620px){
-  .spec td:first-child{ width:auto; min-width:0; }
-  .spec, .spec td{ font-size:12px; }
-}
-
-/* a token swatch, inline in the first cell of a token row */
-.tok{ display:inline-block; width:13px; height:13px; border-radius:3px; margin-right:7px;
-      vertical-align:-2px; box-shadow:inset 0 1px 0 rgba(255,255,255,.18),
-      inset 0 -1px 0 rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
+}   /* @layer skew */

@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skew Design System</title>
-<link rel="stylesheet" href="physical-ui.css">
-<link rel="stylesheet" href="physical-ui-home.css">
+<link rel="stylesheet" href="skew.css">
+<link rel="stylesheet" href="skew-home.css">
 </head>
 <body>
-<script src="physical-ui-nav.js"></script>
+<script src="skew-nav.js"></script>
 
 <div class="wrap" id="main">
 
@@ -21,6 +21,48 @@
 
   <h2>01 <span>/</span> The documents</h2>
   <div class="doc-grid" id="docs"></div>
+
+  <h2>02 <span>/</span> Using it <span>·</span> copy <code>dist/</code>, and nothing else</h2>
+  <p class="sub">
+    <b>Two files, both in <code>dist/</code>. Copy them into your app; do not link to this
+    folder.</b> Launchpad roots every project at its own directory, so a path out of it cannot
+    be fetched at runtime and there is no build step to resolve one. Everything at the root is
+    this documentation site and its source. <code>dist/</code> is the part that is yours.
+  </p>
+
+  <table class="spec">
+    <thead><tr><th>File</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td>dist/skew.css</td><td>Every part's material, this site's own rules removed. Wrapped in <code>@layer skew</code>, so your own <code>.card</code>, <code>.row</code>, <code>.box</code>, <code>.key</code> and <code>.wrap</code> keep beating it without a rename and without an <code>!important</code></td></tr>
+      <tr><td>dist/skew-kit.js</td><td>Every factory, on <code>window.SkewKit</code>: <code>knob</code>, <code>fader</code>, <code>rangeFader</code>, <code>rotary</code>, <code>drum</code>, <code>key</code>, <code>pkey</code>, <code>swBtn</code>, <code>openPicker</code>, <code>windowise</code>. All five value controls carry <code>.set()</code>, which is what a loaded config pushes through</td></tr>
+      <tr><td>skew-machine.css</td><td>At the root, and only for plotter parts: DRO, e-stop, jog, annunciator, meter. No Portrait app needs these</td></tr>
+      <tr class="trap">
+        <td>Never hand-edit a copy</td>
+        <td>Not <code>dist/</code> here, not the vendored file in your app. A patch on a
+            generated file disappears at the next build, silently, and you find out when a
+            control stops matching this page. Anything your app needs that the kit does not
+            give goes in a file of your own, beside it.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="sub">
+    <b>Why the kit is on <code>window.SkewKit</code> rather than loose:</b> the source is a plain
+    script whose factories are top-level <code>const</code>s. An app running p5 in global mode
+    has its own global <code>key</code>, and two of those collide without throwing. So
+    <code>dist/</code> wraps the body in an IIFE and publishes the API. The body is
+    byte-identical to the source.
+  </p>
+
+  <table class="spec">
+    <thead><tr><th>Command</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td>node tools/build-dist.mjs</td><td>Here. Reports whether <code>dist/</code> still matches the source; <code>--write</code> rebuilds it. Run it after any change to <code>skew.css</code> or <code>skew-kit.js</code></td></tr>
+      <tr><td>node tools/kit-css.mjs</td><td>In your app, optional. Reads the class names your own code writes and keeps only those rules, so a small panel does not ship the whole language. Portrait-Typo and Portrait-ribbons both have one</td></tr>
+      <tr><td>@layer skew, app;</td><td>One line in your own stylesheet, before anything loads. Optional: layers already order by first appearance, so this only says it on purpose</td></tr>
+      <tr><td>A panel from a spec</td><td>Past about twenty controls, hand-composing stops paying. <code>Portrait-ribbons/src/skew-panel.js</code> is the working answer: one row per parameter, the factory chosen from the parameter's own shape, <code>.set()</code> registered for the config load</td></tr>
+    </tbody>
+  </table>
 
   <p class="paper-lab">Papers</p>
   <div class="papers" id="papers"></div>
@@ -55,9 +97,8 @@ const ICON = {
 };
 
 const PAPERS = [
-  ['ADOPTING-SKEW-1.14.md', 'Adopting Skew', 'what an app on the kit has to pick up'],
-  ['HATCH-API.md',          'Hatch API',     'the fill generators, in millimetres'],
-  ['FEATURES-REQUEST.md',   'Requests',      'what is asked for and not built'],
+  ['HATCH-API.md',        'Hatch API', 'the fill generators, in millimetres'],
+  ['FEATURES-REQUEST.md', 'Requests',  'what is asked for and not built'],
 ];
 
 /* ── the cards ──────────────────────────────────────────────────────────── */

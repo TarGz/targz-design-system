@@ -1,0 +1,3402 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EVERYTHING BELOW IS IN @layer skew, AND THAT IS THE ONE LINE AN ADOPTER
+   CARES ABOUT.
+
+   An unlayered rule beats a layered one no matter what the specificity says.
+   So an app that has its own `.card`, `.row`, `.box`, `.key`, `.head`, `.page`
+   or `.wrap` — and every app has some of those — keeps its own, without
+   renaming anything and without a single `!important`.
+
+   It also disarms the trap this file's own notes describe three times over:
+   `[data-skin=light] .sw` out-ranking `.sw.on`, a material rule silently
+   un-pressing a key. Layers order by DECLARATION, not by specificity, so the
+   state rules an app writes on top can no longer lose to a material rule
+   underneath.
+
+   The app declares the order it wants, once, before it loads anything:
+
+       @layer skew, app;
+
+   Omit it and the browser orders layers by first appearance, which puts skew
+   first anyway. So the default is already right; declaring it is how you say
+   it on purpose.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer skew {
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHYSICAL UI — an exploration, not the design system.
+
+   This file answers one question: if the targz visual language were rebuilt
+   as machined hardware — anodised chassis, backlit keys, jewel LEDs, engraved
+   plates — what would the LAYER PANEL of Portrait-Typo look like?
+
+   Nothing here is adopted. index.html is untouched. The layer panel's anatomy
+   (rows, switches, colour bar, TONE badge, duplicate/delete, the chevron and
+   the stroke strip it opens, the counted Clear-all) is the REAL one, lifted
+   from Portrait-Typo/ui.js — so the comparison is like for like and this is
+   a re-skin of a shipping component rather than an invented one.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── the material palette ─────────────────────────────────────────────── */
+  --room:        #0b0b0d;   /* the desk it sits on                          */
+  --case:        #191a1d;   /* anodised aluminium chassis                    */
+  --case-lo:     #101113;   /* the shaded half of every bevel                */
+  --case-hi:     #2e3137;   /* the lit half                                  */
+  --bay:         #0e0f11;   /* the recessed well the rows sit in             */
+  --plate:       #232529;   /* a raised key / module face                    */
+  --plate-hi:    #34373d;
+  --groove:      #08090a;   /* milled channel                                */
+  --rim:         rgba(255,255,255,.09);  /* the 1px lit top edge             */
+  --rim-lo:      rgba(0,0,0,.75);        /* the 1px dark bottom edge         */
+
+  --txt:         #d3d6dc;   /* laser-etched white infill                     */
+  --txt-dim:     #7d828c;
+  --txt-etch:    #0a0b0c;   /* engraved-into-metal text                      */
+
+  --led:         #FF6A00;   /* the accent is a LAMP here, not a fill         */
+  --led-hot:     #FFB273;
+  --led-red:     #FF2D2D;
+
+  /* ── THE RECESS, ONCE ─────────────────────────────────────────────────
+     Everything that goes IN uses these two, whatever its size. It took the
+     whole layer switch to arrive at them and there is no reason for the nav
+     bar or a tab to relearn it — worse, five copies is five things that drift
+     apart the next time one is tuned. One place to change, one place to read.
+
+       --recess   the four walls, sharp: a hard near-black line under the top
+                  edge, the sides tight, the bottom softer because that is the
+                  wall light reaches, and a lit lip under it all
+       --chamfer  the broken edge of the cutout, lit DIRECTIONALLY and with
+                  concave polarity — dark where it turns from the lamp at the
+                  top, bright where it turns into it at the bottom. Get this
+                  backwards and the control reads as a bump, every time. */
+  --recess:
+    inset 0 0 0 1px rgba(0,0,0,.73),
+    inset 0 2.4px 1.2px rgba(0,0,0,.86),
+    inset 0 3.6px 4.8px -1.2px rgba(0,0,0,.51),
+    inset 3.6px 0 3.6px -2.4px rgba(0,0,0,.57),
+    inset -3.6px 0 3.6px -2.4px rgba(0,0,0,.57),
+    inset 0 -3.6px 4.8px -2.4px rgba(0,0,0,.31),
+    inset 0 -1px 0 rgba(255,255,255,.15),
+    0 1px 0 #101317,
+    0 1px 1px rgba(0,0,0,.4);
+  --chamfer: linear-gradient(152deg,
+    rgba(0,0,0,.50)        0%,
+    rgba(0,0,0,.20)       24%,
+    rgba(255,255,255,0)   50%,
+    rgba(255,255,255,.30) 100%);
+
+  --font: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+
+  /* Grain. One texture, reused everywhere — real metal is never flat, and a
+     gradient with no grain reads as plastic within about two seconds. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{
+  background:
+    radial-gradient(120% 90% at 50% -10%, #1c1d21 0%, var(--room) 62%),
+    var(--room);
+  color:var(--txt);
+  font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+body::after{  /* room grain over everything, very light */
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:99;
+  background-image:var(--grain); opacity:.035; mix-blend-mode:overlay;
+}
+
+/* ── page furniture ──────────────────────────────────────────────────────── */
+.wrap{ max-width:1160px; margin:0 auto; padding:56px 32px 120px; }
+
+.masthead{ margin-bottom:14px; }
+.kicker{
+  font-family:var(--font); font-size:10px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--led); margin:0 0 14px;
+}
+h1{
+  font-size:clamp(30px,5vw,52px); line-height:1.02; margin:0 0 16px;
+  font-weight:700; letter-spacing:-.02em; color:#f2f4f7;
+}
+.lede{ font-size:15px; line-height:1.65; color:#9ba0aa; max-width:62ch; margin:0 0 8px; }
+.lede b{ color:#d3d6dc; font-weight:600; }
+
+.warn{
+  display:flex; gap:12px; align-items:flex-start;
+  margin:28px 0 0; padding:14px 16px;
+  border:1px solid rgba(255,106,0,.28); border-radius:10px;
+  background:linear-gradient(180deg, rgba(255,106,0,.10), rgba(255,106,0,.04));
+  font-size:13px; line-height:1.6; color:#c8bdb2; max-width:76ch;
+}
+.warn svg{ flex:0 0 16px; width:16px; height:16px; margin-top:2px; stroke:var(--led); fill:none; stroke-width:1.8; }
+
+h2{
+  font-size:12px; font-family:var(--font); letter-spacing:.18em; text-transform:uppercase;
+  color:#6d727c; font-weight:600; margin:78px 0 6px;
+  padding-bottom:10px; border-bottom:1px solid #212327;
+}
+h2 span{ color:#3d4149; }
+.sub{ font-size:14px; line-height:1.65; color:#8b909a; max-width:70ch; margin:16px 0 28px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE STAGE — a lit desk. The light comes from above-left and every bevel,
+   glow and cast shadow in the panel agrees with it. One light source is the
+   whole difference between "3D" and "a pile of gradients".
+   ═══════════════════════════════════════════════════════════════════════════ */
+.stage{
+  position:relative; margin-top:34px;
+  padding:64px 40px; border-radius:18px;
+  background:
+    radial-gradient(70% 60% at 28% 0%, rgba(255,255,255,.055), transparent 60%),
+    linear-gradient(180deg,#141518,#0c0d0f);
+  border:1px solid #1e2024;
+  display:flex; gap:56px; align-items:flex-start; justify-content:center; flex-wrap:wrap;
+}
+.stage-note{
+  position:absolute; left:18px; top:14px;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:#3f434a;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE CHASSIS
+   Five shadows do the whole job:
+     1  a wide soft cast shadow on the desk        (it is above the surface)
+     2  a tight contact shadow                     (it TOUCHES the surface)
+     3  inset 1px light on the top edge            (the lit chamfer)
+     4  inset 1px dark on the bottom edge          (the shaded chamfer)
+     5  a broad inset dark from below              (the body has thickness)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dock{
+  width:318px; flex:0 0 318px; position:relative;
+  border-radius:14px;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    0 42px 60px -24px rgba(0,0,0,.9),
+    0 8px 14px -6px rgba(0,0,0,.75),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9),
+    inset 0 -18px 26px -20px rgba(0,0,0,.8);
+  padding:3px;
+  user-select:none;
+}
+/* Brushed anodising: fine vertical striation + grain. Two cheap layers, and
+   without them the chassis is a plastic toy. */
+.dock::before{
+  content:''; position:absolute; inset:0; border-radius:14px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.020) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto, 140px 140px;
+  opacity:.5; mix-blend-mode:overlay;
+}
+/* The specular sweep — one soft diagonal band. Placed high-left, matching the
+   room light. Never centred: a centred highlight reads as a sticker. */
+.dock::after{
+  content:''; position:absolute; left:0; right:0; top:0; height:52%;
+  border-radius:14px 14px 40% 40%/14px 14px 100% 100%; pointer-events:none;
+  background:linear-gradient(158deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.016) 42%, transparent 70%);
+}
+
+/* Corner screws. Four, real, at the same inset — the cheapest single detail
+   that says "this is an object". Each is a countersunk pit + a domed head. */
+.screw{
+  position:absolute; width:9px; height:9px; border-radius:50%; z-index:3;
+  background:
+    radial-gradient(circle at 34% 28%, #6a6f78 0%, #3c4046 42%, #202225 100%);
+  box-shadow:
+    inset 0 -1px 1px rgba(0,0,0,.85),
+    inset 0 1px 1px rgba(255,255,255,.35),
+    0 1px 2px rgba(0,0,0,.85);
+}
+.screw::after{  /* the slot, oriented differently on each — nobody torques four screws to the same angle */
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(var(--a,20deg), transparent 44%, rgba(0,0,0,.85) 44%, rgba(0,0,0,.85) 56%, transparent 56%);
+  border-radius:50%;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14);
+}
+.screw.tl{ left:7px;  top:7px;    --a:24deg;  }
+.screw.tr{ right:7px; top:7px;    --a:-58deg; }
+.screw.bl{ left:7px;  bottom:7px; --a:82deg;  }
+.screw.br{ right:7px; bottom:7px; --a:-12deg; }
+
+/* ── the header: an engraved faceplate ───────────────────────────────────── */
+.head{
+  display:flex; align-items:center; gap:9px;
+  padding:14px 13px 12px 17px; position:relative; z-index:2;
+  border-bottom:1px solid rgba(0,0,0,.7);
+  box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+.head .t{
+  flex:1; font-family:var(--font); font-size:10.5px; font-weight:700;
+  letter-spacing:.24em; text-transform:uppercase;
+  /* ENGRAVED, not printed: the glyph is darker than the metal and carries a
+     1px light line UNDER it, which is the lit far wall of the cut. */
+  color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.10), 0 -1px 0 rgba(0,0,0,.6);
+}
+/* The count is a LAMP — a 7-segment window, dark glass with the digit lit
+   behind it. The panel's numbers stop being text and become a readout. */
+.readout{
+  min-width:30px; height:22px; padding:0 7px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:4px;
+  background:linear-gradient(180deg,#0a0c0b,#111413);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.95),
+    inset 0 -1px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.06);
+  font-family:var(--font); font-size:13px; font-weight:700;
+  color:#7CFFB0; text-shadow:0 0 7px rgba(124,255,176,.75), 0 0 18px rgba(124,255,176,.35);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ── a KEY: the physical push button primitive ───────────────────────────── */
+/* Everything clickable in this panel is one of these at some size. Raised
+   face, chamfered rim, cast shadow; pressed = travel down + the shadow
+   collapses + the top highlight moves to the bottom. That last part is what
+   sells the travel — a button that only moves 1px still looks flat. */
+.key{
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; position:relative;
+  border-radius:7px; color:#9aa0aa;
+  background:linear-gradient(180deg,var(--plate-hi),var(--plate) 52%,#1a1c20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 2px 0 #0e0f11,
+    0 3px 5px rgba(0,0,0,.65);
+  transition:box-shadow .09s ease, transform .09s ease, color .12s;
+}
+.key:hover{ color:#e2e5ea; background:linear-gradient(180deg,#3b3f46,#2a2d32 52%,#1e2024); }
+.key:active,.key.pressed{
+  transform:translateY(2px);
+  background:linear-gradient(180deg,#1a1c20,#232529);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.8),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    0 0 0 #0e0f11,
+    0 1px 2px rgba(0,0,0,.6);
+}
+.key:disabled{ opacity:.32; cursor:not-allowed; transform:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 1px 0 #0e0f11; }
+.key svg{ stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+
+.add{ width:26px; height:26px; border-radius:8px; }
+.add svg{ width:14px; height:14px; stroke-width:2.2; }
+.add:hover{ color:var(--led-hot); }
+
+/* ── the BAY: the milled well the rows drop into ─────────────────────────── */
+.bay{
+  position:relative; z-index:2;
+  margin:11px 9px; padding:8px 7px;
+  border-radius:9px;
+  /* THE WELL CAME UP IN VALUE WITH THE CAPS. It was near-black, which was
+     fine when the switches were near-black too — now they are grey, and a grey
+     cap on a black floor is a cut-out sitting on nothing. A recess is not a
+     hole into space; it is the same case seen deeper, so it is the case's
+     colour minus some light, not minus all of it. The inset shadow is what
+     makes it read as below the surface; the fill only has to be darker than
+     the surface, not black. */
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:
+    inset 0 3px 7px rgba(0,0,0,.85),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.055);
+  display:flex; flex-direction:column; gap:5px;
+}
+
+/* ── a ROW: a module card seated in the bay ──────────────────────────────── */
+.item{ display:flex; flex-direction:column; }
+.row{
+  display:flex; align-items:center; gap:5px;
+  height:40px; padding:0 8px 0 0; width:100%;
+  border:0; border-radius:7px; cursor:pointer; text-align:left;
+  font-family:inherit; position:relative; overflow:hidden;
+  background:linear-gradient(180deg,#31353b,#25282d 60%,#202328);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 1px 2px rgba(0,0,0,.6);
+  transition:box-shadow .12s, background .12s, transform .09s;
+}
+.row::after{ /* faceplate grain, per module */
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:var(--grain); background-size:140px; opacity:.05; mix-blend-mode:overlay;
+}
+.row:hover{ background:linear-gradient(180deg,#3a3f46,#2c3036 60%,#26292f); }
+.row:active{ transform:translateY(1px); }
+
+/* THE LAYER'S COLOUR IS A LIGHT PIPE, not a painted bar. An edge-lit acrylic
+   strip: a solid core, a bloom on the metal beside it, and a hot white line
+   up its middle where the LED is brightest. This is the single biggest win of
+   the physical language — the list stops being a legend and starts glowing in
+   the layer's own ink. */
+.pipe{
+  flex:0 0 4px; align-self:stretch; margin:6px 7px 6px 4px;
+  border-radius:3px; position:relative;
+  background:linear-gradient(180deg, var(--lyr), color-mix(in srgb, var(--lyr) 72%, #000));
+  box-shadow:
+    0 0 5px color-mix(in srgb, var(--lyr) 85%, transparent),
+    0 0 14px color-mix(in srgb, var(--lyr) 45%, transparent),
+    inset 0 0 3px rgba(255,255,255,.55);
+}
+.pipe::after{
+  content:''; position:absolute; left:1px; right:1px; top:14%; bottom:14%;
+  border-radius:2px; background:rgba(255,255,255,.55); filter:blur(1px);
+}
+.row.off .pipe{ background:#2a2c30; box-shadow:inset 0 1px 1px rgba(0,0,0,.8); }
+.row.off .pipe::after{ display:none; }
+
+/* ── a SWITCH: backlit key, 24px. Off is a dead lamp behind smoked plastic;
+   on is the lamp lit, and the light SPILLS onto the surrounding metal. ───── */
+/* ── THE SWITCH IS AN OBJECT WITH A SKIRT, AND IT TRAVELS ────────────────
+   The cap had light on it but no BODY: an inset chamfer and nothing outside,
+   so it was a painted square rather than a thing standing on a panel. Three
+   additions fix that, and they are the same three that make the big keys work.
+
+     A SKIRT      0 2px 0 of near-black — the wall of the cap you can see
+                  because it is raised off the face
+     A CAST       a soft shadow under that wall, on the panel
+     A DOMED FACE a radial sheen from the top-left, so the face is curved
+                  rather than a flat ramp
+
+   And then it MOVES. Off is up; on is driven 2px down and the skirt collapses
+   to nothing, so the cap ends where its own wall used to be. Mixed sits at
+   1px with half a skirt, which is the only honest place for "some". Three
+   physical positions, readable from across the panel and readable in a
+   greyscale screenshot — the state is in the geometry, not in a colour.
+
+   ON keeps the CAP'S OWN COLOUR with the gradient inverted (dark at the top
+   where the bezel now shades it, light at the bottom where the well bounces),
+   and lights the GLYPH. Same recipe as the big keys' :active, at 24px. */
+.sw{
+  width:24px; height:24px; flex:0 0 24px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; position:relative;
+  color:#a3aab4;                             /* a printed legend, not a dimmed one */
+  /* A GREY CAP, NOT A BLACK ONE. Shadow is a difference, and the cap was
+     already so dark that a hole cut into it had almost nowhere to go — the
+     recess could only be drawn by taking away light that was not there. Lift
+     the unpressed face into real grey and the same shadow suddenly has two
+     stops of room to fall through. This is the one change that makes the
+     pressed state read, and it is a change to the UNPRESSED one. */
+  background:
+    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.14), transparent 62%),
+    linear-gradient(180deg,#474d57 0%,#3a3f48 36%,#2c3138 68%,#22262c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    inset 0 -2px 3px rgba(0,0,0,.6),
+    inset 0 0 0 1px rgba(0,0,0,.55),
+    0 2px 0 #101317,
+    0 3px 6px rgba(0,0,0,.7),
+    0 0 0 1px rgba(0,0,0,.45);
+  transition:color .12s, box-shadow .1s, background .12s, transform .1s;
+}
+.sw::before{
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:7px;
+  background-image:var(--grain); background-size:90px; opacity:.09; mix-blend-mode:overlay;
+}
+.sw svg{ position:relative; width:14px; height:14px; stroke:currentColor; fill:none;
+         stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;
+         transform-origin:50% 50%; transition:transform .1s; }
+.sw:hover{ color:#eef1f5;
+  background:
+    radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.18), transparent 62%),
+    linear-gradient(180deg,#525965 0%,#434955 36%,#343a42 68%,#282d33 100%); }
+/* pressed by a finger: the cap drops onto its own skirt */
+/* ── A SUNK CAP IS A CAP IN SHADOW, and at 24px that has to be overdrawn.
+
+   The recess was there in the geometry and almost invisible in the paint: one
+   soft 4px inset spread across a 24px face is a suggestion, and a suggestion
+   at this size is nothing. What sells a hole is CONTRAST ACROSS A SHORT
+   DISTANCE, so the shadow is now two layers doing two jobs — a tight, nearly
+   black 2px line immediately under the top edge (the wall of the cutout, hard
+   because it is close), and a wider soft one below it (the light that does get
+   in, falling off). Then the opposite wall: a bright lip along the bottom,
+   where the well bounces light back up into the cap.
+
+   Top almost black, bottom lit, a hard dark ring round the whole thing. Big
+   keys can be subtle about this because they have room for a gradient to
+   describe the fall-off; a 24px cap has about six pixels to say "deep" in. */
+/* SHADOW ON ALL FOUR WALLS — SHARP, NOT HEAVY.
+
+   The walls were right and the rendering of them was not: 6–12px of blur at
+   near-full black is a cap sitting in fog, and it swallowed the grey it was
+   supposed to be sitting on. A recess this small has HARD edges — the wall is
+   two or three pixels from the face, so the shade it throws cannot have
+   softened over that distance. Blur radii are 1–4px now and the alphas are
+   roughly half what they were. Less ink, placed more exactly, and the cap
+   stays visibly grey underneath it.
+
+   ALSO ONLY 1px OF TRAVEL.
+
+   Two corrections that go together. The recess only had a top wall, so it read
+   as a cap with a dark stripe rather than a cap down a hole — a hole has
+   sides, and at 24px the sides are most of what you see of it. There are four
+   inner shadows now: the top hard and near-black, the two sides tight against
+   the edge, the bottom softer, because that is the wall light actually
+   reaches. The lit lip stays under it so the bottom does not just go muddy.
+
+   And the drop came back to 1px. 2px was a third of the gap between rows —
+   enough that toggling a switch looked like the row twitched. With the walls
+   drawn properly the depth no longer needs the travel to carry it, so the
+   movement can be the small confirming one it should have been. */
+/* DOWN IS THE SAME CAP. It declares no fill of its own — it inherits the
+   raised cap's, so the two cannot drift apart when that one is tuned. All that
+   changes is the box-shadow: the skirt goes (it is resting on it now) and the
+   four walls of the recess come on. Plus 1px of travel, and the legend lights.
+   Three declarations, one object. */
+.sw:active{ transform:translateY(1px); box-shadow:var(--recess); }
+/* ── DOWN IS ONE STATE. THE LEGEND SAYS WHICH KIND OF DOWN. ─────────────
+   ON and MIXED are the same cap in the same position with the same recess,
+   and they differ only in the colour of what is printed on it:
+
+     up   + grey legend     nothing is on
+     down + WHITE legend    some of them are
+     down + ORANGE legend   all of them are
+
+   That is the honest reading of a master over eight switches. A master whose
+   column is half on is NOT half-pressed — the thing it commands is genuinely
+   engaged, just not everywhere — so parking it at its own intermediate height
+   was inventing a mechanical position to stand for a logical one. Down means
+   "this is happening"; the colour says how completely. And white against
+   orange is a difference you can still see with no colour vision at all,
+   because it is a difference in brightness, which the old dim-orange was not. */
+.sw.on,
+.sw.mixed{ transform:translateY(1px); box-shadow:var(--recess); }
+/* NO FILL ON EITHER, DELIBERATELY. Every attempt at a separate pressed colour
+   was a way of drawing shade with paint, and it kept killing the shadow: a
+   darker cap has nothing left for a shadow to take away. The moulding is one
+   piece of grey plastic in two positions, so it gets ONE fill — the raised
+   cap's, inherited — and the recess is drawn entirely by the walls above.
+   A knock-on worth having: tune .sw's background and every state follows. */
+/* ── THE CHAMFER, AS A RING WITH A DIRECTION ────────────────────────────
+   A 1px white line along the top was the right idea drawn the wrong way. The
+   broken edge of a cutout runs all the way round, and it is not equally lit
+   anywhere: it FLARES where it faces the lamp, fades as it turns away, and
+   goes to shadow on the far side. A box-shadow cannot say that — it is the
+   same value the whole way round — so it always reads as a drawn outline.
+
+   This is the gradient-border trick: a 1.6px ring made by padding a
+   pseudo-element and masking its own middle out, filled with a gradient
+   running from the light. Bright at 152° (top-left, where every other
+   highlight in this panel comes from), through nothing at the equator, into a
+   soft dark on the bottom-right where the lip turns away. Half a pixel of
+   blur, because an edge that has been broken is round, and a round edge has
+   no hard line on it anywhere.
+
+   Only on the pressed states: when the cap is up it fills its hole and there
+   is no lip to see. */
+.sw.on{ color:var(--led); }
+.sw.mixed{ color:#eef1f5; }
+.sw.on:hover{ color:var(--led-hot); }
+.sw.mixed:hover{ color:#fff; }
+
+/* THE LEGEND SHRINKS WITH THE CAP. A face that has dropped into the panel is
+   a face further from the eye, so what is printed on it subtends a smaller
+   angle — 10% at this depth. Too small to notice as a change, which is the
+   point: one more thing agreeing with the others, so the state reads as an
+   object that moved rather than as a colour swap. */
+/* …AND THE SHRINK IS ESSENTIALLY GONE: .9 × 1.1 lands on .99, so the pressed
+   legend is now the same size as the raised one to within a rounding error.
+   Kept as a literal .99 rather than deleted, because the rule is still the
+   place the depth-versus-legend-size relationship lives — if the cap ever goes
+   deeper than 1px, this is the number that has to follow it. */
+.sw.on svg,
+.sw.mixed svg,
+.sw:active svg{ transform:scale(.99); }
+.sw.on svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
+/* white is a legend, not a lamp — it gets no bloom */
+.sw.mixed svg{ filter:none; }
+
+/* ── the jewel LED: the layer's colour as a lens ─────────────────────────── */
+.jewel{
+  width:11px; height:11px; flex:0 0 11px; border-radius:50%; position:relative;
+  background:
+    radial-gradient(circle at 34% 28%, #fff 0%, color-mix(in srgb,var(--lyr) 60%,#fff) 16%, var(--lyr) 52%, color-mix(in srgb,var(--lyr) 55%,#000) 100%);
+  box-shadow:
+    0 0 6px color-mix(in srgb,var(--lyr) 75%,transparent),
+    0 0 15px color-mix(in srgb,var(--lyr) 40%,transparent),
+    inset 0 -1px 2px rgba(0,0,0,.55),
+    0 0 0 1px rgba(0,0,0,.55);
+}
+.jewel.all{ background:var(--all-grad); }
+/* the ALL row is the only jewel left in the dock */
+.row.off .jewel{ filter:grayscale(1) brightness(.42); box-shadow:inset 0 -1px 2px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
+
+/* ── the name: laser-etched infill on the faceplate ──────────────────────── */
+.name{
+  flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--font); font-size:12px; font-weight:700; letter-spacing:.02em;
+  color:#dfe2e7; text-shadow:0 1px 0 rgba(0,0,0,.85);
+}
+.sum{
+  flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.04em; color:#61666f;
+}
+.row.off .name{ color:#6a6f77; }
+
+/* TONE — an etched brass plate. A different METAL is how hardware says "a
+   different kind of thing"; a second colour would have fought the light pipe. */
+.tone{
+  flex:0 0 auto; font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.09em;
+  padding:2px 5px; border-radius:3px; color:#2a1c05;
+  background:linear-gradient(180deg,#E8B45C,#B8862F);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -1px 0 rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.6);
+  text-shadow:0 1px 0 rgba(255,255,255,.28);
+}
+
+/* micro keys — duplicate / delete. Recessed, not raised: they are destructive
+   or duplicative and should not invite the thumb the way the switches do. */
+.micro{
+  width:22px; height:22px; flex:0 0 22px; border-radius:5px;
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; color:#575c65;
+  background:linear-gradient(180deg,#151719,#1e2024);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.06);
+  transition:color .12s, box-shadow .12s;
+}
+.micro svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.micro:hover{ color:#d7dae0; box-shadow:inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.09); }
+.micro.del:hover{ color:#FF6B6B; box-shadow:inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 1px rgba(255,45,45,.35), 0 0 8px rgba(255,45,45,.2); }
+.micro:disabled{ opacity:.3; cursor:not-allowed; }
+
+/* the milled channel between the row's actions and its chevron */
+.sep{ width:1px; height:18px; flex:0 0 1px; margin:0 3px;
+      background:#0a0b0c; box-shadow:1px 0 0 rgba(255,255,255,.07); }
+
+/* the chevron is a knurled thumbwheel edge — grip texture, so it reads as the
+   thing you flick rather than a thing you press */
+/* Knurled — but the teeth stay UNDER the glyph. At 20px a 3px knurl and an
+   11px chevron are the same spatial frequency, and the eye loses the chevron
+   in the texture: the grip has to be a whisper (.05) and the glyph has to be
+   brighter than anything around it, with a dark halo holding it off the metal. */
+.chev{
+  width:20px; height:22px; flex:0 0 20px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; color:#aeb4be;
+  /* POSITIONED, like every other control with a chamfer. Without it the
+     .chev.open::after ring resolved against .row — a 2px chamfer drawn around
+     the whole row and then clipped away by its overflow, so the one control
+     the rule names by name was the one control not getting it. */
+  position:relative;
+  background-image:repeating-linear-gradient(72deg, rgba(255,255,255,.05) 0 1px, rgba(0,0,0,.16) 1px 3px);
+  background-color:#202226;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.6), 0 1px 1px rgba(0,0,0,.5);
+  transition:transform .16s, color .12s, box-shadow .12s;
+}
+.chev svg{ width:11px; height:11px; stroke:currentColor; fill:none; stroke-width:2.4;
+  stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 1px 1px rgba(0,0,0,.9)); }
+.chev:hover{ color:#fff; }
+.chev.open{ color:var(--led); }
+.chev.open svg{ transform:scale(.9); filter:drop-shadow(0 0 3px rgba(255,130,30,.65)); }
+
+/* ── the ALL row is a BUS BAR — a different material, once ───────────────── */
+.row.all{
+  background:
+    repeating-linear-gradient(96deg, rgba(255,255,255,.045) 0 1px, transparent 1px 2px),
+    linear-gradient(180deg,#3a3e45,#2a2d33 55%,#232629);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -1px 0 rgba(0,0,0,.75),
+    0 2px 4px rgba(0,0,0,.6);
+}
+.row.all:hover{ background:
+    repeating-linear-gradient(96deg, rgba(255,255,255,.055) 0 1px, transparent 1px 2px),
+    linear-gradient(180deg,#43474f,#31353b 55%,#282b30); }
+/* ALL never truncates — it is three characters and the row's whole subject. */
+.row.all .name{ letter-spacing:.14em; flex:0 0 auto; }
+
+/* selected — the module is UNDER power: a rim of its own colour and a lit face */
+.row.sel{
+  background:linear-gradient(180deg,#34383f,#232629 60%,#1e2023);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 0 0 1px color-mix(in srgb, var(--lyr) 55%, transparent),
+    0 0 12px -2px color-mix(in srgb, var(--lyr) 45%, transparent),
+    0 2px 5px rgba(0,0,0,.65);
+}
+
+/* ── the stroke strip: a sub-bay, wired to its row by the light pipe's rail ── */
+.strokes{
+  display:flex; align-items:center; gap:4px;
+  margin:4px 8px 2px 22px; padding:6px 8px;
+  border-radius:6px;
+  border-left:2px solid var(--lyr);
+  background:linear-gradient(180deg,#191c20,#22262b);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.055),
+             -3px 0 8px -4px color-mix(in srgb, var(--lyr) 60%, transparent);
+}
+.strokes.allstrip{ margin-left:16px; border-left-color:#4a4e56; box-shadow:inset 0 2px 5px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.055); }
+.gap{ width:8px; flex:0 0 8px; height:16px;
+      background:linear-gradient(90deg,transparent,#000,transparent); opacity:.6; }
+
+/* ── the footer: a guarded action. Hazard stripes are the affordance — this
+   is the one control in the panel that destroys work. ────────────────────── */
+.foot{ padding:0 9px 12px; position:relative; z-index:2; }
+.wipe{
+  width:100%; height:32px; gap:8px; border-radius:8px;
+  font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.06em;
+  color:#8d929b;
+}
+.wipe svg{ width:13px; height:13px; }
+.wipe:hover:not(:disabled){
+  color:#FFD3D3;
+  background:linear-gradient(180deg,#5c1414,#3a0d0d 55%,#280909);
+  box-shadow:
+    inset 0 1px 0 rgba(255,140,140,.3),
+    inset 0 -1px 0 rgba(0,0,0,.8),
+    0 2px 0 #180505,
+    0 0 12px rgba(255,45,45,.35);
+}
+.wipe:hover:not(:disabled)::before{
+  content:''; position:absolute; inset:0; border-radius:8px; pointer-events:none; opacity:.14;
+  background:repeating-linear-gradient(45deg,#FF2D2D 0 6px, transparent 6px 12px);
+}
+
+.key.skirt{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 3px 0 #0e0f11,
+    0 5px 8px rgba(0,0,0,.7);
+}
+/* ── EVERY CONTROL THAT IS IN, DRAWN THE ONE WAY ─────────────────────────
+   Finger-held and mechanism-held are the same physical position, so they are
+   the same rule. None of them declares a fill: each inherits its own raised
+   face, which is what keeps a pressed cap recognisably the same object as the
+   cap next to it, and means tuning a surface tunes both its states at once.
+
+   Travel is 2px on the big keys and 1px on the small ones, down from 3-4px.
+   With the walls and the chamfer doing the work the drop no longer has to
+   carry the message, and a tab that fell 4px was moving further than the gap
+   to its neighbour. */
+.key.skirt:active,
+.key.skirt.is-down,
+.pkey:active,
+.pkey.is-down,
+.chip:active,
+.chip.is-down,
+.chev.open{
+  transform:translateY(2px);
+  box-shadow:var(--recess);
+}
+/* the small ones travel half as far — 2px on a 24px cap is a lurch */
+.sw:active, .sw.on, .sw.mixed{ transform:translateY(1px); }
+.chev.open{ transform:rotate(90deg) translateY(1px); }
+
+/* THE CHAMFER, on everything with a hole to sit in. --ring-r is the control's
+   own radius plus the 2px the ring sits outside it. */
+.sw.on::after, .sw.mixed::after, .sw:active::after,
+.key.skirt.is-down::after, .key.skirt:active::after,
+.pkey.is-down::after, .pkey:active::after,
+.chip.is-down::after, .chip:active::after,
+.chev.open::after{
+  content:''; position:absolute; inset:-2px; border-radius:var(--ring-r,9px);
+  pointer-events:none; padding:1.6px; background:var(--chamfer);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  filter:blur(.5px);
+}
+.sw{ --ring-r:9px; }
+.key{ --ring-r:9px; }
+.pkey{ --ring-r:10px; }
+.chip{ --ring-r:9px; }
+.chev{ --ring-r:6px; }
+/* LATCHED: down AND lit. The lamp is what separates "held by a finger" from
+   "held by the mechanism". */
+/* LATCHED: down AND lit. The lamp is what separates "held by a finger" from
+   "held by the mechanism" — but the cap being 3px lower than its neighbours is
+   already most of the message, so the lamp is a warm glyph and a little light
+   in the well, not a bloom on the chassis. */
+/* LATCHED IS EXACTLY WHAT :active ALREADY DRAWS, held. That state was right
+   all along and the latched one kept inventing a darker cap instead of reusing
+   it — which is why a lit key read as a hole rather than as a key that is in.
+
+   The recipe, and it is the whole of it: the cap keeps ITS OWN COLOUR, the
+   gradient INVERTS (dark at the top, light at the bottom — the bezel is now
+   shading the top of a face that has dropped below it, and the light that
+   reaches it bounces off the well), a hard black inset runs along the top
+   edge, and a hairline of light sits along the bottom. Nothing is tinted, so
+   the cap you press and the cap that is held down are recognisably the same
+   object in two positions.
+
+   Then the LEGEND lights: orange, with just enough glow to read as backlit
+   rather than as printed. That is where all the colour in this state lives. */
+.key.is-down{ color:var(--led); }
+.key.is-down svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
+.key.is-down:hover{ color:var(--led-hot); background:linear-gradient(180deg,#1d1f24,#282b30); }
+/* MOMENTARY actuation: the lamp pulses once and dies. Added for 260ms on
+   click. A key that does something and shows nothing is a key you press twice. */
+@keyframes actuate{
+  0%   { box-shadow:inset 0 2px 5px rgba(0,0,0,.85), 0 0 0 1px rgba(255,106,0,.65), 0 0 16px rgba(255,106,0,.55); color:#FFD9BC; }
+  100% { box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 #0e0f11, 0 5px 8px rgba(0,0,0,.7); }
+}
+.key.flash{ animation:actuate .26s ease-out; }
+
+/* ── THE SAME SURGE WHEN A TOGGLE GOES IN ────────────────────────────────
+   A momentary key pulses once when you hit it, and that pulse turned out to
+   be the most convincing thing on the panel — it is the only moment the UI
+   behaves like something with current in it. A toggle deserves it more, not
+   less: a momentary key's pulse reports an event, a toggle's reports that a
+   circuit has just closed and is now staying closed.
+
+   IT IS LITERALLY THE MOMENTARY KEY'S ANIMATION. I wrote a second one for
+   toggles — a filter with a brightness ramp — on the theory that a latching
+   control wanted its own gesture. It did not. Two surges that are nearly the
+   same read as one done badly, and the filter version was the worse of the
+   two: brightness lifts the whole cap, including the shadow inside it, so the
+   recess washes out at exactly the moment the eye is on it.
+
+   The good one puts the light OUTSIDE — a hot rim on the cutout and a 16px
+   bloom on the panel around it — and leaves the cap alone. Same keyframe shape
+   as :active, same 260ms, and the only difference is where it lands: the
+   momentary key settles back to its raised shadow, this one settles into the
+   recess, because that is where a toggle stops. */
+/* THE LEGEND IS ORANGE FROM FRAME ONE. It was starting at #FFD9BC — near
+   white — and animating to the accent, so for a quarter second the icon was
+   pale and only arrived at orange as the glow died: the switch appeared to
+   turn on AFTER the surge rather than because of it. That washed-out start
+   works on the momentary key, where the lamp is the whole event and there is
+   no lit state waiting at the end. Here there is one, so the colour is simply
+   already there and the animation only carries the light around it. */
+@keyframes engage{
+  0%   { box-shadow:var(--recess),
+                    0 0 0 1px rgba(255,106,0,.65),
+                    0 0 16px rgba(255,106,0,.55); }
+  100% { box-shadow:var(--recess); }
+}
+.engage{ animation:engage .26s ease-out; }
+
+/* ── FOCUS, WITHOUT THE BROWSER RING ─────────────────────────────────────
+   Eleven outline rules are gone. A 2px accent rectangle floating 2px off a
+   moulded cap is the one thing on this panel that is unmistakably a web page,
+   and it lands hardest exactly where the illusion is most expensive — around
+   the small keys, where the ring is nearly as big as the object.
+
+   It is replaced rather than deleted, because a keyboard still has to be able
+   to say where it is. The cap simply comes UP under the light: brighter face,
+   a warmer top edge. That is what a physical control does when your attention
+   is on it, it costs no geometry, and it cannot be confused with the pressed
+   state, which goes the other way.
+
+   Honest note, and it is in the bill: a brightness shift is weaker than an
+   outline. It is fine on a dark panel at this size and it is not the equal of
+   a WCAG focus indicator — if this language ever shipped, this is the first
+   thing that would need a real answer. */
+/* AND KILL THE BROWSER'S OWN RING FIRST. Deleting my outlines did not remove
+   a focus ring, it removed the one I controlled — Chrome's default came back
+   underneath, 2-3px of white-blue, which is worse than what was there before.
+   :focus-visible has to be answered, not ignored.
+
+   One hairline, everywhere: 1px, the panel's own orange, offset by 1. At that
+   weight it reads as the edge catching light rather than as a widget, which is
+   the most a focus indicator can do in this language without becoming the
+   loudest thing on screen. The cap still lifts in brightness underneath it, so
+   the cue is carried twice — a thin line and a change in the object itself. */
+*:focus{ outline:none; }
+*:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:1px; }
+input:focus-visible{ outline-offset:3px; }
+
+.key:focus-visible,
+.sw:focus-visible,
+.micro:focus-visible,
+.chev:focus-visible,
+.pkey:focus-visible,
+.chip:focus-visible,
+.rot-lab:focus-visible,
+.row:focus-visible{ filter:brightness(1.25); }
+.knob:focus-visible,
+.rot-knob:focus-visible,
+.gz-node:focus-visible{ filter:brightness(1.3) drop-shadow(0 0 4px rgba(255,150,60,.45)); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE NAV BAR — a control strip screwed to the desk
+   ═══════════════════════════════════════════════════════════════════════════ */
+.strip{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 13px; border-radius:15px; position:relative;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 30%,#161719 80%,#1d1e22 100%);
+  box-shadow:
+    0 30px 44px -20px rgba(0,0,0,.9),
+    0 6px 12px -5px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9);
+}
+.strip::before{
+  content:''; position:absolute; inset:0; border-radius:15px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+.strip .key{ width:34px; height:34px; border-radius:9px; }
+.strip .key svg{ width:16px; height:16px; }
+/* A MILLED CHANNEL, not a border. Two 1px lines: the cut, and its lit far wall. */
+.chan{
+  width:2px; height:26px; flex:0 0 2px; margin:0 5px; border-radius:1px;
+  background:#08090a; box-shadow:1px 0 0 rgba(255,255,255,.08), inset 0 0 2px rgba(0,0,0,.9);
+}
+/* the status readout — a lit window, not a label */
+.lcd{
+  height:26px; padding:0 11px; margin-left:3px; display:flex; align-items:center; gap:7px;
+  border-radius:5px;
+  background:linear-gradient(180deg,#080a09,#0f1211);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.95),
+    inset 0 -1px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.07);
+  font-family:var(--font); font-size:10.5px; letter-spacing:.09em;
+  color:#7CFFB0; text-shadow:0 0 6px rgba(124,255,176,.7);
+  font-variant-numeric:tabular-nums;
+}
+.lcd.dim{ color:#3f6d55; text-shadow:none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE PAGE SWITCHER — piano keys with a mechanical interlock
+   Pressing one POPS THE OTHERS OUT. That is what a segmented control has
+   always been pretending to be, and in metal it is literally true: three
+   latching keys on one bar, and the bar can only hold one down.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.piano{
+  display:inline-flex; gap:5px; padding:6px;
+  border-radius:12px; position:relative;
+  /* SAME FLOOR AS THE BAY, and for the same reason it was raised there: the
+     caps came up in value and the well did not. A key's skirt is #0d0e10, so
+     on a #0a0b0d floor the one part that proves the cap has a BODY was
+     invisible: the cap read as a grey rectangle printed on black. The floor
+     only has to be darker than the surface it is cut into, not black. The
+     inset shadow is what puts it below; the fill just has to stay out of the
+     way of the skirt. */
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:
+    inset 0 3px 8px rgba(0,0,0,.8),
+    inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.07);
+}
+.pkey{
+  height:36px; padding:0 22px; min-width:78px;
+  display:flex; align-items:center; justify-content:center;
+  border:0; border-radius:8px; cursor:pointer;
+  font-family:var(--font); font-size:11.5px; font-weight:700; letter-spacing:.12em;
+  color:#8d929b;
+  background:linear-gradient(180deg,#34373d,#232529 55%,#1b1d20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(0,0,0,.7),
+    0 4px 0 #0d0e10,
+    0 6px 10px rgba(0,0,0,.7);
+  transition:transform .1s cubic-bezier(.3,1.4,.5,1), box-shadow .1s, color .12s, background .12s;
+}
+.pkey:hover{ color:#d6dae0; }
+.pkey:active{ transform:translateY(4px); }
+/* A piano key that is DOWN is already saying so with 4px of travel, and it
+   carries a lamp bar under the engraving. That is two signals; a halo round
+   the cap would be a third saying the same thing. */
+.pkey.is-down{ color:var(--led); text-shadow:0 0 6px rgba(255,130,30,.5); }
+/* the lamp bar under the engraved label — the key is lit from inside */
+.pkey{ position:relative; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LAUNCHPAD — one rack module per project
+   ═══════════════════════════════════════════════════════════════════════════ */
+.console{
+  border-radius:16px; padding:18px;
+  background:linear-gradient(176deg,#1d1f23,#141517 60%,#17181b);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.85),
+    0 26px 44px -22px rgba(0,0,0,.9);
+  position:relative;
+}
+.console::before{
+  content:''; position:absolute; inset:0; border-radius:16px; pointer-events:none;
+  background-image:var(--grain); background-size:140px; opacity:.05; mix-blend-mode:overlay;
+}
+.con-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; position:relative; z-index:1; }
+/* folder chips are latching radio keys, same interlock as the page switcher */
+.chip{
+  height:28px; padding:0 12px; display:inline-flex; align-items:center; gap:7px;
+  border:0; border-radius:7px; cursor:pointer;
+  font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.08em;
+  color:#8d929b;
+  background:linear-gradient(180deg,#2c2f34,#1e2024);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13), 0 2px 0 #0e0f11, 0 3px 5px rgba(0,0,0,.6);
+  transition:transform .1s, box-shadow .1s, color .12s, background .12s;
+}
+.chip:hover{ color:#dfe2e7; }
+.chip:active{ transform:translateY(2px); }
+.chip.is-down{ color:var(--led); text-shadow:0 0 6px rgba(255,130,30,.5); }
+.chip .ct{
+  font-size:9.5px; padding:1px 5px; border-radius:3px;
+  background:rgba(0,0,0,.45); color:#7CFFB0; text-shadow:0 0 5px rgba(124,255,176,.5);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.8);
+}
+.chip.is-down .ct{ color:#FFD9BC; text-shadow:0 0 5px rgba(255,140,60,.6); }
+.chip.new{ color:#6d727c; background:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.09), inset 0 1px 0 rgba(255,255,255,.05); }
+.chip.new:hover{ color:#c6cad1; box-shadow:inset 0 0 0 1px rgba(255,255,255,.18); }
+
+/* the search slot — a milled well with a real input in it */
+.slot{
+  display:flex; align-items:center; gap:8px; height:30px; padding:0 11px;
+  border-radius:7px; flex:1 1 190px; max-width:280px;
+  background:linear-gradient(180deg,#0a0b0d,#131518);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.05), 0 1px 0 rgba(255,255,255,.06);
+}
+.slot svg{ width:13px; height:13px; stroke:#5b6069; fill:none; stroke-width:1.8; flex:0 0 13px; }
+.slot input{
+  flex:1; min-width:0; background:none; border:0; outline:0; padding:0;
+  font-family:var(--font); font-size:11px; letter-spacing:.06em; color:#7CFFB0;
+  text-shadow:0 0 6px rgba(124,255,176,.5);
+}
+.slot input::placeholder{ color:#3f444c; text-shadow:none; letter-spacing:.1em; }
+
+.rack{ display:grid; grid-template-columns:repeat(auto-fill,minmax(272px,1fr)); gap:14px; position:relative; z-index:1; }
+
+.module{
+  position:relative; display:flex; flex-direction:column; gap:9px;
+  padding:14px 14px 12px 17px; border-radius:11px;
+  background:linear-gradient(178deg,#282b30,#1e2023 55%,#1a1c1f);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),
+    inset 0 -1px 0 rgba(0,0,0,.75),
+    0 3px 6px rgba(0,0,0,.6);
+  overflow:hidden;
+}
+.module::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:var(--grain); background-size:140px; opacity:.05; mix-blend-mode:overlay;
+}
+/* THE RUNNING RAIL — the green bar down the left of the shipping card, as a
+   light pipe. Dark and dead when the project is not up. */
+.module::before{
+  content:''; position:absolute; left:0; top:8px; bottom:8px; width:4px;
+  border-radius:0 3px 3px 0; background:#26282c;
+  box-shadow:inset -1px 0 2px rgba(0,0,0,.8);
+  transition:background .2s, box-shadow .2s;
+}
+.module.up::before{
+  background:linear-gradient(180deg,#7CFFB0,#22C55E);
+  box-shadow:0 0 7px rgba(60,230,140,.8), 0 0 18px rgba(60,230,140,.35), inset 0 0 3px rgba(255,255,255,.7);
+}
+.mod-head{ display:flex; align-items:center; gap:9px; }
+/* the status LED — a jewel, dark until the process is alive */
+.pilot{
+  width:9px; height:9px; flex:0 0 9px; border-radius:50%;
+  background:radial-gradient(circle at 34% 28%, #4a4f57, #26282c 70%);
+  box-shadow:inset 0 -1px 1px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.6);
+  transition:background .2s, box-shadow .2s;
+}
+.module.up .pilot{
+  background:radial-gradient(circle at 34% 28%, #fff 0%, #B6FFD4 18%, #2BE07A 55%, #128C45 100%);
+  box-shadow:0 0 6px rgba(43,224,122,.85), 0 0 15px rgba(43,224,122,.4), inset 0 -1px 1px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.5);
+}
+.mod-name{
+  flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--font); font-size:12.5px; font-weight:700; letter-spacing:.01em;
+  color:#e3e6eb; text-shadow:0 1px 0 rgba(0,0,0,.85);
+}
+/* NODE — a stamped plate, not a coloured pill */
+.stamp{
+  font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.14em;
+  padding:2px 5px; border-radius:3px; color:#0d1a12;
+  background:linear-gradient(180deg,#8FE9B4,#3FA96C);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.6);
+}
+.mod-desc{ font-size:11.5px; line-height:1.5; color:#7e838d; margin:0; min-height:34px; }
+
+/* the port display — a lit strip. It is a LINK, so it also has a key on it. */
+.port{
+  display:flex; align-items:center; gap:8px; height:30px; padding:0 10px;
+  border-radius:6px; cursor:pointer; border:0; width:100%; text-align:left;
+  background:linear-gradient(180deg,#06110c,#0c1a13);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 0 12px rgba(60,230,140,.10),
+             inset 0 -1px 0 rgba(255,255,255,.05), 0 1px 0 rgba(255,255,255,.06);
+  font-family:var(--font); font-size:11px; letter-spacing:.06em;
+  color:#7CFFB0; text-shadow:0 0 7px rgba(124,255,176,.7);
+}
+.port:hover{ box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 0 16px rgba(60,230,140,.2), 0 0 8px rgba(60,230,140,.2); }
+.port span:last-child{ margin-left:auto; font-size:9px; color:#3f7a5c; text-shadow:none; letter-spacing:.1em; }
+.port svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:1.8; }
+
+.mod-acts{ display:flex; align-items:center; gap:7px; }
+/* LAUNCH — an illuminated green key. The lamp lens is INSIDE the cap, left of
+   the label, the way a real illuminated pushbutton is built. */
+.act{
+  height:32px; padding:0 13px; gap:8px; border-radius:8px; flex:0 0 auto;
+  font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.08em;
+}
+.act svg{ width:12px; height:12px; }
+.act.go{
+  color:#CFFFE3;
+  background:linear-gradient(180deg,#1E7A47,#12613A 55%,#0C4529);
+  box-shadow:
+    inset 0 1px 0 rgba(190,255,220,.35),
+    inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 0 #06301c,
+    0 5px 9px rgba(0,0,0,.65),
+    0 0 12px rgba(43,224,122,.22);
+}
+.act.go:hover{ background:linear-gradient(180deg,#279456,#167544 55%,#0F5533);
+  box-shadow:inset 0 1px 0 rgba(190,255,220,.45), 0 3px 0 #06301c, 0 5px 9px rgba(0,0,0,.65), 0 0 18px rgba(43,224,122,.4); }
+.act.go:active{ transform:translateY(3px);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.8), 0 0 0 #06301c, 0 1px 2px rgba(0,0,0,.5), 0 0 14px rgba(43,224,122,.35); }
+/* STOP — red, and it reads as red BEFORE you read the word. The lens is lit
+   because the thing it stops is running; a dark stop button is a lie. */
+.act.halt{
+  color:#FFD6D6;
+  background:linear-gradient(180deg,#8E1F1F,#661616 55%,#490F0F);
+  box-shadow:
+    inset 0 1px 0 rgba(255,190,190,.35),
+    inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 0 #2c0808,
+    0 5px 9px rgba(0,0,0,.65),
+    0 0 12px rgba(255,45,45,.25);
+}
+.act.halt:hover{ background:linear-gradient(180deg,#A82626,#7C1B1B 55%,#5A1313);
+  box-shadow:inset 0 1px 0 rgba(255,190,190,.45), 0 3px 0 #2c0808, 0 5px 9px rgba(0,0,0,.65), 0 0 18px rgba(255,45,45,.45); }
+.act.halt:active{ transform:translateY(3px);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.85), 0 0 0 #2c0808, 0 1px 2px rgba(0,0,0,.5), 0 0 14px rgba(255,45,45,.4); }
+/* the lamp lens inside an illuminated key */
+.lens{ width:8px; height:8px; border-radius:50%; flex:0 0 8px; }
+.act.go .lens{ background:radial-gradient(circle at 35% 30%, #fff, #7CFFB0 40%, #1FA85C);
+  box-shadow:0 0 6px rgba(124,255,176,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
+.act.halt .lens{ background:radial-gradient(circle at 35% 30%, #fff, #FF9B9B 40%, #C21B1B);
+  box-shadow:0 0 6px rgba(255,80,80,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
+/* secondary keys — unlit, plain metal. They open something elsewhere. */
+.act.aux{ padding:0 11px; color:#9aa0aa; }
+/* …unless one of them LATCHES. `.act.aux` and `.key.is-down` have the same
+   specificity and this file declares aux later, so a latched aux key was
+   quietly keeping its grey glyph — the one thing the lit state is made of. */
+.act.is-down{ color:var(--led); }
+
+.mod-tags{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+/* an engraved tag: cut into the module face, so it is a MARK not a control */
+.tagcut{
+  font-family:var(--font); font-size:9px; letter-spacing:.1em; padding:2px 7px;
+  border-radius:4px; color:#797e88;
+  background:linear-gradient(180deg,#171a1c,#1e2124);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.06);
+  text-shadow:0 1px 0 rgba(255,255,255,.06);
+}
+.tagcut.folder{ color:#C99A5B; }
+/* the drag grip — knurled, bottom right, exactly where the shipping card has it */
+.grip{
+  position:absolute; right:9px; bottom:9px; width:14px; height:14px; border-radius:3px;
+  background-image:radial-gradient(circle, rgba(255,255,255,.22) 1px, transparent 1.2px);
+  background-size:5px 5px; opacity:.35; cursor:grab;
+}
+.grip:hover{ opacity:.7; }
+
+.empty{
+  grid-column:1/-1; padding:38px; text-align:center; border-radius:11px;
+  font-family:var(--font); font-size:10.5px; letter-spacing:.18em; color:#4a4e56;
+  background:linear-gradient(180deg,#0a0b0d,#131518);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.05);
+  text-shadow:0 1px 0 rgba(255,255,255,.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE KNOB — what a slider becomes when it has to exist as an object
+   ───────────────────────────────────────────────────────────────────────────
+   A slider is a track and a lump. A knob is FOUR parts and each one earns it:
+
+     1  THE COLLAR      a milled ring the cap sits in, so it looks fitted
+     2  THE ARC         the value, drawn as a lit trace around the collar from
+                        the minimum to where you are. This is the readout you
+                        actually use — the number is for confirming, the arc is
+                        for judging. A slider's filled track does the same job
+                        badly, because it is straight and everything else is not
+     3  THE CAP         knurled aluminium, conic-gradient teeth, domed with an
+                        off-centre specular that stays put as the cap turns
+     4  THE POINTER     one cut line, and it ROTATES. The knob's angle is the
+                        value, which is why you can read it from across the room
+
+   270° of travel, -135° to +135°, the way every real knob is built. Drag up or
+   right to raise it; the wheel works too; shift for fine.
+
+   WHERE A KNOB IS WRONG: a range with two ends you compare (Zone from / Zone
+   to) still wants a track, because "from here to there" is a LENGTH and a
+   length is a straight thing. Those stay faders — see .fader below.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.knob{
+  width:var(--kd,54px); height:var(--kd,54px); position:relative; flex:0 0 auto;
+  touch-action:none; cursor:ns-resize;
+}
+/* the collar it is fitted into */
+.knob-collar{
+  position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #0c0d0f 56%, #1d1f23 57%, #101113 100%);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.07), 0 1px 0 rgba(255,255,255,.06);
+}
+/* THE VALUE ARC IS AN SVG STROKE, and it has to be.
+   It was a conic-gradient behind a CSS mask, and both halves of that alias:
+   a conic hard stop is a hard pixel edge with no antialiasing, and a
+   radial-gradient mask has two more hard edges at the ring's inner and outer
+   walls. Three stair-stepped boundaries on a 54px circle — which is exactly
+   what a stepped orange arc looks like.
+   A stroked <circle> with stroke-dasharray is antialiased by the renderer,
+   scales to any size, gets a round cap for free, and the glow is one
+   drop-shadow on currentColor instead of a colour-mix per state. */
+.knob-ring{
+  position:absolute; inset:0; width:100%; height:100%; overflow:visible;
+  transform:rotate(135deg);            /* put the 90° dead zone at the bottom */
+  color:var(--arc,#FF6A00);
+}
+/* A BIPOLAR knob reads from the CENTRE, not from the minimum — Yaw at 0° with
+   a half-full arc says "half way up the range", which is true and useless;
+   what you want to see is how far off centre you are, and which side. So the
+   trace grows out of 12 o'clock in whichever direction you turned, and the
+   collar carries an etched centre mark for it to grow out of. */
+.knob.bi .knob-collar::after{
+  content:''; position:absolute; left:50%; top:-2px; width:2px; height:5px; margin-left:-1px;
+  border-radius:1px; background:#767d88; box-shadow:0 1px 1px rgba(0,0,0,.85);
+}
+.kr-track,.kr-val{ fill:none; stroke-linecap:round; stroke-width:7; }
+.kr-track{ stroke:rgba(255,255,255,.075); }
+.kr-val{ stroke:currentColor; filter:drop-shadow(0 0 3px currentColor); transition:stroke-dasharray .05s linear; }
+.knob.dragging .kr-val{ transition:none; }
+/* the cap: knurled edge, domed face, fixed specular */
+.knob-cap{
+  position:absolute; inset:19%; border-radius:50%;
+  background:
+    radial-gradient(circle at 36% 26%, rgba(255,255,255,.30) 0%, transparent 46%),
+    conic-gradient(#3a3e45 0deg, #23262b 3deg, #3a3e45 6deg, #23262b 9deg),
+    radial-gradient(circle at 50% 50%, #34383f 55%, #1c1e22 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    inset 0 -2px 4px rgba(0,0,0,.75),
+    0 2px 4px rgba(0,0,0,.8);
+  transform:rotate(var(--deg,0deg));
+  transition:transform .05s linear;
+}
+/* the pointer — a CUT, so it is dark with a lit lower wall */
+.knob-cap::after{
+  content:''; position:absolute; left:50%; top:9%; width:2px; height:34%;
+  margin-left:-1px; border-radius:1px;
+  background:#0a0b0c; box-shadow:0 0 0 1px rgba(255,255,255,.13), 0 0 5px rgba(255,255,255,.10);
+}
+.knob.dragging .knob-cap{ transition:none; }
+
+/* ── the furniture, and it is the part that was too big ──────────────────
+   A caption line, a knob and a readout line stacked is THREE rows for ONE
+   control — a 54px knob in a 100px box. Stacked is kept only for a BANK,
+   where three of them side by side is the point (Yaw / Pitch / Roll).
+   Everything else is a ROW: knob, engraved label, readout, on one 42px line
+   — the same height a slider row already was, so the knob costs nothing. */
+.kwrap{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+/* The inline form is a PARAM STRIP: its own small plate, so a column of them
+   reads as a rack of channels rather than as controls floating on the body.
+   (The modifier is `inline`, not `row` — `.row` is the layer module, and a
+   knob strip was silently inheriting its plate, its hover and its grain.) */
+.kwrap.inline{
+  flex-direction:row; align-items:center; gap:12px; width:100%;
+  /* THE DIAL IS BIGGER THAN ITS BOX. The value arc sits at r=43 of 50 with a
+     3px glow in rendered pixels, so on a 40px knob the light spills about
+     1.6px outside the element. At 4px of padding against a 9px corner radius
+     the plate's own edge was cutting diagonally through that spill, which is
+     what a knob crammed into a slot looks like. 9px of air and a radius that
+     follows the knob rather than fighting it. */
+  padding:9px 13px 9px 10px; border-radius:13px;
+  /* A STRIP HAS AN INTRINSIC WIDTH AND MUST NOT GO UNDER IT. width:100% with
+     nothing holding the floor lets a narrow parent squeeze the row until the
+     label and the value climb onto the dial, which reads as a broken knob
+     rather than as a container that is too small. */
+  min-width:178px;
+  background:linear-gradient(180deg,#25282c,#1c1e21);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.65),
+             0 1px 2px rgba(0,0,0,.5);
+}
+.kwrap.inline .klab{ flex:1; text-align:left; }
+.kwrap.inline .kval{ min-width:58px; }
+
+/* TILE — the stack on a PROUD PLATE, which makes it a module rather than a
+   control. Same plate recipe as the inline strip, because they are the same
+   decision in two orientations: a lit hairline on top, a dark one under, and a
+   short cast shadow. The plate is the edge that says where one channel stops
+   and the next begins, so this is what a GRID of knobs wants. */
+.kwrap.tile{
+  gap:7px; padding:11px 13px 10px; border-radius:11px;
+  background:linear-gradient(180deg,#25282c,#1c1e21);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.65),
+             0 2px 4px rgba(0,0,0,.55);
+}
+
+/* COMPACT — dial and value, no caption, and no plate under it either: a strip
+   earns its plate by being one of several in a column, and a single control
+   sitting inside a row that already names it does not. */
+.kwrap.compact{ flex-direction:row; align-items:center; gap:9px; }
+.kwrap.compact .kval{ min-width:52px; }
+
+/* BARE — the dial alone. Not a stack with its parts deleted: a caller that
+   removes .klab and .kval by hand is a caller that has to be updated when the
+   markup changes, and there were two of those before this existed. */
+.kwrap.bare{ gap:0; }
+.klab{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09); line-height:1;
+}
+.kval{
+  min-width:50px; height:18px; padding:0 7px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#080a09,#0f1211);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 1px 0 rgba(255,255,255,.06);
+  font-family:var(--font); font-size:10.5px; color:#7CFFB0;
+  text-shadow:0 0 6px rgba(124,255,176,.65); font-variant-numeric:tabular-nums;
+}
+
+/* THE FIELD IS THE WINDOW, not a box drawn inside it. A readout being typed
+   into is the same lit glass with a cursor in it — same phosphor, same tabular
+   figures, no border and no white ground, because nothing about it has become
+   a form. Only the caret says it is live. */
+/* NO I-BEAM ON THE WINDOW. A text cursor over a readout says "this is a text
+   field", and it is not one — it is a display that will take a value if you
+   ask it twice. The pointer stays a pointer until the caret is actually in
+   there. */
+.kedit-able{ cursor:default; }
+.kval input.kedit,
+.lcd input.kedit{
+  width:100%; min-width:0; border:0; padding:0; margin:0; background:none;
+  text-align:center; font:inherit; color:inherit; text-shadow:inherit;
+  font-variant-numeric:tabular-nums; letter-spacing:inherit;
+  caret-color:#7CFFB0;
+}
+.kval input.kedit:focus,
+.lcd input.kedit:focus{ outline:none; }
+/* the window brightens while it is taking input, the way a lit display does */
+.kval:has(input.kedit),
+.lcd:has(input.kedit){
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 0 0 1px rgba(124,255,176,.35),
+             0 0 7px rgba(124,255,176,.20);
+}
+
+/* ── the FADER, built like one ───────────────────────────────────────────
+   Kept only where the value is a LENGTH. The first pass was a rounded bar and
+   a rounded lump, which is the flat slider with a bevel painted on. A real
+   fader is four things:
+
+     THE SLOT     cut, not drawn — dark core, lit far wall at the bottom, and
+                  the ends CAPPED so the travel has a physical limit
+     THE SCALE    engraved ticks at 0 · ¼ · ½ · ¾ · 1 under the slot. Ticks are
+                  what make a track readable without a number, and they are the
+                  reason a fader can be a fader instead of a bar with a lump
+     THE TRACE    the lit part of the slot, glowing onto the metal around it
+     THE CAP      a moulded thumb: chamfered top, a knurled grip, a WAIST where
+                  the finger sits, and one bright indicator line on the exact
+                  value — the line is the pointer, the cap is just what holds it
+   ─────────────────────────────────────────────────────────────────────────── */
+.fader{ display:flex; align-items:center; gap:12px; padding:3px 0; }
+.fader .flab{ flex:0 0 62px; font-family:var(--font); font-size:8.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09); }
+/* The scale sits BELOW the cap's travel, not under it — a 24px cap on a 26px
+   slot covers its own ticks, which is the scale and the pointer fighting for
+   the same 4px. */
+.fslot{ flex:1; position:relative; height:30px; display:flex; align-items:center; }
+.ftrack{
+  position:absolute; left:0; right:0; top:7px; height:9px; border-radius:5px;
+  cursor:pointer; touch-action:none;
+  background:linear-gradient(180deg,#060708 0%,#0d0f11 55%,#191c20 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.98),
+    inset 0 -1px 0 rgba(255,255,255,.09),
+    inset 2px 0 3px -2px rgba(0,0,0,.9),
+    inset -2px 0 3px -2px rgba(0,0,0,.9),
+    0 1px 0 rgba(255,255,255,.07);
+}
+/* the engraved scale, under the slot */
+.fticks{
+  position:absolute; left:0; right:0; top:25px; height:4px; pointer-events:none;
+  background-image:linear-gradient(90deg, #000 0 1px, transparent 1px);
+  background-size:calc(25% - .25px) 3px; background-repeat:repeat-x;
+  box-shadow:0 1px 0 rgba(255,255,255,.05);
+  opacity:.85;
+}
+.fticks::after{ content:''; position:absolute; right:0; top:0; width:1px; height:3px; background:#000;
+  box-shadow:1px 0 0 rgba(255,255,255,.06); }
+.ffill{
+  position:absolute; left:2px; top:2px; bottom:2px; border-radius:3px;
+  background:linear-gradient(180deg,#FFC58F,var(--led) 55%,#C24E00);
+  box-shadow:0 0 5px rgba(255,106,0,.7), 0 0 13px rgba(255,106,0,.35),
+             inset 0 1px 0 rgba(255,255,255,.45);
+}
+/* THE BAND between two caps is a PIECE, not a fill that starts late. A fine
+   hatch is what says so — the same reason the caps are knurled. */
+.ffill.band{
+  top:1px; bottom:1px; border-radius:4px;
+  background-image:
+    repeating-linear-gradient(74deg, rgba(0,0,0,.26) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg,#FFC58F,var(--led) 55%,#C24E00);
+  box-shadow:0 0 6px rgba(255,106,0,.6), 0 0 14px rgba(255,106,0,.3),
+             inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(0,0,0,.35);
+}
+.kval.wide{ min-width:78px; }
+/* the cap — waisted, knurled, with the indicator line on the value */
+.fcap{
+  position:absolute; top:50%; width:17px; height:24px; margin:-12px 0 0 -8.5px;
+  border-radius:5px; cursor:grab;
+  background:
+    linear-gradient(180deg,#585d66 0%,#3a3e45 16%,#22252a 46%,#1a1c20 54%,#33373d 86%,#4c5158 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -1px 0 rgba(255,255,255,.22),
+    inset 1px 0 0 rgba(255,255,255,.10),
+    inset -1px 0 0 rgba(0,0,0,.6),
+    0 3px 6px rgba(0,0,0,.9),
+    0 0 0 1px rgba(0,0,0,.65);
+}
+.fcap:active{ cursor:grabbing; }
+/* knurl: fine teeth on the two shoulders, none across the waist */
+.fcap::before{
+  content:''; position:absolute; inset:2px 3px;
+  background-image:repeating-linear-gradient(0deg,
+    rgba(255,255,255,.13) 0 1px, rgba(0,0,0,.30) 1px 2.5px);
+  -webkit-mask:linear-gradient(180deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+          mask:linear-gradient(180deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+  border-radius:3px;
+}
+/* THE INDICATOR — this is the part that carries the value */
+.fcap::after{
+  content:''; position:absolute; left:2px; right:2px; top:50%; height:2px; margin-top:-1px;
+  border-radius:1px; background:var(--led-hot);
+  box-shadow:0 0 5px var(--led), 0 0 10px rgba(255,106,0,.55), 0 1px 0 rgba(0,0,0,.8);
+}
+
+/* ── THE CENTRE-DETENT SCALE ──────────────────────────────────────────────
+   A trim fader's zero is a PLACE, so it is marked like one: a full-height
+   tick at the middle where the others are stubs, and the cap notches into it.
+   The quarter marks stay, because the scale still has to say how far. */
+.fader.bi .fticks::before{
+  content:''; position:absolute; left:50%; top:-1px; width:1px; height:5px;
+  margin-left:-.5px; background:#000; box-shadow:1px 0 0 rgba(255,255,255,.07);
+}
+
+/* ── THE SAME FADER, STOOD UP ─────────────────────────────────────────────
+   Everything that was horizontal turns: the slot, the groove's lighting (a
+   vertical cut is lit on one WALL, not on its top edge), the scale, the
+   cap's waist and its knurl, and the indicator line, which has to stay
+   across the travel to point at a value. Column-reverse puts the readout at
+   the top and the legend at the foot, which is where a mixer has always put
+   them: you read the number while your hand is on the cap, and the channel
+   name is under the strip. */
+.fader.vert{ flex-direction:column-reverse; align-items:center; gap:7px; }
+.fader.vert .flab{ flex:0 0 auto; text-align:center; }
+.fader.vert .fslot{ flex:0 0 auto; width:34px; height:136px; }
+.fader.vert .ftrack{
+  left:12px; right:auto; top:0; bottom:0; width:9px; height:auto;
+  background:linear-gradient(90deg,#060708 0%,#0d0f11 55%,#191c20 100%);
+  box-shadow:
+    inset 2px 0 4px rgba(0,0,0,.98),
+    inset -1px 0 0 rgba(255,255,255,.09),
+    inset 0 2px 3px -2px rgba(0,0,0,.9),
+    inset 0 -2px 3px -2px rgba(0,0,0,.9),
+    1px 0 0 rgba(255,255,255,.07);
+}
+.fader.vert .fticks{
+  left:auto; right:1px; top:0; bottom:0; width:4px; height:auto;
+  background-image:linear-gradient(180deg, #000 0 1px, transparent 1px);
+  background-size:3px calc(25% - .25px); background-repeat:repeat-y;
+  box-shadow:1px 0 0 rgba(255,255,255,.05);
+}
+.fader.vert .fticks::after{ right:auto; left:0; bottom:0; top:auto; width:3px; height:1px; }
+.fader.vert.bi .fticks::before{
+  left:0; top:50%; width:5px; height:1px; margin:-.5px 0 0;
+  box-shadow:0 1px 0 rgba(255,255,255,.07);
+}
+.fader.vert .ffill{ left:2px; right:2px; top:auto; bottom:2px; }
+.fader.vert .fcap{
+  top:auto; left:50%; width:24px; height:17px; margin:-8.5px 0 0 -12px;
+  background:linear-gradient(90deg,#585d66 0%,#3a3e45 16%,#22252a 46%,#1a1c20 54%,#33373d 86%,#4c5158 100%);
+  box-shadow:
+    inset 1px 0 0 rgba(255,255,255,.45),
+    inset -1px 0 0 rgba(255,255,255,.22),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 6px rgba(0,0,0,.9),
+    0 0 0 1px rgba(0,0,0,.65);
+}
+.fader.vert .fcap::before{
+  inset:3px 2px;
+  background-image:repeating-linear-gradient(90deg,
+    rgba(255,255,255,.13) 0 1px, rgba(0,0,0,.30) 1px 2.5px);
+  -webkit-mask:linear-gradient(90deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+          mask:linear-gradient(90deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+}
+.fader.vert .fcap::after{
+  left:50%; right:auto; top:2px; bottom:2px; height:auto; width:2px; margin:0 0 0 -1px;
+}
+/* a bank: the reason vertical exists at all is that the caps line up into a
+   profile you read across, so the sample has to be more than one */
+.fbank{ display:flex; gap:10px; align-items:flex-end; }
+
+/* ── the ROTARY SELECTOR: a dropdown with detents ────────────────────────
+   A <select> is a list that hides. A selector switch shows every position at
+   once and points at the one you are on.
+
+   THE POSITIONS ARE PIPS ON THE DIAL, which is where a rotary switch has
+   always put them: one small dot per detent, ringed round the collar at the
+   angle the pointer stops at. Two things fall out of that. You can see how
+   many positions there are without reading anything — four dots is four
+   choices. And the pointer LANDS ON ONE, so the knob is not merely "turned a
+   bit", it is at a position, which a bare pointer over an unmarked collar can
+   never say. The dots are dark until the pointer reaches them; the one under
+   the pointer is lit, so the dial answers on its own and the label list beside
+   it is only there to say what the positions are called. */
+/* THE DIAL SITS IN A BOSS THAT STANDS PROUD OF THE CASE.
+
+   A control does not have to live inside the rectangle. On real gear the big
+   selector gets its own raised boss moulded into the shell, half off the face,
+   because the switch body is deeper than the panel and the case grows to meet
+   it. Three things follow, and all three are why it is worth doing here:
+
+     the dial stops competing for panel width — the boss hangs ~20px outside
+     the edge, and the width it would have eaten is now free for the labels;
+     the panel gets a SILHOUETTE, so it reads as an object with a front and a
+     side rather than as a rounded rectangle;
+     and the one control that is not like the others stops looking like a knob
+     that wandered in — it is bolted through a different part of the case.
+
+   The positions then all fan to ONE side, which is what a boss on the left
+   edge forces and what a rotary switch does anyway: a tick per detent, a
+   leader line out to its name, the four names stacked in a column you read
+   top to bottom. */
+/* THE BAY: dial on the left, its two neighbours on the right, one band.
+   Moving the boss onto the panel edge frees the width the dial used to eat,
+   and the two param strips go into it at the same height — so what was three
+   stacked blocks is one. */
+.placebay{ display:flex; align-items:center; gap:6px; min-height:116px; }
+.placebay .knobcol{ flex:1 1 auto; min-width:0; }
+/* the place bay is tighter than the default strip, but not tighter than the
+   glow: same 9px of vertical air, less on the sides */
+/* THE PLACE BAY IS THE ONE TIGHT CALLER, so it opts out of the floor: it
+   already runs a narrower value window and it shares a 318px box with a
+   rotary, so 178 would push it out of its own panel. */
+.placebay .kwrap.inline{ gap:9px; padding:9px 9px 9px 8px; min-width:0; }
+.placebay .kwrap.inline .kval{ min-width:52px; }
+
+.rotary{ position:relative; height:116px; flex:0 0 106px; --rcx:-5px; }
+/* THE LEGEND IS ON THE CASE, ABOVE THE WHOLE BAY — not tucked over the first
+   position. Inside the dial block it landed 8px above "Reference": two lines
+   of small grey caps, the same size and colour, which reads as a five-item
+   list whose first item happens to be the heading. Out here it is a heading
+   over three controls, with a hairline under it doing the separating that the
+   gap could not. */
+.bay-cap{
+  display:flex; align-items:center; gap:9px; padding:2px 2px 0;
+  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09); white-space:nowrap;
+}
+.bay-cap::after{
+  content:''; flex:1; height:1px; background:#0a0b0c; box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+/* THE BOSS WEARS THE CASE'S OWN FACE, not a darker disc laid on top of it.
+   That is the whole trick: it is opaque and it paints above the panel's
+   background, so the 1px rim running down the panel's left edge disappears
+   behind it and the SILHOUETTE becomes panel ∪ circle — the case bulging out
+   to meet a switch body deeper than the panel, which is why real enclosures
+   have these. Get the gradient wrong and it is a coin sitting on a box. */
+/* THE PANEL'S OUTLINE HAS TO FOLLOW IT, or it is a coin lying on a box.
+
+   Three things had to change for that. The boss is a child of the CASE now,
+   not of the dial — it paints on the panel's own background, above it and
+   below the body, so the 1px rim running down the panel's left edge simply
+   disappears behind it. Its centre sits 10px INSIDE the edge rather than on
+   it, so the circle crosses the straight edge at about 11° off vertical
+   instead of meeting it square: a soft junction where a half-disc gives you
+   two corners. And the panel's drop shadow is a FILTER rather than a
+   box-shadow — a box-shadow is cast by the border-box, so it would run
+   straight down the old rectangle and cut the bulge in half, while
+   filter: drop-shadow() is cast by the rendered ALPHA and therefore by the
+   union of rectangle and circle. One silhouette, one shadow. */
+/* THE BUMP IS THE PANEL'S OWN SHAPE. Nothing is added on top of it.
+
+   Two goes at this failed the same way, and it was the same mistake twice: a
+   separate disc sat over the panel, and a disc is a disc. Matching its grey
+   was never going to work, because the panel's face is ONE gradient run down
+   its whole height and the disc had a gradient of its own; and even with the
+   fill aligned there were two elements, two edges and two shadows to keep in
+   agreement, plus a blend mode inside a filtered box that blew the whole thing
+   out white.
+
+   So the panel is ONE element and the silhouette is a clip-path: the rounded
+   rectangle unioned with a circular lobe, joined by a TANGENT FILLET at each
+   end so the straight edge does not butt the curve — the flare the case would
+   have where a moulded boss grows out of a flat face. The background is the
+   panel's, painted once, clipped to that outline, so a seam cannot exist: it
+   is not two surfaces meeting, it is one surface with a bump in it.
+
+   The clip-path is generated from measured layout — the lobe's centre is
+   wherever the dial ended up — and the drop shadow goes on a WRAPPER, because
+   filters are applied before clipping and a shadow cast by the unclipped box
+   would be clipped away with it. */
+.bulge-wrap{
+  filter:
+    drop-shadow(0 26px 30px rgba(0,0,0,.75))
+    drop-shadow(0 6px 8px rgba(0,0,0,.6));
+}
+.box.bulge{
+  width:370px; flex:0 0 370px;               /* 318 of panel + 52 of lobe */
+  padding:3px 3px 3px 55px;                  /* content stays inside the face */
+  border-radius:0;                           /* the clip-path owns the corners now */
+  background-image:
+    radial-gradient(circle 46px at 44px var(--boss-y,50%), rgba(255,255,255,.055), transparent 74%),
+    radial-gradient(circle 46px at 54px calc(var(--boss-y,50%) + 12px), rgba(0,0,0,.24), transparent 68%),
+    linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9),
+    inset 0 -18px 26px -20px rgba(0,0,0,.8);
+  clip-path:var(--panel-shape, none);
+}
+/* the brushed overlay is full-bleed now — the clip-path is what shapes it */
+.box.bulge::before{ border-radius:0; }
+/* --rcx IS MEASURED FROM THE BODY'S CONTENT BOX, NOT THE PANEL'S EDGE, and
+   that is two paddings deep: the case's 55px on this side plus .box-body's own
+   12px. Offsetting by only the first left the dial sitting 12px right of the
+   lobe it is supposed to be concentric with — which is exactly the "the knob
+   is not in the middle of its bump" that no amount of moving the bump fixes.
+   Lobe centre 44 − (55 + 12) = −23. */
+.box.bulge .rotary{ --rcx:-23px; }
+/* the parting line where the moulded boss meets the flat face */
+.box-boss::after{
+  content:''; position:absolute; inset:6px; border-radius:50%;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.4);
+}
+/* the parting line where the boss meets the face */
+/* THE POINTER IS THE KNOB. A round cap with a cut line has to be read twice —
+   once to find the line, once to see where it points. A teardrop IS the arrow:
+   the body is what your fingers turn, the tip is the reading, and the whole
+   shape rotates. It is also the one LIGHT part of the panel, which is how a
+   selector on real gear is built — a pale lever on a dark plate, because where
+   it points is the thing you must see from across the room. */
+.rot-knob{
+  position:absolute; left:var(--rcx); top:50%; width:62px; height:62px; margin:-31px 0 0 -31px;
+  cursor:ns-resize; touch-action:none; border-radius:50%; z-index:2;
+}
+.rot-seat{
+  position:absolute; left:var(--rcx); top:50%; width:74px; height:74px; margin:-37px 0 0 -37px;
+  border-radius:50%;
+  background:radial-gradient(circle, #0c0d0f 60%, #1c1e22 62%, #0f1012 100%);
+  box-shadow:inset 0 2px 7px rgba(0,0,0,.92), 0 1px 0 rgba(255,255,255,.07);
+}
+/* THE CAP DOES NOT TURN — only the pointer does. That is the whole reason the
+   lever became a disc: a circle has no orientation, so its lighting can be
+   nailed to the room like every other cap here instead of swinging round with
+   the value. */
+.tear{
+  width:100%; height:100%; overflow:visible; display:block;
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.78));
+}
+.tear-ptr{
+  transform:rotate(var(--deg,0deg));
+  transform-box:view-box; transform-origin:50% 50%;
+  transition:transform .18s cubic-bezier(.3,1.5,.5,1);
+}
+.rot-knob.dragging .tear-ptr{ transition:none; }
+/* the leaders: tick end, elbow, then flat into the name. Engraved hairlines,
+   so they are strokes — a 1px div rotated to an angle is a grey smear. */
+.rot-leads{
+  position:absolute; left:var(--rcx); top:50%; margin-top:-65px; overflow:visible;
+  pointer-events:none;
+}
+.rot-lead{
+  fill:none; stroke:#4b515b; stroke-width:1; stroke-linejoin:round; stroke-linecap:round;
+  transition:stroke .14s, filter .14s;
+}
+.rot-lab{
+  position:absolute; left:var(--rcx); top:50%; border:0; background:none; cursor:pointer;
+  padding:4px 6px; margin:-4px -6px;      /* a real hit target, not just the word */
+  font-family:var(--font); font-size:9.5px; letter-spacing:.1em; white-space:nowrap;
+  color:#6b7079; transition:color .14s;
+}
+.rot-lab:hover{ color:#c2c7cf; }
+.rot-lab.on{ color:#FFD9BC; text-shadow:0 0 8px rgba(255,140,60,.6); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   .eng — THE ENGRAVED ICON, and it is the primitive this language was missing.
+
+   There was engraved TYPE (.demo-etch) and nothing engraved that is a SHAPE,
+   so every icon in the document is a flat monoline glyph laid ON the metal.
+   That is the sticker failure the file already names about a centred
+   highlight, and it is worse for icons because there are more of them.
+
+   Same recipe as the etched legend, moved from text-shadow to drop-shadow
+   because the subject is a stroke rather than a glyph: the line is the
+   PANEL'S SHADOW COLOUR, not a grey, and one 1px light line sits under it —
+   the lit far wall of the cut. Nothing in here is white, and nothing in here
+   is currentColor: an engraving does not change colour when its row is
+   selected, because it is a hole.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.eng{
+  width:14px; height:14px; flex:0 0 14px; display:block;
+  fill:none; stroke:#0d0f12; stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.11));
+}
+/* Cut into a recess floor rather than the faceplate: less light reaches the
+   far wall down there, so the highlight drops with it. */
+.hb-deep .eng{ stroke:#08090b; filter:drop-shadow(0 1px 0 rgba(255,255,255,.055)); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PANEL BODIES — the editor and the viewport share one chassis
+   ═══════════════════════════════════════════════════════════════════════════ */
+.box{
+  width:318px; flex:0 0 318px; position:relative; padding:3px; border-radius:14px;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    0 42px 60px -24px rgba(0,0,0,.9),
+    0 8px 14px -6px rgba(0,0,0,.75),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9),
+    inset 0 -18px 26px -20px rgba(0,0,0,.8);
+  user-select:none;
+}
+.box::before{
+  content:''; position:absolute; inset:0; border-radius:14px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.020) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+.box-head{
+  display:flex; align-items:center; gap:9px; padding:13px 12px 11px 16px; position:relative; z-index:2;
+  border-bottom:1px solid rgba(0,0,0,.7); box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+.box-head .nm{ flex:1; font-family:var(--font); font-size:12px; font-weight:700; color:#e3e6eb;
+  text-shadow:0 1px 0 rgba(0,0,0,.85); }
+.box-body{ padding:12px; position:relative; z-index:2; display:flex; flex-direction:column; gap:12px; }
+
+/* tab keys — the same interlock as the page switcher, one size down */
+.piano.sm{ padding:5px; gap:7px; width:100%; }
+/* A SIZE OVERRIDE MUST NOT OUT-RANK THE STATE. These say how big a key is,
+   and they were also re-declaring its box-shadow — at the same specificity as
+   the shared pressed rule but later in the file, so a small key that went down
+   kept its RAISED shadow and only the label changed colour. Scoped to :not()
+   so the raised shadow is only claimed while the key is actually up. */
+.piano.sm .pkey{ height:26px; min-width:0; flex:1; padding:0 6px; font-size:9px; letter-spacing:.06em; }
+.piano.sm .pkey:not(.is-down):not(:active){
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.7),
+             0 2px 0 #0d0e10, 0 3px 6px rgba(0,0,0,.6); }
+/* THE TAB DOES NOT TRAVEL. A 26px cap dropping 2px in a strip this tight
+   lands its shadow on the neighbour and the whole row reads as unstable —
+   and unlike the big keys there is no room for the fall to be legible as a
+   fall. It still goes IN: the recess and the chamfer say pressed, the lamp
+   says which one. What is removed is the movement, not the state. */
+.piano.sm .pkey:active,
+.piano.sm .pkey.is-down{ transform:none; }
+
+/* a screen: the reference image behind glass */
+.screen{
+  border-radius:8px; padding:9px; position:relative; overflow:hidden;
+  background:linear-gradient(180deg,#08090b,#111316);
+  box-shadow:inset 0 3px 8px rgba(0,0,0,.95), inset 0 -1px 0 rgba(255,255,255,.05), 0 1px 0 rgba(255,255,255,.06);
+}
+.screen canvas, .screen .thumb{ display:block; width:100%; border-radius:4px; filter:contrast(1.05) brightness(.96); }
+/* the glass: one diagonal reflection, and a scanline haze */
+.screen::after{
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:8px;
+  background:
+    linear-gradient(148deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.02) 26%, transparent 46%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+}
+.screen .cap{
+  display:block; text-align:center; margin-top:7px;
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c;
+}
+.filmrow{ display:flex; align-items:center; gap:10px; }
+.filmrow .thumb{ width:56px; height:56px; object-fit:cover; border-radius:5px; flex:0 0 56px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1), 0 2px 5px rgba(0,0,0,.7); }
+.filmrow .meta{ flex:1; min-width:0; }
+.filmrow .fn{ font-family:var(--font); font-size:11px; color:#dfe2e7; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.filmrow .fs{ font-family:var(--font); font-size:9px; letter-spacing:.08em; color:#61666f; margin-top:3px; }
+.filmrow .stack{ display:flex; flex-direction:column; gap:5px; }
+.filmrow .stack .key{ height:24px; padding:0 10px; font-family:var(--font); font-size:9px; letter-spacing:.1em; }
+
+.knobrow{ display:flex; align-items:flex-start; justify-content:space-around; gap:8px; padding:2px 0; }
+/* a settings bay is not a viewport — the knobs sit tight and share the row */
+.set-bay .knobrow{ padding:0; justify-content:space-evenly; }
+/* single knobs stack as ROWS — one 40px line each, the height a slider was */
+.knobcol{ display:flex; flex-direction:column; gap:8px; padding:1px 2px; }
+.divider{ height:1px; background:#0a0b0c; box-shadow:0 1px 0 rgba(255,255,255,.06); margin:1px 0; }
+.actrow{ display:flex; align-items:center; gap:7px; }
+.actrow .act{ flex:1; }
+.act.fire{
+  color:#FFE0C8;
+  background:linear-gradient(180deg,#C25411,#8E3B0B 55%,#6A2C08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,210,170,.4), inset 0 -1px 0 rgba(0,0,0,.6),
+    0 3px 0 #451c05, 0 5px 9px rgba(0,0,0,.65), 0 0 14px rgba(255,106,0,.3);
+}
+.act.fire:hover{ background:linear-gradient(180deg,#DC6314,#A5450D 55%,#7C340A);
+  box-shadow:inset 0 1px 0 rgba(255,210,170,.5), 0 3px 0 #451c05, 0 5px 9px rgba(0,0,0,.65), 0 0 20px rgba(255,106,0,.5); }
+.act.fire:active{ transform:translateY(3px);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.85), 0 0 0 #451c05, 0 1px 2px rgba(0,0,0,.5), 0 0 16px rgba(255,106,0,.4); }
+.act.fire .lens{ background:radial-gradient(circle at 35% 30%, #fff, #FFC08A 40%, #E05A00);
+  box-shadow:0 0 7px rgba(255,140,50,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE GIZMO — an axis ball under a glass dome
+   ═══════════════════════════════════════════════════════════════════════════ */
+.gizmo{
+  width:132px; height:132px; margin:0 auto; position:relative; border-radius:50%;
+  background:
+    radial-gradient(circle at 38% 26%, rgba(255,255,255,.13) 0%, transparent 42%),
+    radial-gradient(circle at 50% 60%, #191b1f 0%, #0c0d0f 78%);
+  box-shadow:
+    inset 0 4px 10px rgba(0,0,0,.95),
+    inset 0 -2px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.07);
+}
+.gizmo::after{  /* the dome */
+  content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  background:linear-gradient(152deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.03) 28%, transparent 52%);
+}
+.gz-arm{ position:absolute; left:50%; top:50%; height:2px; transform-origin:0 50%;
+  background:linear-gradient(90deg, color-mix(in srgb,var(--ax) 30%, transparent), var(--ax));
+  box-shadow:0 0 5px color-mix(in srgb,var(--ax) 55%, transparent); border-radius:1px; }
+.gz-node{
+  position:absolute; width:15px; height:15px; margin:-7.5px 0 0 -7.5px; border-radius:50%;
+  border:0; padding:0; cursor:pointer;
+  background:radial-gradient(circle at 34% 28%, #fff 0%, color-mix(in srgb,var(--ax) 55%,#fff) 18%, var(--ax) 55%, color-mix(in srgb,var(--ax) 50%,#000) 100%);
+  box-shadow:0 0 7px color-mix(in srgb,var(--ax) 70%,transparent), inset 0 -1px 2px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.55);
+  transition:transform .12s;
+}
+.gz-node:hover{ transform:scale(1.22); }
+.gz-node.hollow{ background:radial-gradient(circle at 50% 50%, #14161a 52%, color-mix(in srgb,var(--ax) 70%,#000) 53%);
+  box-shadow:inset 0 0 4px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.6); }
+.gz-hub{
+  position:absolute; left:50%; top:50%; width:11px; height:11px; margin:-5.5px 0 0 -5.5px;
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 28%, #cfd4db, #5f656e 60%, #26292e);
+  box-shadow:inset 0 -1px 1px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.6), 0 0 6px rgba(255,255,255,.14);
+}
+/* A KEY THAT TRAVELS NEEDS ROOM UNDER IT. On a 5px grid the pressed key drops
+   4px and its glow lands on the cap below — the two read as one welded block,
+   and the thing that was supposed to say "this one is down" instead says "these
+   two are joined". So the pad gets a taller ROW gap than column gap (they are
+   not the same problem: nothing travels sideways), and its keys get a 3px
+   skirt, which is what a short-travel key on a real pad has anyway. */
+.keypad{ display:grid; grid-template-columns:repeat(3,1fr); gap:11px 5px; }
+.keypad .pkey{ min-width:0; padding:0 4px; height:30px; font-size:9px; letter-spacing:.08em; }
+.keypad .pkey:not(.is-down):not(:active){
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.7),
+             0 3px 0 #0d0e10, 0 5px 8px rgba(0,0,0,.7);
+}
+/* ── THE TOOLS ARE NOT PART OF THE VIEWPORT ──────────────────────────────
+   Pan, Turn and Select were the third row of the viewport panel, under the
+   view keys, and that is a filing error you can feel: everything else in that
+   box answers WHERE THE CAMERA IS — a view, an angle, a fit. These three
+   answer WHAT THE MOUSE DOES, which is true of the whole application and stays
+   true while you are not looking at the viewport at all. Two different
+   questions do not share a chassis.
+
+   So they get their own palette, and it is a tool palette in the old sense: a
+   narrow strip, one key per tool, stacked, small enough to sit anywhere on the
+   canvas. Being a separate object also lets it be MOVED, which a row inside a
+   panel can never be — and being three keys on their own bar makes the
+   interlock obvious, where in a stack of rows it read as one more row. */
+.palette{
+  width:118px; flex:0 0 118px; align-self:flex-start;
+  /* 10px, not 5: every raised cap lays a 3px hard skirt plus blur under
+     itself, so a 5px gap is really ~2px of daylight — and a pressed cap
+     drops 2px further into it. The keypad's stacked rows are 11px apart
+     for the same reason. */
+  display:flex; flex-direction:column; gap:10px;
+  padding:8px; border-radius:12px; position:relative;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 30%,#161719 80%,#1d1e22 100%);
+  box-shadow:
+    0 28px 40px -20px rgba(0,0,0,.9),
+    0 6px 12px -5px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.9);
+}
+.palette::before{
+  content:''; position:absolute; inset:0; border-radius:12px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+.pal-cap{
+  font-family:var(--font); font-size:8px; letter-spacing:.2em; text-transform:uppercase;
+  color:#5d626b; text-shadow:0 1px 0 rgba(255,255,255,.09);
+  padding:1px 0 6px 3px;
+}
+.palette .pkey{ height:34px; min-width:0; padding:0 10px; font-size:9.5px; justify-content:flex-start; }
+.palette .pkey svg{ width:14px; height:14px; margin-right:8px; stroke:currentColor; fill:none; stroke-width:1.7; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   .plate — THE FLOATING PLATE, and it is the language's first one.
+
+   Everything else in this document is bolted into a chassis. This is the first
+   surface that OPENS: it positions itself against the thing that summoned it,
+   sits above the panel, and goes away. The answer has to be reusable, because
+   menus, tooltips and the rotary's own popup all want it.
+
+   A plate is the same metal as a .box with two differences, and both are about
+   elevation. The cast shadow is HARDER and SHORTER — a plate 8mm off the panel
+   throws a tighter shadow than a panel 40mm off the desk — and there is a
+   1px black line all the way round, because a lifted edge has a dark side no
+   matter where the lamp is. Nothing else changes: same gradient, same grain,
+   same edge highlight. It is a piece of the same machine, held up.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.plate{
+  position:fixed; z-index:80; padding:3px; border-radius:12px;
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    0 18px 30px -10px rgba(0,0,0,.92),
+    0 5px 10px -3px rgba(0,0,0,.8),
+    0 0 0 1px rgba(0,0,0,.9),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -1px 0 rgba(0,0,0,.9);
+  user-select:none;
+}
+.plate::before{
+  content:''; position:absolute; inset:0; border-radius:12px; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.020) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+.plate-body{ padding:10px; position:relative; z-index:2; display:flex; flex-direction:column; gap:9px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   .picker — A COLOUR PICKER MADE OF THE SAME STUFF AS EVERYTHING ELSE.
+
+   input[type=color] renders its popup in browser chrome and no CSS reaches
+   it, so the one moment you touch a colour, a dark machined panel produced a
+   bright OS sheet. Every primitive in this language exists to avoid exactly
+   that. This is not "theme the popup" — it cannot be themed — it is replace
+   it, keeping a hidden native input as the form value so nothing downstream
+   has to change.
+
+   DARK BY DEFAULT, and here that is not a style preference: a picker is the
+   one place the panel must DISAPPEAR so the colour can be judged. Neutral
+   metal, no coloured light spilling out of the chassis, no tint in the bezel.
+   The only saturated thing inside is the colour being picked.
+
+   NOT WANTED, and left out on purpose: alpha, HSL/LAB tabs, palette
+   management. A plotter pen is opaque and has one colour.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.picker{ width:236px; }
+
+/* the field is behind glass, like every other display in the language */
+.pk-field{
+  position:relative; height:132px; border-radius:6px; cursor:crosshair;
+  background:
+    linear-gradient(0deg, #000, transparent),
+    linear-gradient(90deg, #fff, hsl(var(--pk-h,20) 100% 50%));
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.07);
+  touch-action:none;
+}
+.pk-field::after{
+  content:''; position:absolute; inset:0; border-radius:6px; pointer-events:none;
+  background:
+    linear-gradient(148deg, rgba(255,255,255,.13) 0%, rgba(255,255,255,.02) 24%, transparent 44%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 1px, transparent 1px 3px);
+}
+/* the crosshair reads as something UNDER the glass: a dark ring with a light
+   one inside it, so it survives on white and on black without inverting */
+.pk-cross{
+  position:absolute; width:13px; height:13px; margin:-6.5px 0 0 -6.5px;
+  border-radius:50%; pointer-events:none; z-index:1;
+  box-shadow:0 0 0 1.5px rgba(0,0,0,.85), inset 0 0 0 1.5px rgba(255,255,255,.9),
+             0 1px 3px rgba(0,0,0,.6);
+}
+
+/* HUE IS A FADER — a value with a range like every other value with a range,
+   so it gets the slot, the knurled cap and the engraved scale. What changes
+   is what is IN the slot and that there is no lit trace: the track is already
+   the answer, and a fill over it would be a second reading of the same thing. */
+.pk-hue{ padding:0; }
+.pk-hue .flab, .pk-hue .kval{ display:none; }
+.pk-hue .ftrack{
+  background:linear-gradient(90deg,#f00 0,#ff0 16.66%,#0f0 33.33%,#0ff 50%,#00f 66.66%,#f0f 83.33%,#f00 100%);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.7), inset 0 -1px 0 rgba(255,255,255,.12),
+             0 1px 0 rgba(255,255,255,.07);
+}
+.pk-hue .ffill{ display:none; }
+/* six primaries, not four quarters — the scale counts what the track holds */
+.pk-hue .fticks{ background-size:calc(16.666% - .25px) 3px; }
+
+.pk-row{ display:flex; align-items:center; gap:8px; }
+.pk-row .key{ width:28px; height:28px; flex:0 0 28px; border-radius:7px; }
+.pk-row .key svg{ width:14px; height:14px; }
+.pk-hue{ flex:1; min-width:0; }
+
+/* the readout is ONE LIT WINDOW, not three white boxes borrowed from a form */
+.pk-lcd{ gap:0; padding:0 6px; height:28px; }
+.pk-lcd input{
+  width:30px; border:0; background:none; padding:0 2px; text-align:center;
+  font-family:var(--font); font-size:10.5px; letter-spacing:.06em;
+  color:inherit; text-shadow:inherit; font-variant-numeric:tabular-nums;
+}
+.pk-lcd input.hex{ width:62px; text-align:left; letter-spacing:.09em; }
+.pk-lcd input:focus{ outline:none; background:rgba(124,255,176,.10); border-radius:3px; }
+.pk-lcd .pk-sep{ opacity:.4; }
+/* the label strip under the window, engraved on the case */
+.pk-legend{
+  display:flex; padding:0 6px; margin-top:-4px;
+  font-family:var(--font); font-size:7.5px; letter-spacing:.14em; color:#4b5058;
+  text-shadow:0 1px 0 rgba(255,255,255,.07);
+}
+.pk-legend span{ width:34px; text-align:center; }
+
+/* recents are pen caps in a well — the SAME object the ink rail uses, at the
+   size a rail of eight needs. One primitive, two places. */
+.pk-well{
+  display:flex; align-items:flex-end; gap:5px; height:34px; padding:4px 6px 3px;
+  border-radius:7px;
+  background:linear-gradient(180deg,#131519,#191c20);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.04);
+}
+/* the recents are the same tube at a smaller size — the clip-path is in
+   percentages, so the silhouette comes along for free */
+.pk-well{ height:34px; align-items:center; }
+.pk-well[hidden]{ display:none; }
+.pk-well .pencap{ width:17px; height:17px; flex:0 0 17px; border-radius:6px; --ring-r:8px; }
+/* pinned: both selectors weigh the same and the rail's rules come later, so
+   without this the selected recent takes the rail's size */
+.pk-well .pencap.on{ transform:none; width:17px; height:17px; flex:0 0 17px; border-radius:6px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE HATCH BAY — the first COMPOUND control in the language.
+
+   Everything built so far is one control on one row, and a row of five of
+   them is mute: same shape, same green number at the end, nothing saying
+   which one you turn to change how the drawing looks. Hatching is the one
+   place where the parameters are PHYSICAL OBJECTS — a pen has a nib width you
+   can hold, spacing is a distance on paper, angle is an angle — so it is the
+   block that should prove the language, and it needs a chassis idea the
+   language did not have: a bay whose members feed a display INSIDE it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* ── THE BAY IS SIZED TO A LAPTOP, AND THE TAB STRIP IS WHAT PAID FOR IT ───
+   405 of face plus the 55 the lobe sticks out to the left. .box.bulge sets 370
+   for the editor; this rule is later and more specific to the bay, and both are
+   the same arithmetic: face + lobe.
+
+   IT WAS 572, AND THE STRIP WAS THE REASON. Six captions and a master on ONE
+   LINE need about 420px before anything else in the bay is consulted — so the
+   widest row in the panel was the one carrying no values, and every other row
+   was built out to meet it. On a 1280 or 1440 laptop that is a third of the
+   screen spent on a panel that sits over the drawing it is editing.
+
+   Two lines of three fixes it at the source: the strip's demand drops to ~230
+   and the binding row becomes the one that actually holds the controls — the
+   turret beside three knobs, with the pen case under them. That is what 405 is
+   measured from, and it is the honest floor. Below it the case starts wrapping.
+
+   THE COST IS 26px OF HEIGHT AND IT IS WORTH IT, because the strip is the one
+   block in the bay whose height is not carrying a reading. Everything else that
+   came down — the sheets, the case, the well — came down by the same
+   proportion the face did, so the panel is the same panel at a smaller size
+   rather than a squeezed one. */
+.box.hatchbay{ width:460px; flex:0 0 460px; }
+/* The rhythm follows the face. 12/12 was set against a 520 face and reads as a
+   margin at 405; the bay is a dense instrument and its gutters are what say so. */
+.box.hatchbay > .box-body{ padding:10px; }
+.hb-body{ display:flex; flex-direction:column; gap:9px; }
+
+/* ── THE TAB STRIP, AND THE ENABLE ON THE SAME BAR ────────────────────────
+   Six keys and a switch in one well. The keys share the width evenly because
+   they are peers; the switch does not, because it is not one — it is what the
+   channel to its left says it is, a different question on the same bar.
+
+   ── THREE ACROSS, TWICE, AND ALL DOWN THE SIDE ────────────────────────────
+   ONE BAR IS NOT THE SAME CLAIM AS ONE LINE. What the strip has to say is that
+   these six are ALTERNATIVES and the seventh is a reach — and a well with six
+   keys in it says that whether they are in one row or two. What one line
+   additionally said was "the bay is at least 420px wide", which is not a fact
+   about hatching.
+
+   ALL SPANS BOTH ROWS, past the same milled channel it always sat behind. That
+   is the load-bearing part: it is now the one key on the bar with a different
+   SHAPE, which is exactly what it is — not a seventh surface but the question
+   of how wide the next change goes, asked about all six at once. A half-height
+   ALL in the corner would read as the surface nobody named.
+
+   IT IS PLACED, NOT REFLOWED, and nothing in the markup moved. The channel and
+   ALL are pinned to columns 4 and 5 across both rows; grid places explicit
+   items first, so the six keys auto-flow into the three free columns and skip
+   the two occupied ones — 1,2,3 then 4,5,6, in DOM order, reading left to
+   right and top to bottom, which is the order the list is written in. Any host
+   that builds this strip the reference's way gets the two lines for free. */
+.piano.sm.hb-tabs{
+  display:grid; grid-template-columns:repeat(3,1fr) auto auto;
+  /* THE TWO ROWS ARE EXPLICIT, and that is not tidiness. `grid-row: 1 / span 2`
+     is spelled as a span rather than as `1 / -1` because a negative line counts
+     back from the end of the EXPLICIT grid — with the rows left implicit there
+     is only line 1 to count back to, so `-1` resolves to the start line and the
+     span collapses to one row. The channel and ALL would silently sit in the top
+     row with the keys flowing round them. */
+  grid-template-rows:repeat(2,24px); align-items:stretch;
+  column-gap:5px; row-gap:4px; padding:5px; width:100%;
+}
+/* `.piano.sm .pkey` IS THREE CLASSES AND THIS HAS TO BEAT IT. It was written as
+   `.hb-tabs .pkey`, which is two — so the bay's own size override lost to the
+   generic small-key rule on every property they share, and the strip has been
+   drawing 26px caps at 9px with 6px of padding while this rule asked for
+   something else. Silent, because both are plausible sizes for a tab. The
+   modifier goes on the same element as the size class it is overriding. */
+.piano.sm.hb-tabs .pkey{
+  min-width:0; padding:0 4px; height:auto; flex:none;
+  font-size:8.5px; letter-spacing:.06em;
+}
+/* Full height of the well rather than a fixed 20: the channel is a CUT in the
+   plate, and a cut that stops short of the two rows it separates is a scratch. */
+.hb-tabs .chan{ grid-column:4; grid-row:1 / span 2; margin:0 3px; height:auto; }
+/* ALL SAYS ALL. A glyph was a quarter of the width and cost more than it
+   saved: every other key on this bar is a WORD, so a lone mark among six names
+   reads as a different KIND of thing rather than as the same kind with a wider
+   reach — which is the one thing it must not say. It is narrow because it is
+   set tight, not because it is abbreviated. */
+.hb-tabs .hb-all{
+  grid-column:5; grid-row:1 / span 2;
+  width:auto; height:auto; min-width:0; padding:0 9px; border-radius:7px;
+  font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.08em;
+}
+
+/* ── TWO FACTS, TWO CHANNELS ──────────────────────────────────────────────
+   DOWN is what the next change reaches. A LIT LEGEND is what gets plotted.
+   They are independent, so a tab can be down and dark — you are editing
+   something that will not be drawn, which is a real state and a useful one —
+   or up and lit. A muted tab keeps its cap and loses its legend: the key is
+   still there, the mark it makes is not. */
+/* A STRUCK LEGEND, not a faded one. Dimming says "this key is unavailable",
+   which is the opposite of true — an undrawn surface is still fully editable,
+   and you often want to set one up before you switch it on. A strike says the
+   name is still there and the MARK IS NOT. The line takes the key's own
+   colour, so an off tab that is down strikes in the lamp colour and one that
+   is up strikes in grey. */
+.hb-tabs .pkey.mute{
+  text-decoration:line-through;
+  text-decoration-color:currentColor;
+  text-decoration-thickness:1.4px;
+  color:#7c828b;
+}
+
+/* ── THE OPTION ROW ───────────────────────────────────────────────────────
+   One switch, its engraving and its name, on the line under the knob whose
+   units it changes. Not a bay of its own: it is a modifier, and a modifier
+   that gets its own well reads as a setting in its own right. */
+.hb-opt{ display:flex; align-items:center; gap:8px; padding:2px 2px 4px; }
+/* THE ONLY MARK ON THE ROW, so it gets the room to be read. */
+.hb-opt .sw{ flex:0 0 26px; width:26px; height:26px; border-radius:7px; --ring-r:9px; }
+.hb-opt .sw svg{ width:15px; height:15px; }
+.hb-optlab{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09);
+}
+/* the whole bar warms while it is engaged — the state belongs to the strip,
+   not to the one key that set it */
+.hb-tabs.all-on{
+  box-shadow:inset 0 3px 8px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.05),
+             inset 0 0 0 1px rgba(255,106,0,.22), 0 1px 0 rgba(255,255,255,.07);
+}
+/* A CONTOUR HAS NO AREA TO FILL, so the four controls that fill one go quiet.
+   PEN AND INK STAY LIVE, because a contour has both — dimming the whole row
+   made the one tab where you set a line's weight the one tab where you could
+   not touch anything. The sheets keep drawing: a contour's preview is its
+   outline, which is exactly what the tab is for. */
+.hatchbay.noline .hb-turret,
+.hatchbay.noline .hb-knobs .kwrap:nth-child(2),
+.hatchbay.noline .hb-knobs .kwrap:nth-child(3),
+.hatchbay.noline .hb-opt,
+.hatchbay.noline .hb-deep{ opacity:.3; pointer-events:none; }
+
+/* ── THE SPECIMEN — the readout, and it is not decoration ─────────────────
+   The refs both put the display in among the controls that feed it: the
+   EQ-200 draws the curve its ten faders make, the K.O.II keeps a lit strip
+   over the pads. You judge 0,6 by seeing how dense 0,6 IS, not by reading the
+   number — which is the whole argument for showing material instead of value,
+   and the reason every other control in this bay is an input to this picture. */
+.hb-spec{ padding:8px; }
+/* THE GROUND IS PAPER, and it has to be.
+
+   It was near-black, which worked for exactly as long as the ink was orange.
+   The pen case has BLACK in it — every plotter case does, it is the pen you
+   own most of — and black ink on a black field is nothing at all. Grey is
+   worse, because it looks like it is working.
+
+   That is the same argument the colour picker makes about its own panel: the
+   surface a colour is judged against cannot compete with it. So the specimen
+   is paper under the bay's glass — a lit display showing a document, which is
+   what it is — and every pen in the case reads on it, which is the entire
+   point of a specimen.
+
+   AND THE STOCK IS TONED, because the case has a WHITE pen in it. White on
+   cream is not a subtle result, it is no result — the specimen would show an
+   empty sheet and look broken rather than look like white ink. Toned stock is
+   what you actually reach for when you plot white, and it is the one ground
+   where black, grey and white all read at once. */
+.hb-field{
+  --paper:#BEB5A3;
+  /* TALL ENOUGH FOR A SUBJECT. A 118px strip could only ever hold an even
+     field of hatch, which shows the spacing and hides the thing hatching is
+     actually for. A ball needs room to be a ball, and its shadow needs room
+     to leave it.
+
+     160 RATHER THAN 196, AND THE SHEET KEEPS ITS PROPORTION. This is the one
+     block in the bay where a pixel is a MILLIMETRE — the specimen is 1:1 — so
+     the honest way to state the change is in paper: each sheet was 63 × 52mm
+     and is now 47 × 42mm, and `KIT.scene` sizes the ball `min(w × .34,
+     h × .295)`, which is height-bound at both, so a 25mm ball where there was
+     a 30mm one. That is a smaller specimen and it is still a specimen: at the
+     1–4mm pitches this bay sets, a 25mm ball is ten to twenty strokes across,
+     which is what you are reading.
+
+     KEEPING 196 ON A 179-WIDE SHEET WOULD HAVE BEEN THE WORSE ANSWER, and it
+     is what a straight width cut would have left: the pair was landscape and
+     would have gone portrait, with the ball no bigger than it is here — the
+     height is what binds either way — and 36px of margin above and below it. */
+  height:160px; border-radius:4px; position:relative; overflow:hidden;
+  background:var(--paper);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 8px rgba(0,0,0,.4);
+}
+/* Real millimetres: the viewBox is measured from the element and converted at
+   96/25.4, so one user unit is one mm and the hatch on screen is the hatch
+   that plots. A 0.20 nib is a sub-pixel line and looks like one — that is not
+   a bug to tune away, it is what 0.20 is, and the density is still exact. */
+.hb-field svg{ display:block; width:100%; height:100%; }
+/* TWO SHEETS ON ONE DISPLAY. Not two displays: they are one answer read two
+   ways, and a gap wide enough to be a border would make them two exhibits. */
+.hb-pair{ display:flex; gap:7px; }
+.hb-pair .hb-field{ flex:1 1 0; min-width:0; }
+.hb-legend{ color:#3f7a5c; opacity:.75; }
+/* THE FLOOD STILL NEEDS NO CODE. Strokes are drawn at the nib width, spacing
+   apart; take spacing under the nib and they overlap into solid ink on their
+   own. Below the nib there is no hatch, there is ink. */
+.hatchbay.off .hb-field{ background:#20242a; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05), inset 0 2px 8px rgba(0,0,0,.7); }
+.hatchbay.off .hb-field svg{ visibility:hidden; }
+.hatchbay.off .hb-scale{ color:#3c4149; }
+
+/* ── A SURFACE THAT IS NOT DRAWN HAS ITS LAMPS OUT ────────────────────────
+   Every lit thing on this bay means one thing: this is going to be plotted.
+   On a surface you have struck through none of that is true.
+
+   ONE FILTER, NOT TWENTY OVERRIDES — the lamps are spread across knob arcs,
+   fader fills, cap indicators, readouts and the ink lamp, and half of them
+   hard-code their colour, so hunting them one by one would miss some and go
+   stale. The controls stay LIVE and only their light goes, because editing a
+   surface before switching it on is why the strike is a strike and not a
+   disable. The tab strip is excluded: you have to be able to reach the tab
+   that turns it back on. */
+.hatchbay.off .hb-body > :not(.hb-tabs){ filter:saturate(.06) brightness(.6); }
+
+.hb-scale{
+  display:flex; justify-content:space-between; align-items:center; margin-top:7px;
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c;
+}
+
+/* ── the two columns under it: the turret, and the three straight controls ── */
+.hb-row{ display:flex; align-items:flex-start; gap:4px; }
+.hb-stack{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.hb-stack .kwrap.inline .kval{ min-width:52px; }
+/* Every caption in this bay carries its engraving, so the captions are rows
+   rather than words. The icon leads: on a real panel the symbol is what you
+   find first and the word is what confirms it. */
+.hatchbay .flab,
+.hatchbay .klab{ display:flex; align-items:center; gap:7px; }
+.hatchbay .fader .flab{ flex:0 0 96px; }
+.hatchbay .kwrap.inline .klab{ flex:0 0 82px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DRUM — a cylinder of names in a milled window
+
+   THE WINDOW IS CUT, THE DRUM IS BEHIND IT. That order matters: the recess
+   belongs to the CASE and the names belong to the thing turning inside it, so
+   the shadow at the top of the window falls ON the names and does not travel
+   with them. Get that backwards and the drum reads as a list with a gradient
+   over it, which is what every software picker looks like and what this is
+   not trying to be.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* ── THE WELL IT IS CUT INTO ──────────────────────────────────────────────
+   The same milled recess every other bay in this document uses, and the
+   MARGIN is the point: a recess is read from its FLOOR, not from its walls, so
+   a well with no floor showing is not a well, it is a border. Eight pixels of
+   case all the way round is what lets the eye see the drum is standing in
+   something rather than butted against it. */
+.drum-bay{
+  display:inline-block; padding:8px; border-radius:12px;
+  background:linear-gradient(180deg,#15181b,#1c2024 55%,#131619);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 3px 7px rgba(0,0,0,.85),
+    inset 3px 0 5px -3px rgba(0,0,0,.7),
+    inset -3px 0 5px -3px rgba(0,0,0,.7),
+    inset 0 -1px 0 rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.07);
+}
+
+/* THE DRUM SITS ON THAT FLOOR, so it throws one shadow rather than two:
+   a drop-shadow on the pair follows the outline they make together, where a
+   box-shadow on each would draw a seam down the join. */
+.drum{
+  display:flex; align-items:stretch; gap:0; height:76px;
+  /* NOTHING IN HERE IS SELECTABLE TEXT. The names are a readout that happens
+     to be made of letters; a drag across them is a turn of the drum, and a
+     browser that helpfully highlights them has misread the object. */
+  user-select:none; -webkit-user-select:none;
+  filter:drop-shadow(0 5px 9px rgba(0,0,0,.75)) drop-shadow(0 1px 2px rgba(0,0,0,.6));
+}
+.drum-win{
+  position:relative; flex:1 1 auto; min-width:0; overflow:hidden;
+  border-radius:6px 0 0 6px; cursor:default;
+  /* the milled well the cylinder sits in */
+  background:linear-gradient(180deg,#111417,#191d21 52%,#101316);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.7),
+    inset 0 3px 6px rgba(0,0,0,.9),
+    inset 0 -3px 6px rgba(0,0,0,.75),
+    inset 2px 0 3px -1px rgba(0,0,0,.7),
+    inset 0 -1px 0 rgba(255,255,255,.11),
+    /* THE CASE ABOVE THE CUT IS LIT, and that edge was missing. A recess is
+       dark INSIDE its top wall — but the flat face it is cut into is the part
+       of the panel facing the lamp most directly, so there is a bright line
+       right where the surface stops and the hole begins. Without it the drum
+       has no top: the names just start out of nothing. */
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 -1px 0 rgba(255,255,255,.07),
+    0 1px 0 rgba(255,255,255,.09);
+  /* far enough back that the curve is a drum and not a fisheye */
+  perspective:260px;
+  perspective-origin:50% 50%;
+}
+.drum-list{
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+  pointer-events:none;
+}
+.drum-item{
+  position:absolute; left:0; right:0; top:50%; height:18px; margin-top:-9px;
+  display:flex; align-items:center; justify-content:flex-start; padding:0 10px;
+  border:0; background:none; cursor:pointer; pointer-events:auto;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.1em; white-space:nowrap;
+  color:#6b7079;
+  backface-visibility:hidden;
+  /* THE OVERSHOOT IS THE DETENT. A name that slides to its place has been
+     dragged there; one that goes slightly past and settles has DROPPED INTO
+     something. That tiny bounce is the only visual a notch has — you normally
+     feel it, and here there is nothing to feel. */
+  transition:color .12s, transform .17s cubic-bezier(.22,1.7,.36,1), opacity .17s ease-out;
+}
+.drum-item:hover{ color:#c2c7cf; }
+/* THE ONE IN THE WINDOW IS LIT, and it is the only thing that says which is
+   selected — the others are simply nearer or further round the drum. */
+.drum-item.on{ color:#FFD9BC; text-shadow:0 0 8px rgba(255,140,60,.6); }
+
+/* THE SHADOW LIVES ON THE CASE, NOT ON THE CYLINDER. It is the lip of the
+   window cutting the light off top and bottom, so it stays put while the names
+   roll under it. */
+.drum-win::after{
+  content:''; position:absolute; inset:0; pointer-events:none; border-radius:6px 0 0 6px;
+  background:
+    linear-gradient(180deg, rgba(8,9,11,.95) 0%, rgba(8,9,11,.30) 22%, transparent 40%),
+    linear-gradient(0deg,   rgba(8,9,11,.95) 0%, rgba(8,9,11,.30) 22%, transparent 40%);
+}
+/* the detent line: where the drum reads, engraved on the case */
+.drum-win::before{
+  content:''; position:absolute; left:0; right:0; top:50%; height:18px; margin-top:-9px;
+  pointer-events:none; z-index:1;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(255,255,255,.05);
+}
+
+/* THE GRIP IS THE RIM, and the rim is where a drum is actually turned. Each
+   tooth takes the lamp separately, the same alternation the knob's collar has
+   — a uniform ridge pattern is a texture, and textures do not turn. */
+/* ── THE WHEEL ────────────────────────────────────────────────────────────
+   THE BARREL CURVES THE WAY THE NAMES DO. The drum's axis is horizontal, so
+   its edge turns away at the TOP and BOTTOM and is broadest across the middle
+   — the shading has to run vertically to match. It ran horizontally at first,
+   which shades a cylinder lying the other way and quietly contradicts the very
+   list rolling beside it.
+
+   AND THE TEETH DIE AT THE ENDS. A knurl at one pitch from top to bottom is a
+   striped strip; on a real wheel the teeth crowd together as the surface turns
+   out of sight, and it is that crowding — not the stripes — that says round. A
+   mask at both ends is the cheap way to say it, and at this size it is the
+   honest one too: past about 70° the teeth are finer than a pixel anyway. */
+.drum-grip{
+  flex:0 0 24px; position:relative; border-radius:0 7px 7px 0;
+  cursor:ns-resize; touch-action:none;
+  /* THE TEETH ARE ON THE WHEEL, THE LIGHT IS IN THE ROOM. Two background
+     layers and only the first one moves: the knurl is a property of the
+     cylinder and travels with it, the crown highlight is where the lamp
+     happens to fall and stays put however far the thing has turned. Slide
+     both and it stops being a wheel and becomes a conveyor belt.
+
+     THE PITCH IS 3.2px AND NOT 3px ON PURPOSE. One detent rolls the surface
+     R·θ = 17.9px; at a 3px pitch that is exactly six teeth and the pattern
+     lands identical every time, so the only movement you would ever see is
+     during the tween. At 3.2 it lands two thirds of a tooth out, so a wheel
+     that has been turned once looks turned. */
+  background:
+    repeating-linear-gradient(180deg,
+      rgba(255,255,255,.17) 0 1px, rgba(0,0,0,.44) 1px 3.2px),
+    linear-gradient(180deg,
+      #191d22 0%, #232830 8%, #2f353e 20%, #3f4650 36%, #454d58 45%,
+      #2e343c 63%, #191d22 85%, #0d1013 100%);
+  background-position:0 var(--roll, 0px), 0 0;
+  /* the same spring the names settle on — one mechanism, one motion */
+  transition:background-position .17s cubic-bezier(.22,1.7,.36,1);
+  /* THE SLOT IT TURNS IN. The wheel was butted straight against the window,
+     which reads as two panels side by side rather than as a cylinder coming up
+     through a cut in the case. A wheel that protrudes has to protrude THROUGH
+     something: hard dark walls closing over it top and bottom, the far wall
+     catching the room at the bottom, and a lit lip on the case below the whole
+     slot. Same four hairlines as every other recess here — this one just has
+     something turning in it. */
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0,0,0,.92),
+    inset 0 -3px 5px -1px rgba(0,0,0,.85),
+    inset -2px 0 3px -1px rgba(0,0,0,.8),
+    inset 1px 0 0 rgba(0,0,0,.6),
+    inset 0 -1px 0 rgba(255,255,255,.13),
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 -1px 0 rgba(255,255,255,.07),
+    0 1px 0 rgba(255,255,255,.09);
+}
+/* the broken edge of the cut, lit directionally — dark where it turns from the
+   lamp at the top, bright where it turns into it at the bottom. Concave, like
+   every other chamfer in this document, or the wheel reads as a bump. */
+.drum-grip::before{
+  content:''; position:absolute; inset:-1.5px -1.5px -1.5px 0;
+  border-radius:0 8px 8px 0; pointer-events:none; z-index:2;
+  padding:1.5px; background:var(--chamfer);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  filter:blur(.4px);
+}
+/* the ends turning away, and one specular along the crown */
+.drum-grip::after{
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:
+    linear-gradient(180deg,
+      rgba(8,10,12,.88) 0%, rgba(8,10,12,.30) 5%, transparent 13%,
+      transparent 87%, rgba(8,10,12,.34) 95%, rgba(8,10,12,.9) 100%),
+    linear-gradient(180deg,
+      transparent 36%, rgba(255,255,255,.18) 42%, rgba(255,255,255,.05) 48%, transparent 54%);
+}
+/* AND THE CASE TAKES THE KNOCK. The ball dropping into the groove is a small
+   impact, so the window flinches: one frame of the detent line brightening and
+   the lip shadow deepening, gone in 90ms. Long enough to register, too short
+   to be an animation you notice. */
+@keyframes drum-knock{
+  0%   { box-shadow:inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(255,255,255,.22); }
+  100% { box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(255,255,255,.05); }
+}
+.drum-win.knock::before{ animation:drum-knock .09s ease-out; }
+
+.drum-win:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+
+/* ── THE TYPE SELECTOR ────────────────────────────────────────────────────
+   Four ways to fill an area, on the switch rather than on a bar of keys. A
+   row of keys shows four labels and makes you infer that they are one choice;
+   a selector switch has ONE lever pointing at ONE detent, so the fact that
+   these are alternatives is in the object rather than in the reading. The
+   names are long — "Hand hatched" is not shortenable without lying about what
+   it is — so the column is wider than the dial needs. */
+/* 136, NOT 178, AND IT IS MEASURED OFF THE LONGEST NAME. The dial's centre sits
+   at --rcx (−23px, out in the lobe) and `rotary` prints its labels at LAB_X=56
+   from that centre, so the column is used from x=33 rightward: "Hand random" at
+   9.5px monospace with .1em of tracking is ~85px of cap, ending at 118. The 60px
+   the column used to carry past that was the panel being built out to a strip
+   that no longer needs it. Anything longer than eleven characters wants this
+   number checked, not the panel widened. */
+.hb-turret{ flex:0 0 136px; display:flex; flex-direction:column; gap:6px; }
+.hb-sel.rotary{ flex:1 1 auto; height:132px; }
+
+/* the three knobs share one row */
+.hb-knobs{ justify-content:space-between; gap:4px; padding:2px 0 4px; }
+/* ONE KNOB, ONE POSITION, AND ONLY BECAUSE IT IS DOCUMENTED. Spacing and angle
+   reach every fill on the dial except one: hand random has no register to
+   rotate, and 08 says so in as many words — "a fill with no readable direction
+   is the whole definition of it". So Angle goes quiet there rather than turning
+   and changing nothing, which is the worse of the two. Everywhere else both
+   knobs are live, including on the hands. */
+.hb-knobs .kwrap.inert{ opacity:.34; pointer-events:none; }
+.hb-knobs .kwrap{ flex:1 1 0; min-width:0; align-items:center; gap:5px; }
+.hb-knobs .klab{ justify-content:center; font-size:8px; letter-spacing:.12em; }
+.hb-knobs .kval{ min-width:0; width:100%; text-align:center; }
+.hb-knobs .kval.wide{ min-width:0; font-size:9.5px; letter-spacing:.02em; }
+
+/* SPACING UNDER THE NIB IS NOT AN ERROR AND NOTHING REPORTS IT. The strokes
+   overlap and the sheet fills solid, which is a fill — something you ask for.
+   An earlier build lit a red legend and turned the spacing arc red, framing a
+   legitimate result as a fault. The specimen already shows exactly what
+   happens, and that is the whole job of a specimen. */
+
+/* ── THE INK SWATCH — a cap whose face is the colour ──────────────────────
+   THREE OBJECTS WERE TRIED AND ALL THREE WERE THE SAME MISTAKE. A pen cap, a
+   nib, a glass pipette: each got better at being a picture of a thing on the
+   desk, and none of them got better at being a CONTROL. A rail of little
+   drawings is an illustration; you cannot tell at a glance which one is
+   selected, the colour is fighting a silhouette for attention, and at 17px
+   the object it is a picture of is unreadable anyway.
+
+   So the swatch stops depicting the pen and starts behaving like everything
+   else on this panel: a cap with a coloured face, seated in the case, that
+   goes DOWN when it is the one in use. The colour gets the whole face instead
+   of a stem, the state is the same up/down the switches and the piano keys
+   use, and it is legible at any size because a rounded square has no detail
+   to lose.
+
+   MODELLED, NOT FLAT — which is the only thing separating this from the soft
+   pastel swatch it is shaped like. Light from above left at 158° like the rest
+   of the document, a hairline of light on the top edge, a dark one under it,
+   and the specular OFF CENTRE because a centred highlight reads as a sticker.
+   ─────────────────────────────────────────────────────────────────────────── */
+/* THE CASE WRAPS RATHER THAN OVERFLOWS, and that is the one thing a rail of
+   fixed-width slots must be told. `.pencap` is `flex:0 0 22px` — it cannot
+   shrink — so on any face too narrow for the row the caps ran off the panel
+   instead of taking a second line. A pen case with two rows of slots is a pen
+   case; nine slots trailing off the edge of one is a bug. It still sits on one
+   line at the shipped width, and the height follows the content rather than
+   being declared, or a wrapped second row would be clipped by the number that
+   was right for one. */
+.pens{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+       gap:4px; padding:5px 0 3px; }
+/* GLASS SHADING WAS TRIED HERE AND REVERTED, once. Bright walls, a hard
+   specular and the ink as a core — the recipe that is correct for a tube and
+   is wrong for a 28px square, because at that size the two lit walls and the
+   specular are most of the object and the colour is what is left over. On a
+   swatch the COLOUR IS THE POINT, and any treatment that spends the width on
+   describing the material has already lost. The modelled cap stands. */
+.pencap{
+  --ink:#FF6A00;
+  --ring-r:11px;
+  width:22px; height:22px; flex:0 0 22px;
+  border:0; padding:0; cursor:pointer; position:relative;
+  border-radius:7px;
+  background:
+    radial-gradient(115% 85% at 30% 16%, rgba(255,255,255,.36), transparent 60%),
+    linear-gradient(158deg,
+      color-mix(in srgb,var(--ink) 74%,#fff) 0%,
+      var(--ink) 44%,
+      color-mix(in srgb,var(--ink) 86%,#000) 100%);
+  /* THE ONES YOU ARE NOT USING SIT DOWN IN THE CASE, and the hairlines are the
+     whole of it. An inset shadow laid over the RAISED recipe — light hairline
+     above, dark below, a skirt and a cast shadow — is a proud cap with a smudge
+     on it, and the eye believes the hairlines every time.
+
+     A recess inverts all four: a hard near-black line INSIDE the top edge, the
+     wall shading down from it, a faint light INSIDE the bottom because that is
+     the wall the room actually reaches, and a lit lip OUTSIDE below the whole
+     thing. And no cast shadow at all — a hole does not throw one.
+
+     THE DIM IS A FILTER, not a second set of colours: nine inks would need
+     nine muted twins, and they would drift from the real ones the first time
+     either was tuned. */
+  filter:brightness(.6) saturate(.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 2.4px 1.2px rgba(0,0,0,.88),
+    inset 0 7px 11px -3px rgba(0,0,0,.72),
+    inset 3.5px 0 4px -3px rgba(0,0,0,.6),
+    inset -3.5px 0 4px -3px rgba(0,0,0,.6),
+    inset 0 -3px 5px -2px rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(255,255,255,.16),
+    0 1px 0 rgba(255,255,255,.085);
+  transition:box-shadow .1s, filter .12s;
+}
+/* ── THE CHAMFER ON THE EDGE ──────────────────────────────────────────────
+   The one thing a box-shadow cannot draw: an edge lit DIRECTIONALLY, dark
+   where it turns away from the lamp at the top and bright where it turns into
+   it at the bottom. Concave polarity — the other way round and every cap on
+   the rail reads as a bump. */
+.pencap::before{
+  content:''; position:absolute; inset:-1.5px; border-radius:8.5px;
+  pointer-events:none; padding:1.5px; background:var(--chamfer);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  filter:blur(.4px);
+}
+/* HOVER COMES PART WAY UP OUT OF THE TRAY — the walls shallow out and the rim
+   catches a little light. Not all the way: it is not selected. */
+.pencap:hover{
+  filter:brightness(.85) saturate(.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.45),
+    inset 0 1px 2px rgba(0,0,0,.6),
+    inset 0 -1px 0 rgba(255,255,255,.12),
+    0 0 0 1px rgba(255,255,255,.12),
+    0 1px 0 rgba(255,255,255,.06);
+}
+/* ── SELECTED IS THE LAMP, AND ONLY THE LAMP ──────────────────────────────
+   Every cap on the rail is the same object at the same size in the same hole.
+   One has a light round it, and that is the whole of the difference.
+
+   THREE OTHER SIGNALS WERE TRIED AND ALL THREE WERE REDUNDANT: the selected
+   cap was bigger, it was brighter, and its core was inverted. Each is a second
+   thing to notice that means the thing you already noticed, and the cost is
+   not clutter — it is that the rail stops being a row of nine like objects. A
+   pen case is nine identical slots; which pen is in your hand is a fact about
+   you, not about the slot, so it is said with light and nothing else.
+
+   IT IS THE PANEL'S LAMP COLOUR, NOT THE INK'S: an indicator that changed
+   colour with the thing it indicates stops being an indicator. */
+.pencap.on{
+  filter:none;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 2.4px 1.2px rgba(0,0,0,.88),
+    inset 0 7px 11px -3px rgba(0,0,0,.72),
+    inset 3.5px 0 4px -3px rgba(0,0,0,.6),
+    inset -3.5px 0 4px -3px rgba(0,0,0,.6),
+    inset 0 -3px 5px -2px rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(255,255,255,.16),
+    0 0 0 1.5px rgba(255,106,0,.85),
+    0 0 7px rgba(255,106,0,.45),
+    0 0 15px rgba(255,106,0,.20),
+    0 1px 0 rgba(255,255,255,.085);
+}
+/* the native input is the value, never the surface — the cap is what you see */
+.ink-src{
+  position:absolute; inset:0; width:100%; height:100%;
+  opacity:0; border:0; padding:0; pointer-events:none; cursor:pointer;
+}
+
+/* ── AN EMPTY SLOT IS A HOLE ──────────────────────────────────────────────
+   The same footprint with no cap in it: the milled well the cap sits in, on
+   its own. Deeper than it is wide-looking, with the two hairlines every other
+   recess in this language has, and no colour at all because it has none yet. */
+.pencap.empty{
+  border-radius:7px;
+  background:linear-gradient(180deg,#101317,#181b20);
+  box-shadow:inset 0 3px 6px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.055);
+}
+/* the invitation: the well lights its own rim rather than lifting, because a
+   hole cannot come towards you */
+.pencap.empty:hover{
+  transform:none;
+  box-shadow:inset 0 3px 6px rgba(0,0,0,.9), inset 0 0 0 1px rgba(255,255,255,.15),
+             0 1px 0 rgba(255,255,255,.055);
+}
+
+/* ── THE RECESS BELOW THE FOLD ────────────────────────────────────────────
+   Min stroke and Join reach are cleanup thresholds — set once for a plotter
+   and never touched again. Five identical rows is itself most of why the
+   current panel is sad, so the two that do not belong in the rhythm of the
+   four that matter go down a step, into their own well. */
+.hb-deep{
+  margin-top:2px; padding:6px 9px 7px; border-radius:8px;
+  background:linear-gradient(180deg,#131519,#191c20);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.88), inset 0 -1px 0 rgba(255,255,255,.045),
+             0 1px 0 rgba(255,255,255,.05);
+}
+.hb-deep .fader{ padding:1px 0; }
+/* THE SLOT IS THE ONE THING IN THIS WELL THAT DID NOT COME DOWN, and it was
+   tried: 30 → 26 looks like 8px of free height across the two rows. It is not
+   free. `.fticks` is absolutely positioned at top:25px, so at 26 the scale
+   hangs 3px out of its own slot and into the row below, and pulling it up to
+   clear that puts it under a 24px cap — which is the exact fault `.fslot` is
+   30px to avoid, written four rules above. A fader is a track, a cap AND a
+   scale; shrinking the housing without the other two is how a control loses
+   the third one silently. */
+.hb-deep .fader .flab{ flex:0 0 74px; color:#4e535b; }
+.hb-deep .bay-cap{ margin-bottom:5px; }
+
+/* the bay's own lamp: lit only when this layer is actually hatching, so a bay
+   full of settings that are doing nothing looks like it */
+.hatchbay.off .jewel{ filter:grayscale(1) brightness(.4);
+  box-shadow:inset 0 -1px 2px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE WINDOW — moved, and got out of the way exactly one way
+   ═══════════════════════════════════════════════════════════════════════════ */
+.win{ position:relative; will-change:transform; }
+/* THE WHOLE HEAD IS THE HANDLE, so it says so with the cursor and not with a
+   grip glyph in the corner. A title bar is the one strip of a panel with
+   nothing in it you can hit by accident. */
+.win-head{ cursor:grab; user-select:none; }
+.win.dragging .win-head{ cursor:grabbing; }
+/* LIFTED WHILE IT MOVES. A panel being dragged is off the desk, so it throws
+   the harder, shorter shadow a .plate does — the same elevation vocabulary,
+   because it is the same fact. */
+.win.dragging{
+  box-shadow:
+    0 26px 40px -12px rgba(0,0,0,.92),
+    0 8px 14px -4px rgba(0,0,0,.8),
+    0 0 0 1px rgba(0,0,0,.9),
+    inset 0 1px 0 rgba(255,255,255,.16);
+}
+/* ONE BUTTON, and it is a micro key: recessed, because it removes something.
+   The raised caps on this panel invite the thumb; this one should not. */
+.win-btn{
+  width:22px; height:22px; flex:0 0 22px; margin-left:auto;
+  display:flex; align-items:center; justify-content:center;
+  border:0; padding:0; cursor:pointer; color:#575c65; border-radius:5px;
+  background:linear-gradient(180deg,#151719,#1e2024);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.06);
+  transition:color .12s, box-shadow .12s;
+}
+.win-btn svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2;
+              stroke-linecap:round; }
+.win-btn:hover{ color:#d7dae0; box-shadow:inset 0 1px 2px rgba(0,0,0,.8),
+                0 0 0 1px rgba(255,255,255,.09); }
+
+/* REDUCED IS THE TITLE BAR AND NOTHING ELSE. Not a shrunken panel — a panel at
+   50% is a panel you cannot read and cannot use, which is the worst of both.
+   The head is already a complete object: a lamp, a name, and the one control
+   that puts it back. */
+.win.reduced .box-body,
+.win.reduced .hb-body{ display:none; }
+.win.reduced{ width:auto; min-width:190px; }
+.win.reduced .win-head{ border-bottom:0; box-shadow:none; }
+/* CLOSED IS GONE, not hidden-but-taking-space. Something else has to bring it
+   back, which is the price of being closeable and the reason a panel the app
+   needs does not get an ×. */
+.win.gone{ display:none; }
+
+/* the dock that brings the closed ones back */
+/* the demo readout's own row — it borrowed the settings panel's dimension
+   layout, which no longer exists now that those are three knobs */
+.win-readout{ display:flex; align-items:center; gap:6px; }
+.win-readout .lcd{ flex:1 1 0; min-width:0; justify-content:center; }
+
+.win-dock{
+  display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+  padding:9px 11px; border-radius:10px; margin-top:16px;
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.055);
+}
+.win-dock .lab{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09); margin-right:4px;
+}
+.win-dock .chip.away{ opacity:.42; }
+
+/* the demo floor: panels sit ON something, or "moved it" has no meaning */
+.win-floor{
+  position:relative; min-height:330px; padding:18px;
+  border-radius:14px; overflow:hidden;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.022) 0 1px, transparent 1px 26px),
+    linear-gradient(180deg,#0d0e10,#121417);
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.04);
+}
+.win-floor .box{ position:absolute; }
+.win-floor{ min-height:430px; }
+
+/* ── THE OFF-CANVAS MODEL ─────────────────────────────────────────────────
+   A screen with a page in it and a drawer beside it. Everything here is the
+   real mechanism at a size you can watch: one transform on the page, one on
+   the drawer, the same curve on both, and the tab riding on the drawer rather
+   than sitting on the page. */
+.oc{
+  position:relative; height:104px; border-radius:6px; overflow:hidden;
+  background:linear-gradient(180deg,#0a0b0d,#101316);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.9), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.06);
+}
+.oc-page{
+  position:absolute; inset:0; padding:11px 12px;
+  display:flex; flex-direction:column; gap:7px; justify-content:center;
+  transition:transform .28s var(--drawer-ease);
+}
+.oc-bar{ height:5px; border-radius:3px; background:#242830; }
+.oc-bar.lit{ background:linear-gradient(90deg,#FF6A00,#C24E00); box-shadow:0 0 6px rgba(255,106,0,.4); }
+.oc-drawer{
+  position:absolute; top:0; right:0; bottom:0; width:96px;
+  transform:translateX(100%);
+  transition:transform .28s var(--drawer-ease);
+  padding:11px 9px; display:flex; flex-direction:column; gap:7px; justify-content:center;
+  background:linear-gradient(176deg,#26282d,#1b1c20 40%,#161719);
+  box-shadow:-1px 0 0 rgba(255,255,255,.10), -2px 0 0 rgba(0,0,0,.9),
+             -14px 0 22px -8px rgba(0,0,0,.8);
+}
+.oc-field{
+  height:13px; border-radius:4px;
+  background:linear-gradient(180deg,#080a09,#0f1211);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.06);
+}
+.oc.open .oc-page{ transform:translateX(-96px); }
+.oc.open .oc-drawer{ transform:translateX(0); }
+/* the one bump of it still showing when it is away */
+.oc-tab{
+  position:absolute; left:-17px; top:12px; width:17px; height:30px;
+  padding:0; border:0; cursor:pointer; border-radius:6px 0 0 6px;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(96deg,#2b2e33,#212429 55%,#191b1f);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13), inset 0 -1px 0 rgba(0,0,0,.8),
+             -4px 2px 7px -2px rgba(0,0,0,.75);
+}
+.oc-tab:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+@media (prefers-reduced-motion: reduce){
+  .oc-page, .oc-drawer{ transition:none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE OFF-CANVAS DRAWER — push variant
+
+   OFF-CANVAS NAMES WHERE IT LIVES WHEN IT IS SHUT, which is the useful thing
+   to know about it. Three variants exist and only one of them is this: an
+   OVERLAY slides over the page, a REVEAL slides the page off something already
+   underneath, and a PUSH moves the page aside. Push is the one worth the work
+   here — an overlay hides the drawing at the exact moment you adjust it, so
+   you slide it out, lose sight of the thing, change a number and only find out
+   what you did after sliding it back.
+
+   Z-INDEX: the page runs 1–3, panels 80, the picker plate 99. The drawer is
+   200 and its tab 201, because a drawer over a floating plate is right and a
+   plate over the drawer that opened it is not.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{ --drawer-w:404px; --drawer-tab:38px; --drawer-ease:cubic-bezier(.22,.68,.24,1); }
+
+.wrap,
+.navdock{ transition:transform .28s var(--drawer-ease); will-change:transform; }
+/* THE NAV GOES WITH THE PAGE. It is a sibling of .wrap, not a child, so a
+   rule that only moves .wrap leaves the bar sitting still while everything
+   under it slides, which reads as the bar being part of the drawer. */
+body.drawer-open .wrap,
+body.drawer-open .navdock{ transform:translateX(calc(-1 * var(--drawer-w))); }
+
+.drawer{
+  position:fixed; top:0; right:0; bottom:0; width:var(--drawer-w); z-index:200;
+  transform:translateX(100%);
+  transition:transform .28s var(--drawer-ease);
+  will-change:transform;
+  /* THE CASE'S OWN METAL, and a hard edge down the left where it meets the
+     page — a rack unit is a slab with a machined face, not a sheet of glass. */
+  background:linear-gradient(176deg,#26282d 0%,#1b1c20 26%,#161719 78%,#1c1d21 100%);
+  box-shadow:
+    -1px 0 0 rgba(255,255,255,.10),
+    -2px 0 0 rgba(0,0,0,.9),
+    -28px 0 44px -16px rgba(0,0,0,.85);
+}
+.drawer::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.020) 0 1px, transparent 1px 3px),
+    var(--grain);
+  background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
+}
+body.drawer-open .drawer{ transform:translateX(0); }
+/* the drawer's own head: a lamp and a name. The way out is the tab. */
+.drawer-head{
+  position:relative; z-index:2;
+  display:flex; align-items:center; gap:9px;
+  padding:15px 16px 13px;
+  border-bottom:1px solid rgba(0,0,0,.7);
+  box-shadow:0 1px 0 rgba(255,255,255,.05);
+}
+.drawer-head .nm{
+  flex:1; font-family:var(--font); font-size:12px; font-weight:700; color:#e3e6eb;
+  text-shadow:0 1px 0 rgba(0,0,0,.85); letter-spacing:.06em;
+}
+
+.drawer-body{
+  position:relative; z-index:2; height:100%; overflow-y:auto; overscroll-behavior:contain;
+  padding:14px 16px 26px; display:flex; flex-direction:column; gap:14px;
+  height:calc(100% - 50px);
+}
+/* ── NO PANEL INSIDE A PANEL ──────────────────────────────────────────────
+   THE DRAWER IS THE CHASSIS. A .box in here brought a second one with it: its
+   own bevel, its own grain, its own cast shadow, sitting on a slab that
+   already has all three. Two chassis deep and the wells stop reading as cut
+   into anything, because the thing they are cut into is itself floating on
+   something else.
+
+   SO THE GROUPS LOSE THEIR CASE AND KEEP THEIR CONTENTS. The bays are still
+   milled wells, still cut into metal, still lit from above left. What goes is
+   only the box around them, and what is left is what was ever doing the work.
+
+   The head stays, minus the rule under it: a lamp and a name is a caption, and
+   a caption does not need a chassis to be one. */
+.drawer-body .box{
+  width:100%; flex:0 0 auto;
+  background:none; box-shadow:none; border-radius:0; padding:0;
+}
+.drawer-body .box::before{ content:none; }        /* and its grain */
+.drawer-body .box-head{
+  padding:2px 2px 9px; border-bottom:0; box-shadow:none;
+}
+.drawer-body .box-head .nm{ font-size:11px; letter-spacing:.12em; color:#b9bec6; }
+.drawer-body .box-body{ padding:0; }
+
+/* ── THE PULL TAB ─────────────────────────────────────────────────────────
+   IT RIDES ON THE DRAWER, so when the drawer is away the tab is the one bump
+   of it still showing — a unit not quite pushed home. A control floating in the
+   corner would be a handle that stays put while its drawer moves, which is a
+   handle for nothing.
+
+   44px tall: the touch minimum, and it is the only control on the page that
+   has to be hittable before anything else is on screen. */
+.drawer-tab{
+  position:absolute; left:calc(-1 * var(--drawer-tab)); top:20px; z-index:201;
+  width:var(--drawer-tab); height:46px; padding:0; border:0; cursor:pointer;
+  border-radius:9px 0 0 9px;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(96deg,#2b2e33 0%,#212429 55%,#191b1f 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.13),
+    inset 0 -1px 0 rgba(0,0,0,.8),
+    inset 1px 0 0 rgba(255,255,255,.06),
+    -6px 3px 10px -3px rgba(0,0,0,.75);
+  transition:background .14s;
+}
+/* THE SAME TAB, STOOD ON THE PAGE. It is absolutely positioned on the drawer
+   because it rides on its edge; here it is the specimen, so it sits still and
+   gets both its corners back — same metal, same engraved bars, same size, so
+   what you press in the section is what you press at the edge. */
+.tab-demo{
+  position:static; border-radius:9px; width:44px; height:52px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.13),
+    inset 0 -1px 0 rgba(0,0,0,.8),
+    inset 1px 0 0 rgba(255,255,255,.06),
+    inset -1px 0 0 rgba(0,0,0,.5),
+    0 4px 0 #0d0e10,
+    0 7px 12px rgba(0,0,0,.7);
+}
+.tab-demo:active{ transform:translateY(2px); box-shadow:var(--recess); }
+
+/* ── BOTH POSITIONS, SIDE BY SIDE ─────────────────────────────────────────
+   A control whose mark changes has two specimens, or the section documents
+   half of it. The left one is LIVE and the right one is the same tab frozen
+   open — not a picture of it: the same element, the same class, the same
+   engraved tracks, with the fold applied by hand instead of by the drawer.
+   Anything else would be a drawing that could drift from the thing it draws.
+
+   THE FROZEN ONE IS NOT A BUTTON. It is a div and it is aria-hidden, because
+   a control that looks pressable and does nothing is worse than no control —
+   and a screen reader hearing two Open Settings buttons would be told the page
+   has two drawers. */
+.tab-pair{ display:flex; gap:52px; align-items:flex-start; }
+.tab-cell{ display:flex; flex-direction:column; align-items:center; gap:9px; }
+.tab-cell .tab-demo{ cursor:default; }
+.tab-cell .tab-demo#setopen{ cursor:pointer; }
+.tab-cap{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09);
+}
+.tab-sub{ font-size:11px; color:#6b7079; margin-top:-5px; }
+.drawer-tab:hover{ background:linear-gradient(96deg,#33373d 0%,#272b31 55%,#1d2024 100%); }
+.drawer-tab:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+
+/* ── THE MARK ON THE TAB ──────────────────────────────────────────────────
+   A BURGER SAYS "MENU" AND THIS IS NOT ONE. Three equal bars is the mark for a
+   list of destinations; behind this tab are knobs, switches and a paper size.
+   Sliders say it exactly — three tracks with a handle at a different place on
+   each — and they say it as a picture of what is actually in there rather than
+   as a convention you have to have learned.
+
+   ENGRAVED, like every other mark on this case: the track is cut and the
+   handle sits proud of it, so the two read as different objects the way they
+   do on the panel inside.
+
+   AND THE HANDLES MOVE WHEN IT OPENS. Not a swap to a cross — that is two
+   icons pretending to be one. The same three handles slide along their own
+   tracks, which is the tab showing you it has been operated rather than
+   showing you a different symbol. */
+/* THE THREE TRACKS ARE PLACED, NOT STACKED. They were block elements with a
+   margin, so folding them meant guessing how far apart their centres were —
+   and a guess that is out by a pixel gives you two arms at the right ANGLE on
+   the wrong LINE, which reads as a chevron pointing left rather than as a
+   cross. Absolute positions make the fold exact: both arms travel to the
+   middle row's y and land on the same line. */
+.sliders{ position:relative; display:block; width:17px; height:14px; }
+.sliders i{
+  position:absolute; left:0; right:0; height:1.6px; border-radius:1px;
+  background:#0c0e11; box-shadow:0 1px 0 rgba(255,255,255,.13);
+  transition:transform .24s var(--drawer-ease), opacity .16s;
+}
+.sliders i:nth-child(1){ top:0; }
+.sliders i:nth-child(2){ top:6.2px; }
+.sliders i:nth-child(3){ top:12.4px; }
+.sliders i b{
+  position:absolute; top:-2px; width:4px; height:5.6px; border-radius:1.5px;
+  background:linear-gradient(180deg,#5a616b,#2e333a);
+  box-shadow:0 1px 0 rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.35);
+  transition:left .24s var(--drawer-ease), opacity .16s;
+}
+.sliders i:nth-child(1) b{ left:2px; }
+.sliders i:nth-child(2) b{ left:10px; }
+.sliders i:nth-child(3) b{ left:6px; }
+
+/* OPEN, IT IS A CROSS. The handles go first — a slider with its handle gone is
+   already not a slider — then the outer two arms travel 6.2px to the middle
+   row and rotate opposite ways, so they cross at one point instead of meeting
+   at an end. */
+body.drawer-open .sliders i b,
+.mark-open .sliders i b{ opacity:0; }
+body.drawer-open .sliders i:nth-child(1),
+.mark-open .sliders i:nth-child(1){ transform:translateY(6.2px) rotate(45deg); }
+body.drawer-open .sliders i:nth-child(2),
+.mark-open .sliders i:nth-child(2){ opacity:0; }
+body.drawer-open .sliders i:nth-child(3),
+.mark-open .sliders i:nth-child(3){ transform:translateY(-6.2px) rotate(-45deg); }
+
+/* the model's tab is smaller — same construction, scaled */
+.oc-tab .sliders{ width:11px; height:9px; }
+.oc-tab .sliders i{ height:1.2px; }
+.oc-tab .sliders i:nth-child(1){ top:0; }
+.oc-tab .sliders i:nth-child(2){ top:3.9px; }
+.oc-tab .sliders i:nth-child(3){ top:7.8px; }
+.oc-tab .sliders i b{ width:3px; height:4px; top:-1.4px; }
+.oc-tab .sliders i:nth-child(1) b{ left:1px; }
+.oc-tab .sliders i:nth-child(2) b{ left:6px; }
+.oc-tab .sliders i:nth-child(3) b{ left:3.5px; }
+.oc.open .oc-tab .sliders i b{ opacity:0; }
+.oc.open .oc-tab .sliders i:nth-child(1){ transform:translateY(3.9px) rotate(45deg); }
+.oc.open .oc-tab .sliders i:nth-child(2){ opacity:0; }
+.oc.open .oc-tab .sliders i:nth-child(3){ transform:translateY(-3.9px) rotate(-45deg); }
+
+/* MOTION IS A PREFERENCE. Everything still works with it off — the drawer
+   arrives, it just does not travel. */
+@media (prefers-reduced-motion: reduce){
+  .wrap, .navdock, .drawer, .sliders i, .sliders i b{ transition:none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   09 · THE SETTINGS PANEL
+
+   A FOLDER IS A BAY, not a collapsible header. Five folders that all collapse
+   is a panel that has hidden itself: you open one to look at it and close it
+   to reach the next, and at no point can you see the machine. These are milled
+   wells with an engraved cap and a hairline — the same object the layer rows
+   drop into — so the whole panel is legible at once and only the genuinely
+   rare stuff goes behind a chevron.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.set-body{ gap:7px; }
+.set-bay{ margin:0; padding:8px 9px 9px; display:flex; flex-direction:column; gap:7px; }
+.set-bay > .bay-cap{ margin:0 0 1px; }
+
+/* two switches side by side, because four names each is small enough to sit
+   in half a panel and a column of them would be twice the height for nothing */
+.set-two{ display:flex; gap:6px; }
+.set-two > *{ flex:1 1 0; min-width:0; }
+
+/* THE CAPTION IS ENGRAVED ABOVE THE CONTROL, not floated beside it. A form row
+   puts the name and the thing on one line and makes the name a column that has
+   to be wide enough for the longest one — which is why every pane like this
+   ends up with a third of its width spent on text nobody reads twice. */
+.set-sel{ display:flex; flex-direction:column; gap:3px; }
+.set-cap{
+  font-family:var(--font); font-size:8px; letter-spacing:.16em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09);
+}
+/* THE DIAL IS SMALLER IN A SETTINGS BAY than in a viewport, and it has to be:
+   a 76px cap plus 56px of leader plus a name is more width than a 318px panel
+   has to give five times over. 54px keeps the pointer readable and buys 22px
+   back for the names, which is the difference between "Smallest first" fitting
+   and not. */
+/* THE SWITCH IS A GROUP, AND THE GROUP IS WHAT GETS CENTRED. The rotary fills
+   its cell and positions the dial inside it absolutely, so a half-width bay
+   left the knob against one edge and a column of air against the other. The
+   fix is not to nudge --rcx along until it looks right: it is to give the
+   container the width of what is actually in it (a 54px dial, a 48px leader,
+   and about 40px of name) and let auto margins do the centring.
+
+   --rcx IS THE DIAL'S CENTRE, so anything under 27 hangs its left half outside
+   whatever contains it. At 22 it did, and nobody saw until the .box padding
+   came off and there was nothing left to hang into. */
+.set-sel .rotary{ height:auto; width:124px; flex:0 0 auto; margin:0 auto; --rcx:30px; }
+.set-sel .rot-knob{ width:54px; height:54px; margin:-27px 0 0 -27px; }
+.set-sel .rot-seat{ width:64px; height:64px; margin:-32px 0 0 -32px; }
+.set-sel .rot-lab{ font-size:9px; letter-spacing:.08em; }
+.set-sel.tall .drum-bay{ display:block; }
+/* a row carrying a name AND its size needs the width and a touch less letter */
+.set-sel .drum-item{ font-size:9px; letter-spacing:.06em; padding:0 9px; }
+
+.set-orient{ width:100%; }
+.set-orient .pkey{ flex:1 1 0; min-width:0; height:26px; font-size:8.5px; letter-spacing:.06em; padding:0 4px; }
+/* a square has no orientation and a custom size already is one — the bar goes
+   quiet rather than offering a choice with one outcome */
+.set-orient.inert{ opacity:.3; pointer-events:none; }
+/* both live in the same slot; exactly one of them is ever in it */
+
+/* THREE KNOBS ON ONE LINE, and the units engraved under them rather than
+   repeated in every readout. A knob that says "42.0" three times over with
+   "cm" glued on is three copies of a fact that belongs to the row. */
+.set-dimrow{ padding:2px 0 0; justify-content:space-evenly; }
+.set-units{
+  display:flex; justify-content:space-evenly; padding:1px 0 0;
+  font-family:var(--font); font-size:8px; letter-spacing:.14em; color:#3f7a5c;
+}
+.set-units span{ flex:1 1 0; text-align:center; }
+.set-orient.inert{ opacity:.3; pointer-events:none; }
+/* both live in the same slot; exactly one of them is ever in it */
+
+/* THE DERIVED PAIR. Two lit windows and a unit, reading what the format and
+   the orientation make — no track, no thumb, nothing that says "drag me". */
+.set-dlab{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.09);
+}
+.set-dunit{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c; }
+
+
+/* ADVANCED IS A DRAWER. It is allowed to hide because what it hides is rare;
+   the four bays above it are not, which is the whole argument for their being
+   open wells rather than four more of these. */
+.set-adv{ padding:2px 9px 8px; }
+.set-advcap{ cursor:default; }
+.set-adv .chev{ margin-left:2px; }
+/* THE DRAWER IS SHUT UNTIL IT IS OPEN, and it is a drawer rather than a bay
+   because what is in it is rare. A bay that is always open for four numbers
+   you touch twice a year is four numbers in the way of the ones you touch
+   every minute. */
+.set-advbody{ display:none; flex-direction:column; gap:7px; padding:8px 0 0; }
+.set-adv.open .set-advbody{ display:flex; }
+.set-seed{ display:flex; align-items:center; gap:8px; }
+.set-seed .lcd{ flex:1 1 auto; justify-content:center; }
+.set-roll{
+  flex:0 0 auto; height:22px; padding:0 10px; border-radius:6px;
+  font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.1em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MATERIALS — the primitives, so this is a language and not one drawing
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mats{ display:grid; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)); gap:16px; margin-top:26px; }
+.mat{
+  border:1px solid #212327; border-radius:12px; overflow:hidden;
+  background:linear-gradient(180deg,#141518,#0f1012);
+}
+/* THE STAGE IS CASE METAL, not a dark backdrop. A well cut into #101114 is
+   lighter than the thing it is cut into, which is not a well, it is a tile.
+   These samples are pieces of the panel, so they have to sit on the panel's
+   own material: then the plate reads as above it and the well as below it,
+   which is the entire content of this section. */
+.mat-stage{
+  height:104px; display:flex; align-items:center; justify-content:center; gap:10px;
+  background:radial-gradient(70% 80% at 30% 10%, rgba(255,255,255,.06), transparent 65%),
+             linear-gradient(176deg,#26282d 0%,#1d1e22 42%,#191a1e 100%);
+  border-bottom:1px solid #141518;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.05);
+}
+.mat-body{ padding:12px 14px 14px; }
+.mat-t{ font-family:var(--font); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#d3d6dc; margin:0 0 6px; }
+.mat-d{ font-size:12px; line-height:1.55; color:#7f848e; margin:0; }
+.mat-d code{ font-family:var(--font); font-size:11px; color:#9aa0aa; background:#1a1c20; padding:1px 4px; border-radius:3px; }
+
+/* demo objects in the material tiles */
+/* A GLYPH IS NOT THE CAP. 24px of icon in a 38px cap leaves 7px of face, and
+   on the lit one the sun's rays ran into the walls: the orange stopped being
+   a legend and became the button's colour. The nav bar's ratio is 16 in 34;
+   this is the same ratio at this size. */
+/* A FADER IS A WIDE CONTROL and cannot be sampled in a 232px column: label,
+   slot and readout would leave the track about 90px, which is not a length,
+   it is a stub. Its tile takes two columns and the row runs the full width,
+   which is also how it sits in the editor. */
+.mats .mat.wide{ grid-column:span 2; }
+.mats .mat.tall .mat-stage{ height:206px; }
+.mats .mat.wide .mat-stage{ padding:0 18px; }
+.mats .mat.wide .fader{ width:100%; }
+/* The small controls are sampled at the size the row uses them — same 5px gap,
+   no scaling. The chevron's knurl is tuned against an 11px glyph; blow it up
+   and the tile shows a material that is nowhere in the document. */
+.mat-row{ display:flex; align-items:center; gap:5px; }
+.mat-keys{ display:flex; gap:11px; }
+.mat-keys .key{ width:38px; height:38px; border-radius:9px; }
+.mat-keys .key svg{ width:18px; height:18px; }
+.demo-plate{ width:90px; height:44px; border-radius:8px;
+  background:linear-gradient(176deg,#2b2e33,#1b1d20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.85), 0 6px 12px -4px rgba(0,0,0,.8); }
+.demo-well{ width:90px; height:44px; border-radius:8px;
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.055); }
+.demo-etch{ font-family:var(--font); font-size:15px; font-weight:700; letter-spacing:.18em; color:#5d626b;
+  text-shadow:0 1px 0 rgba(255,255,255,.12), 0 -1px 0 rgba(0,0,0,.7); }
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE API BLOCK — the interface, not the argument
+
+   This section used to open with eleven paragraphs of reasoning, which is the
+   right thing to have and the wrong thing to put in front of someone who wants
+   to USE it. The reasoning stayed where it belongs — in the code comments, next
+   to the line it explains, where it cannot go stale without the line going with
+   it — and what is on the page is the smallest thing you can act on: the one
+   contract, the entry points, and a door to the full reference.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.api{
+  max-width:76ch; margin:0 0 4px; padding:16px 18px 14px;
+  border:1px solid #212327; border-radius:12px;
+  background:linear-gradient(180deg,#141518,#0f1012);
+}
+.api-rule{ font-size:13px; line-height:1.65; color:#8b909a; margin:0 0 14px; }
+.api-rule b{ color:#c6cad1; font-weight:600; }
+.api dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:5px 16px; align-items:baseline; }
+.api dt{
+  font-family:var(--font); font-size:11px; letter-spacing:.02em; color:#7CFFB0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.api dd{ margin:0; font-size:12.5px; line-height:1.5; color:#7d828b; }
+/* the rows a dev gets wrong: marked, not explained twice */
+.api dt.warn{ color:#FFB273; }
+.api code{ font-family:var(--font); font-size:11px; color:#c6cad1; }
+.api-more{
+  display:inline-block; margin-top:15px; padding:6px 11px; border-radius:6px;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:#8b919b; text-decoration:none;
+  background:linear-gradient(180deg,var(--plate-hi),var(--plate) 52%,#1a1c20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.7),
+             0 2px 0 #0e0f11, 0 3px 5px rgba(0,0,0,.6);
+}
+.api-more:hover{ color:#e2e5ea; }
+.api-more:active{ transform:translateY(2px);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.8), 0 1px 2px rgba(0,0,0,.6); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   08 · FILLING — the specimen rig
+
+   The bay next door is a compound CONTROL: a specimen with four controls
+   pointing at it. This is a compound SPECIMEN, and the only control on either
+   panel re-rolls the seed — because there is nothing here to set. The fills
+   are answers to one question and what is being asked is which of them is
+   right; a knob would invite tuning before judging.
+
+   ONE ROW PER FILL, AND ONE SHEET PER ROW. It was a grid of separate screens,
+   which is one display per drawing — and that is the wrong unit, because the
+   question a row asks is what ONE hand does to two different problems. So the
+   two answers sit on the same sheet, side by side, with a gap: same paper,
+   same pen, same run, and the gap is the whole of the separation. Reading DOWN
+   the balls compares the hands on tone; down the shapes compares them on
+   boundary; across a row is one hand answering both.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.box.handbay{ width:auto; flex:0 0 auto; }
+
+/* ── THE PAIRED STAGE ─────────────────────────────────────────────────────
+   SIDE BY SIDE IS THE COMPARISON. Stacked, one hand and one machine are two
+   things you scroll between, and a fill you have to remember is a fill you are
+   not comparing — the whole reason both are on the same ball and the same lamp
+   is so the eye can cross between them without moving.
+
+   IT BROKE ITS BANKS FOR ONE VERSION AND DOES NOT NEED TO ANY MORE. At full
+   size the pair was about 1260px against a 1160px wrap, so the stage ran to
+   the viewport edge and scrolled sideways. Halving the sheets took it to about
+   700, which fits the column with room — so it goes back inside, centred, and
+   the page keeps one measure down its whole length. A section that breaks the
+   grid should be doing it because it cannot fit, not because it once could
+   not. */
+.stage.pair{ flex-wrap:nowrap; gap:30px; justify-content:center; }
+.stage.pair > .box{ flex:0 0 auto; }
+.hh-body{ flex-direction:column; align-items:flex-start; gap:14px; }
+.hh-cell{ display:flex; flex-direction:column; gap:6px; }
+.hh-cell .bay-cap{ margin-bottom:1px; }
+.hh-cell .bay-cap em{ font-style:normal; color:#4a4f57; letter-spacing:.10em; }
+.hh-cell .bay-cap::after{ order:9; }
+.hh-spec{ padding:8px; }
+/* THE GLASS KEEPS ITS REFLECTION AND LOSES ITS SCANLINES, which is the one
+   place this block departs from `.screen` and it is not a preference. The haze
+   is a 1-in-3px horizontal rule; the thing behind it is a fill made of rules a
+   few tenths apart. Those two beat against each other, and the moire lands
+   exactly on the property being judged. A display that adds a texture to the
+   specimen is not a display, it is a filter. */
+.hh-spec::after{ background:linear-gradient(148deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.02) 26%, transparent 46%); }
+/* FIXED SIZES, NEVER FLUID, and the reason is the millimetre: each specimen's
+   viewBox is measured off its own element, so a field that stretched with the
+   window would silently change the size of the drawing being judged.
+
+   HALVED, AND 1:1 SURVIVES BECAUSE THE MILLIMETRE DID NOT MOVE. 130px is
+   34.4mm and 160px is 42.3mm, so the sheets are half the paper they were and
+   the ball on them is half the ball — but the pen is still 0.35 and the pitch
+   is still 2.17, because those are properties of the PLOTTER and not of the
+   specimen. What you lose is passes: half the sheet is half the strokes across
+   the subject, so each fill has fewer of them to make its case with. What you
+   do not lose is the claim in the caption. Scaling the rendered panel instead
+   would have kept every stroke and cost the 1:1 — the opposite trade, and the
+   wrong one on a page whose whole argument is that these are real sizes. */
+.hh-pair{ display:flex; gap:9px; }
+/* THE SAME TONED STOCK AS THE BAY'S SPECIMEN, and for the bay's own reason:
+   the surface a mark is judged against cannot compete with it. There is only
+   one pen in this block — a hatch being read for its HAND has no business also
+   being read for its colour — and black on #BEB5A3 is 8.7:1, which is a
+   drawing rather than a diagram. */
+.hh-field{
+  --paper:#BEB5A3;
+  flex:0 0 130px; height:136px;
+  border-radius:4px; position:relative; overflow:hidden;
+  background:var(--paper);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 8px rgba(0,0,0,.4);
+}
+/* the fill test is wider and shorter — a flat shape needs no headroom for a
+   cast shadow, and giving it any would make the two look like two papers */
+/* AND IT IS `hh-shape`, NOT `flat`. `.flat` was taken at the time, by the pale
+   comparison panel that used to sit in 01, and it carried a 1px WHITE border
+   and a 16px radius. `.hh-field` overrode its background and its shadow by
+   source order and had no reason to mention `border`, so the shape sheet came
+   out wearing a white edge the tone sheet beside it did not have. Two rules
+   that never met, agreeing on everything except the one property neither
+   declared.
+
+   THE PANEL IS GONE AND THE NAME IS FREE AGAIN. The lesson is not: check what
+   the stylesheet already says about a name before reusing it. Renaming was the
+   fix, not more specificity. */
+.hh-field.hh-shape{ flex:0 0 160px; }
+.hh-field svg{ display:block; width:100%; height:100%; }
+.hh-scale{
+  display:flex; align-items:center; margin-top:7px;
+  font-family:var(--font); font-size:8px; letter-spacing:.10em; color:#3f7a5c;
+}
+/* each caption sits under the drawing it is about, which is what the two
+   fixed widths are for — a shared row of text under a pair of drawings makes
+   you work out which half belongs to which */
+.hh-scale .hh-a{ flex:0 0 130px; }
+.hh-scale .hh-b{ flex:0 0 160px; margin-left:9px; }
+.hh-scale .hh-a, .hh-scale .hh-b{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.hh-scale .hh-a > span:last-child, .hh-scale .hh-b > span:last-child{ color:#2f5f47; letter-spacing:.16em; }
+.handbay .bay-cap{ font-size:8px; letter-spacing:.12em; }
+.hh-roll{ padding:0 11px; height:23px; font-family:var(--font); font-size:8.5px;
+          letter-spacing:.16em; color:#8b919b; }
+.hh-note{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
+          text-shadow:0 1px 0 rgba(255,255,255,.08); }
+/* THE READOUT IS THE RESULT of the machine half, not a caption on it — so it
+   is the language's lit window at the smallest size it survives, sitting in
+   the scale row where the mm note sits everywhere else. DIM is the control
+   row: the .lcd's off state is powered rather than dark, which is exactly
+   right for a number that is correct and is not the one being argued for. */
+.hh-scale .lcd{ height:17px; padding:0 7px; margin:0; font-size:8.5px; letter-spacing:.12em; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE BILL — what the language costs. Read this before adopting anything.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.bill{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; margin-top:26px; }
+.card{ border:1px solid #212327; border-radius:12px; padding:18px 20px;
+       background:linear-gradient(180deg,#141518,#0f1012); }
+.card.good{ border-color:rgba(124,255,176,.22); }
+.card.bad{ border-color:rgba(255,45,45,.22); }
+.card h3{ margin:0 0 12px; font-family:var(--font); font-size:10px; letter-spacing:.16em;
+          text-transform:uppercase; color:#7CFFB0; }
+.card.bad h3{ color:#FF8A8A; }
+.card ul{ margin:0; padding-left:17px; }
+.card li{ font-size:13px; line-height:1.65; color:#8b909a; margin-bottom:9px; }
+.card li b{ color:#c6cad1; font-weight:600; }
+.card li:last-child{ margin-bottom:0; }
+
+footer{ margin-top:80px; padding-top:22px; border-top:1px solid #1c1e22;
+        font-family:var(--font); font-size:10.5px; color:#4a4e56; letter-spacing:.06em; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE NAV DOCK — every page carries it
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* THE DOCK IS FULL WIDTH AND THE BAR IS NOT, which is the whole reason the
+   dock has pointer-events:none. A sticky rail spanning the viewport with a
+   180px bar floating in the middle of it is an invisible 1160px lid over the
+   top of every page: the first row of anything below it stops taking clicks
+   and nothing on screen says why. The bar puts them back on for itself. */
+.navdock{
+  position:sticky; top:14px; z-index:40;
+  display:flex; justify-content:center;
+  margin:14px 0 -46px; padding:0 32px;
+  pointer-events:none;
+}
+.navdock > .strip{ pointer-events:auto; gap:8px; padding:8px 11px; }
+
+/* SEATED. Past the first scroll the bar is over content rather than over the
+   room, so it deepens its cast shadow and takes an outline. Both halves of
+   that matter: the shadow says it is above, the outline stops it dissolving
+   into a panel of the same metal passing underneath. */
+.navdock > .strip{ transition:box-shadow .18s ease; }
+.navdock.seated > .strip{
+  box-shadow:
+    0 40px 56px -22px rgba(0,0,0,.96),
+    0 10px 18px -6px rgba(0,0,0,.85),
+    0 0 0 1px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -1px 0 rgba(0,0,0,.9);
+}
+/* the sentinel the observer watches. 1px, at the top, and never seen. */
+.nav-sentinel{ height:1px; margin:0; }
+
+/* the wordmark is .demo-etch at nav size: engraved, not printed */
+.nav-mark{ font-size:12.5px; letter-spacing:.2em; padding:0 8px 0 5px; }
+
+.nav-pages{ padding:5px; gap:6px; }
+/* AN ANCHOR, NOT A BUTTON. These go to documents, so the part underneath has
+   to be the part that goes to documents: middle-click opens a tab, the status
+   bar shows where it lands, and none of that survives a button with an
+   onclick. .pkey is a look; <a> is the mechanism. */
+.nav-link{
+  height:28px; min-width:0; padding:0 15px;
+  font-size:10px; letter-spacing:.14em; text-decoration:none;
+}
+/* THE PAGE YOU ARE ON IS A SPAN. A link to here is a link to nowhere, and a
+   key that is already down is not a control. It keeps .pkey.is-down for the
+   travel and the lamp, and loses the cursor and the href. */
+span.nav-link{ cursor:default; }
+.nav-ver{ margin-left:2px; }
+
+@media (prefers-reduced-motion: reduce){
+  .navdock > .strip{ transition:none; }
+}
+
+/* under 620px the switcher is the bar: the wordmark and the version window go,
+   because three destinations are the only part of it that is load-bearing */
+@media (max-width:620px){
+  .navdock{ padding:0 12px; }
+  .nav-mark, .nav-ver, .navdock .chan{ display:none; }
+  .nav-link{ padding:0 11px; }
+}
+
+/* ── THE SKIP LINK. A nav-heavy site puts destinations in front of the content
+      on every page, and a keyboard has to tab through all of them each time.
+      Off screen until focused, then it lands on the metal like anything else. */
+.skip{
+  position:absolute; left:-9999px; top:0; z-index:60;
+  padding:9px 14px; border-radius:0 0 8px 0; text-decoration:none;
+  font-family:var(--font); font-size:10px; letter-spacing:.14em;
+  color:var(--led); background:linear-gradient(180deg,#26282d,#161719);
+  box-shadow:0 6px 14px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.skip:focus{ left:0; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SPEC TABLE — reference rows, not prose
+   ═══════════════════════════════════════════════════════════════════════════ */
+.spec{
+  width:100%; border-collapse:collapse; margin-top:26px;
+  font-size:13px; line-height:1.6;
+}
+.spec th{
+  text-align:left; padding:9px 12px; border-bottom:1px solid #212327;
+  font-family:var(--font); font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+  color:#5a5f68; font-weight:600;
+}
+.spec td{ padding:11px 12px; border-bottom:1px solid #17191c; color:#8b909a; vertical-align:top; }
+.spec tr:last-child td{ border-bottom:0; }
+.spec td:first-child{
+  width:24%; min-width:150px; color:#c6cad1;
+  font-family:var(--font); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+}
+.spec td b{ color:#c6cad1; font-weight:600; }
+.spec code{
+  font-family:var(--font); font-size:11.5px; color:#a9b0ba;
+  background:#121417; padding:1.5px 5px; border-radius:4px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.7);
+}
+/* the rows a dev gets wrong. Amber, because it is a caution and not a failure:
+   every one of them is code that runs and then behaves oddly six weeks later. */
+.spec tr.trap td{ background:rgba(255,196,0,.045); }
+.spec tr.trap td:first-child{ color:#E3B45E; box-shadow:inset 2px 0 0 rgba(255,196,0,.5); }
+
+@media (max-width:620px){
+  .spec td:first-child{ width:auto; min-width:0; }
+  .spec, .spec td{ font-size:12px; }
+}
+
+/* a token swatch, inline in the first cell of a token row */
+.tok{ display:inline-block; width:13px; height:13px; border-radius:3px; margin-right:7px;
+      vertical-align:-2px; box-shadow:inset 0 1px 0 rgba(255,255,255,.18),
+      inset 0 -1px 0 rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
+
+
+}   /* @layer skew */

@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skew · Machine</title>
-<link rel="stylesheet" href="physical-ui.css">
-<link rel="stylesheet" href="physical-ui-machine.css">
+<link rel="stylesheet" href="skew.css">
+<link rel="stylesheet" href="skew-machine.css">
 </head>
 <body>
-<script src="physical-ui-nav.js"></script>
+<script src="skew-nav.js"></script>
 
 <div class="wrap" id="main">
 
@@ -133,7 +133,7 @@
     <div class="card bad">
       <h3>Costs</h3>
       <ul>
-        <li><b>A second copy of the kit.</b> <code>physical-ui-kit.js</code> and the inline copy in
+        <li><b>A second copy of the kit.</b> <code>skew-kit.js</code> and the inline copy in
             the layers document will not stay identical. One has to become the other's import.</li>
         <li><b>The real app is Metro4 and jQuery.</b> This is its anatomy rebuilt, not a re-skin, so
             adopting any of it means replacing the widget underneath first.</li>
@@ -146,13 +146,13 @@
     </div>
   </div>
 
-  <footer>targz design system · skew · exploration 02 · physical-ui-machine.html · read from TargzPenPlotterCtrl, which is unchanged</footer>
+  <footer>targz design system · skew · exploration 02 · skew-machine.html · read from TargzPenPlotterCtrl, which is unchanged</footer>
 </div>
 
-<script src="physical-ui-kit.js"></script>
+<script src="skew-kit.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
-   THE MACHINE PAGE. Every part comes from physical-ui-kit.js; what is written
+   THE MACHINE PAGE. Every part comes from skew-kit.js; what is written
    here is the WIRING — which is the point, because a panel of controls that do
    not drive each other is a picture of a panel.
 
@@ -177,7 +177,7 @@
    recovered by the key sitting on a machine panel, next to a jog pad, above a
    Z column: nothing here could plausibly mean any other home.
 
-   It lives in this page and not in physical-ui-kit.js on purpose — the kit is
+   It lives in this page and not in skew-kit.js on purpose — the kit is
    a verbatim extract of exploration 01 and a machine-only glyph does not
    belong in it. Same stroke language: 24 grid, no fill, round joins. */
 const ICON_ORIGIN = svg(
@@ -499,7 +499,7 @@ buildDro(document.getElementById('droB'), { stacked: true, demo: true }); // abo
     const st2 = el('div', 'stick');
     /* THE CAP IS EXTRUDED — twelve slices of barrel under one top face, so the
        thing tilts like a cylinder instead of like a coin. See the note in
-       physical-ui-machine.css; nothing here drives them, they are geometry. */
+       skew-machine.css; nothing here drives them, they are geometry. */
     const SLICES = 16;
     const body3d = el('span', 'stick-body',
       Array.from({ length: SLICES }, (_, i) => `<i style="--i:${i + 1}"></i>`).join(''));

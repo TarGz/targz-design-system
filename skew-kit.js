@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════════════
-   physical-ui-kit.js — THE SKEW KIT, LIFTED OUT OF THE PAGE THAT GREW IT.
+   skew-kit.js — THE SKEW KIT, LIFTED OUT OF THE PAGE THAT GREW IT.
 
-   Every primitive here was written for physical-ui-layers.html and is copied
+   Every primitive here was written for skew-layers.html and is copied
    from it VERBATIM: the icon sets, the voice bank, the knob, the two faders,
    the colour picker, the drum, the rotary, the key and the piano key, the
    panel outline and the window. Nothing was redesigned on the way out — the
@@ -12,7 +12,7 @@
    ids. It now reads `window.ENGAGE_ROOTS` at CALL time, so a second page
    declares its own roots and neither page knows about the other's.
 
-   physical-ui-layers.html still carries its own inline copy and is untouched.
+   skew-layers.html still carries its own inline copy and is untouched.
    Two copies of a kit is a debt, and it is written down here rather than paid
    by editing a document another hand is in the middle of.
    ══════════════════════════════════════════════════════════════════════════ */
@@ -697,6 +697,18 @@ function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
 
   paint();
   row.append(el('div', 'flab', label), slot, out);
+  /* THE SAME HANDLE THE OTHER FOUR EXPOSE, and the last one to get it. Two
+     arguments because a span is two numbers, and the far cap is clamped the
+     same way a drag clamps it — a config that stored a crossed pair does not
+     get to put the control in a state a hand could not.
+     Silent, like the others: a host pushing a loaded config into a panel is
+     not a user turning a knob, and firing onChange here is how a config load
+     turns into a re-render per control. */
+  row.set = (x, y) => {
+    a = q(x);
+    b = Math.max(q(y), a + MIN_SPAN * (max - min));
+    paint();
+  };
   return row;
 }
 
@@ -1494,7 +1506,7 @@ function panelShape(w, h, cy, { L = 52, R = 44, f = 12, r = 14, cxOff = -8 } = {
    Only if it actually ended up IN. Flipping a switch off is a circuit opening;
    there is nothing to surge. */
 /* THE ROOTS ARE THE HOST'S, not the kit's — the one line that changed on the
-   way out of physical-ui-layers.html. Read at call time so a page can declare
+   way out of skew-layers.html. Read at call time so a page can declare
    `window.ENGAGE_ROOTS` after the kit has loaded. */
 const ENGAGE_ROOTS = '#dock, #editor, #viewport, #tools, #navbar, #console, #pages, #hatch, #handhatch, #serp';
 function engage(btn, run, cls) {

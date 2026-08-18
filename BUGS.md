@@ -22,32 +22,11 @@ the engine produces geometry headlessly, so this is layout, not JS: `render()` b
 entirely. Those are different bugs. `.hh-field` is `flex:0 0 130px; height:136px` with a
 `--paper` background, so if the box lays out at all they should be visible.
 
-### The grid rig's body is missing `box-body`
-
-`docs/skew-system.html:1281` builds `el('div', 'set-body gridbody')`. Every other body on the site
-is `box-body` plus its own class, and `box-body` is what supplies the column, the padding and
-`z-index:2` — which lifts contents above `.box::before`, the grain overlay. Without it the `gap`
-is inert and the controls paint through the overlay. Same omission was fixed in the segment rig.
-
-### The kit's `ENG` and PANELS' inline copy have drifted
-
-`src/skew-kit.js:62` declares `ENG` with the plotter marks. `docs/skew-panels.html` carries its own
-inline copy of the kit and has added `hhand`, `hcross`, `hrand` and `serp` to that copy, so the
-canonical table has never had them. SYSTEM §01 has a trap row about these two copies; this is it
-happening. `docs/skew-hatch.html` works around it with `Object.assign(ENG, …)`.
-
-### `.intcell > .bay-cap` ships into dist
-
-It names `bay-cap`, which is a part, so the build keeps the rule even though `.intcell` is
-doc-only. Inert — it can only match inside `.intcell` — but it is doc CSS in the shipped file.
-
 ### `.seg` is dead in Portrait-Ribbons' vendored CSS
 
 `.seg` was deleted here in 1.30.0. `Portrait-ribbons/assets/skew-kit.css` still carries it from an
 earlier extraction, and nothing in that app uses it. Clears on the next
 `node tools/kit-css.mjs --write` there.
-
----
 
 ### `quiet` on a factory's `set()` silences the SOUND but still fires `onChange`
 

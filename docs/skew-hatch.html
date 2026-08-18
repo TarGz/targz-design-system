@@ -129,26 +129,6 @@
 <script>
 window.ENGAGE_ROOTS = '#handhatch, #serp';
 
-/* THE FOUR ENGRAVINGS THESE SPECIMENS USE. `eng` and `ENG` are the kit's —
-   an engraved glyph is a part, and the table already carries the plotter's
-   marks. These four are ADDED to it rather than shadowing it: a second
-   `const ENG` is a SyntaxError that stops the whole page script parsing, so
-   nothing on the page runs and it reads as "the specimens are blank".
-   The day either specimen grows a fifth hand, its mark goes here. */
-Object.assign(ENG, {
-  // THE THREE HANDS, and each one is its own marks rather than a picture of
-  // them: strokes that bend, strokes that cross, strokes that agree on nothing
-  hhand: eng('<path d="M4 16.5C7 9.5 11 6 17 5"/><path d="M7 19C10 12 14 8.5 20 7.5"/>' +
-             '<path d="M3.5 11.5C6 7.5 8.5 5.5 12.5 4.5"/>'),
-  hcross: eng('<path d="M3.5 14C7 8 11 5 17 4"/><path d="M6.5 19.5C10 13.5 14 10.5 20.5 9.5"/>' +
-              '<path d="M7 3.5C9 9 12.5 15 17.5 20"/><path d="M3 8.5C5 13 8 17.5 11.5 21"/>'),
-  hrand: eng('<line x1="3.5" y1="7" x2="7" y2="4.5"/><line x1="10" y1="5.5" x2="12" y2="9.5"/>' +
-             '<line x1="16" y1="4" x2="19.5" y2="6.5"/><line x1="5" y1="13" x2="8.5" y2="11"/>' +
-             '<line x1="12.5" y1="14.5" x2="15" y2="11.5"/><line x1="18" y1="13.5" x2="20.5" y2="16"/>' +
-             '<line x1="4" y1="19.5" x2="6" y2="16.5"/><line x1="10" y1="20" x2="14" y2="18.5"/>'),
-  // the serpentine: three passes and the two turns that make them one stroke
-  serp: eng('<path d="M4 5h13a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h13"/>'),
-});
 
 /* ══════════════════════════════════════════════════════════════════════════
    08a · BY HAND — three hands, one ball

@@ -188,7 +188,7 @@
     second part.
   </p>
   <div class="stage">
-    <div class="stage-note">one boolean, three places it lives &middot; throw them</div>
+    <div class="stage-note">two candidates, then three places it lives &middot; throw them</div>
     <div class="togrig" id="togrig"></div>
   </div>
 
@@ -229,13 +229,25 @@
           is genuinely the absence of the thing, and wrong the moment the two states both have
           names</td></tr>
       <tr class="trap">
-        <td>Not a lamp, and not a capsule</td>
+        <td>Open &mdash; two dresses, one survives</td>
+        <td><code>.slide</code> and <code>.slide.pill</code> are the same part, the same markup and
+            the same 46&times;22, differing in where the material is. <b>A</b> puts it in the
+            actuator: a bright knurled extrusion, ribs, a specular streak, and the colour is a
+            floor behind it. <b>B</b> inverts that &mdash; the actuator goes matte charcoal with a
+            dimple grip and nearly vanishes, and the lit window becomes the whole object, blooming
+            onto the plate with the engraved end of the slot showing through it. B is louder and
+            reads from further away; A is quieter and is the only part here made of metal. The
+            loser is <b>deleted</b>, not kept as an option: an option is a decision nobody made.</td>
+      </tr>
+      <tr class="trap">
+        <td>Not a lamp, and the capsule is B's alone</td>
         <td>The blank cap was first answered with a lamp behind a lens in the middle of it, which
             is wrong twice. It says "lit" where this panel already has jewels, pipes and lit arcs
             saying that, and it turns every switch on the plate into a dot. The slot is a rounded
             rectangle for the matching reason: at a capsule radius the actuator stops being a
             machined part and becomes a dot in a pill, which is the shape every operating system
-            draws for this.</td>
+            draws for this &mdash; B takes that radius deliberately and pays for it with the glow
+            and the engraved ends, which is a different argument, not the same one made twice.</td>
       </tr>
       <tr class="trap">
         <td>swBtn is REBUILT, toggle is not</td>
@@ -668,7 +680,9 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
        uncovers is the state. §06. */
     ['Slide switch',
      `<span class="slide on"><i class="sl-bed"></i><i class="sl-act"></i></span>` +
-     `<span class="slide"><i class="sl-bed"></i><i class="sl-act"></i></span>`],
+     `<span class="slide"><i class="sl-bed"></i><i class="sl-act"></i></span>` +
+     `<span class="slide pill on"><i class="sl-bed"></i><i class="sl-act"></i></span>` +
+     `<span class="slide pill"><i class="sl-bed"></i><i class="sl-act"></i></span>`],
     ['Jewel LED',
      '<span class="jewel" style="--lyr:#FF6A00"></span><span class="jewel" style="--lyr:#2C6BFF"></span><span class="jewel" style="--lyr:#4CE04C"></span>'],
     ['Light pipe',
@@ -1367,7 +1381,7 @@ document.getElementById('navspec').replaceWith(navBar({
     if (out) out.textContent = pitch + ' · ' + (subOn ? minor : '-');
   }
 
-  const body = el('div', 'set-body gridbody');
+  const body = el('div', 'box-body set-body gridbody');
   body.append(el('div', 'bay-cap', '<span>Grid</span>'));
 
   const wrap = (cap, ctl) => {
@@ -1450,12 +1464,25 @@ document.getElementById('navspec').replaceWith(navBar({
   };
 
   /* ── A SETTING. No colour, no glyph, no card: the slot, the actuator, and
-     the name etched on the metal beside it. */
-  cell('Twist', [
-    toggle({ label: 'Invert tone',     value: true }),
-    toggle({ label: 'Apply edits',     value: true }),
-    toggle({ label: 'Weave crossings' }),
-  ], '.tog');
+     the name etched on the metal beside it.
+
+     AND IT IS UP TWICE, IN TWO DRESSES, because this is a choice being made
+     rather than an option being offered. A — machined: the material is in the
+     ACTUATOR, a bright knurled extrusion, and the colour is a floor behind it.
+     B — lit: the actuator goes matte and nearly vanishes, and the window
+     becomes the whole object, blooming onto the plate with the engraved end of
+     the slot showing through it. Whichever loses gets deleted. */
+  const dress = (node, cls) => {
+    if (cls) node.querySelector('.slide').classList.add(cls);
+    return node;
+  };
+  const SETTINGS = [['Invert tone', true], ['Apply edits', true], ['Weave crossings', false]];
+  cell('Twist · A · machined',
+       SETTINGS.map(([l, v]) => toggle({ label: l, value: v })),
+       '.slide');
+  cell('Twist · B · lit',
+       SETTINGS.map(([l, v]) => dress(toggle({ label: l, value: v }), 'pill')),
+       '.slide.pill');
 
   /* ── A LAYER, AND THE MASTER OVER THE COLUMN. One cell, because a master
      needs the column under it to mean anything — on its own it is a switch
@@ -1538,7 +1565,7 @@ document.getElementById('navspec').replaceWith(navBar({
 
   const cell = (cls, cap, node, tag) => {
     const c = el('div', 'intcell' + (cls ? ' ' + cls : ''));
-    c.append(el('div', 'bay-cap', `<span>${cap}</span>`), node,
+    c.append(el('div', 'bay-cap intcell-cap', `<span>${cap}</span>`), node,
              el('span', 'tagcut', tag));
     rig.append(c);
   };

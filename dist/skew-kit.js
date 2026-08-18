@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.34.0
+     at       Skew v1.34.1
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -89,6 +89,23 @@ const ENG = {
   // a protractor quadrant: the baseline, the arm, and the arc between them
   angle: eng('<line x1="4" y1="18" x2="20" y2="18"/><line x1="4" y1="18" x2="17" y2="7"/>' +
              '<path d="M12 18A8 8 0 0 0 14.2 12.5"/>'),
+  /* THE THREE HANDS AND THE SERPENTINE. They were never in this table — the
+     PANELS page carries its own inline copy of this kit and added them to
+     THAT, so the canonical one has been short of four marks for as long as
+     both copies existed. Here, so the HATCH page can read them off the kit
+     like every other engraving. */
+  // THE THREE HANDS, and each one is its own marks rather than a picture of
+  // them: strokes that bend, strokes that cross, strokes that agree on nothing
+  hhand: eng('<path d="M4 16.5C7 9.5 11 6 17 5"/><path d="M7 19C10 12 14 8.5 20 7.5"/>' +
+             '<path d="M3.5 11.5C6 7.5 8.5 5.5 12.5 4.5"/>'),
+  hcross: eng('<path d="M3.5 14C7 8 11 5 17 4"/><path d="M6.5 19.5C10 13.5 14 10.5 20.5 9.5"/>' +
+              '<path d="M7 3.5C9 9 12.5 15 17.5 20"/><path d="M3 8.5C5 13 8 17.5 11.5 21"/>'),
+  hrand: eng('<line x1="3.5" y1="7" x2="7" y2="4.5"/><line x1="10" y1="5.5" x2="12" y2="9.5"/>' +
+             '<line x1="16" y1="4" x2="19.5" y2="6.5"/><line x1="5" y1="13" x2="8.5" y2="11"/>' +
+             '<line x1="12.5" y1="14.5" x2="15" y2="11.5"/><line x1="18" y1="13.5" x2="20.5" y2="16"/>' +
+             '<line x1="4" y1="19.5" x2="6" y2="16.5"/><line x1="10" y1="20" x2="14" y2="18.5"/>'),
+  // the serpentine: three passes and the two turns that make them one stroke
+  serp: eng('<path d="M4 5h13a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h13"/>'),
   // the pen cap, for the colour row
   ink: eng('<path d="M8.5 21V8.5C8.5 5 10 3 12 3s3.5 2 3.5 5.5V21z"/><line x1="8.5" y1="17" x2="15.5" y2="17"/>'),
   // THE THREE HANDS, and each one is its own marks rather than a picture of
@@ -1722,6 +1739,6 @@ windowise.top = 10;
 
 window.SkewKit = {
   el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, key, pkey, swBtn, toggle, chevBtn, openPicker, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, SFX, clicky,
-  VERSION: '1.34.0',
+  VERSION: '1.34.1',
 };
 })();

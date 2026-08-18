@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.34.0
+     at       Skew v1.34.1
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -435,7 +435,6 @@ h2 span{ color:#3d4149; }
     0 1px 0 rgba(255,255,255,.055);
   display:flex; flex-direction:column; gap:5px;
 }
-.intcell > .bay-cap{ align-self:stretch; }
 .togcell > .bay-cap{ align-self:stretch; }
 
 /* THE HEADING IS THE PANEL'S, NOT THE BAR'S. An interlock sits under a `.bay-cap`
@@ -709,11 +708,18 @@ h2 span{ color:#3d4149; }
   /* THE CUT ITSELF. The top wall overhangs and is nearly black under it; the
      bottom wall is the one the floor throws light back onto. */
   background:linear-gradient(180deg,#08090b 0%,#0e1114 48%,#0a0c0e 100%);
+  /* EVERY INSET HERE CARRIES BLUR, and that is not a taste. An inset shadow
+     with an offset and NO blur cannot follow a radius: it is the shape pushed
+     one pixel sideways, so at each rounded corner the offset copy pulls away
+     from the edge and leaves a bright or dark spot sitting in the turn. Two of
+     those on the actuator were visible as dots. One pixel of blur closes the
+     gap; where an edge has to stay crisp, it is drawn as a clipped background
+     band instead, because a background IS clipped by the radius. */
   box-shadow:
     inset 0 2px 3px rgba(0,0,0,.95),
-    inset 0 1px 0 rgba(0,0,0,.9),
+    inset 0 1px 1px rgba(0,0,0,.9),
     inset 1px 0 2px rgba(0,0,0,.75),
-    inset 0 -1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 1px rgba(255,255,255,.11),
     0 1px 0 rgba(255,255,255,.055);
 }
 /* ── THE FLOOR ─────────────────────────────────────────────────────────────
@@ -758,15 +764,29 @@ h2 span{ color:#3d4149; }
 .sl-act{
   display:block; position:absolute; top:1px; left:1px; width:24px; height:20px;
   border-radius:5px;
-  background-image:linear-gradient(180deg,
-    #838b96 0%, #6f7883 13%, #5b636e 38%, #4a515b 62%, #383e47 84%, #2a2f36 100%);
+  /* THE CHAMFERS ARE BACKGROUND BANDS, NOT INSET HAIRLINES. A background is
+     clipped by the border-radius, so a 1px bright band across the top simply
+     STOPS where the corner rolls away from the lamp — which is what a chamfer
+     does. The same line drawn as `inset 0 1px 0` is the shape offset downward,
+     and it left a lit dot in each top corner and a pale one at the bottom
+     right. Those were the two dots.
+
+     AND THE METAL IS DARKER. It was reading as bright alloy against a black
+     plate — the lightest object on the panel, which a small switch has no
+     business being. It sits a full stop down now and the chamfer carries the
+     contrast instead, which is also how a real one works: the face is dull and
+     the broken edge is what catches the lamp. */
+  background-image:
+    linear-gradient(180deg, rgba(255,248,238,.38) 0 1px, transparent 1px),
+    linear-gradient(90deg,
+      rgba(255,248,238,.10) 0 1px, transparent 12%,
+      transparent 82%, rgba(0,0,0,.32) 100%),
+    linear-gradient(180deg,
+      #646b76 0%, #545b65 13%, #454b55 38%, #383e47 62%, #2b3038 84%, #202429 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255,248,238,.44),
-    inset 1px 0 0 rgba(255,248,238,.13),
-    inset -1px 0 0 rgba(0,0,0,.55),
     inset 0 -2px 3px rgba(0,0,0,.5),
-    inset 0 -1px 0 rgba(255,236,214,.15),
-    0 0 0 1px rgba(0,0,0,.6),
+    inset 0 -1px 1px rgba(255,236,214,.14),
+    0 0 0 1px rgba(0,0,0,.62),
     0 2px 2px rgba(0,0,0,.55),
     0 4px 7px rgba(0,0,0,.55);
   /* IT SNAPS. A slide switch is spring-loaded over centre — it does not ease
@@ -776,19 +796,26 @@ h2 span{ color:#3d4149; }
              box-shadow .18s;
 }
 .slide.on .sl-act{ transform:translateX(20px); }
-/* AND WHEN THE FLOOR IS LIT IT BOUNCES INTO THE UNDERSIDE. One lamp, one
-   painted surface under the part, and warm light coming back up off it — the
-   only place in this language where a colour reaches something it is not
-   printed on. */
+/* AND WHEN THE FLOOR IS LIT IT BOUNCES ONTO THE ACTUATOR — FROM THE LEFT.
+
+   THE BOUNCE HAS TO COME FROM WHERE THE LIGHT IS, and the light is not under
+   the part. Throwing the switch on puts the actuator at the RIGHT end and
+   uncovers the floor to its LEFT: that is the whole lit surface, it is beside
+   the actuator rather than beneath it, and it is what any of this bounces off.
+   The first version lit the underside, which is a second light source nothing
+   on the panel can account for — the exact failure this language spends its
+   whole shadow budget avoiding.
+
+   So it is a warm wash coming in through the left flank, hottest at the edge
+   nearest the floor and gone by the middle of the face, with a lit lip on the
+   left edge itself. It is the only place in this language where a colour
+   reaches something it is not printed on. */
 .slide.on .sl-act{
   box-shadow:
-    inset 0 1px 0 rgba(255,248,238,.44),
-    inset 1px 0 0 rgba(255,248,238,.13),
-    inset -1px 0 0 rgba(0,0,0,.55),
     inset 0 -2px 3px rgba(0,0,0,.42),
-    inset 0 -3px 5px -1px color-mix(in srgb, var(--lyr, var(--led)) 42%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, var(--lyr, var(--led)) 45%, #d8ccc0),
-    0 0 0 1px rgba(0,0,0,.6),
+    inset 6px 0 8px -3px color-mix(in srgb, var(--lyr, var(--led)) 55%, transparent),
+    inset 1px 0 1px color-mix(in srgb, var(--lyr, var(--led)) 58%, #e6dbcd),
+    0 0 0 1px rgba(0,0,0,.62),
     0 2px 2px rgba(0,0,0,.55),
     0 4px 7px rgba(0,0,0,.55);
 }
@@ -831,14 +858,114 @@ h2 span{ color:#3d4149; }
    highlight has no edge. Kept off pure white: the lamp has a colour, the metal
    has a colour, and their product never lands on #fff. */
 .sl-act::after{
-  content:''; position:absolute; left:2px; right:2px; top:1.5px; height:3.5px;
+  content:''; position:absolute; left:3.5px; right:3.5px; top:2px; height:3px;
   border-radius:3px; pointer-events:none;
   background-image:linear-gradient(90deg,
-    transparent 0%, rgba(255,252,245,.20) 20%, rgba(255,252,245,.30) 50%,
-    rgba(255,252,245,.14) 80%, transparent 100%);
+    transparent 0%, rgba(255,252,245,.15) 22%, rgba(255,252,245,.23) 50%,
+    rgba(255,252,245,.10) 78%, transparent 100%);
   filter:blur(.5px);
 }
 .tog:hover .sl-act{ filter:brightness(1.07); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VARIANT B — THE LIT PILL. Same part, same markup, same 46×22, one class
+   ═══════════════════════════════════════════════════════════════════════════
+   A CANDIDATE, NOT A SECOND PART. `.slide` and `.slide.pill` are the same
+   object in two dresses and only one of them will survive; they are up
+   together so the choice can be made by looking rather than by describing.
+   Whichever loses gets deleted, not kept as an option — an option is a
+   decision nobody made.
+
+   WHAT IT ARGUES. The machined version puts the material in the ACTUATOR: a
+   bright aluminium extrusion, knurled, and the colour is a floor behind it.
+   This one inverts that. The actuator goes matte charcoal and nearly vanishes,
+   and the lit half becomes the whole object — a glowing window with a word in
+   it, blooming out onto the plate. It is louder, it is legible from further
+   away, and it is one more thing on a dark panel that GLOWS, which is either
+   the point or the problem.
+
+   THE LEGENDS ARE CUT INTO THE FLOOR AT BOTH ENDS AND THE ACTUATOR COVERS ONE.
+   That is the mechanism the reference is drawing and it is honest: nothing
+   changes the word, nothing swaps it, there is no state in it. ON is engraved
+   at the left end and OFF at the right, permanently, and which one you can see
+   is which end the actuator is not standing on.
+
+   THE GRIP IS A DOT MATRIX rather than ribs, and that is the other half of the
+   comparison: dimples read as moulded, ribs read as machined. Each dot is a
+   PIT, not a bump — dark rim on the side facing the lamp, lit crescent on the
+   far wall — which is the same reasoning as the recess under a key cap. */
+.slide.pill{ border-radius:999px; }
+.slide.pill .sl-bed{ inset:2px; border-radius:999px; }
+.slide.pill.on .sl-bed{
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.45),
+    inset 0 0 0 1px rgba(0,0,0,.35),
+    0 0 10px color-mix(in srgb, var(--lyr, var(--led)) 65%, transparent),
+    0 0 26px color-mix(in srgb, var(--lyr, var(--led)) 38%, transparent);
+}
+/* ── THE ENGRAVED ENDS ─────────────────────────────────────────────────────
+   Silkscreened, not backlit: the word is INK on the floor, so it goes dark
+   where the floor is lit and stays a dim grey where it is not. A light word on
+   a lit panel is a word cut through to a lamp, which is a different part. */
+.slide.pill .sl-bed::before,
+.slide.pill .sl-bed::after{
+  position:absolute; top:50%; transform:translateY(-50%);
+  font-family:var(--font); font-size:7px; font-weight:700; letter-spacing:.08em;
+  line-height:1; pointer-events:none;
+  color:rgba(226,232,240,.13); text-shadow:0 1px 0 rgba(0,0,0,.7);
+  transition:color .18s, text-shadow .18s;
+}
+.slide.pill .sl-bed::before{ content:'ON';  left:5.5px; }
+.slide.pill .sl-bed::after { content:'OFF'; right:4.5px; }
+.slide.pill.on .sl-bed::before{
+  color:color-mix(in srgb, var(--lyr, var(--led)) 26%, #000);
+  text-shadow:0 1px 0 color-mix(in srgb, var(--lyr, var(--led)) 55%, #fff);
+}
+/* ── THE ACTUATOR, MATTE ───────────────────────────────────────────────────
+   Charcoal, four stops, no specular streak and no bright chamfer. It is the
+   piece that is NOT lit, and everything about it stands back so the window
+   does the talking. */
+.slide.pill .sl-act{
+  border-radius:999px;
+  background-image:
+    linear-gradient(180deg, rgba(226,232,240,.16) 0 1px, transparent 1px),
+    linear-gradient(90deg,
+      rgba(226,232,240,.05) 0 1px, transparent 14%,
+      transparent 84%, rgba(0,0,0,.30) 100%),
+    linear-gradient(180deg, #3b424b 0%, #333941 42%, #262b32 74%, #1a1e23 100%);
+  box-shadow:
+    inset 0 -2px 3px rgba(0,0,0,.55),
+    inset 0 -1px 1px rgba(226,232,240,.07),
+    0 0 0 1px rgba(0,0,0,.7),
+    0 2px 2px rgba(0,0,0,.6),
+    0 4px 8px rgba(0,0,0,.6);
+}
+.slide.pill.on .sl-act{
+  box-shadow:
+    inset 0 -2px 3px rgba(0,0,0,.5),
+    inset 7px 0 9px -4px color-mix(in srgb, var(--lyr, var(--led)) 60%, transparent),
+    inset 1px 0 1px color-mix(in srgb, var(--lyr, var(--led)) 62%, #e6dbcd),
+    0 0 0 1px rgba(0,0,0,.7),
+    0 2px 2px rgba(0,0,0,.6),
+    0 4px 8px rgba(0,0,0,.6);
+}
+/* THE DIMPLES. Two circles per cell: the pit, and the crescent of its far wall
+   catching the lamp half a pixel below. Five across, three down, in a patch
+   that stops short of the ends. */
+.slide.pill .sl-act::before{
+  width:17px; height:10.5px; border-radius:0;
+  background-image:
+    radial-gradient(circle at 1.2px 1.2px, rgba(0,0,0,.62) .62px, transparent .72px),
+    radial-gradient(circle at 1.2px 1.9px, rgba(226,232,240,.17) .62px, transparent .72px);
+  background-size:3.5px 3.5px, 3.5px 3.5px;
+  background-position:center, center;
+  background-repeat:repeat, repeat;
+  box-shadow:none;
+}
+/* NO SPECULAR ON A MATTE PART. The streak is what a machined finish does; a
+   moulded charcoal cap scatters in every direction and has no highlight to
+   run. */
+.slide.pill .sl-act::after{ display:none; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE TOGGLE — a switch mounted on the faceplate, its name engraved beside it

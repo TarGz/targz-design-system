@@ -78,7 +78,7 @@ const DOC_ONLY = new Set([
   'doc-list', 'doc-open',
   'paper', 'paper-lab', 'papers', 'archive', 'arch-link',
   'klayouts', 'deskdemo', 'matstage', 'setrow', 'gridout',
-  'intrig', 'intcell', 'intcell-wrap',
+  'intrig', 'intcell', 'intcell-cap', 'intcell-wrap',
   'togrig', 'togcell',
   'gridbox', 'gridbody', 'gridrow', 'gridcol', 'gridswatch',
   'loupe', 'loupe-glass', 'loupe-mark',

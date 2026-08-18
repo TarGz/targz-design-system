@@ -3,12 +3,53 @@
 - Only commit when I ask
 - Never mention Claude Code in commits
 - Never add Co-Authored-By lines to commits
+- USER is the one who tests — anything VISUAL is his to judge; Claude says what to test and what to check, nerver use playwright
 
 ## Versioning
 
 - Every commit must include a version bump in `version.js`
 - Follow semver: Major (breaking changes), Minor (new features), Fix/Patch (bug fixes)
 - Always update the CHANGELOG array in `version.js` with the current date and list of changes
+
+
+## BUG.md file template
+# Bugs
+
+This file tracks known bugs in the repo. Keep it up to date so any agent working on the code (Claude Code, etc.) knows the current state before making changes.
+
+## How to use this file
+
+- Add a new entry under **Open** when you find a bug.
+- Keep descriptions short but precise and short, very close from the USER prompt, One title on short descritpion 100 char MAX
+- Remove the entry once implemented — it's recorded in `version.js` and the commit, not here.
+
+---
+
+## Open
+
+### Short title of the bug
+100 char MAX
+
+
+
+# FEATURES-REQUEST.md template
+
+This file tracks feature requests in the repo. Keep it up to date so any agent working on the code (Claude Code, etc.) knows what's planned before making changes.
+
+## How to use this file
+
+- Add a new entry under **Open** when you think of a feature.
+- Remove the entry once implemented — it's recorded in `version.js` and the commit, not here.
+- Keep descriptions short but precise and short, very close from the USER prompt, One title on short descritpion 100 char MAX
+
+---
+
+## Open
+
+<!-- Duplicate the block above for each new request -->
+### Short title of the bug
+100 char MAX
+
 
 ## Targz Launchpad compatibility
 

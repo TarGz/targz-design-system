@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skew Design System</title>
+<link rel="stylesheet" href="../src/skew.css">
+<link rel="stylesheet" href="skew-home.css">
+</head>
+<body>
+<script src="skew-nav.js"></script>
+
+<div class="wrap" id="main">
+
+  <div class="masthead">
+    <h1>Skew Design System</h1>
+    <p class="lede">
+      A vibe coded design system, used for my pen control machine software and my generative art UI.
+    </p>
+  </div>
+
+  <h2>01 <span>/</span> The documents</h2>
+  <div class="doc-grid" id="docs"></div>
+
+  <h2>02 <span>/</span> Using it</h2>
+  <table class="spec">
+    <thead><tr><th>Folder</th><th>Whose it is</th></tr></thead>
+    <tbody>
+      <tr><td>dist/</td><td><b>Yours.</b> The only folder an app copies from. Its path does not change when the repo is reorganised, which is the point of having it</td></tr>
+      <tr><td>src/</td><td>Where the language is written. Read it, do not vendor it: <code>src/skew.css</code> still carries this site's own rules and <code>src/skew-kit.js</code> is a plain script that collides with p5</td></tr>
+      <tr><td>docs/</td><td>These four pages. They load <code>src/</code>, so the site cannot document a version of the language nobody ships</td></tr>
+      <tr><td>tools/</td><td><code>build-dist.mjs</code>, which turns the first into the second</td></tr>
+    </tbody>
+  </table>
+
+  <table class="spec">
+    <thead><tr><th>File</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td>dist/skew.css</td><td>Every part's material, this site's own rules removed. Wrapped in <code>@layer skew</code>, so your own <code>.card</code>, <code>.row</code>, <code>.box</code>, <code>.key</code> and <code>.wrap</code> keep beating it without a rename and without an <code>!important</code></td></tr>
+      <tr><td>dist/skew-kit.js</td><td>Every factory, on <code>window.SkewKit</code>: <code>knob</code>, <code>fader</code>, <code>rangeFader</code>, <code>rotary</code>, <code>drum</code>, <code>key</code>, <code>pkey</code>, <code>toggle</code>, <code>swBtn</code>, <code>openPicker</code>, <code>windowise</code>. All five value controls carry <code>.set()</code>, which is what a loaded config pushes through</td></tr>
+      <tr><td>src/skew-machine.css</td><td>Not built into <code>dist/</code>, because only a plotter panel wants it: DRO, e-stop, jog, annunciator, meter. Copy it directly if you need those</td></tr>
+      <tr class="trap">
+        <td>Never hand-edit a copy</td>
+        <td>Not <code>dist/</code> here, not the vendored file in your app. A patch on a
+            generated file disappears at the next build, silently, and you find out when a
+            control stops matching this page. Anything your app needs that the kit does not
+            give goes in a file of your own, beside it.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="spec">
+    <thead><tr><th>Command</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td>node tools/build-dist.mjs</td><td>Here. Reports whether <code>dist/</code> still matches the source; <code>--write</code> rebuilds it. Run it after any change to <code>skew.css</code> or <code>skew-kit.js</code></td></tr>
+      <tr><td>node tools/kit-css.mjs</td><td>In your app, optional. Reads the class names your own code writes and keeps only those rules, so a small panel does not ship the whole language. Portrait-Typo and Portrait-ribbons both have one</td></tr>
+      <tr><td>@layer skew, app;</td><td>One line in your own stylesheet, before anything loads. Optional: layers already order by first appearance, so this only says it on purpose</td></tr>
+      <tr><td>A panel from a spec</td><td>Past about twenty controls, hand-composing stops paying. <code>Portrait-ribbons/src/skew-panel.js</code> is the working answer: one row per parameter, the factory chosen from the parameter's own shape, <code>.set()</code> registered for the config load</td></tr>
+    </tbody>
+  </table>
+
+  <h2>03 <span>/</span> In use</h2>
+  <div class="shots" id="shots"></div>
+
+  <p class="paper-lab">Papers</p>
+  <div class="papers" id="papers"></div>
+
+  <div class="archive" id="archive"></div>
+
+  <footer id="foot">targz design system · skew</footer>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   THE HOME, and it is a door rather than a document. No component lives here
+   and no component is specified here: that is what SYSTEM is for. What this
+   page owns is the answer to "what exists and where do I go", which is the
+   one question the other three cannot answer about themselves.
+
+   Both lists below are built from window.SKEW_PAGES, the same registry the
+   nav bar reads, so the cards and the bar cannot disagree about what exists.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const el = (tag, cls, html) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (html != null) n.innerHTML = html;
+  return n;
+};
+const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ICON = {
+  open:  svg('<path d="M5 12h13"/><polyline points="12 6 18 12 12 18"/>'),
+  paper: svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/>'),
+  box:   svg('<path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/>'),
+};
+
+const PAPERS = [
+  ['../HATCH-API.md',        'Hatch API', 'the fill generators, in millimetres'],
+  ['../FEATURES-REQUEST.md', 'Requests',  'what is asked for and not built'],
+];
+
+/* ── the cards ──────────────────────────────────────────────────────────── */
+(function buildDocs() {
+  const grid = document.getElementById('docs');
+
+  SKEW_PAGES.filter(p => p.inGrid !== false).forEach(p => {
+    const box = el('div', 'box doc');
+
+    const head = el('div', 'box-head');
+    head.append(el('span', 'nm', p.name), el('div', 'lcd', p.no));
+    box.append(head);
+
+    const body = el('div', 'doc-body');
+    body.append(el('p', 'doc-kick', p.kick), el('p', 'doc-line', p.line));
+
+    const parts = el('ul', 'doc-list');
+    p.parts.forEach(t => parts.append(el('li', null, t)));
+    body.append(parts);
+
+    const foot = el('div', 'doc-foot');
+    const open = el('a', 'key act go doc-open', `<span class="lens"></span>OPEN${ICON.open}`);
+    open.href = p.file;
+    foot.append(open, el('span', 'tagcut doc-file', p.file));
+    body.append(foot);
+
+    box.append(body);
+    grid.append(box);
+  });
+})();
+
+/* ── 03 · IN USE ──────────────────────────────────────────────────────────
+   THE ONLY CLAIM ON THIS PAGE A TABLE CANNOT MAKE. Every section above is the
+   language describing itself, which is exactly as convincing as any design
+   system's own documentation. A shot of an app that has to do work is the
+   other kind of evidence.
+
+   BOTH ARE ONE APP ON PURPOSE. Two apps at one view each would say the parts
+   are portable; one app at two views says the parts hold a whole tool
+   together, which is the harder claim and the one in doubt. */
+const SHOTS = [
+  {
+    file: 'shots/typo-3d.png',
+    app:  'PORTRAIT-TYPO',
+    ver:  'v9.9.1',
+    line: 'The <b>3D</b> view, mid-build. Nothing here is a mockup: the panel is the app.',
+    parts: ['layer dock', 'settings drawer', 'windowed panel', 'viewport gizmo',
+            'rotary selector', 'tool palette', 'nav bar · view mode', 'status rail'],
+  },
+  {
+    file: 'shots/typo-canvas.png',
+    app:  'PORTRAIT-TYPO',
+    ver:  'v9.9.1',
+    line: 'The <b>hatch bay</b> open over a finished plot. Six fills on one rotary, the pen '
+        + 'and the pitch on knobs beside it, and two screens showing what the numbers do '
+        + 'before you spend paper on them.',
+    parts: ['hatch bay', 'rotary · six positions', 'knob · row layout', 'screen',
+            'ink rail', 'fader', 'the sheet'],
+  },
+];
+
+/* THE CROPS ARE A SECOND KIND OF EVIDENCE and they are not shown the same way.
+   A full screen argues the parts hold a whole tool together. A panel at its own
+   size argues something narrower and harder: that this many controls in this
+   little space is still readable. Blown to page width they would prove neither,
+   because every part would be at twice the size it is ever used at. */
+const CROPS = [
+  {
+    file: 'shots/typo-drop.png',
+    app:  'DROP',
+    line: 'Fifteen controls in 420px, and no scrollbar. Three engraved headings do the '
+        + 'sorting a folder would have done, and none of them collapses.',
+    parts: ['knob · stack', 'knob · row', 'drum', 'pkey interlock', 'bay-cap', 'engaged key'],
+  },
+  {
+    file: 'shots/typo-layers.png',
+    app:  'PANELS',
+    line: 'The dock. A light pipe per row for the ink, a lit cap for on and a dead one for '
+        + 'off, and the row you opened holding its sub-bay.',
+    parts: ['light pipe', 'backlit key', 'jewel LED', 'micro key', 'chevron', 'readout'],
+  },
+  {
+    file: 'shots/typo-letters.png',
+    app:  'LETTERS',
+    line: 'The same panel, one tab over, and <b>an adoption caught halfway</b>. The font list '
+        + 'is a drum; the set, the characters and the extrusion are still a native '
+        + '<code>select</code>, a text field and a range input. Worth leaving on this page: a '
+        + 'language is adopted control by control, and this is what that actually looks like.',
+    parts: ['drum', 'pkey interlock', 'swatch', 'engaged key', 'native select', 'native range'],
+  },
+  {
+    file: 'shots/typo-tool.png',
+    app:  'TOOL',
+    line: 'The smallest thing here, and the one that answers a question the viewport cannot: '
+        + 'everything in a viewport panel says where the camera is, these three say what a '
+        + 'drag does. Two questions do not share a chassis.',
+    parts: ['interlock · latching', 'engraved icon', 'lamp on the legend'],
+  },
+];
+
+(function buildShots() {
+  const well = document.getElementById('shots');
+
+  SHOTS.forEach(s => {
+    const fig = el('figure', 'shot-fig');
+    const screen = el('div', 'screen shot');
+
+    /* THE MISSING STATE IS A DEAD SCREEN RATHER THAN A BROKEN IMAGE ICON.
+       A shot not yet dropped in is a display that is powered and showing
+       nothing, which this language already knows how to draw — and the panel
+       around it stays correct, so the page never looks broken while a file
+       is on its way. */
+    const img = new Image();
+    img.alt = `${s.app} ${s.ver}`;
+    img.onerror = () => img.replaceWith(
+      el('div', 'shot-empty', `NO SIGNAL<br>${s.file}`));
+    img.src = s.file;
+    screen.append(img);
+
+    const cap = el('figcaption', 'shot-cap');
+    cap.append(el('span', 'shot-app', s.app), el('span', 'lcd shot-ver', s.ver));
+
+    const parts = el('ul', 'shot-parts');
+    s.parts.forEach(t => parts.append(el('li', null, t)));
+
+    fig.append(screen, cap, el('p', 'shot-line', s.line), parts);
+    well.append(fig);
+  });
+
+  /* THE CROPS GO IN ONE WRAPPING ROW under the full screens, and they carry no
+     version chip: they are the same app at the same version as the shots above
+     and repeating it four more times is four more strings to get wrong. */
+  const row = el('div', 'shot-crops');
+  CROPS.forEach(c => {
+    const fig = el('figure', 'shot-crop');
+    const screen = el('div', 'screen shot');
+
+    const img = new Image();
+    img.alt = c.app;
+    img.onerror = () => img.replaceWith(el('div', 'shot-empty', `NO SIGNAL<br>${c.file}`));
+    img.src = c.file;
+    screen.append(img);
+
+    const parts = el('ul', 'shot-parts');
+    c.parts.forEach(t => parts.append(el('li', null, t)));
+
+    fig.append(screen,
+               el('figcaption', 'shot-cap', `<span class="shot-app">${c.app}</span>`),
+               el('p', 'shot-line', c.line),
+               parts);
+    row.append(fig);
+  });
+  well.append(row);
+})();
+
+/* ── the papers ─────────────────────────────────────────────────────────── */
+(function buildPapers() {
+  const well = document.getElementById('papers');
+  PAPERS.forEach(([file, name, line]) => {
+    const a = el('a', 'paper', `${ICON.paper}<b>${name}</b>`);
+    a.href = file;
+    /* THE BADGE IS THE FILE'S NAME, NOT THE HREF. They stopped being the same
+       thing when the pages moved into docs/ and the papers stayed at the repo
+       root: the link needs the ../ and the reader does not, and a chip reading
+       "../HATCH-API.md" is a chip about this page's own directory. */
+    a.append(el('span', null, line), el('span', 'tagcut', file.replace(/^(\.\.\/)+/, '')));
+    well.append(a);
+  });
+})();
+
+/* ── THE ARCHIVE. One line, at the foot, and deliberately not a card: it is
+      not a document in this system, it is the thing this system proposes to
+      replace. A card would put it in the same row as the three pages and make
+      it look like a fourth destination. ─────────────────────────────────── */
+(function buildArchive() {
+  const a = document.getElementById('archive');
+  const link = el('a', 'arch-link', `${ICON.box}<b>${SKEW_ARCHIVE.name}</b>`);
+  link.href = SKEW_ARCHIVE.file;
+  link.append(el('span', null, SKEW_ARCHIVE.line), el('span', 'tagcut', SKEW_ARCHIVE.file));
+  a.append(el('p', 'paper-lab', 'Archive'), link);
+})();
+
+/* the footer states the version, read from the same place the nav window is */
+import('../version.js')
+  .then(m => {
+    document.getElementById('foot').textContent =
+      `targz design system · skew · v${m.version}`;
+  })
+  .catch(() => {});
+</script>
+</body>
+</html>

@@ -24,12 +24,22 @@ const path = require('path');
 const ROOT         = __dirname;
 const DEFAULT_PORT = 2860;
 
-/* THE LANDING PAGE. `/` is the one URL the launcher opens, and the home is now
-   the root document, so there is nothing to redirect to and the directory
-   branch serves it. Point this at a subfolder and `/` becomes a 302 to it
-   rather than a silent rewrite, so the address bar keeps reading the page's
-   real path. One line either way. */
-const HOME = '/';
+/* ── WHERE A URL IS LOOKED FOR, AND WHY IT IS TWO PLACES ───────────────────
+   The documentation site lives in docs/ and the language lives in src/, which
+   is the layout every library of this shape uses. But the site is what `/`
+   should serve, and a 302 to /docs/ would put a build directory in the address
+   bar of the thing a reader was sent to look at.
+
+   So a request is resolved against docs/ FIRST and the repo root SECOND. `/`
+   and `/skew-system.html` come out of docs/; `/src/skew.css`, `/dist/skew.css`
+   and `/HATCH-API.md` fall through to the root and are found there. The pages'
+   own hrefs are ordinary relative paths either way — `../src/skew.css` from
+   docs/ resolves to /src/skew.css, which the fallback serves.
+
+   ORDER MATTERS AND ONLY IN ONE CASE: a name that exists in both. There is
+   none today, and docs/ winning is the right answer if there ever is, because
+   docs/ is what the site is. */
+const ROOTS = [path.join(__dirname, 'docs'), __dirname];
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -75,39 +85,40 @@ http.createServer((req, res) => {
     return send(res, 400, '400 bad request');
   }
 
-  /* HOME === '/' means the home already IS the root document, so there is
-     nothing to redirect to and the directory branch below serves it. Guarding
-     this is not defensive noise: the constant is one line and the day it moves
-     to '/' an unguarded redirect points at itself. */
-  if (urlPath === '/' && HOME !== '/') {
-    res.writeHead(302, { Location: HOME });
-    return res.end();
-  }
-
   /* path.normalize collapses ../ before the prefix test, so a request for
-     /../../.ssh/id_rsa resolves and then fails to start with ROOT. */
-  const file = path.normalize(path.join(ROOT, urlPath));
-  if (!file.startsWith(ROOT)) return send(res, 403, '403 forbidden');
+     /../../.ssh/id_rsa resolves and then fails to start with ROOT. The guard
+     is against ROOT rather than against each root in turn: docs/ is inside it,
+     so one test covers both and cannot be passed by a path that climbs out of
+     docs/ into the repo, which is allowed anyway. */
+  const candidates = ROOTS
+    .map(r => path.normalize(path.join(r, urlPath)))
+    .filter(f => f.startsWith(ROOT));
+  if (!candidates.length) return send(res, 403, '403 forbidden');
 
-  fs.stat(file, (err, st) => {
+  const found = candidates.find(f => fs.existsSync(f));
+  if (!found) return send(res, 404, `404 ${urlPath}`);
+
+  fs.stat(found, (err, st) => {
     if (err) return send(res, 404, `404 ${urlPath}`);
 
     /* a directory is its index.html, and a directory URL without the trailing
        slash is redirected rather than served: relative hrefs inside the page
-       resolve against the wrong parent otherwise */
+       resolve against the wrong parent otherwise. `/` is the exception and it
+       is not a special case here — it already ends in a slash, so it falls
+       straight through to docs/index.html. */
     if (st.isDirectory()) {
       if (!urlPath.endsWith('/')) {
         res.writeHead(301, { Location: urlPath + '/' });
         return res.end();
       }
-      const idx = path.join(file, 'index.html');
+      const idx = path.join(found, 'index.html');
       if (!fs.existsSync(idx)) return send(res, 404, `404 no index in ${urlPath}`);
       return stream(res, idx);
     }
-    stream(res, file);
+    stream(res, found);
   });
 }).listen(port, '127.0.0.1', () => {
-  console.log(`targz-design-system  http://localhost:${port}${HOME}`);
+  console.log(`targz-design-system  http://localhost:${port}/`);
 }).on('error', e => {
   if (e.code === 'EADDRINUSE') {
     console.error(`port ${port} is already in use. Something else is on it, or a previous run did not exit.`);

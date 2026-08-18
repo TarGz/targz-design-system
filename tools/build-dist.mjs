@@ -4,16 +4,21 @@
 //   node tools/build-dist.mjs           report whether dist/ matches the source
 //   node tools/build-dist.mjs --write   rebuild it
 //
-// WHY dist/ EXISTS. The repo root holds eleven files and only two of them are for
-// an adopting app; the other nine are this documentation site and its two demo
-// pages. Which two was a question you had to be told the answer to, and being
-// told is not a system. dist/ is the answer written down: what is in here you
-// copy, what is outside you read.
+// WHY dist/ EXISTS. src/ is where the language is written and dist/ is what an
+// app copies, and they are different files on purpose: src/skew.css carries this
+// documentation site's own rules, and src/skew-kit.js is a plain script that
+// cannot be loaded beside p5 without colliding. dist/ is those two problems
+// solved, once, by a program rather than by remembering.
 //
 // IT IS GENERATED AND NEVER HAND-EDITED, which is the whole reason it is allowed
 // to exist at all. A third copy of a stylesheet is a third thing to keep in sync
-// unless a program owns it, and then it is a build output. Edit `skew.css` and
-// `skew-kit.js` at the root; run this; commit both.
+// unless a program owns it, and then it is a build output. Edit src/; run this;
+// commit both.
+//
+//   src/     what you edit
+//   dist/    what an app copies
+//   docs/    the four pages, which read src/ so the site cannot document a
+//            version of the language nobody ships
 //
 // ── WHAT THE CSS BUILD DOES, AND WHAT IT DELIBERATELY DOES NOT ───────────────
 // It removes the documentation site's own rules and nothing else. It does NOT
@@ -22,8 +27,8 @@
 // Portrait-Typo and Portrait-ribbons reads the class names its own app writes and
 // pulls only those rules. This build is the input to that, not a replacement.
 //
-// So dist/skew.css is barely smaller than skew.css, and that is correct. The win
-// is not bytes, it is that copying it cannot bring the doc site's `.wrap`,
+// So dist/skew.css is barely smaller than src/skew.css, and that is correct. The
+// win is not bytes, it is that copying it cannot bring the doc site's `.wrap`,
 // `.spec` and `.mat` into your app.
 //
 // AN EXCLUDE LIST, NOT AN INCLUDE LIST, AND THAT DIRECTION IS THE POINT. An
@@ -50,7 +55,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -72,7 +77,12 @@ const DOC_ONLY = new Set([
   'doc', 'doc-body', 'doc-file', 'doc-foot', 'doc-grid', 'doc-kick', 'doc-line',
   'doc-list', 'doc-open',
   'paper', 'paper-lab', 'papers', 'archive', 'arch-link',
-  'klayouts', 'lightrow', 'proudrow',
+  'klayouts', 'deskdemo', 'matstage', 'setrow', 'gridout',
+  'intrig', 'intcell', 'intcell-wrap',
+  'togrig', 'togcell',
+  'gridbox', 'gridbody', 'gridrow', 'gridcol', 'gridswatch',
+  'loupe', 'loupe-glass', 'loupe-mark',
+  'detail', 'detail-tab', 'detail-nm', 'detail-n',
 ]);
 
 /* ── A BRACE WALKER, BECAUSE A REGEX CANNOT DO THIS ───────────────────────────
@@ -144,23 +154,36 @@ function strip(css) {
 const API = [
   'el', 'svg', 'eng', 'ICON', 'ENG',
   'knob', 'fader', 'rangeFader', 'rotary', 'drum',
-  'key', 'pkey', 'swBtn', 'chevBtn',
+  'key', 'pkey', 'swBtn', 'toggle', 'chevBtn',
   'openPicker', 'typeable', 'engage', 'windowise', 'WIN_ICON',
   'hex2rgb', 'rgb2hex', 'rgb2hsv', 'hsv2rgb',
   'RING_R', 'RING_C', 'CAP_W', 'panelShape',
   'SFX', 'clicky',
 ];
 
-const version = () => {
-  const v = fs.readFileSync(path.join(ROOT, 'version.js'), 'utf8')
-    .match(/export const version = '([^']+)'/);
-  return v ? v[1] : 'unknown';
+/* THE VERSION IS IMPORTED, NOT GREPPED, AND THAT IS THE WHOLE REASON THIS IS
+   ASYNC. A regex over the file reported a perfectly good version number out of
+   a file that had stopped parsing — a doubled `],` left by an edit — so every
+   build said `clean at v1.28.0` while the nav bar on all four pages sat at its
+   `v—` placeholder, because the pages read it with a dynamic import and the
+   import was throwing. The build has to fail the way the page fails. */
+const version = async () => {
+  const url = pathToFileURL(path.join(ROOT, 'version.js')).href;
+  try {
+    const m = await import(url + '?t=' + fs.statSync(path.join(ROOT, 'version.js')).mtimeMs);
+    if (!m.version) throw new Error('no `version` export');
+    return m.version;
+  } catch (e) {
+    console.error('version.js does not parse — the nav bar will read v—');
+    console.error('  ' + e.message);
+    process.exit(1);
+  }
 };
 
 const banner = (src, v) => `/* ─────────────────────────────────────────────────────────────────────────────
    ${src} — GENERATED. DO NOT HAND-EDIT.
 
-     source   ../${src}
+     source   ../src/${src}
      at       Skew v${v}
      rebuild  node tools/build-dist.mjs --write
 
@@ -170,7 +193,7 @@ const banner = (src, v) => `/* ────────────────�
 `;
 
 function buildJs(v) {
-  const src = fs.readFileSync(path.join(ROOT, 'skew-kit.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'src/skew-kit.js'), 'utf8');
   return banner('skew-kit.js', v)
     + '(function () {\n'
     + "'use strict';\n\n"
@@ -179,18 +202,29 @@ function buildJs(v) {
 }
 
 function buildCss(v) {
-  const src = fs.readFileSync(path.join(ROOT, 'skew.css'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'src/skew.css'), 'utf8');
   const { css, dropped } = strip(src);
   return { text: banner('skew.css', v) + css, dropped };
 }
 
-const v = version();
+const v = await version();
 const js = buildJs(v);
 const { text: css, dropped } = buildCss(v);
+
+/* THE HATCH ENGINE IS COPIED, NOT BUILT. It is already a self-contained IIFE
+   that touches nothing but three globals, it has no doc-site rules to strip and
+   no public-surface list to append — so a build step here would be a step that
+   can only introduce a difference between what is tested and what ships. It
+   gets the banner and nothing else. */
+function buildHatch(v) {
+  const src = fs.readFileSync(path.join(ROOT, 'src/skew-hatch.js'), 'utf8');
+  return banner('skew-hatch.js', v) + src;
+}
 
 const targets = [
   ['dist/skew-kit.js', js],
   ['dist/skew.css', css],
+  ['dist/skew-hatch.js', buildHatch(v)],
 ];
 
 if (WRITE) {

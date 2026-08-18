@@ -106,10 +106,224 @@ body{
   -webkit-font-smoothing:antialiased;
   min-height:100vh;
 }
-body::after{  /* room grain over everything, very light */
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:99;
+/* THE AIR IN THE ROOM, NOT A TEXTURE ON THE PANELS, and `fixed` is what says so:
+   an absolute grain swims with the canvas when you pan, and a grain that travels
+   with the artwork is read as dirt on the paper.
+
+   THE Z IS A TOKEN BECAUSE 99 IS ONLY RIGHT HERE. This page has no floating
+   panels, so the grain can sit over everything. An app has panels, and the grain
+   belongs UNDER them and OVER the canvas — Portrait-Typo sets 90 against panels
+   at 96 and up. Take this rule at 99 into an app and it lays a haze over your own
+   panels, which is an afternoon spent looking for it in the panel's CSS. */
+body::after{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:var(--grain-z, 99);
   background-image:var(--grain); opacity:.035; mix-blend-mode:overlay;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE SHEET
+
+   The one rule the whole block exists for: A THEME THAT TINTS THE THING BEING
+   DRAWN IS A THEME THAT LIES ABOUT THE DRAWING. The chrome is anodised metal on
+   a near-black desk. The paper is paper. Nothing here reaches inside it — no
+   grain, no tint, no filter, no blend mode — and the only thing this class does
+   is put it on the desk convincingly.
+
+   THE SHADOW IS BIGGER THAN ANY PANEL'S, and it has to be. Every raised thing in
+   this language uses one wide soft shadow plus one tight contact shadow; at panel
+   size that is 6px and 2px. A white sheet on a near-black desk at those numbers
+   reads as a sticker. Same recipe, ten times the throw.
+   ══════════════════════════════════════════════════════════════════════════ */
+.sheet{
+  background:#fff;
+  box-shadow:
+    0 30px 60px -18px rgba(0,0,0,.9),   /* the throw: how far off the desk it is */
+    0 6px 16px -4px rgba(0,0,0,.7);     /* the contact: where it actually touches */
+}
+/* A CANVAS OR AN SVG IS A REPLACED ELEMENT and sits on the text baseline, so the
+   sheet gets a few pixels of white under it that no padding explains. */
+.sheet > canvas, .sheet > svg{ display:block; }
+
+/* AND SOMETIMES THE SHEET IS NOT THE SUBJECT. A 3D view, a depth map or a debug
+   pass is a WINDOW onto something, not a piece of paper laid on a desk, and a
+   window does not throw a shadow. */
+.sheet.window{ box-shadow:none; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE GRID ON THE SHEET
+
+   Paper you are about to plot on is not blank paper. The grid is the only
+   thing on the sheet that is NOT the work, which is the whole difficulty: it
+   has to be readable enough to align against and faint enough that you never
+   mistake a rule for a stroke. So it is ink, in millimetres, with its own
+   colour and its own opacity, and it sits on the sheet rather than in it.
+
+   TWO WEIGHTS, AND THE SECOND IS THE POINT. A single pitch is either too
+   coarse to place anything against or so dense it greys the page. Majors
+   carry the count, sublines subdivide them, and the sublines are thinner AND
+   fainter — a grid you read as a hierarchy rather than as a texture.
+
+   EVERY NUMBER IS A CUSTOM PROPERTY because every one of them is a setting in
+   the app: the panel writes them and the CSS draws. Nothing here is hard-coded
+   that a Grid bay does not expose.
+   ══════════════════════════════════════════════════════════════════════════ */
+.grid{
+  --grid-pitch:  15px;    /* major spacing. SQUARE: same both ways   */
+  --grid-minor:  3px;     /* subline spacing. AN EXACT DIVISOR of it */
+  --grid-w:      1px;     /* major weight                            */
+  --grid-subw:   1px;     /* subline weight                          */
+  --grid-ink:    #7FB2E5;
+  --grid-op:     1;
+  --grid-subink: color-mix(in srgb, var(--grid-ink) 40%, transparent);
+
+  position:absolute; inset:0; pointer-events:none;
+  opacity:var(--grid-op);
+  background-image:
+    repeating-linear-gradient(to right,  var(--grid-subink) 0 var(--grid-subw), transparent var(--grid-subw) var(--grid-minor)),
+    repeating-linear-gradient(to bottom, var(--grid-subink) 0 var(--grid-subw), transparent var(--grid-subw) var(--grid-minor)),
+    repeating-linear-gradient(to right,  var(--grid-ink)    0 var(--grid-w),    transparent var(--grid-w)    var(--grid-pitch)),
+    repeating-linear-gradient(to bottom, var(--grid-ink)    0 var(--grid-w),    transparent var(--grid-w)    var(--grid-pitch));
+}
+
+/* ── THREE RULES THAT LOOK LIKE FUSSING AND ARE NOT ────────────────────────
+   SQUARE CELLS. One pitch for both axes, so a cell is a square unit — which is
+   what ruled paper is. Dividing each axis into the same COUNT gave 15 x 21
+   cells on a 300 x 424 sheet: a grid describing the sheet's proportions rather
+   than a unit of measure, and you cannot count a distance on it.
+
+   THE PITCHES ARE WHOLE PIXELS AND THE MINOR EXACTLY DIVIDES THE MAJOR. A
+   repeating gradient at 3.04px does not land on the device grid, so the
+   renderer rounds each repeat independently and the error walks — which draws
+   a staircase across the sheet and looks like a bug in the drawing rather than
+   in the ruling. The panel does that arithmetic and hands CSS integers.
+
+   AND THE WEIGHT IS 1px, NOT 0.5. Below one device pixel a line does not get
+   thinner, it gets rounded up to one and drawn at full strength, so a 0.2mm
+   subline and a 0.5mm major came out identical and the hierarchy vanished at
+   exactly the density it matters. Weight below 1px is carried by ALPHA — which
+   is what `--grid-subink` is for. */
+
+/* THE RULERS ARE ENGRAVED ON THE DESK, so they are LIGHT lines. This is the one
+   place the engraving rule inverts: everywhere else a cut is darker than its
+   surface with a lit far wall, but the desk is already near black and a near
+   black tick on it is not a tick. */
+.ruler-tick{ background:rgba(255,255,255,.34); opacity:1; }
+.ruler-label{
+  color:#6d727c; font-family:var(--font); font-size:8px; letter-spacing:.1em;
+  text-shadow:0 1px 0 rgba(0,0,0,.8);
+}
+
+
+/* ── THE DESK SPECIMEN'S FURNITURE ────────────────────────────────────────
+   A ruler is a strip with ticks in it, and the strip is the app's to place —
+   Portrait-Typo hangs one on each edge of `#canvas-container` and insets both
+   with the drawer. What the language owns is what a tick LOOKS like on this
+   ground, above; this is the minimum frame that lets you see it. */
+.ruler{ position:absolute; pointer-events:none; }
+.ruler-top{ top:-13px; left:0; right:0; height:11px; }
+.ruler-left{ left:-13px; top:0; bottom:0; width:11px; }
+.ruler-tick{ position:absolute; }
+.ruler-top .ruler-tick{ bottom:0; width:1px; height:4px; }
+.ruler-top .ruler-tick.long{ height:9px; }
+.ruler-left .ruler-tick{ right:0; height:1px; width:4px; }
+.ruler-left .ruler-tick.long{ width:9px; }
+
+
+/* THE SPECIMEN'S STAGE, and it is doc-only — the exclude list in
+   tools/build-dist.mjs names `.deskdemo`, so it does not reach an app. The
+   sheet itself is a part; the box it is posed in is this page.
+
+   THE SPECIMEN'S OWN SIZE IS INLINE ON THE ELEMENT, not a `.deskdemo .sheet`
+   rule here, and that is the exclude list's one sharp edge: a selector naming
+   a doc class AND a part is KEPT, because dropping `.mat .knob` would take a
+   part's geometry with it. Correct in general, and here it would have shipped a
+   dead rule sizing a sheet inside a container an app does not have. */
+/* THE SHEET SITS ON A STAGE LIKE EVERY OTHER SPECIMEN, and the loupe needs it:
+   a glass overhanging the paper has to overhang ONTO something. */
+.deskdemo{
+  display:flex; align-items:center; justify-content:center;
+  gap:56px; flex-wrap:wrap; padding:18px 0 6px; margin:0; width:100%;
+}
+/* THE BAY IS THE SPECIMEN'S OTHER HALF. A grid you cannot change is a picture
+   of a grid; the panel is what makes the sheet an argument. Doc-only. */
+/* ══════════════════════════════════════════════════════════════════════════
+   THE LOUPE — a magnifier lying on the paper
+
+   A rectangular inset off to one side is a second picture you have to relate
+   to the first. A round glass sitting ON the sheet, overhanging its corner and
+   throwing a shadow onto the desk, is the same object as everything else here:
+   a thing on a table, at 1:1, that you would pick up.
+
+   IT IS ROUND BECAUSE LENSES ARE, and that is not decoration — a circle is the
+   one silhouette on this page that cannot be mistaken for a panel, so nothing
+   about it reads as another control to operate.
+
+   THREE PARTS, SAME AS EVERY OTHER OBJECT: a machined bezel with the lit edge
+   at the top, glass cut into it, and a specular that runs off the lamp at 158°
+   like the rest of the room.
+   ══════════════════════════════════════════════════════════════════════════ */
+.loupe{
+  position:absolute; right:-46px; top:-46px;
+  width:146px; height:146px; padding:7px;
+  border-radius:50%; pointer-events:none;
+  background:linear-gradient(158deg,#3a3e45 0%,#22252a 46%,#15171a 72%,#2b2e34 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.20),      /* the lit top of the ring   */
+    inset 0 -2px 0 rgba(0,0,0,.9),            /* and its shaded underside  */
+    0 26px 40px -14px rgba(0,0,0,.95),        /* the throw onto the desk   */
+    0 6px 12px -3px rgba(0,0,0,.8),           /* the contact               */
+    0 0 0 1px rgba(0,0,0,.85);                /* the lifted edge, all round */
+}
+/* THE GLASS IS CUT INTO THE BEZEL, so it takes the well's inset and not a
+   border: a lens sits below the ring that holds it, never on top of it. */
+.loupe-glass{
+  position:relative; width:100%; height:100%;
+  border-radius:50%; overflow:hidden; background:#fff;
+  box-shadow:
+    inset 0 3px 7px rgba(0,0,0,.5),
+    inset 0 0 0 1px rgba(0,0,0,.55),
+    inset 0 -1px 0 rgba(255,255,255,.35);
+}
+/* THE SPECULAR IS ON THE OUTSIDE OF THE GLASS and does not care what is under
+   it, so it runs the full disc rather than stopping at the grid. */
+.loupe-glass::after{
+  content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  background:
+    linear-gradient(158deg,
+      rgba(255,255,255,.42) 0%, rgba(255,255,255,.14) 15%,
+      rgba(255,255,255,.02) 30%, transparent 46%),
+    radial-gradient(120% 120% at 78% 88%, rgba(0,0,0,.16), transparent 52%);
+}
+/* THE MAGNIFICATION IS ENGRAVED ON THE BEZEL, because it is a property of the
+   instrument rather than a value the panel sets. */
+/* THE MARK MOVED UNDER THE GLASS WITH IT. At the top-right corner the label
+   would otherwise sit on the top ruler. */
+.loupe-mark{
+  position:absolute; left:0; right:0; bottom:-15px; text-align:center;
+  font-family:var(--font); font-size:8px; letter-spacing:.16em; color:#4c515a;
+  text-shadow:0 1px 0 rgba(255,255,255,.10);
+}
+
+.gridbody{ padding:9px 10px 11px; gap:9px; }
+.gridrow{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px 8px; }
+/* THE VALUE SITS BESIDE THE DIAL. `bare` was the first choice and it showed
+   only the pointer, which on a control whose whole subject is tenths of a
+   millimetre is a control you cannot read — you could turn Sub mm all the way
+   and never learn what you had set it to. */
+.gridrow .kwrap.compact{ gap:8px; }
+.gridrow .kwrap.compact .kval{ min-width:46px; }
+.gridcol{ display:flex; align-items:center; gap:8px; }
+/* THE SWATCH IS A CAP, not a colour box: it goes down when you press it and it
+   carries the ink on its face, the way every other lit thing here does. */
+.gridswatch{
+  width:34px; height:22px; flex:0 0 34px; border:0; padding:0; cursor:pointer;
+  border-radius:6px; background:var(--sw, #7FB2E5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.5),
+             0 0 0 1px rgba(0,0,0,.65), 0 2px 4px rgba(0,0,0,.6);
+  transition:transform .1s;
+}
+.gridswatch:active{ transform:translateY(1px); }
+.gridswatch:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 
 /* ── page furniture ──────────────────────────────────────────────────────── */
 .wrap{ max-width:1160px; margin:0 auto; padding:56px 32px 120px; }
@@ -311,6 +525,60 @@ h2 span{ color:#3d4149; }
   display:flex; flex-direction:column; gap:5px;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   THE INTERLOCK — n latching keys on one bar, one down at a time.
+
+   It is not a new mechanism and it never needed a new part. `pkey` carries the
+   interlock (press one, the others pop out) and the bar is `.piano`, the same
+   milled floor every bay uses. What the two add together is a CLAIM: these n
+   things are ONE setting, and exactly one of them is true right now. A row of
+   separate keys says n independent things; sunk into one bar they say one
+   thing with n positions, which is what a mode is.
+
+   THREE SHAPES, AND ALL THREE ARE IN SHIPPING APPS. A bar (`.piano`), a
+   PALETTE stood on end (`.palette`), and a bar that WRAPS when the names stop
+   fitting (`.piano.sm.hb-tabs`). A fourth was written from scratch as `.seg`,
+   documented as a new part, and never once rendered upright in four attempts.
+   It is gone. The rule it broke is the oldest one here: if a component is not
+   in a real app, it does not belong in Skew.
+
+   AGAINST THE ROTARY, and the line is about how you read it rather than how
+   many there are: a rotary POINTS at its position, so it is right when the
+   positions are an ordered scale you aim along. An interlock LIGHTS one, which
+   is right when they are unrelated alternatives and each needs its own name
+   and icon at full size. Three tools are not a scale from Pan to Select.
+
+   ── THE RIG. Doc-only, and it is three widths and nothing else. `.piano` and
+   `.palette` size themselves; the wrapped bar is `width:100%` because in the
+   hatch bay it fills a panel, so here it needs a number to fill. That was the
+   whole of what kept collapsing: a bar sized by its keys while its keys are
+   sized by the bar has no answer on a stage, and every previous fix supplied
+   the number from a chassis wrapped round the outside — so the specimen only
+   stood up inside a case it is never inside in an app. */
+.intrig{
+  display:flex; flex-wrap:wrap; align-items:flex-start;
+  justify-content:center; gap:34px 44px;
+}
+.intcell{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.intcell > .bay-cap{ align-self:stretch; }
+.intcell-wrap{ width:412px; }
+
+/* ── THE TOGGLE RIG. Doc-only, and it is one width and nothing else. A `.tog`
+   is `width:100%` because on a panel it fills the bay, so on a stage it needs
+   a number to fill — the same trap the interlock rig spent four rebuilds on.
+   258px is the settings panel's body width, which is where these actually
+   live. */
+.togrig{
+  display:flex; flex-wrap:wrap; align-items:flex-start;
+  justify-content:center; gap:34px 44px;
+}
+.togcell{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; width:258px; }
+.togcell > .bay-cap{ align-self:stretch; }
+
+/* THE HEADING IS THE PANEL'S, NOT THE BAR'S. An interlock sits under a `.bay-cap`
+   like anything else, so it carries no title of its own and cannot disagree
+   with the one above it. */
+
 /* ── a ROW: a module card seated in the bay ──────────────────────────────── */
 .item{ display:flex; flex-direction:column; }
 .row{
@@ -405,7 +673,13 @@ h2 span{ color:#3d4149; }
 .sw svg{ position:relative; width:14px; height:14px; stroke:currentColor; fill:none;
          stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round;
          transform-origin:50% 50%; transition:transform .1s; }
-.sw:hover{ color:#eef1f5;
+/* AND THE PLATE ANSWERS FOR THE CAP. In a `.tog` the button is the whole line
+   and the cap is a span inside it, so `.sw:hover` and `.sw:active` never fire
+   when the pointer is on the name — which is most of the line. The two states
+   are added to the rules that already own them rather than written again next
+   to them: a second copy of this gradient is a second thing to tune. */
+.sw:hover,
+.tog:hover .sw{ color:#eef1f5;
   background:
     radial-gradient(125% 95% at 32% 16%, rgba(255,255,255,.18), transparent 62%),
     linear-gradient(180deg,#525965 0%,#434955 36%,#343a42 68%,#282d33 100%); }
@@ -452,7 +726,8 @@ h2 span{ color:#3d4149; }
    changes is the box-shadow: the skirt goes (it is resting on it now) and the
    four walls of the recess come on. Plus 1px of travel, and the legend lights.
    Three declarations, one object. */
-.sw:active{ transform:translateY(1px); box-shadow:var(--recess); }
+.sw:active,
+.tog:active .sw{ transform:translateY(1px); box-shadow:var(--recess); }
 /* ── DOWN IS ONE STATE. THE LEGEND SAYS WHICH KIND OF DOWN. ─────────────
    ON and MIXED are the same cap in the same position with the same recess,
    and they differ only in the colour of what is printed on it:
@@ -514,6 +789,237 @@ h2 span{ color:#3d4149; }
 .sw.on svg{ filter:drop-shadow(0 0 3px rgba(255,130,30,.7)); }
 /* white is a legend, not a lamp — it gets no bloom */
 .sw.mixed svg{ filter:none; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SLIDE SWITCH — a machined actuator standing proud of a milled slot
+   ═══════════════════════════════════════════════════════════════════════════
+   A CAP IS FOR A BOOLEAN WITH A LEGEND. Most have none: "Invert tone", "Apply
+   edits", "Weave crossings" — nineteen in the app this was written for, three
+   with an honest glyph. A cap with nothing printed on it is not a blank legend
+   but a missing one, and a lamp in the middle of it is not the answer either:
+   it says "lit" where this panel already has jewels, pipes and lit arcs saying
+   that, and it turns every switch on the plate into a dot.
+
+   SO THE LEGEND IS THE POSITION, and the part is the switch a console has most
+   of: a knurled actuator thrown left or right in a slot milled through the
+   faceplate. You read it from the far side of the room without reading
+   anything.
+
+   ── WHY IT IS FIVE SURFACES AND NOT TWO ────────────────────────────────────
+   The first two passes drew it with the slot's own ::before and ::after and it
+   read as cheap, which is a specific failure and not a vague one. A small part
+   looks cheap when its shading does not describe a SOLID: stripes instead of
+   ridges, one flat fill instead of a chamfer and a face, nothing cast anywhere,
+   and every highlight pure white. Pure white is the tell — a lamp has a colour
+   and metal has a colour, and their product is never #fff.
+
+   So the slot builds two children and they carry three more pseudo-surfaces:
+
+     .slide      the CUT: the walls of the slot, dark at the top where the wall
+                 overhangs, lit along the bottom where the floor bounces
+     .sl-bed     the FLOOR: painted, and darkened into its own corners because
+                 a floor meets its walls in shadow. This is the part that
+                 lights, and what lights is a painted surface catching a lamp,
+                 not a coloured rectangle
+     .sl-act     the ACTUATOR: an aluminium extrusion, chamfered top and left
+                 where the lamp is, falling to shade bottom and right, standing
+                 on a skirt and casting onto the plate
+     ::before    the KNURL, cut into the middle of its face
+     ::after     the SPECULAR, one anisotropic streak across the crowns
+
+   ── AND IT IS WIDER THAN THE SLOT ──────────────────────────────────────────
+   The single biggest thing that stopped it reading as an object. A rectangle
+   inside a rectangle is two rectangles; an actuator with a FLANGE — 24px in a
+   22px opening, overhanging a pixel top and bottom — is a part sitting IN
+   something, and its shadow falls on the slot's own edge. Every real slide
+   switch has this flange, because the actuator has to hold itself in the
+   panel.
+
+   ── THE MATERIAL IS ALUMINIUM, AND IT IS THE ONLY ONE HERE ─────────────────
+   The keys in this language are moulded plastic caps and the plates are
+   anodised. This is bead-blasted aluminium: a lighter grey, a bright hard
+   chamfer, sharp groove shadows, and one specular streak that runs ACROSS the
+   part because that is how a machined finish scatters. A second material used
+   once, for one part, the way the brass tone plate is. */
+.slide{
+  position:relative; flex:0 0 46px; width:46px; height:22px; border-radius:7px;
+  /* THE CUT ITSELF. The top wall overhangs and is nearly black under it; the
+     bottom wall is the one the floor throws light back onto. */
+  background:linear-gradient(180deg,#08090b 0%,#0e1114 48%,#0a0c0e 100%);
+  box-shadow:
+    inset 0 2px 3px rgba(0,0,0,.95),
+    inset 0 1px 0 rgba(0,0,0,.9),
+    inset 1px 0 2px rgba(0,0,0,.75),
+    inset 0 -1px 0 rgba(255,255,255,.10),
+    0 1px 0 rgba(255,255,255,.055);
+}
+/* ── THE FLOOR ─────────────────────────────────────────────────────────────
+   DARK IN ITS OWN CORNERS, both states. A floor meets its walls in shadow, and
+   the version without that corner darkening was the single flattest thing in
+   the part — a coloured rectangle with a border-radius. The radial goes FIRST
+   in the list because background layers paint first-on-top. */
+.sl-bed{
+  display:block; position:absolute; inset:3px; border-radius:4px;
+  background-image:
+    radial-gradient(120% 200% at 50% 45%, transparent 34%, rgba(0,0,0,.55) 100%),
+    linear-gradient(180deg,#06070a,#0c0f12 55%,#080a0c);
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.95),
+    inset 0 -1px 1px rgba(255,255,255,.05);
+  transition:background-image .18s, box-shadow .18s;
+}
+/* LIT IS A PAINTED FLOOR CATCHING A LAMP, so it is brightest across its middle
+   and turns down at both walls, with a hard specular line just under the top
+   wall. It keeps its inset shadow — it is a hole either way, and a lit floor
+   that loses its shadow becomes a sticker laid on the panel. */
+.slide.on .sl-bed{
+  background-image:
+    radial-gradient(120% 200% at 50% 45%, transparent 30%, rgba(0,0,0,.5) 100%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--lyr, var(--led)) 52%, #000) 0%,
+      color-mix(in srgb, var(--lyr, var(--led)) 90%, #fff) 34%,
+      color-mix(in srgb, var(--lyr, var(--led)) 88%, #000) 62%,
+      color-mix(in srgb, var(--lyr, var(--led)) 50%, #000) 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.6),
+    inset 0 0 0 1px rgba(0,0,0,.4),
+    0 0 7px color-mix(in srgb, var(--lyr, var(--led)) 45%, transparent),
+    0 0 16px color-mix(in srgb, var(--lyr, var(--led)) 22%, transparent);
+}
+/* ── THE ACTUATOR ──────────────────────────────────────────────────────────
+   SIX STOPS, NOT TWO. An extrusion has a chamfer, a face, a turn and an
+   under-edge, and a two-stop gradient can only say "lighter at the top". The
+   bottom stop comes back UP a little: that is the floor of the slot bouncing
+   into the underside, and it is the difference between a part sitting in a
+   hole and a part pasted over one. */
+.sl-act{
+  display:block; position:absolute; top:1px; left:1px; width:24px; height:20px;
+  border-radius:5px;
+  background-image:linear-gradient(180deg,
+    #838b96 0%, #6f7883 13%, #5b636e 38%, #4a515b 62%, #383e47 84%, #2a2f36 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,248,238,.44),
+    inset 1px 0 0 rgba(255,248,238,.13),
+    inset -1px 0 0 rgba(0,0,0,.55),
+    inset 0 -2px 3px rgba(0,0,0,.5),
+    inset 0 -1px 0 rgba(255,236,214,.15),
+    0 0 0 1px rgba(0,0,0,.6),
+    0 2px 2px rgba(0,0,0,.55),
+    0 4px 7px rgba(0,0,0,.55);
+  /* IT SNAPS. A slide switch is spring-loaded over centre — it does not ease
+     into place, it arrives and stops hard, which is what the overshoot on this
+     curve is. 160ms is the whole throw. */
+  transition:transform .16s cubic-bezier(.34,1.25,.5,1), filter .12s,
+             box-shadow .18s;
+}
+.slide.on .sl-act{ transform:translateX(20px); }
+/* AND WHEN THE FLOOR IS LIT IT BOUNCES INTO THE UNDERSIDE. One lamp, one
+   painted surface under the part, and warm light coming back up off it — the
+   only place in this language where a colour reaches something it is not
+   printed on. */
+.slide.on .sl-act{
+  box-shadow:
+    inset 0 1px 0 rgba(255,248,238,.44),
+    inset 1px 0 0 rgba(255,248,238,.13),
+    inset -1px 0 0 rgba(0,0,0,.55),
+    inset 0 -2px 3px rgba(0,0,0,.42),
+    inset 0 -3px 5px -1px color-mix(in srgb, var(--lyr, var(--led)) 42%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--lyr, var(--led)) 45%, #d8ccc0),
+    0 0 0 1px rgba(0,0,0,.6),
+    0 2px 2px rgba(0,0,0,.55),
+    0 4px 7px rgba(0,0,0,.55);
+}
+/* ── THE KNURL ─────────────────────────────────────────────────────────────
+   THREE RIBS, ROUNDED, CUT INTO THE MIDDLE OF THE FACE. The first cut was a
+   3px repeating gradient across the whole part: seven one-pixel ridges, which
+   at this size the eye reads as NOISE rather than as grip, and which on a dark
+   face turns to grey mush. A real grip has a countable number of grooves and
+   they stop short of the edges, where the moulding radius is.
+
+   AND EACH GROOVE IS A CROSS-SECTION, NOT A STRIPE. A ridge lit from above-left
+   is bright on its left flank, falls through the crown, drops into a dark floor
+   and comes back up — five stops per 5.2px, ramped rather than stepped, so the
+   ribs read as round. Stepped stops give flat bands, which is exactly what
+   "cheap" looked like.
+
+   The overlay on top of it is the band's own vertical shading: the crowns
+   catch the lamp at the top and the whole knurl sits in shade at the bottom,
+   because the face it is cut into is curving away there. */
+.sl-act::before{
+  content:''; position:absolute; left:50%; top:50%; width:16px; height:12px;
+  transform:translate(-50%, -50%); border-radius:2px;
+  background-image:
+    linear-gradient(180deg,
+      rgba(255,252,246,.15) 0%, rgba(255,252,246,.02) 24%,
+      rgba(0,0,0,.05) 58%, rgba(0,0,0,.30) 100%),
+    repeating-linear-gradient(90deg,
+      rgba(255,249,240,.32) 0px,
+      rgba(255,249,240,.07) 1.5px,
+      rgba(0,0,0,.18) 2.3px,
+      rgba(0,0,0,.62) 3.3px,
+      rgba(0,0,0,.18) 4.1px,
+      rgba(255,249,240,.32) 5.2px);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.3);
+}
+/* ── THE SPECULAR ──────────────────────────────────────────────────────────
+   ONE STREAK, ACROSS THE PART. A bead-blasted or extruded finish scatters
+   along the direction it was worked, so the highlight is not a point — it is a
+   band, and it runs the long way. Half a pixel of blur, because a scattered
+   highlight has no edge. Kept off pure white: the lamp has a colour, the metal
+   has a colour, and their product never lands on #fff. */
+.sl-act::after{
+  content:''; position:absolute; left:2px; right:2px; top:1.5px; height:3.5px;
+  border-radius:3px; pointer-events:none;
+  background-image:linear-gradient(90deg,
+    transparent 0%, rgba(255,252,245,.20) 20%, rgba(255,252,245,.30) 50%,
+    rgba(255,252,245,.14) 80%, transparent 100%);
+  filter:blur(.5px);
+}
+.tog:hover .sl-act{ filter:brightness(1.07); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE TOGGLE — a switch mounted on the faceplate, its name engraved beside it
+   ═══════════════════════════════════════════════════════════════════════════
+   THERE IS NO PLATE, AND THAT IS THE PART. A `.row` is a module card, and a
+   card is a claim: this is a thing with contents, a colour and an editor
+   behind it. A boolean has none of that. A settings bay engraves its names
+   straight onto the metal and mounts the control on the face, and nineteen
+   booleans each on their own raised card is a stack of pallets rather than a
+   panel.
+
+   THE WHOLE LINE IS THE BUTTON, so the hit target is the name — which is what
+   you were aiming at — rather than a 24px cap floating at the end of it. The
+   only thing saying the line is live before you press it is the metal warming
+   under the pointer, which is what a faceplate does and what a card cannot do
+   without moving. */
+.tog{
+  display:flex; align-items:center; gap:9px; width:100%;
+  min-height:30px; padding:2px 6px; border:0; border-radius:6px;
+  background:transparent; cursor:pointer; text-align:left;
+  font-family:inherit; position:relative;
+  transition:background .12s;
+}
+.tog:hover{ background:rgba(255,255,255,.035); }
+.tog:active{ background:rgba(0,0,0,.20); }
+/* THE NAME IS THE ROW'S NAME, ONE SIZE DOWN. A setting sits under a bay cap
+   that has already said what the bay is, so its own name does not need the
+   12px a layer's does — and at 11.5px a column of them lines up with the
+   engraved captions beside it instead of shouting over them. */
+.tog .name{ font-size:11.5px; }
+.tog.off .name{ color:#8b9099; }
+/* OFF IS DIMMER, NOT GREYED OUT. `.row.off` takes the name down to #6a6f77
+   because a hidden layer is a layer you have parked; a boolean that is off is
+   still the control you are about to press, and at that grey a column of
+   mostly-off switches reads as a panel of disabled ones. */
+
+/* THE PIPE IS A LAYER'S OWN INK, and it only appears when the switch was given
+   a colour. A pipe on every boolean is a column of light saying nothing, which
+   is the fastest way to spend the one signal in this language that carries
+   across a room. */
+.tog .pipe{ flex:0 0 3px; align-self:stretch; margin:4px 2px 4px 0; }
+.tog.off .pipe{ background:#2a2c30; box-shadow:inset 0 1px 1px rgba(0,0,0,.8); }
+.tog.off .pipe::after{ display:none; }
+.tog:focus-visible{ filter:brightness(1.25); }
 
 /* ── the jewel LED: the layer's colour as a lens ─────────────────────────── */
 .jewel{
@@ -1711,6 +2217,16 @@ input:focus-visible{ outline-offset:3px; }
   display:block; text-align:center; margin-top:7px;
   font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c;
 }
+/* A SCREENSHOT IS A SCREEN AND NOT A THUMBNAIL, so it keeps the well and the
+   diagonal reflection and loses the scanlines. The haze is a 3px repeat: right
+   on a 56px reference where it reads as one texture, and at full width it is a
+   grille laid over somebody's actual interface. The glass has to stay — without
+   it a bright rectangle on this page is a hole rather than a display. */
+.screen.shot{ padding:7px; }
+.screen.shot::after{
+  background:linear-gradient(148deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.02) 24%, transparent 44%);
+}
+.screen.shot img{ display:block; width:100%; border-radius:5px; filter:none; }
 .filmrow{ display:flex; align-items:center; gap:10px; }
 .filmrow .thumb{ width:56px; height:56px; object-fit:cover; border-radius:5px; flex:0 0 56px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.1), 0 2px 5px rgba(0,0,0,.7); }
@@ -2875,6 +3391,19 @@ body.drawer-open .drawer{ transform:translateX(0); }
    a control that looks pressable and does nothing is worse than no control —
    and a screen reader hearing two Open Settings buttons would be told the page
    has two drawers. */
+/* SECTION 10 IS TWO COLUMNS: the spec on the left, the control it describes on
+   the right. Stacked, the panel was a wall of definitions and the thing they
+   are about was below the fold — you read the spec for a button you had not
+   seen yet. Side by side you can check a line against the object.
+   Doc-only. */
+.setrow{ display:flex; align-items:flex-start; gap:26px; }
+.setrow > .api{ flex:1 1 0; min-width:0; max-width:none; margin:0; }
+.setrow > .stage{ flex:0 0 340px; margin-top:0; padding:44px 24px; }
+@media (max-width: 1000px){
+  .setrow{ flex-direction:column; }
+  .setrow > .stage{ flex:1 1 auto; width:100%; }
+}
+
 .tab-pair{ display:flex; gap:52px; align-items:flex-start; }
 .tab-cell{ display:flex; flex-direction:column; align-items:center; gap:9px; }
 .tab-cell .tab-demo{ cursor:default; }
@@ -3062,41 +3591,66 @@ body.drawer-open .sliders i:nth-child(3),
 /* ═══════════════════════════════════════════════════════════════════════════
    MATERIALS — the primitives, so this is a language and not one drawing
    ═══════════════════════════════════════════════════════════════════════════ */
-.mats{ display:grid; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)); gap:16px; margin-top:26px; }
-.mat{
-  border:1px solid #212327; border-radius:12px; overflow:hidden;
-  background:linear-gradient(180deg,#141518,#0f1012);
-}
-/* THE STAGE IS CASE METAL, not a dark backdrop. A well cut into #101114 is
-   lighter than the thing it is cut into, which is not a well, it is a tile.
-   These samples are pieces of the panel, so they have to sit on the panel's
-   own material: then the plate reads as above it and the well as below it,
-   which is the entire content of this section. */
-.mat-stage{
-  height:104px; display:flex; align-items:center; justify-content:center; gap:10px;
-  background:radial-gradient(70% 80% at 30% 10%, rgba(255,255,255,.06), transparent 65%),
-             linear-gradient(176deg,#26282d 0%,#1d1e22 42%,#191a1e 100%);
-  border-bottom:1px solid #141518;
-  box-shadow:inset 0 -1px 0 rgba(255,255,255,.05);
-}
-.mat-body{ padding:12px 14px 14px; }
-.mat-t{ font-family:var(--font); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#d3d6dc; margin:0 0 6px; }
-.mat-d{ font-size:12px; line-height:1.55; color:#7f848e; margin:0; }
-.mat-d code{ font-family:var(--font); font-size:11px; color:#9aa0aa; background:#1a1c20; padding:1px 4px; border-radius:3px; }
 
-/* demo objects in the material tiles */
-/* A GLYPH IS NOT THE CAP. 24px of icon in a 38px cap leaves 7px of face, and
-   on the lit one the sun's rays ran into the walls: the orange stopped being
-   a legend and became the button's colour. The nav bar's ratio is 16 in 34;
-   this is the same ratio at this size. */
-/* A FADER IS A WIDE CONTROL and cannot be sampled in a 232px column: label,
-   slot and readout would leave the track about 90px, which is not a length,
-   it is a stub. Its tile takes two columns and the row runs the full width,
-   which is also how it sits in the editor. */
-.mats .mat.wide{ grid-column:span 2; }
-.mats .mat.tall .mat-stage{ height:206px; }
-.mats .mat.wide .mat-stage{ padding:0 18px; }
-.mats .mat.wide .fader{ width:100%; }
+/* NOT A GRID. A grid gives every cell the same width, so a knob 60px across
+   and a fader 300px across get the same track and the knob sits in a lake of
+   its own column. These are eighteen objects of eighteen different sizes and
+   the only layout that respects that is one that asks each of them how wide it
+   is: a wrapping row, packed left, tiles at their natural width.
+
+   IT ALSO KILLS THE `wide` / `tall` PROBLEM RATHER THAN MANAGING IT. Column
+   spans, dense flow and a per-group column count were all ways of telling a
+   grid about sizes it could have measured itself. */
+.mats{
+  display:flex; flex-wrap:wrap; align-items:stretch;
+  gap:26px 30px; width:100%;
+}
+/* STRETCH, NOT flex-start, AND IT IS THE WHOLE ALIGNMENT FIX. In a wrapping
+   row every LINE sizes to its tallest item; stretch makes the rest of that
+   line match it, and `margin-top:auto` on the body then drops every name onto
+   the same baseline. With flex-start each tile was only as tall as itself and
+   the names sat wherever their specimen happened to end. */
+/* THE TILES GROW TO FILL THE LINE. flex:0 0 auto packed them left at their
+   natural width and left the tail of every row empty, which on a stage reads
+   as the group having run out rather than as the group being laid out. They
+   share the slack instead, so the specimens spread across the full width and
+   the air lands BETWEEN parts rather than all of it after the last one.
+
+   `min-width` is the floor that keeps a seven-part line from squeezing a
+   300px fader; below it the line wraps, which is the correct answer. */
+.mat{
+  flex:1 1 auto; min-width:118px; max-width:100%;
+  display:flex; flex-direction:column;
+}
+/* A WIDE PART ASKS FOR ITS REAL LENGTH AS ITS BASIS, so the slack is shared in
+   proportion to what each part actually needs rather than equally between a
+   knob and a fader bank. */
+.mats .mat.wide{ flex-basis:300px; }
+
+/* THE SPECIMEN AREA HAS A FLOOR so a 12px LED and a 200px fader bank do not
+   make two different-looking rows, and it takes the slack in a stretched
+   tile so the name stays pinned under it. */
+.mat-stage{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  min-height:88px; flex:1 0 auto;
+}
+.mat-body{ margin-top:auto; padding-top:11px; }
+
+/* THE NAME IS ENGRAVED, like every other label on this page. It was a card
+   title when the tile was a card; on an open stage a heading in body type at
+   15px is the loudest thing in the section and the part comes second. */
+.mat-t{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.15em;
+  text-transform:uppercase; color:#6b7079; margin:0; text-align:center;
+  text-shadow:0 1px 0 rgba(255,255,255,.07);
+}
+
+/* A FADER IS A LENGTH AND WANTS A REAL ONE. 300px is what the layer editor's
+   own Zone row runs at, so the specimen is the size the part is actually used
+   at rather than whatever a column happened to be. */
+.mats .mat.wide .fader{ width:300px; }
+.mats .mat.wide .frange{ width:300px; }
+.mats .mat.tall .mat-stage{ min-height:200px; }
 /* The small controls are sampled at the size the row uses them — same 5px gap,
    no scaling. The chevron's knurl is tuned against an 11px glyph; blow it up
    and the tile shows a material that is nowhere in the document. */
@@ -3111,6 +3665,17 @@ body.drawer-open .sliders i:nth-child(3),
   background:linear-gradient(180deg,#17191d,#1e2126);
   box-shadow:inset 0 3px 7px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
              0 1px 0 rgba(255,255,255,.055); }
+/* THE STAGE — the third surface, and the one this documentation was posing the
+   other two ON without ever naming it. A chassis is a raised body and a well is
+   a cut into one; a stage is neither. It is a FIELD: the same case metal seen
+   at low light, a hairline border rather than a bevel, and one soft radial
+   from the lamp so it is not flat. Nothing is bolted to it and nothing is cut
+   into it — things are simply set down on it, which is why every specimen on
+   this site sits on one and why the drawing area of an app is one too. */
+.demo-stage{ display:block; width:90px; height:44px; border-radius:8px;
+  border:1px solid #1e2024;
+  background:radial-gradient(70% 60% at 28% 0%, rgba(255,255,255,.055), transparent 60%),
+             linear-gradient(180deg,#141518,#0c0d0f); }
 .demo-etch{ font-family:var(--font); font-size:15px; font-weight:700; letter-spacing:.18em; color:#5d626b;
   text-shadow:0 1px 0 rgba(255,255,255,.12), 0 -1px 0 rgba(0,0,0,.7); }
 
@@ -3362,6 +3927,53 @@ span.nav-link{ cursor:default; }
 /* ═══════════════════════════════════════════════════════════════════════════
    THE SPEC TABLE — reference rows, not prose
    ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE FOLDED DETAIL — a spec table behind a chevron
+
+   Doc-only: the excluded list in tools/build-dist.mjs names these, because a
+   disclosure around a reference table is how this SITE reads, not a part of
+   the language an app adopts.
+
+   THE SUMMARY IS A MILLED STRIP rather than a key. It is not a control that
+   does something to the machine, it is a lid — so it gets the well's two
+   hairlines and no travel, and the only thing that moves is the chevron.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.detail{ margin:18px 0 26px; }
+
+.detail-tab{
+  display:flex; align-items:center; gap:10px;
+  padding:7px 11px 7px 8px; border-radius:9px; cursor:pointer;
+  list-style:none;                       /* the default triangle, gone */
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.055);
+  transition:color .12s;
+}
+.detail-tab::-webkit-details-marker{ display:none; }
+.detail-tab:hover .detail-nm{ color:#aeb4be; }
+.detail-tab:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+
+.detail-nm{
+  font-family:var(--font); font-size:8.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:#6b7079; text-shadow:0 1px 0 rgba(255,255,255,.07); transition:color .12s;
+}
+/* THE COUNT IS A READOUT, because it is a number the page works out. It also
+   answers the only question a shut lid raises: how much is under it. */
+.detail-n{
+  margin-left:auto; font-family:var(--font-mono, var(--font)); font-size:8.5px;
+  color:var(--lcd, #4CE04C); opacity:.55; font-variant-numeric:tabular-nums;
+}
+
+/* THE CHEVRON TURNS, and it is the same 90 degrees a layer row's does — same
+   class, same knurl, same lamp, so a lid and a row open the same way. */
+.detail[open] .detail-tab .chev{ transform:rotate(90deg) translateY(1px); color:var(--led); }
+.detail[open] .detail-nm{ color:#aeb4be; }
+.detail .spec{ margin-top:2px; }
+
+@media (prefers-reduced-motion: reduce){
+  .detail-tab, .detail-tab .chev{ transition:none; }
+}
+
 .spec{
   width:100%; border-collapse:collapse; margin-top:26px;
   font-size:13px; line-height:1.6;

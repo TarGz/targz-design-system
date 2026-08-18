@@ -34,17 +34,19 @@
       no:   '00',
       kick: 'the language',
       line: 'The <b>parts</b>, and the rules that make them one language.',
-      parts: ['tokens', 'the light', 'primitives', 'factories', 'nav bar', 'settings', 'hatch', 'traps'],
+      parts: ['factories', 'surfaces', 'tokens', 'primitives', 'knob layouts', 'toggle',
+              'interlock', 'nav bar', 'settings', 'the room', 'traps'],
     },
     {
-      file: 'skew-layers.html',
-      nav:  'LAYERS',
-      name: 'LAYERS',
+      file: 'skew-panels.html',
+      nav:  'PANELS',
+      name: 'PANELS',
       no:   '01',
       kick: 'exploration 01 · an app',
       line: 'The <b>drawing</b> side. Portrait-Typo rebuilt as hardware, down to a hatch bay that '
           + 'plots in real millimetres.',
-      parts: ['layer dock', 'viewport', 'launchpad', 'hatch bay', 'filling', 'windows'],
+      parts: ['layer dock', 'layer editor', 'viewport', 'hatch bay',
+              'windows', 'launchpad'],
     },
     {
       file: 'skew-machine.html',
@@ -56,6 +58,21 @@
           + 'stick.',
       parts: ['DRO', 'jog', 'pen bank', 'guard', 'e-stop', 'annunciator', 'meter', 'tape'],
     },
+    /* NOT AN EXPLORATION, WHICH IS WHY IT HAS NO `exploration NN` KICKER. The
+       other three pages are a language and two apps drawn in it; this is the
+       one piece of the language that is an ENGINE, and the only one meant to
+       keep growing. It is `src/skew-hatch.js` plus the argument for it. */
+    {
+      file: 'skew-hatch.html',
+      nav:  'HATCH',
+      name: 'HATCH',
+      no:   '03',
+      kick: 'the engine',
+      line: 'The <b>fill</b> engine. One contract, three layers, and two specimens at 1:1 — '
+          + 'what is on screen is what a pen would put on paper, at size.',
+      parts: ['the contract', 'KIT', 'HANDS', 'HATCH', 'by hand', 'by machine',
+              'the API', 'growing it'],
+    },
   ];
 
   /* NOT A PAGE, AND NOT A DESTINATION. The old light-palette document is
@@ -63,7 +80,7 @@
      thing a decision was made against loses the decision, but it is a line at
      the foot of the home and never a key on the bar. */
   const ARCHIVE = {
-    file: 'old/index.html',
+    file: '../old/index.html',
     name: 'targz Design System',
     line: 'discontinued · the light-palette document Skew replaces',
   };
@@ -165,7 +182,7 @@
     /* THE VERSION IS READ, NOT TYPED. A number written into two files drifts
        on the first commit that only remembers one of them. Dynamic import, so
        a failure is a dim window rather than a dead script. */
-    import('./version.js')
+    import('../version.js')
       .then(m => { ver.textContent = 'v' + m.version; ver.classList.remove('dim'); })
       .catch(() => {});
 
@@ -187,6 +204,44 @@
   const dock = navBar();
 
   document.body.prepend(skip, sentinel, dock);
+
+  /* ── FOLD THE DETAIL ──────────────────────────────────────────────────────
+     EVERY SPEC TABLE GOES BEHIND A CHEVRON, SHUT. The pages are specimens
+     first: the argument for a part is the part, live, at its real size, and a
+     four-row table of prose underneath is the thing you read once and scroll
+     past forever after. Folded, a section is its heading and its specimens,
+     and the reference is one click away for the day you need it.
+
+     `<details>` DOES THE MECHANISM. It is a disclosure widget in the platform
+     — keyboard, screen reader, Escape, find-in-page opening it to show a hit —
+     and every hand-rolled version of it gets at least one of those wrong. All
+     this adds is the metal: the summary wears the same knurled `.chev` the
+     layer rows use, and `details[open]` turns it the same 90 degrees.
+
+     THE LABEL IS THE TABLE'S OWN FIRST HEADING, so it cannot drift from what
+     is inside. A table with no `thead` is a trap block, and says so. */
+  document.addEventListener('DOMContentLoaded', () => {
+    const CHEV = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+               + '<polyline points="9 6 15 12 9 18"/></svg>';
+
+    document.querySelectorAll('table.spec').forEach(table => {
+      if (table.closest('details.detail')) return;
+
+      const th   = table.querySelector('thead th');
+      const trap = !th && table.querySelector('tr.trap');
+      const name = th ? th.textContent.trim() : trap ? 'Traps' : 'Detail';
+      const n    = table.querySelectorAll('tbody tr').length;
+
+      const d = mk('details', 'detail');
+      const sum = mk('summary', 'detail-tab');
+      sum.innerHTML = `<span class="chev">${CHEV}</span>`
+                    + `<span class="detail-nm">${name}</span>`
+                    + `<span class="detail-n">${n}</span>`;
+
+      table.replaceWith(d);
+      d.append(sum, table);
+    });
+  });
 
   /* SEATED — one IntersectionObserver on a 1px sentinel, not a scroll
      listener: two callbacks in the life of the page instead of sixty a

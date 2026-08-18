@@ -337,19 +337,6 @@ move to a wrapper because filters apply before clipping.
 
 ---
 
-### The tool palette as its own object
-`.palette` — Pan / Turn / Select on a narrow movable strip of their own, on the argument that
-everything in a viewport panel answers WHERE THE CAMERA IS while these three answer WHAT THE
-MOUSE DOES, *"which stays true while you are not looking at the viewport at all. Two different
-questions do not share a chassis."*
-
-**Why it is missing:** this is a **UX change, not a skin.** In Portrait-Typo the three tools are
-a segmented control inside the viewport panel. Adopting it means moving a control, which is a
-decision about the app rather than about its material — flagged here so it is chosen rather than
-absorbed.
-
----
-
 ### A DOM gizmo
 `.gz-arm`, `.gz-node`, `.gz-hub` under a glass dome — arms as lit spokes, nodes as jewels.
 
@@ -387,37 +374,26 @@ milled channel with a bevelled thumb in place of the OS bar. That is 20 lines th
 adopter will write, slightly differently, until the language has them.
 
 **The related decision the language has not made:** density. 133 knobs at 46px is not a
-panel, it is a wall. The five knob layouts (SYSTEM 06) are the start of the answer and
+panel, it is a wall. The five knob layouts (SYSTEM 05) are the start of the answer and
 they stop at five variants of one control; there is no guidance on what a bay of twelve
 numbers should look like, and Ribbons guessed (`knobs()` puts up to three on a
 `.knobrow`, everything else stacks).
 
 ---
 
-### `[design system]` A LABELLED SWITCH — `swBtn` is icon-only and most booleans have no icon
-`swBtn(on, label, icon, state, onClick)` puts the label in the `aria-label` and the
-`title`, never on screen, because in `physical-ui-layers.html` it lives on a layer row
-where the row already carries the name. Off that row there is nothing saying what the
-switch does.
+### `[design system]` A GATED BAY DOES NOT DIM
+`toggle` gives a bay its gate — "Weave crossings" over a clearance and a minimum angle — and
+when the gate is off the two knobs below it stay at full brightness and stay draggable. The
+panel goes on offering a clearance to a weave that is not running.
 
-Ribbons has **19 booleans** and about three of them have an honest icon — `eye` for a
-preview, `outline` for the ribbons, `shade` for the shading. The rest are "Weave
-crossings", "Apply edits", "Invert tone", "Fill background". There is no glyph for those,
-and handing them an arbitrary one is worse than none: an eye on a switch that has nothing
-to do with seeing.
+**Why it is not built.** No app dims one today, and SYSTEM 06 states the placement rule (the
+gate is first in the bay, under the cap, above what it governs) while declining this half of
+it in the open. A rule the documentation states and the language does not implement is drift
+wearing a hat, so it is filed rather than quietly half-shipped.
 
-**What Ribbons did, and why it should be upstream rather than in an app.** Composed from
-parts the language already has — `.actrow` for the geometry, `.set-cap` for the engraved
-name, `swBtn` with an empty icon string for the cap. It works and it looks right, which is
-exactly why it should not be re-derived by every adopter: four apps composing the same
-molecule four ways is how a language stops being one.
-
-**One trap worth writing into whatever gets built.** `swBtn` bakes its state into the
-class, the aria and the `title` at construction, so toggling a class by hand leaves the
-title saying "Show" while the lamp says on. It has to be REBUILT on change. That is safe —
-`engage()` is explicitly written for it, noting the index before the callback and finding
-the element again after — but only if the container is in `ENGAGE_ROOTS`, and nothing
-says so at the point where you would get it wrong.
+**What it needs deciding first.** Whether a gated control is *dimmed* (still readable, still
+tells you what the bay will do when you turn it on) or *disabled* (unreachable). Ribbons wants
+the first: the knobs are how you decide whether to turn the gate on at all.
 
 ---
 
@@ -525,6 +501,48 @@ a hand could not reach.
 
 Nothing left open. Kept as a record because the underlying claim is load-bearing:
 Portrait-ribbons built its config-load path on `.set()` existing on everything.
+
+---
+
+### `[design system]` `windowise` SHOULD DEFINE WHERE A WINDOW'S POSITION LIVES
+
+`windowise` moves a window, folds it, and brings it to the front. It forgets all three the
+moment the page reloads, and it says nothing about whose job remembering is. Two apps have
+now answered that question independently and arrived at the same answer, which is the
+signal that it belongs in the language rather than in each of them.
+
+**Portrait-Typo** stores panel position in `localStorage`, per page, and states the rule in
+its own notes: *"where you put a panel is not part of the piece"* — a file arriving from
+somebody else and landing your panels in a corner you did not choose is the same fault as
+one arriving with a fold closed. A saved drop is a pile and its settings, not a desk.
+
+**Portrait-Ribbons** got it wrong first, wrote the layout into the config, and shipped a
+config load that rearranged your room. It now matches Typo: `localStorage`, per page,
+keyed by window title.
+
+**What the request actually is.** Not necessarily code — a RULE, and then optionally the
+code. The rule is the valuable half and it is one line:
+
+> A window's position, its reduced state and which page it was on are properties of the
+> DESK. They belong in `localStorage` and never in a document, a param or a saved file.
+
+**And if it does become code**, three things both apps had to work out separately:
+
+1. **`reset()` before restoring.** `windowise` keeps `dx`/`dy` in a closure and exposes only
+   `reset()` and `rest()`. Setting `style.transform` alone moves the element while the
+   factory still believes it is elsewhere, so the *next* drag jumps by the difference. There
+   is no way to write a position through the public API without this dance — which is
+   itself an argument for `windowise` owning it.
+2. **Key by title, not index.** An index renumbers the moment a window is added and silently
+   moves everybody's layout by one.
+3. **Per page.** Both apps landed here for the same reason: the pages are different jobs,
+   and the corner that is free while you look at the sheet is the corner you need while
+   painting a map.
+
+**A way back is required, not optional.** A window dragged mostly off-screen has no handle
+left to grab, and folding does not help — the head goes with it. Ribbons added a tidy key to
+its bottom bar; Typo resets on a double-click of the header. Whichever it is, `windowise`
+producing a state a user cannot get out of is the part that should not be left to adopters.
 
 ---
 

@@ -1,16 +1,3 @@
-/* ─────────────────────────────────────────────────────────────────────────────
-   skew-kit.js — GENERATED. DO NOT HAND-EDIT.
-
-     source   ../src/skew-kit.js
-     at       Skew v1.34.0
-     rebuild  node tools/build-dist.mjs --write
-
-   A patch applied here disappears at the next build, silently, and the way you
-   find out is that a control stops matching the reference. Change the source.
-   ───────────────────────────────────────────────────────────────────────────── */
-(function () {
-'use strict';
-
 /* ══════════════════════════════════════════════════════════════════════════
    skew-kit.js — THE SKEW KIT, LIFTED OUT OF THE PAGE THAT GREW IT.
 
@@ -1718,10 +1705,3 @@ function windowise(box, { title, mode = 'reduce', onClose } = {}) {
   return box;
 }
 windowise.top = 10;
-
-
-window.SkewKit = {
-  el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, key, pkey, swBtn, toggle, chevBtn, openPicker, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, SFX, clicky,
-  VERSION: '1.34.0',
-};
-})();

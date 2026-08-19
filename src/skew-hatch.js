@@ -286,7 +286,531 @@ const KIT = (function specimenKit() {
     };
   }
 
-  return { rng, noise, clamp01, norm, cross, plen, scene, blob,
+
+  /* ══════════════════════════════════════════════════════════════════════
+     THE TEAPOT — the first subject here that is actually three-dimensional
+
+     `scene()`'s ball is a DRAWING of a lit sphere: an analytic function of
+     paper position with a fake normal, hand-tuned until it reads. That is the
+     right way to make one specimen and the wrong way to make a test, because
+     a function of (x, y) cannot produce the cases that break a fill. It has no
+     inside. Nothing occludes anything. The cast shadow is an ellipse someone
+     chose.
+
+     THIS ONE IS RENDERED, and it is here for the four cases nothing else on
+     the page reaches:
+
+       · SELF-OCCLUSION.  The spout crosses the body and the handle crosses
+         itself, so the fill meets a hard tone discontinuity that is NOT the
+         outer silhouette. That is where runs fragment and chaining starts
+         proposing connectors across a gap that is not empty paper.
+       · A HOLE THAT IS NOT THE OUTLINE.  Between the handle and the body.
+       · SADDLE CURVATURE.  The neck. A direction field derived from tone
+         behaves differently on a saddle than on a dome, and until now nothing
+         asked it to.
+       · A REAL CAST SHADOW, projected rather than drawn, which falls back
+         across the object's own foot.
+
+     AND IT IS STILL JUST `tone(x, y)`. The renderer runs once into a depth,
+     normal and light buffer; the tone function is a buffer lookup returning
+     -1 outside the silhouette. Every generator in this file fills it without
+     knowing any of the above happened — which is the contract doing exactly
+     what it is for, and the reason this could be added without touching one
+     line of any fill.
+
+     THE DATA IS MARTIN NEWELL'S, 1975, via three.js's TeapotGeometry: 32
+     bicubic Bézier patches over 290 control points. Transcribed rather than
+     retyped — a single wrong digit in 870 numbers is a spike you would have to
+     find by eye. Public domain, and the reference object every renderer has
+     been checked against for fifty years, which is most of the argument for
+     using it here rather than modelling something. */
+  const TEA_V = [
+    1.4,0,2.4,1.4,-0.784,2.4,0.784,-1.4,2.4,0,-1.4,2.4,1.3375,0,2.53125,1.3375,-0.749,2.53125,
+    0.749,-1.3375,2.53125,0,-1.3375,2.53125,1.4375,0,2.53125,1.4375,-0.805,2.53125,0.805,-1.4375,
+    2.53125,0,-1.4375,2.53125,1.5,0,2.4,1.5,-0.84,2.4,0.84,-1.5,2.4,0,-1.5,2.4,-0.784,-1.4,2.4,
+    -1.4,-0.784,2.4,-1.4,0,2.4,-0.749,-1.3375,2.53125,-1.3375,-0.749,2.53125,-1.3375,0,2.53125,
+    -0.805,-1.4375,2.53125,-1.4375,-0.805,2.53125,-1.4375,0,2.53125,-0.84,-1.5,2.4,-1.5,-0.84,
+    2.4,-1.5,0,2.4,-1.4,0.784,2.4,-0.784,1.4,2.4,0,1.4,2.4,-1.3375,0.749,2.53125,-0.749,1.3375,
+    2.53125,0,1.3375,2.53125,-1.4375,0.805,2.53125,-0.805,1.4375,2.53125,0,1.4375,2.53125,-1.5,
+    0.84,2.4,-0.84,1.5,2.4,0,1.5,2.4,0.784,1.4,2.4,1.4,0.784,2.4,0.749,1.3375,2.53125,1.3375,
+    0.749,2.53125,0.805,1.4375,2.53125,1.4375,0.805,2.53125,0.84,1.5,2.4,1.5,0.84,2.4,1.75,0,
+    1.875,1.75,-0.98,1.875,0.98,-1.75,1.875,0,-1.75,1.875,2,0,1.35,2,-1.12,1.35,1.12,-2,1.35,0,
+    -2,1.35,2,0,0.9,2,-1.12,0.9,1.12,-2,0.9,0,-2,0.9,-0.98,-1.75,1.875,-1.75,-0.98,1.875,-1.75,0,
+    1.875,-1.12,-2,1.35,-2,-1.12,1.35,-2,0,1.35,-1.12,-2,0.9,-2,-1.12,0.9,-2,0,0.9,-1.75,0.98,
+    1.875,-0.98,1.75,1.875,0,1.75,1.875,-2,1.12,1.35,-1.12,2,1.35,0,2,1.35,-2,1.12,0.9,-1.12,2,
+    0.9,0,2,0.9,0.98,1.75,1.875,1.75,0.98,1.875,1.12,2,1.35,2,1.12,1.35,1.12,2,0.9,2,1.12,0.9,2,
+    0,0.45,2,-1.12,0.45,1.12,-2,0.45,0,-2,0.45,1.5,0,0.225,1.5,-0.84,0.225,0.84,-1.5,0.225,0,
+    -1.5,0.225,1.5,0,0.15,1.5,-0.84,0.15,0.84,-1.5,0.15,0,-1.5,0.15,-1.12,-2,0.45,-2,-1.12,0.45,
+    -2,0,0.45,-0.84,-1.5,0.225,-1.5,-0.84,0.225,-1.5,0,0.225,-0.84,-1.5,0.15,-1.5,-0.84,0.15,
+    -1.5,0,0.15,-2,1.12,0.45,-1.12,2,0.45,0,2,0.45,-1.5,0.84,0.225,-0.84,1.5,0.225,0,1.5,0.225,
+    -1.5,0.84,0.15,-0.84,1.5,0.15,0,1.5,0.15,1.12,2,0.45,2,1.12,0.45,0.84,1.5,0.225,1.5,0.84,
+    0.225,0.84,1.5,0.15,1.5,0.84,0.15,-1.6,0,2.025,-1.6,-0.3,2.025,-1.5,-0.3,2.25,-1.5,0,2.25,
+    -2.3,0,2.025,-2.3,-0.3,2.025,-2.5,-0.3,2.25,-2.5,0,2.25,-2.7,0,2.025,-2.7,-0.3,2.025,-3,-0.3,
+    2.25,-3,0,2.25,-2.7,0,1.8,-2.7,-0.3,1.8,-3,-0.3,1.8,-3,0,1.8,-1.5,0.3,2.25,-1.6,0.3,2.025,
+    -2.5,0.3,2.25,-2.3,0.3,2.025,-3,0.3,2.25,-2.7,0.3,2.025,-3,0.3,1.8,-2.7,0.3,1.8,-2.7,0,1.575,
+    -2.7,-0.3,1.575,-3,-0.3,1.35,-3,0,1.35,-2.5,0,1.125,-2.5,-0.3,1.125,-2.65,-0.3,0.9375,-2.65,
+    0,0.9375,-2,-0.3,0.9,-1.9,-0.3,0.6,-1.9,0,0.6,-3,0.3,1.35,-2.7,0.3,1.575,-2.65,0.3,0.9375,
+    -2.5,0.3,1.125,-1.9,0.3,0.6,-2,0.3,0.9,1.7,0,1.425,1.7,-0.66,1.425,1.7,-0.66,0.6,1.7,0,0.6,
+    2.6,0,1.425,2.6,-0.66,1.425,3.1,-0.66,0.825,3.1,0,0.825,2.3,0,2.1,2.3,-0.25,2.1,2.4,-0.25,
+    2.025,2.4,0,2.025,2.7,0,2.4,2.7,-0.25,2.4,3.3,-0.25,2.4,3.3,0,2.4,1.7,0.66,0.6,1.7,0.66,
+    1.425,3.1,0.66,0.825,2.6,0.66,1.425,2.4,0.25,2.025,2.3,0.25,2.1,3.3,0.25,2.4,2.7,0.25,2.4,
+    2.8,0,2.475,2.8,-0.25,2.475,3.525,-0.25,2.49375,3.525,0,2.49375,2.9,0,2.475,2.9,-0.15,2.475,
+    3.45,-0.15,2.5125,3.45,0,2.5125,2.8,0,2.4,2.8,-0.15,2.4,3.2,-0.15,2.4,3.2,0,2.4,3.525,0.25,
+    2.49375,2.8,0.25,2.475,3.45,0.15,2.5125,2.9,0.15,2.475,3.2,0.15,2.4,2.8,0.15,2.4,0,0,3.15,
+    0.8,0,3.15,0.8,-0.45,3.15,0.45,-0.8,3.15,0,-0.8,3.15,0,0,2.85,0.2,0,2.7,0.2,-0.112,2.7,0.112,
+    -0.2,2.7,0,-0.2,2.7,-0.45,-0.8,3.15,-0.8,-0.45,3.15,-0.8,0,3.15,-0.112,-0.2,2.7,-0.2,-0.112,
+    2.7,-0.2,0,2.7,-0.8,0.45,3.15,-0.45,0.8,3.15,0,0.8,3.15,-0.2,0.112,2.7,-0.112,0.2,2.7,0,0.2,
+    2.7,0.45,0.8,3.15,0.8,0.45,3.15,0.112,0.2,2.7,0.2,0.112,2.7,0.4,0,2.55,0.4,-0.224,2.55,0.224,
+    -0.4,2.55,0,-0.4,2.55,1.3,0,2.55,1.3,-0.728,2.55,0.728,-1.3,2.55,0,-1.3,2.55,1.3,0,2.4,1.3,
+    -0.728,2.4,0.728,-1.3,2.4,0,-1.3,2.4,-0.224,-0.4,2.55,-0.4,-0.224,2.55,-0.4,0,2.55,-0.728,
+    -1.3,2.55,-1.3,-0.728,2.55,-1.3,0,2.55,-0.728,-1.3,2.4,-1.3,-0.728,2.4,-1.3,0,2.4,-0.4,0.224,
+    2.55,-0.224,0.4,2.55,0,0.4,2.55,-1.3,0.728,2.55,-0.728,1.3,2.55,0,1.3,2.55,-1.3,0.728,2.4,
+    -0.728,1.3,2.4,0,1.3,2.4,0.224,0.4,2.55,0.4,0.224,2.55,0.728,1.3,2.55,1.3,0.728,2.55,0.728,
+    1.3,2.4,1.3,0.728,2.4,0,0,0,1.425,0,0,1.425,0.798,0,0.798,1.425,0,0,1.425,0,1.5,0,0.075,1.5,
+    0.84,0.075,0.84,1.5,0.075,0,1.5,0.075,-0.798,1.425,0,-1.425,0.798,0,-1.425,0,0,-0.84,1.5,
+    0.075,-1.5,0.84,0.075,-1.5,0,0.075,-1.425,-0.798,0,-0.798,-1.425,0,0,-1.425,0,-1.5,-0.84,
+    0.075,-0.84,-1.5,0.075,0,-1.5,0.075,0.798,-1.425,0,1.425,-0.798,0,0.84,-1.5,0.075,1.5,-0.84,
+    0.075
+  ];
+  const TEA_P = [
+    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,3,16,17,18,7,19,20,21,11,22,23,24,15,25,26,27,18,28,29,
+    30,21,31,32,33,24,34,35,36,27,37,38,39,30,40,41,0,33,42,43,4,36,44,45,8,39,46,47,12,12,13,14,
+    15,48,49,50,51,52,53,54,55,56,57,58,59,15,25,26,27,51,60,61,62,55,63,64,65,59,66,67,68,27,37,
+    38,39,62,69,70,71,65,72,73,74,68,75,76,77,39,46,47,12,71,78,79,48,74,80,81,52,77,82,83,56,56,
+    57,58,59,84,85,86,87,88,89,90,91,92,93,94,95,59,66,67,68,87,96,97,98,91,99,100,101,95,102,
+    103,104,68,75,76,77,98,105,106,107,101,108,109,110,104,111,112,113,77,82,83,56,107,114,115,
+    84,110,116,117,88,113,118,119,92,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,
+    135,123,136,137,120,127,138,139,124,131,140,141,128,135,142,143,132,132,133,134,135,144,145,
+    146,147,148,149,150,151,68,152,153,154,135,142,143,132,147,155,156,144,151,157,158,148,154,
+    159,160,68,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,164,177,178,161,
+    168,179,180,165,172,181,182,169,176,183,184,173,173,174,175,176,185,186,187,188,189,190,191,
+    192,193,194,195,196,176,183,184,173,188,197,198,185,192,199,200,189,196,201,202,193,203,203,
+    203,203,204,205,206,207,208,208,208,208,209,210,211,212,203,203,203,203,207,213,214,215,208,
+    208,208,208,212,216,217,218,203,203,203,203,215,219,220,221,208,208,208,208,218,222,223,224,
+    203,203,203,203,221,225,226,204,208,208,208,208,224,227,228,209,209,210,211,212,229,230,231,
+    232,233,234,235,236,237,238,239,240,212,216,217,218,232,241,242,243,236,244,245,246,240,247,
+    248,249,218,222,223,224,243,250,251,252,246,253,254,255,249,256,257,258,224,227,228,209,252,
+    259,260,229,255,261,262,233,258,263,264,237,265,265,265,265,266,267,268,269,270,271,272,273,
+    92,119,118,113,265,265,265,265,269,274,275,276,273,277,278,279,113,112,111,104,265,265,265,
+    265,276,280,281,282,279,283,284,285,104,103,102,95,265,265,265,265,282,286,287,266,285,288,
+    289,270,95,94,93,92
+  ];
+
+  /* One cache. Nine fills ask for the same subject at the same size, and
+     rendering it nine times is nine times the work for one answer. */
+  const solidCache = new Map();
+
+  /* ── `solid` IS THE RENDERER AND IT DOES NOT KNOW WHAT A TEAPOT IS ──────
+     It was written as `teapot()` and that was one subject's worth of thinking.
+     What it actually does is take a triangle mesh with normals and hand back
+     `tone`, `shadow` and `edge` — so the mesh belongs to the caller, and the
+     LIGHTING BELONGS HERE, once. That is the whole KIT argument one floor
+     down: light the ball in one place and the teapot in another and the two
+     stop being comparable, which on a page whose only job is comparing fills
+     is not a cosmetic problem. Switch subject and exactly one thing may change,
+     and it has to be the shape. */
+  function solid(w, h, meshOf, opt = {}) {
+    /* THE KEY IS EVERY INPUT, and it has to be. Leave one out and the cache
+       answers a question it was not asked: four lamp positions came back as
+       four copies of the first render, with four identical tone ranges printed
+       underneath, which is the sort of wrong that looks like a finding. */
+    const key = [opt.mesh || 'teapot', w.toFixed(2), h.toFixed(2), opt.seg || 7, opt.res || 3.4,
+                 opt.az == null ? 34 : opt.az, opt.el == null ? 16 : opt.el,
+                 (opt.light || [0.10, -0.80, 0.59]).join(','),
+                 opt.ambient == null ? 0.13 : opt.ambient,
+                 opt.gamma == null ? 0.80 : opt.gamma,
+                 opt.margin == null ? 2.0 : opt.margin].join('|');
+    const hit = solidCache.get(key);
+    if (hit) return hit;
+
+    const SEG = opt.seg || 7;                     /* per patch, per direction */
+    const RES = opt.res || 3.4;                   /* buffer samples per mm */
+    const az = (opt.az == null ? 34 : opt.az) * Math.PI / 180;
+    /* SIXTEEN DEGREES, NOT TWENTY-SIX, and it is the difference between a
+       teapot and a blob. Look down at it far enough and the spout foreshortens
+       into the body, the handle merges with the rim, and the silhouette — the
+       thing every fill on this page has to fill — is a rounded lump with a nub
+       on it. Low enough to see the profile is the whole reason to use this
+       object rather than a sphere. */
+    const el = (opt.el == null ? 16 : opt.el) * Math.PI / 180;
+
+    /* ── the mesh ───────────────────────────────────────────────────────
+       A bicubic Bézier patch and its two partial derivatives. THE LID AND
+       THE BASE HAVE DEGENERATE PATCHES — four identical control points at a
+       cusp — so one derivative vanishes there and the cross product is the
+       zero vector. Nudging the parameter off the cusp is the whole fix; take
+       the normal at face value and the teapot gets a black pinhole at the top
+       of the lid, which reads as a hole in the drawing. */
+    const B = (t) => {
+      const s = 1 - t;
+      return [s * s * s, 3 * s * s * t, 3 * s * t * t, t * t * t];
+    };
+    const dB = (t) => {
+      const s = 1 - t;
+      return [-3 * s * s, 3 * s * s - 6 * s * t, 6 * s * t - 3 * t * t, 3 * t * t];
+    };
+    const tri = meshOf(SEG);
+
+    /* ── the view ───────────────────────────────────────────────────────
+       ORTHOGRAPHIC, and not for simplicity. A plotter draws what is on the
+       sheet at the size it is on the sheet; a perspective divide means the
+       same object plots at two sizes depending where it sits, which is the
+       one thing 1:1 cannot survive. It also makes the cast shadow an exact
+       affine projection rather than something to approximate.
+
+       The Newell data is Z-UP. The sheet is x right, y DOWN. */
+    const ca = Math.cos(az), sa = Math.sin(az), ce = Math.cos(el), se = Math.sin(el);
+    const F = [ca * ce, sa * ce, se];              /* toward the camera */
+    const R = [-sa, ca, 0];                        /* screen right */
+    const U = [-ca * se, -sa * se, ce];            /* screen up */
+    /* RAKING, NOT OVERHEAD, and it was measured against three others rather than
+       reasoned. Near the vertical the lid lights up, every side of the body falls
+       to the same middling dark, and there is no terminator anywhere — which is
+       the one feature a fill is here to render. This one puts the turn straight
+       across the belly, catches the spout, and drops the handle into the dark:
+       full range on the one surface every tile has to cross. */
+    const L = norm(opt.light || [0.10, -0.80, 0.59]);   /* toward the lamp */
+
+    const proj = (p) => [p[0] * R[0] + p[1] * R[1] + p[2] * R[2],
+                         p[0] * U[0] + p[1] * U[1] + p[2] * U[2],
+                         p[0] * F[0] + p[1] * F[1] + p[2] * F[2]];
+
+    /* Fit: the object AND the ground it throws a shadow on, so the shadow
+       cannot fall off the sheet. */
+    const gnd = (p) => {                            /* p flattened onto z = 0 along L */
+      const k = p[2] / L[2];
+      return [p[0] - L[0] * k, p[1] - L[1] * k, 0];
+    };
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const t of tri) for (const v of t) {
+      for (const q of [v.p, gnd(v.p)]) {
+        const s = proj(q);
+        if (s[0] < x0) x0 = s[0]; if (s[0] > x1) x1 = s[0];
+        if (-s[1] < y0) y0 = -s[1]; if (-s[1] > y1) y1 = -s[1];
+      }
+    }
+    const m = opt.margin == null ? 2.0 : opt.margin;
+    const sc = Math.min((w - 2 * m) / (x1 - x0), (h - 2 * m) / (y1 - y0));
+    const ox = (w - (x1 - x0) * sc) / 2 - x0 * sc;
+    const oy = (h - (y1 - y0) * sc) / 2 - y0 * sc;
+    const toPaper = (p) => { const s = proj(p); return [s[0] * sc + ox, -s[1] * sc + oy, s[2]]; };
+
+    /* ── the buffers ────────────────────────────────────────────────────
+       One rasteriser, run twice: once from the camera for depth and normal,
+       once from the LIGHT for the shadow. Two buffers out of one pass each,
+       and the light one answers both questions that matter — whether a
+       surface can see the lamp, and whether a patch of ground can. */
+    const BW = Math.max(8, Math.round(w * RES)), BH = Math.max(8, Math.round(h * RES));
+    const dep = new Float32Array(BW * BH).fill(-Infinity);
+    const nrm = new Float32Array(BW * BH * 3);
+    const msk = new Uint8Array(BW * BH);
+
+    const LR = 2.6;                                 /* light buffer, per mm */
+    const LU = [-L[1], L[0], 0], lm = Math.hypot(LU[0], LU[1]) || 1;
+    LU[0] /= lm; LU[1] /= lm;
+    const LV = cross(L, LU);
+    const lproj = (p) => [p[0] * LU[0] + p[1] * LU[1] + p[2] * LU[2],
+                          p[0] * LV[0] + p[1] * LV[1] + p[2] * LV[2],
+                          p[0] * L[0]  + p[1] * L[1]  + p[2] * L[2]];
+    let lx0 = 1e9, lx1 = -1e9, ly0 = 1e9, ly1 = -1e9;
+    for (const t of tri) for (const v of t) {
+      const s = lproj(v.p);
+      if (s[0] < lx0) lx0 = s[0]; if (s[0] > lx1) lx1 = s[0];
+      if (s[1] < ly0) ly0 = s[1]; if (s[1] > ly1) ly1 = s[1];
+    }
+    const LW = Math.max(8, Math.round((lx1 - lx0) * sc * LR)), LH = Math.max(8, Math.round((ly1 - ly0) * sc * LR));
+    const ldep = new Float32Array(LW * LH).fill(-Infinity);
+    const toLight = (p) => { const s = lproj(p);
+      return [(s[0] - lx0) / (lx1 - lx0) * (LW - 1), (s[1] - ly0) / (ly1 - ly0) * (LH - 1), s[2]]; };
+
+    /* Scanline fill of one triangle, nearest wins. `store` is what a hit
+       writes — the two passes differ in that and in nothing else. */
+    function raster(a, b, c, W, H, keep, store) {
+      const minx = Math.max(0, Math.floor(Math.min(a[0], b[0], c[0])));
+      const maxx = Math.min(W - 1, Math.ceil(Math.max(a[0], b[0], c[0])));
+      const miny = Math.max(0, Math.floor(Math.min(a[1], b[1], c[1])));
+      const maxy = Math.min(H - 1, Math.ceil(Math.max(a[1], b[1], c[1])));
+      const d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
+      if (Math.abs(d) < 1e-12) return;
+      for (let py = miny; py <= maxy; py++) for (let px = minx; px <= maxx; px++) {
+        const l1 = ((b[1] - c[1]) * (px + 0.5 - c[0]) + (c[0] - b[0]) * (py + 0.5 - c[1])) / d;
+        const l2 = ((c[1] - a[1]) * (px + 0.5 - c[0]) + (a[0] - c[0]) * (py + 0.5 - c[1])) / d;
+        const l3 = 1 - l1 - l2;
+        if (l1 < 0 || l2 < 0 || l3 < 0) continue;
+        const z = l1 * a[2] + l2 * b[2] + l3 * c[2];
+        const i = py * W + px;
+        if (z > keep[i]) { keep[i] = z; store(i, l1, l2, l3); }
+      }
+    }
+
+    for (const t of tri) {
+      const A = toPaper(t[0].p), Bp = toPaper(t[1].p), C = toPaper(t[2].p);
+      raster([A[0] * RES, A[1] * RES, A[2]], [Bp[0] * RES, Bp[1] * RES, Bp[2]], [C[0] * RES, C[1] * RES, C[2]],
+        BW, BH, dep, (i, l1, l2, l3) => {
+          msk[i] = 1;
+          for (let k = 0; k < 3; k++) nrm[i * 3 + k] = l1 * t[0].n[k] + l2 * t[1].n[k] + l3 * t[2].n[k];
+        });
+      const la = toLight(t[0].p), lb = toLight(t[1].p), lc = toLight(t[2].p);
+      raster(la, lb, lc, LW, LH, ldep, () => {});
+    }
+
+    /* A SURFACE IS ITS OWN NEAREST OCCLUDER, so without slack everything
+       shadows itself — the classic acne. Generous, because the light buffer
+       is coarser than the object. */
+    /* THE BIAS SCALES WITH THE SLOPE. Near the terminator a surface runs almost
+       edge-on to the lamp, so one light-buffer texel spans a long way along it
+       and the depth inside that texel varies by more than any flat constant
+       covers; the surface then reads as nearer the lamp than its own recorded
+       depth and shadows itself in a band. Dividing by n·L is the standard
+       answer and the right shape — nothing where the surface faces the lamp
+       squarely, as much as it takes where it does not. Capped, or a grazing
+       face asks for infinity.
+
+       IT IS NOT WHAT FIXED THE SPHERE'S DIAGONAL, and the note is here so the
+       next reader does not inherit the wrong story. That line is the
+       TERMINATOR: the lamp sits 101° off the camera, so the terminator great
+       circle is seen nearly edge-on and projects to something very close to a
+       straight line. It is correct, it is meant to be there, and it is the
+       best thing on the specimen — a hard tonal turn for a hatch to cross. */
+    const BIAS = 0.06 * Math.max(1, 3 / LR);
+    const litAt = (p, lam) => {
+      const q = toLight(p);
+      const px = Math.round(q[0]), py = Math.round(q[1]);
+      if (px < 0 || py < 0 || px >= LW || py >= LH) return 1;
+      const d = ldep[py * LW + px];
+      const b = BIAS * Math.min(6, 1 / Math.max(0.16, lam == null ? 1 : lam));
+      return d === -Infinity || q[2] >= d - b ? 1 : 0;
+    };
+
+    /* ── the tone ───────────────────────────────────────────────────────
+       Lambert off the REAL normal, and then the two things `scene()` had to
+       fake: the shadow is looked up rather than drawn, and the bounce comes
+       off the ground plane the object is actually standing on. */
+    const amb = opt.ambient == null ? 0.13 : opt.ambient;
+    const gam = opt.gamma == null ? 0.80 : opt.gamma;
+    const shade = new Float32Array(BW * BH);
+    for (let py = 0; py < BH; py++) for (let px = 0; px < BW; px++) {
+      const i = py * BW + px;
+      if (!msk[i]) continue;
+      const n = [nrm[i * 3], nrm[i * 3 + 1], nrm[i * 3 + 2]];
+      const nl = Math.hypot(n[0], n[1], n[2]) || 1;
+      n[0] /= nl; n[1] /= nl; n[2] /= nl;
+      const lam = Math.max(0, n[0] * L[0] + n[1] * L[1] + n[2] * L[2]);
+      /* the world point, recovered from the depth we stored */
+      const sx = ((px + 0.5) / RES - ox) / sc, sy = -((py + 0.5) / RES - oy) / sc, sz = dep[i];
+      const P = [sx * R[0] + sy * U[0] + sz * F[0], sx * R[1] + sy * U[1] + sz * F[1], sx * R[2] + sy * U[2] + sz * F[2]];
+      const vis = litAt(P, lam);
+      let lit = amb + (1 - amb) * lam * vis;
+      /* THE BOUNCE IS SMOOTH, because `max(0, -n.z)` is continuous in VALUE and
+         kinked in its DERIVATIVE at the equator, and a C1 break can read as a
+         crease even where nothing jumps. A squared half-angle falls off the
+         same way with no corner in it. Housekeeping rather than a fix: it was
+         changed while hunting the sphere's diagonal, which turned out to be the
+         terminator and nothing to do with either. */
+      const down = clamp01(0.5 - 0.5 * n[2]);
+      lit += down * down * 0.26 * (1 - lam);          /* the table, bouncing */
+      shade[i] = clamp01(1 - Math.pow(clamp01(lit), gam)) * 0.97;
+    }
+
+    const at2 = (x, y) => {
+      const px = Math.floor(x * RES), py = Math.floor(y * RES);
+      if (px < 0 || py < 0 || px >= BW || py >= BH) return -1;
+      return msk[py * BW + px] ? py * BW + px : -1;
+    };
+    const tone = (x, y) => { const i = at2(x, y); return i < 0 ? -1 : shade[i]; };
+
+    /* ── the cast shadow ────────────────────────────────────────────────
+       A SEPARATE TONE FUNCTION, exactly as `scene()` keeps ball and shadow
+       apart: they are different surfaces and the strokes that fill them are
+       not the same strokes. Ground first — a paper point is a ray, and where
+       that ray meets z = 0 is the patch of table under it. */
+    /* WHERE THE POT MEETS THE TABLE, measured off the mask rather than assumed:
+       the lowest covered row, and the span of it. Everything about the contact
+       shadow is derived from those two numbers. */
+    let cxp = w / 2, cyp = h / 2, R0 = Math.min(w, h) / 4;
+    {
+      let lo = 1e9, hi = -1e9, bot = -1;
+      for (let py = BH - 1; py >= 0 && bot < 0; py--)
+        for (let px = 0; px < BW; px++) if (msk[py * BW + px]) { bot = py; break; }
+      if (bot >= 0) {
+        for (let px = 0; px < BW; px++) if (msk[bot * BW + px]) { if (px < lo) lo = px; if (px > hi) hi = px; }
+        let l2 = 1e9, h2 = -1e9;
+        for (let py = 0; py < BH; py++) for (let px = 0; px < BW; px++)
+          if (msk[py * BW + px]) { if (px < l2) l2 = px; if (px > h2) h2 = px; }
+        cxp = (l2 + h2) / 2 / RES; cyp = bot / RES; R0 = (h2 - l2) / 2 / RES;
+      }
+    }
+
+    const ground = (x, y) => {
+      const sx = (x - ox) / sc, sy = -(y - oy) / sc;
+      const den = F[2];
+      if (Math.abs(den) < 1e-9) return null;
+      const t = -(sx * R[2] + sy * U[2]) / den;
+      return [sx * R[0] + sy * U[0] + t * F[0], sx * R[1] + sy * U[1] + t * F[1], 0];
+    };
+    const shadow = (x, y) => {
+      if (at2(x, y) >= 0) return -1;               /* the pot is in front of it */
+      const g = ground(x, y);
+      if (!g) return -1;
+      if (litAt(g)) return -1;
+      /* A DIRECTIONAL SHADOW DOES NOT GET LIGHTER BECAUSE THE CASTER IS TALL.
+         Grading it by how far the blocker sits above the table read as a pale
+         disc inside a dark one — the body's shadow lighter than the foot's,
+         which is a ring nobody would draw. It is one tone, darkened where the
+         pot actually touches: that contact is the only thing in the picture
+         saying the two are in the same place. */
+      const foot = Math.hypot((x - cxp) / (R0 * 1.25), (y - cyp) / (R0 * 0.42));
+      return clamp01(0.62 + 0.34 * Math.max(0, 1 - foot));
+    };
+
+    /* ── the silhouette ─────────────────────────────────────────────────
+       Marching squares over the mask, midpoints rather than interpolation —
+       the mask is binary, so there is nothing to interpolate. It costs a
+       half-sample of stair on a hairline annotation and it gets the HANDLE
+       HOLE for free, which is the boundary worth having. */
+    const segs = [];
+    const M = (px, py) => (px < 0 || py < 0 || px >= BW || py >= BH) ? 0 : msk[py * BW + px];
+    for (let py = -1; py < BH; py++) for (let px = -1; px < BW; px++) {
+      const a = M(px, py), b = M(px + 1, py), c = M(px + 1, py + 1), d2 = M(px, py + 1);
+      const k = a | (b << 1) | (c << 2) | (d2 << 3);
+      if (k === 0 || k === 15) continue;
+      const X = (px + 1), Y = (py + 1);
+      const T = [X, Y - 0.5], Rt = [X + 0.5, Y], Bm = [X, Y + 0.5], Lf = [X - 0.5, Y];
+      const P2 = q => [q[0] / RES, q[1] / RES];
+      const push = (p, q) => segs.push([P2(p), P2(q)]);
+      switch (k) {
+        case 1: case 14: push(Lf, T); break;
+        case 2: case 13: push(T, Rt); break;
+        case 4: case 11: push(Rt, Bm); break;
+        case 8: case 7:  push(Bm, Lf); break;
+        case 3: case 12: push(Lf, Rt); break;
+        case 6: case 9:  push(T, Bm); break;
+        case 5:  push(Lf, T); push(Rt, Bm); break;
+        case 10: push(T, Rt); push(Bm, Lf); break;
+      }
+    }
+    const edge = segs.map(s => `M${(Math.round(s[0][0] * 100) / 100)} ${(Math.round(s[0][1] * 100) / 100)}` +
+                               `L${(Math.round(s[1][0] * 100) / 100)} ${(Math.round(s[1][1] * 100) / 100)}`).join('');
+
+    /* ── THE SILHOUETTE AS POLYLINES ────────────────────────────────────
+       `edge` is path data, which is all an annotation needs. A HAND needs
+       points: it inks a contour as a run of separate marks with gaps in it,
+       the same way `blob` hands back `rings`, and it cannot do that to a
+       string. Same segments, linked head to tail — a marching-squares cell
+       emits its ends on a shared lattice, so two segments meet when their
+       endpoints round to the same lattice point and no tolerance is needed. */
+    function rings(step) {
+      const q = 1 / (RES * 2);
+      const key = pt => Math.round(pt[0] / q) + ',' + Math.round(pt[1] / q);
+      const ends = new Map();
+      segs.forEach((sg, i) => [0, 1].forEach(e => {
+        const k = key(sg[e]);
+        let a = ends.get(k); if (!a) { a = []; ends.set(k, a); } a.push([i, e]);
+      }));
+      const used = new Uint8Array(segs.length), out = [];
+      for (let i = 0; i < segs.length; i++) {
+        if (used[i]) continue;
+        used[i] = 1;
+        const line = [segs[i][0].slice(), segs[i][1].slice()];
+        for (;;) {
+          const a = ends.get(key(line[line.length - 1]));
+          let nxt = -1, end = 0;
+          if (a) for (const [j, e] of a) if (!used[j]) { nxt = j; end = e; break; }
+          if (nxt < 0) break;
+          used[nxt] = 1;
+          line.push(segs[nxt][1 - end].slice());
+        }
+        if (line.length > 2) out.push(step ? thin(line, Math.max(1, Math.round(step * RES))) : line);
+      }
+      return out;
+    }
+
+    const out = { tone, shadow, edge, rings, ground, mask: msk, BW, BH, RES, scale: sc,
+                  cx: cxp, cy: cyp, R: R0 };
+    solidCache.set(key, out);
+    if (solidCache.size > 24) solidCache.delete(solidCache.keys().next().value);
+    return out;
+  }
+
+  /* ── THE MESHES ─────────────────────────────────────────────────────────
+     A mesh is a flat list of triangles, each a triple of `{p, n}`. Nothing
+     below knows about paper, light or pitch; nothing in `solid` knows what it
+     is looking at. */
+
+  /* A bicubic Bézier patch and its two partial derivatives. THE LID AND THE
+     BASE HAVE DEGENERATE PATCHES — four identical control points at a cusp —
+     so one derivative vanishes there and the cross product is the zero vector.
+     Nudging the parameter off the cusp is the whole fix; take the normal at
+     face value and the teapot gets a black pinhole at the top of the lid,
+     which reads as a hole in the drawing. */
+  const BZ = (t) => { const s = 1 - t; return [s * s * s, 3 * s * s * t, 3 * s * t * t, t * t * t]; };
+  const dBZ = (t) => { const s = 1 - t; return [-3 * s * s, 3 * s * s - 6 * s * t, 6 * s * t - 3 * t * t, 3 * t * t]; };
+
+  function teapotMesh(SEG) {
+    const at = (patch, u, v) => {
+      const bu = BZ(u), bv = BZ(v), du = dBZ(u), dv = dBZ(v);
+      const p = [0, 0, 0], pu = [0, 0, 0], pv = [0, 0, 0];
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+        /* `c * 4 + r`, TRANSPOSED, and it is not a tidy-up. Read the patch
+           table row-major and the surface is identical — a Bézier patch is
+           symmetric under transposing its control net and swapping u for v —
+           but du × dv comes out the other way and EVERY NORMAL POINTS INTO
+           THE POT. Nothing looks broken: it renders, it shades, and it is lit
+           from the wrong side by exactly 180°. Measured rather than reasoned:
+           on the body patches, outward is 42 of 48 this way and 6 of 48 the
+           other. The six are the lid's underside, which faces in and should. */
+        const idx = TEA_P[patch * 16 + c * 4 + r] * 3;
+        const wp = bu[r] * bv[c], wu = du[r] * bv[c], wv = bu[r] * dv[c];
+        for (let k = 0; k < 3; k++) {
+          p[k]  += TEA_V[idx + k] * wp;
+          pu[k] += TEA_V[idx + k] * wu;
+          pv[k] += TEA_V[idx + k] * wv;
+        }
+      }
+      const n = [pu[1] * pv[2] - pu[2] * pv[1], pu[2] * pv[0] - pu[0] * pv[2], pu[0] * pv[1] - pu[1] * pv[0]];
+      const m = Math.hypot(n[0], n[1], n[2]);
+      if (m < 1e-9) {                              /* a cusp: step off it */
+        return { p, n: at(patch, Math.min(0.999, u + 0.004), Math.min(0.999, v + 0.004)).n };
+      }
+      return { p, n: [n[0] / m, n[1] / m, n[2] / m] };
+    };
+    const tri = [];
+    for (let s = 0; s < 32; s++) {
+      const g = [];
+      for (let i = 0; i <= SEG; i++) { g.push([]); for (let j = 0; j <= SEG; j++) g[i].push(at(s, i / SEG, j / SEG)); }
+      for (let i = 0; i < SEG; i++) for (let j = 0; j < SEG; j++) {
+        tri.push([g[i][j], g[i + 1][j], g[i + 1][j + 1]]);
+        tri.push([g[i][j], g[i + 1][j + 1], g[i][j + 1]]);
+      }
+    }
+    return tri;
+  }
+
+  /* THE BALL, AND IT SITS ON THE TABLE. Radius 2 centred at z = 2, so it
+     touches z = 0 exactly where the teapot's foot does and both get the same
+     contact, the same bounce and the same projected shadow. A sphere floating
+     above the ground would light identically and read completely differently,
+     which is the sort of difference that ends up being blamed on the fill. */
+  function sphereMesh(SEG) {
+    const N = Math.max(8, SEG * 4), R = 2, C = [0, 0, 2];
+    const P = (i, j) => {
+      const th = i / N * Math.PI, ph = j / (N * 2) * Math.PI * 2;
+      const n = [Math.sin(th) * Math.cos(ph), Math.sin(th) * Math.sin(ph), Math.cos(th)];
+      return { p: [C[0] + R * n[0], C[1] + R * n[1], C[2] + R * n[2]], n };
+    };
+    const tri = [];
+    for (let i = 0; i < N; i++) for (let j = 0; j < N * 2; j++) {
+      const a = P(i, j), b = P(i + 1, j), c = P(i + 1, j + 1), d = P(i, j + 1);
+      if (i > 0) tri.push([a, b, c]);
+      if (i < N - 1) tri.push([a, c, d]);
+    }
+    return tri;
+  }
+
+  const teapot = (w, h, opt) => solid(w, h, teapotMesh, opt);
+  const ball3d = (w, h, opt) => solid(w, h, sphereMesh, Object.assign({ mesh: 'ball' }, opt));
+
+  return { rng, noise, clamp01, norm, cross, plen, scene, blob, teapot, ball3d, solid,
            latitudes, parallels, carve, toPath, thin, AXIS };
 })();
 
@@ -348,28 +872,84 @@ const KIT = (function specimenKit() {
      no. Two regions in this section answer that question differently, and the
      difference is the finding. */
   function stitch(runs, bridge) {
-    const free = runs.map(ends), used = new Array(free.length).fill(false);
+    /* IT CARRIES THE WHOLE RUN, and it did not always. Reducing each run to
+       its two ends is right for a straight chord and only for a straight
+       chord — it is what 08b wants, and it is what makes a plotter file forty
+       times smaller. Do it in here and every CURVED fill comes out as a
+       scribble of chords between the places its curves happened to start and
+       stop, which still draws, still counts one pen down, and is not the
+       drawing. A caller with straight runs reduces them itself, before
+       chaining, where that decision belongs. */
+    const path = runs.map(r => r.slice());
+    const free = path.map(ends), used = new Array(free.length).fill(false);
     const out = [];
-    for (let n = 0; n < free.length; n++) {
-      if (used[n]) continue;
-      used[n] = true;
-      const cur = free[n].slice();
-      for (;;) {
-        const p = cur[cur.length - 1];
-        const cand = [];
+
+    /* THE SEARCH IS BOUNDED WHEN THE BRIDGE SAYS SO. Walking every free end
+       on every step is O(n²) per stroke and O(n³) over a fill — fine at the
+       two hundred runs a specimen makes, not fine at the ten thousand a
+       streamline fill on a big sheet makes, where it is minutes.
+
+       `cut` publishes its own reach, so the ends go in a bucket grid sized to
+       it and only the neighbours are considered. That is not an approximation
+       of the greedy rule, it is the same rule: `cut` refuses every gap wider
+       than `reach`, so a candidate outside the neighbourhood could never have
+       been taken however long it was looked at. A bridge that does not
+       publish a reach — one that walks a wall, say — gets the exhaustive
+       search it needs, unchanged. */
+    const reach = typeof bridge.reach === 'number' ? bridge.reach : null;
+    let cellOf = null, grid = null;
+    if (reach) {
+      const c = Math.max(reach, 0.5), key = (i, j) => i * 100003 + j;
+      grid = new Map();
+      cellOf = (p) => key(Math.floor(p[0] / c), Math.floor(p[1] / c));
+      free.forEach((e, i) => {
+        for (let k = 0; k < 2; k++) {
+          const g = cellOf(e[k]);
+          let a = grid.get(g); if (!a) { a = []; grid.set(g, a); } a.push([i, k]);
+        }
+      });
+      cellOf.c = c; cellOf.key = key;
+    }
+
+    const near = (p) => {
+      const cand = [];
+      if (grid) {
+        const ci = Math.floor(p[0] / cellOf.c), cj = Math.floor(p[1] / cellOf.c);
+        for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) {
+          const a = grid.get(cellOf.key(ci + di, cj + dj)); if (!a) continue;
+          for (let q = 0; q < a.length; q++) {
+            const [j, k] = a[q]; if (used[j]) continue;
+            const d = dist(p, free[j][k]);
+            if (d <= reach) cand.push([d, j, k]);
+          }
+        }
+      } else {
         for (let j = 0; j < free.length; j++) {
           if (used[j]) continue;
           cand.push([dist(p, free[j][0]), j, 0], [dist(p, free[j][1]), j, 1]);
         }
-        cand.sort((a, b) => a[0] - b[0]);
+      }
+      cand.sort((a, b) => a[0] - b[0]);
+      return cand;
+    };
+
+    for (let n = 0; n < free.length; n++) {
+      if (used[n]) continue;
+      used[n] = true;
+      const cur = path[n].slice();
+      for (;;) {
+        const p = cur[cur.length - 1];
         let hit = null, br = null;
-        for (const c of cand) {
+        for (const c of near(p)) {
           br = bridge(p, free[c[1]][c[2]]);
           if (br) { hit = c; break; }
         }
         if (!hit) break;
         used[hit[1]] = true;
-        cur.push(...br, free[hit[1]][1 - hit[2]]);
+        const seg = hit[2] === 1 ? path[hit[1]].slice().reverse() : path[hit[1]];
+        /* the bridge ends ON the next run's near end, so that point is already
+           down — push the run from its second point or it is drawn twice */
+        cur.push(...br, ...seg.slice(1));
       }
       out.push(cur);
     }
@@ -380,14 +960,468 @@ const KIT = (function specimenKit() {
      enough" is only half the test. It also has to stay inside the region being
      filled — skip that and the fill grows whiskers across the white paper
      between its islands, which is worse than the lift it saved. */
-  const cut = (reach, inside) => (a, b) => {
-    if (dist(a, b) > reach) return null;
-    for (let i = 1; i < 5; i++) {
-      const u = i / 5;
-      if (!inside(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u)) return null;
-    }
-    return [b];
+  const cut = (reach, inside) => {
+    const bridge = (a, b) => {
+      if (dist(a, b) > reach) return null;
+      for (let i = 1; i < 5; i++) {
+        const u = i / 5;
+        if (!inside(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u)) return null;
+      }
+      return [b];
+    };
+    /* PUBLISHED so `stitch` may bound its search. It is the bridge that knows
+       what it will refuse, and nothing else can be told to assume it. */
+    bridge.reach = reach;
+    return bridge;
   };
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     FOUR MORE MACHINE FILLS
+
+     Every one of them answers the same question as the serpentine — how do
+     you turn a tone into strokes without lifting more than you must — and
+     every one answers it differently enough to be a different drawing, not a
+     setting. They take a region and hand back runs, so `stitch` and `cut`
+     work on all four exactly as they work on `scanlines`.
+
+     WHAT THEY DO NOT DO IS ASK WHAT SHAPE THEY ARE ON. The direction field
+     below is derived from the tone function itself; nothing here knows there
+     is a ball. Hand it the blob and it wraps the blob.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* ── THE DIRECTION FIELD ────────────────────────────────────────────────
+     A base angle, BENT toward the iso-tone direction where the tone actually
+     has one. Flat tone leaves the base direction alone; a turning tone bends
+     the lines round it, which is what "the hatching follows the form" means
+     when you are not allowed to know what the form is.
+
+     TWO THINGS ARE DELIBERATE HERE AND BOTH ARE BUGS IF YOU UNDO THEM.
+
+     It BENDS THE ANGLE, it does not blend two vector fields. Blending a
+     uniform field with a rotational one always leaves a point where the two
+     cancel, and every streamline in the neighbourhood spirals into it — a
+     whirlpool in the middle of the fill, the same failure as an unplaced
+     `latitudes` pole but arriving without warning.
+
+     It bends by `sin(2d)`, not by `d`. The iso-tone direction is a LINE, not
+     an arrow: it has no preferred end, so any formula that folds it into a
+     half-turn range has a seam where the fold happens, and the fill shows it
+     as a staircase straight across the region. `sin(2d)` is π-periodic, so
+     the seam cannot exist. It is zero at 0° and at 90° and peaks at 45°,
+     which is also the right shape: those two are the angles where there is
+     nothing to bend toward. */
+  function toneField(tone, angDeg, bend) {
+    const base = angDeg * Math.PI / 180;
+    const e = 1.6;                                    /* probe, mm */
+    const t0 = (x, y) => { const v = tone(x, y); return v < 0 ? 0 : v; };
+    return (x, y) => {
+      const gx = t0(x + e, y) - t0(x - e, y), gy = t0(x, y + e) - t0(x, y - e);
+      const g = Math.hypot(gx, gy);
+      if (g < 1e-9) return base;
+      const coh = Math.min(1, g / 0.06);              /* how much to trust it */
+      const d = (Math.atan2(gy, gx) + Math.PI / 2) - base;
+      return base + bend * coh * Math.sin(2 * d);
+    };
+  }
+
+  /* ── STREAMLINES · evenly spaced, tone by separation ────────────────────
+     Jobard & Lefer, 1997. Seed a point, integrate the field both ways, and
+     stop the moment you come closer than `d` to a line already drawn; then
+     drop fresh seeds at ±d off the line you just made and repeat until the
+     queue empties. Tone enters as `d` itself — the separation closes up
+     where the region is dark.
+
+     THIS IS THE ONE FILL HERE WHERE TONE IS NOT A THRESHOLD. `carve` and the
+     serpentine both draw a full-strength line or no line; this draws every
+     line and moves them. That is why it has no banding to dither away and
+     why it is the only one that reads as drawn rather than screened.
+
+     `opt.near` / `opt.far` are the two separations in mm, dark and light.
+     `opt.bend` is how hard the field follows the tone, 0 = straight parallels.
+
+     THE SELF TEST IS NOT OPTIONAL. A line has not been added to the grid
+     while it is still being walked, so without checking its own trail it
+     will happily spiral onto itself wherever the field curls. The trailing
+     window is skipped because the last few samples are always within `d` of
+     the head — that is not a collision, that is the line. */
+  function streamlines(w, h, tone, opt = {}) {
+    const nib   = opt.nib   || 0.35;
+    const far   = opt.far   || 3.6 * (nib / 0.35);
+    const near  = opt.near  || 1.25 * (nib / 0.35);
+    const field = opt.field || toneField(tone, opt.angle == null ? -34 : opt.angle,
+                                         opt.bend == null ? 0.85 : opt.bend);
+    const step  = 0.7, TEST = 0.56, maxLen = opt.maxLen || Math.max(w, h) * 0.9;
+    const cap   = opt.cap || 4000;
+
+    const sep = (x, y) => { const t = tone(x, y); return t < 0 ? far : far + (near - far) * Math.pow(t, 0.85); };
+    const cell = far, grid = new Map(), key = (i, j) => i * 100003 + j;
+    const put = p => {
+      const k = key(Math.floor(p[0] / cell), Math.floor(p[1] / cell));
+      let a = grid.get(k); if (!a) { a = []; grid.set(k, a); } a.push(p);
+    };
+    const crowded = (x, y, r) => {
+      const ci = Math.floor(x / cell), cj = Math.floor(y / cell), r2 = r * r;
+      for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) {
+        const a = grid.get(key(ci + di, cj + dj)); if (!a) continue;
+        for (let q = 0; q < a.length; q++) {
+          const ex = a[q][0] - x, ey = a[q][1] - y;
+          if (ex * ex + ey * ey < r2) return true;
+        }
+      }
+      return false;
+    };
+
+    const walk = (sx, sy, sgn) => {
+      const pts = []; let x = sx, y = sy, len = 0;
+      for (let s = 0; s < 4000; s++) {
+        if (x < 0 || x > w || y < 0 || y > h || tone(x, y) < 0) break;
+        const r = TEST * sep(x, y);
+        if (crowded(x, y, r)) break;
+        const back = Math.ceil(2.4 * sep(x, y) / step);
+        let hit = false;
+        for (let q = 0; q < pts.length - back; q++) {
+          const ex = pts[q][0] - x, ey = pts[q][1] - y;
+          if (ex * ex + ey * ey < r * r) { hit = true; break; }
+        }
+        if (hit) break;
+        pts.push([x, y]);
+        const a1 = field(x, y);                                     /* midpoint (RK2) */
+        const a2 = field(x + sgn * step * 0.5 * Math.cos(a1), y + sgn * step * 0.5 * Math.sin(a1));
+        x += sgn * step * Math.cos(a2); y += sgn * step * Math.sin(a2);
+        len += step; if (len > maxLen) break;
+      }
+      return pts;
+    };
+
+    /* Propagation from one seed stalls wherever the queue happens to close a
+       pocket off, so a jittered grid goes in behind it as a backstop. Every
+       one of those is rejected on the spot if the space is already taken —
+       they cost nothing and they are the difference between a fill and a
+       fill with a hole in it. */
+    const queue = [[w / 2, h / 2]];
+    const G = 19;
+    for (let gy = 0; gy < G; gy++) for (let gx = 0; gx < G; gx++)
+      queue.push([(gx + 0.5) * w / G, (gy + 0.5) * h / G]);
+
+    const out = [];
+    for (let qi = 0; qi < queue.length && out.length < cap; qi++) {
+      const s = queue[qi];
+      if (s[0] < 0 || s[0] > w || s[1] < 0 || s[1] > h) continue;
+      if (tone(s[0], s[1]) < 0) continue;
+      if (crowded(s[0], s[1], sep(s[0], s[1]))) continue;
+      const fwd = walk(s[0], s[1], 1), back = walk(s[0], s[1], -1);
+      const line = back.slice(1).reverse().concat(fwd);
+      if (line.length < 4) continue;
+      for (const p of line) put(p);
+      out.push(line);
+      let acc = 0;
+      for (let i = 1; i < line.length; i++) {
+        acc += dist(line[i], line[i - 1]);
+        const d = sep(line[i][0], line[i][1]);
+        if (acc < d * 0.9) continue;
+        acc = 0;
+        const tx = line[i][0] - line[i - 1][0], ty = line[i][1] - line[i - 1][1];
+        const m = Math.hypot(tx, ty) || 1, nx = -ty / m, ny = tx / m;
+        queue.push([line[i][0] + nx * d, line[i][1] + ny * d]);
+        queue.push([line[i][0] - nx * d, line[i][1] - ny * d]);
+      }
+    }
+    return out;
+  }
+
+  /* ── SQUIGGLE · amplitude-modulated line halftone ───────────────────────
+     Ahmed & Deussen. Rows at the base angle, and the tone is the AMPLITUDE
+     of a wave riding along each one rather than whether the row is drawn.
+     Nothing is ever broken, so a whole region comes out as one row of runs
+     that `stitch` folds into a single stroke — this and the space-filling
+     curve are the two fills here that genuinely reach one pen-down.
+
+     THE AMPLITUDE CEILING IS THE WHOLE OF THE TUNING. Peak-to-peak has to
+     stay under the pitch or neighbouring rows collide, and when they collide
+     the dark end stops getting darker and starts getting muddled: the tone
+     inverts and the shading reads as a smear. 0.44 of the pitch is peak, so
+     0.88 of it is peak-to-peak, and the remaining eighth is the margin.
+
+     THE PHASE ADVANCES BY ARC LENGTH, not by x. Advance it by the parameter
+     and the wavelength stretches with the row's own direction — every row at
+     an angle comes out a different frequency from the ones beside it, which
+     reads as a moiré nobody asked for. */
+  function squiggle(w, h, tone, opt = {}) {
+    const nib   = opt.nib   || 0.35;
+    const pitch = opt.pitch || 2.6 * (nib / 0.35);
+    const ang   = opt.angle == null ? -34 : opt.angle;
+    const amp   = opt.amp   == null ? 0.44 : opt.amp;              /* of the pitch */
+    const wl0   = opt.wave  || 4.6 * (nib / 0.35);
+    const ds    = 0.22;
+    const out = [];
+    let phase = 0;
+    scanlines(w, h, pitch, ang, opt.margin == null ? 1.4 : opt.margin).forEach(seg => {
+      const [x0, y0, x1, y1] = seg;
+      const L = Math.hypot(x1 - x0, y1 - y0); if (L < ds) return;
+      const ux = (x1 - x0) / L, uy = (y1 - y0) / L, nx = -uy, ny = ux;
+      let run = null;
+      for (let s = 0; s <= L; s += ds) {
+        const px = x0 + ux * s, py = y0 + uy * s;
+        const t = tone(px, py);
+        if (t < 0) { run = null; continue; }               /* outside: break the row */
+        const a = Math.pow(t, 1.15) * pitch * amp;
+        phase += ds / Math.max(0.6, wl0 - (wl0 * 0.55) * t) * Math.PI * 2;
+        let o = a * Math.sin(phase);
+        /* THE WAVE IS WHAT LANDS ON THE PAPER, not the row it rides on. The
+           region test belongs on the displaced point: test the centreline and
+           a crest near the edge swings a millimetre outside the shape, which
+           is a mark in the white and the one thing the contract forbids. The
+           amplitude is pulled in until it fits rather than the run being cut,
+           so the wave hugs the boundary instead of fraying against it. */
+        if (tone(px + nx * o, py + ny * o) < 0) {
+          let lo = 0, hi = o;
+          for (let k = 0; k < 5; k++) {
+            const u = (lo + hi) / 2;
+            if (tone(px + nx * u, py + ny * u) < 0) hi = u; else lo = u;
+          }
+          o = lo;
+        }
+        if (!run) { run = []; out.push(run); }
+        run.push([px + nx * o, py + ny * o]);
+      }
+    });
+    return out.filter(r => r.length > 1);
+  }
+
+  /* ── SPACE-FILLING CURVE · one line, tone by curve length ───────────────
+     Velho & Gomes. A Hilbert curve that recurses a level deeper wherever the
+     region is darker, so tone becomes how much curve length is spent per
+     square millimetre. Because every sub-cell of a Hilbert curve enters and
+     leaves at fixed corners, you may stop the recursion at different depths
+     in different places and the curve is STILL CONTINUOUS — that property is
+     the entire reason this works, and it is why no other subdivision can be
+     substituted for it without redoing the corners.
+
+     ITS HONEST WEAKNESS IS THE GRID. The curve is axis-aligned and its
+     lattice is visible in any flat area, which is a texture, not a shading.
+     Segerman's pinwheel curve is the published answer and is not built here.
+
+     Cells outside the region are dropped, which breaks the one line into one
+     run per contiguous stretch. That is the correct behaviour and not a
+     failure to chain: a connector across the outside is a mark on the paper. */
+  function spaceFill(w, h, tone, opt = {}) {
+    const nib  = opt.nib  || 0.35;
+    const m    = opt.margin == null ? 1.4 : opt.margin;
+    const S    = Math.min(w, h) - 2 * m;
+    const ox   = (w - S) / 2, oy = (h - S) / 2;
+    /* The shallow depth is set from the pitch so this fill lands at the same
+       density as the others: a depth-n curve puts its line S/2^n apart. */
+    const pitch = opt.pitch || 2.6 * (nib / 0.35);
+    const dmin = opt.depth || Math.max(2, Math.round(Math.log2(S / pitch)));
+    const dmax = dmin + (opt.levels == null ? 3 : opt.levels);
+    const out = []; let run = null;
+    (function rec(x0, y0, xi, xj, yi, yj, depth) {
+      const cx = x0 + (xi + yi) / 2, cy = y0 + (xj + yj) / 2;
+      const t = tone(cx, cy);
+      const want = t < 0 ? dmin : dmin + Math.round(Math.pow(t, 0.9) * (dmax - dmin));
+      if (depth >= want || depth >= dmax) {
+        if (t < 0) { run = null; return; }
+        if (!run) { run = []; out.push(run); }
+        run.push([cx, cy]);
+        return;
+      }
+      rec(x0, y0, yi / 2, yj / 2, xi / 2, xj / 2, depth + 1);
+      rec(x0 + xi / 2, y0 + xj / 2, xi / 2, xj / 2, yi / 2, yj / 2, depth + 1);
+      rec(x0 + xi / 2 + yi / 2, y0 + xj / 2 + yj / 2, xi / 2, xj / 2, yi / 2, yj / 2, depth + 1);
+      rec(x0 + xi / 2 + yi, y0 + xj / 2 + yj, -yi / 2, -yj / 2, -xi / 2, -xj / 2, depth + 1);
+    })(ox, oy, S, 0, 0, S, 0);
+    return out.filter(r => r.length > 1);
+  }
+
+  /* ── LABYRINTH · one closed curve, grown ────────────────────────────────
+     Pedersen & Singh, NPAR 2006. A closed polyline under four forces —
+     fairing toward the neighbours' midpoint, an edge spring holding the node
+     spacing, Brownian jitter, and repulsion from every non-adjacent node
+     inside a radius — resampling itself as it goes. The tone drives the
+     repulsion radius, so the coils crowd where the region is dark.
+
+     GROWTH IS AN INJECTION, and this is the part that is not obvious.
+     Repulsion cannot lengthen a small loop, because a small loop has no
+     non-adjacent neighbours inside the radius to push against: leave it to
+     the forces and the curve sits there as a circle for as long as you care
+     to iterate. Nodes are pushed in at a fixed rate and the forces then have
+     something to arrange.
+
+     IT IS BY FAR THE MOST EXPENSIVE FILL HERE — an n-body relaxation with a
+     neighbour query per node per step — and it does not hold fine tone. What
+     it holds is TEXTURE, which nothing else in this file can make. */
+  function labyrinth(w, h, tone, opt = {}) {
+    const nib  = opt.nib  || 0.35;
+    const near = opt.near || 2.0 * (nib / 0.35);
+    const far  = opt.far  || 4.2 * (nib / 0.35);
+    const iters = opt.iters || 240;
+    const rnd  = KIT.rng(opt.seed || 1);
+
+    /* Start wherever there is the most room: the inside sample furthest from
+       anything outside. Starting at the centre of the sheet puts the seed
+       loop through the blob's hole about a third of the time. */
+    let sx = w / 2, sy = h / 2, bestD = -1, inside = 0;
+    for (let gy = 1; gy < 24; gy++) for (let gx = 1; gx < 24; gx++) {
+      const x = gx * w / 24, y = gy * h / 24;
+      if (tone(x, y) < 0) continue;
+      inside++;
+      let d = 0;
+      while (d < 22) {
+        const q = d + 1.6; let free = true;
+        for (let k = 0; k < 8; k++) {
+          const a = k / 8 * Math.PI * 2;
+          if (tone(x + q * Math.cos(a), y + q * Math.sin(a)) < 0) { free = false; break; }
+        }
+        if (!free) break; d = q;
+      }
+      if (d > bestD) { bestD = d; sx = x; sy = y; }
+    }
+    /* A curve at coil spacing `near` fills an area with `area / near` of line,
+       and a node every `near * 0.46` of it. That is the budget — measured off
+       the same grid the seed came from, so a small specimen and a big sheet
+       both stop when they are full rather than when a constant says so. */
+    const area = inside / (23 * 23) * w * h;
+    const cap = opt.cap || Math.max(200, Math.min(4000,
+                  Math.round(area / (0.46 * near * near) * 1.15)));
+    let R0 = Math.max(1.6, Math.min(bestD * 0.55, 12));
+    let nodes = [];
+    for (let tries = 0; tries < 9; tries++) {
+      nodes = [];
+      let ok = true;
+      for (let i = 0; i < 56; i++) {
+        const a = i / 56 * Math.PI * 2;
+        const x = sx + R0 * Math.cos(a), y = sy + R0 * Math.sin(a);
+        if (tone(x, y) < 0) { ok = false; break; }
+        nodes.push([x, y]);
+      }
+      if (ok) break;
+      R0 *= 0.7;                      /* shrink until the seed loop fits */
+    }
+
+    const radius = (x, y) => { const t = tone(x, y); return t < 0 ? near : far + (near - far) * Math.pow(t, 0.75); };
+    const cell = near, key = (i, j) => i * 100003 + j;
+
+    for (let it = 0; it < iters; it++) {
+      const n = nodes.length, grid = new Map();
+      for (let i = 0; i < n; i++) {
+        const k = key(Math.floor(nodes[i][0] / cell), Math.floor(nodes[i][1] / cell));
+        let a = grid.get(k); if (!a) { a = []; grid.set(k, a); } a.push(i);
+      }
+      const fx = new Float64Array(n), fy = new Float64Array(n);
+      for (let i = 0; i < n; i++) {
+        const p = nodes[i], pv = nodes[(i - 1 + n) % n], nx2 = nodes[(i + 1) % n];
+        const R = radius(p[0], p[1]), de = R * 0.46;
+        fx[i] += ((pv[0] + nx2[0]) / 2 - p[0]) * 0.20;
+        fy[i] += ((pv[1] + nx2[1]) / 2 - p[1]) * 0.20;
+        for (const q of [pv, nx2]) {
+          const dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy);
+          if (d > 1e-6) { const f = (d - de) * 0.22; fx[i] += dx / d * f; fy[i] += dy / d * f; }
+        }
+        fx[i] += (rnd() * 2 - 1) * 0.13; fy[i] += (rnd() * 2 - 1) * 0.13;
+        const ci = Math.floor(p[0] / cell), cj = Math.floor(p[1] / cell);
+        const RR = Math.ceil(R / cell);
+        for (let di = -RR; di <= RR; di++) for (let dj = -RR; dj <= RR; dj++) {
+          const a = grid.get(key(ci + di, cj + dj)); if (!a) continue;
+          for (let q = 0; q < a.length; q++) {
+            const j = a[q];
+            if (j === i || j === (i + 1) % n || j === (i - 1 + n) % n
+                        || j === (i + 2) % n || j === (i - 2 + n) % n) continue;
+            const dx = p[0] - nodes[j][0], dy = p[1] - nodes[j][1], d = Math.hypot(dx, dy);
+            if (d > 1e-6 && d < R) { const f = (1 - d / R) * 0.62; fx[i] += dx / d * f; fy[i] += dy / d * f; }
+          }
+        }
+      }
+      /* The region is the wall. A node that steps outside is walked back
+         along the step it just took rather than clamped to a box — the box
+         is the sheet, and the sheet is not the shape. */
+      for (let i = 0; i < n; i++) {
+        const p = nodes[i];
+        const px = p[0] + Math.max(-0.9, Math.min(0.9, fx[i]));
+        const py = p[1] + Math.max(-0.9, Math.min(0.9, fy[i]));
+        if (px > 0 && px < w && py > 0 && py < h && tone(px, py) >= 0) { p[0] = px; p[1] = py; continue; }
+        let lo = 0, hi = 1;
+        for (let k = 0; k < 6; k++) {
+          const u = (lo + hi) / 2;
+          const qx = p[0] + (px - p[0]) * u, qy = p[1] + (py - p[1]) * u;
+          if (qx > 0 && qx < w && qy > 0 && qy < h && tone(qx, qy) >= 0) lo = u; else hi = u;
+        }
+        p[0] += (px - p[0]) * lo * 0.6; p[1] += (py - p[1]) * lo * 0.6;
+      }
+      /* GROWTH IS GATED ON ROOM, and this is the second half of the same
+         lesson. Injecting at a fixed rate is what lengthens the curve, but a
+         lobe that has already filled cannot take more nodes: the repulsion
+         has nowhere to put them, the walk-back pins them against the wall,
+         and the next injection lands on top of the pile. It knots — a solid
+         black tangle where the coils should be — and no amount of iterating
+         undoes it, because the crossings are already made.
+
+         So a node goes in only where its midpoint has clearance. The curve
+         then grows until the region is full and stops on its own, which is
+         also the only sensible definition of "full". */
+      if (nodes.length < cap) {
+        const add = Math.max(1, Math.floor(n * 0.08));
+        /* PICKED FIRST, SPLICED AFTER, and in descending order. The grid holds
+           indices into the array as it stood at the top of the iteration; the
+           first splice moves every index above it and every later room test
+           then reads the wrong node. It does not throw — it quietly refuses
+           almost every injection, and the curve sits there as a ring. */
+        const picks = [], seen = new Set();
+        for (let g = 0; g < add; g++) {
+          const i = Math.floor(rnd() * n);
+          if (seen.has(i)) continue;
+          const a = nodes[i], b = nodes[(i + 1) % n];
+          const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+          if (tone(mx, my) < 0) continue;
+          const room = radius(mx, my) * 0.55, r2 = room * room;
+          const ci = Math.floor(mx / cell), cj = Math.floor(my / cell);
+          const RR = Math.ceil(room / cell);
+          let tight = false;
+          for (let di = -RR; di <= RR && !tight; di++) for (let dj = -RR; dj <= RR && !tight; dj++) {
+            const arr = grid.get(key(ci + di, cj + dj)); if (!arr) continue;
+            for (let q = 0; q < arr.length; q++) {
+              const j = arr[q];
+              /* The window is along the CURVE, not in space. Its own near
+                 neighbours sit a node-spacing from the midpoint by definition;
+                 count those and every injection is refused by the run it is
+                 being inserted into. What the test asks about is another COIL. */
+              const g1 = Math.abs(j - i), gap = g1 < n - g1 ? g1 : n - g1;
+              if (gap <= 4) continue;
+              const ex = nodes[j][0] - mx, ey = nodes[j][1] - my;
+              if (ex * ex + ey * ey < r2) { tight = true; break; }
+            }
+          }
+          if (!tight) { picks.push([i, mx, my]); seen.add(i); }
+        }
+        picks.sort((p1, p2) => p2[0] - p1[0]);
+        for (const [i, mx, my] of picks) {
+          if (nodes.length >= cap) break;
+          nodes.splice(i + 1, 0, [mx, my]);
+        }
+      }
+      /* THE CAP IS ON WHAT THIS PASS STARTED WITH. Gate the split on the
+         array being BUILT and it never holds: `keep` already contains a copy
+         of every node, so it passes the cap halfway through and the pass
+         still added a midpoint to everything before that point. Each pass
+         then comes out half as long again as the last — a runaway that ends
+         at fifty thousand nodes and a hundred seconds, with no error. */
+      const mayGrow = nodes.length < cap;
+      const keep = [];
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i], b = nodes[(i + 1) % nodes.length];
+        const de = radius(a[0], a[1]) * 0.46, d = dist(a, b);
+        if (d < de * 0.30 && keep.length > 40 && nodes.length > 56) continue;
+        keep.push(a);
+        if (d > de * 1.35 && mayGrow && keep.length < cap) {
+          const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+          if (tone(mx, my) >= 0) keep.push([mx, my]);
+        }
+      }
+      nodes = keep;
+    }
+    nodes.push(nodes[0].slice());
+    return [nodes];
+  }
 
   /* ── THE THREE HANDS ──────────────────────────────────────────────────── */
   const { rng, noise, plen, scene, blob, latitudes, parallels,
@@ -670,11 +1704,151 @@ const KIT = (function specimenKit() {
     return { paths: out, nib, S };
   }
 
+
+  /* ══════════════════════════════════════════════════════════════════════
+     `fill` — A HAND ON ANY REGION
+
+     `draw` and `drawShape` each BUILD their own subject: one makes a scene and
+     hatches the ball, the other makes a blob and hatches that. They predate the
+     region contract, and the cost showed up the moment there was a third
+     subject — the teapot — because they are the only generators in this file
+     that cannot be pointed at one. Three tiles out of nine quietly drew
+     something else.
+
+     THIS IS THE SAME HAND WITH THE SUBJECT TAKEN OUT. Same jitter, same drift,
+     same overshoot, same re-grip, same four thresholds each confined to what
+     the last left dark. `draw` and `drawShape` are untouched — Portrait-Typo
+     calls both, and changing what they return would change a drawing in
+     somebody else's app to tidy this one.
+
+     THE FORM-FOLLOWING PASS IS THE ONLY REAL DIFFERENCE, and it had to be.
+     `latitudes` wraps a SPHERE: it needs a centre, a radius and an axis, and it
+     has one pole on the front of the ball that must be aimed at the highlight
+     or the fill grows a whirlpool. A teapot has no such axis and no honest
+     place to put one. So the wrapping pass is `streamlines` over the field the
+     tone itself implies — which is the same idea arrived at from the other end,
+     works on any region, and has no pole to place.
+     ══════════════════════════════════════════════════════════════════════ */
+  function fill(kind, w, h, seed, region, opt = {}) {
+    const tone = region.tone;
+    const rnd = rng(seed), n1 = noise(seed ^ 0x9e37), n2 = noise(seed ^ 0x51ed);
+    const dither = (x, y) => (n1(x * 0.62 + y * 0.21) + n2(y * 0.55 - x * 0.18)) * 0.085;
+    const nib = opt.nib || 0.35;
+    const u = nib / 0.35;
+    const S0 = opt.spacing > 0 ? opt.spacing : 2.17 * u;
+    const k = S0 / 2.17, A0 = opt.angle == null ? -34 : opt.angle;
+    const jit = () => rnd() - 0.5;
+    const amp = 0.11 * u, out = [];
+    const ink = pts => { const g = handify(thin(pts, 3), rnd, n1, amp, 0.5 * u); if (g) out.push(toPath(g)); };
+    /* PAST ABOUT 16MM THE WRIST RUNS OUT and the stroke is two strokes with a
+       hairline break in it, which is why a long hand-drawn fill has no single
+       edge-to-edge line anywhere in it. */
+    const push = pts => {
+      const L = plen(pts);
+      if (L < 17 || pts.length < 8) return ink(pts);
+      const c = Math.round(pts.length * (0.38 + rnd() * 0.24));
+      const g = Math.max(1, Math.round(pts.length * (0.02 + rnd() * 0.03)));
+      ink(pts.slice(0, c)); ink(pts.slice(c + g));
+    };
+
+    if (kind === 'random') {
+      const dens = 2.7 / k, N = Math.round(w * h * dens);
+      for (let i = 0; i < N; i++) {
+        const x = rnd() * w, y = rnd() * h;
+        const t = tone(x, y);
+        if (t <= 0.03 || rnd() > Math.pow(t, 1.3)) continue;
+        const base = (n1(x * 0.10 + y * 0.07) * 1.6 + n1(y * 0.31 - x * 0.19 + 90) * 0.5) * Math.PI;
+        const a = base + (rnd() - 0.5) * 1.1;
+        const dx = Math.cos(a), dy = Math.sin(a);
+        const len = (0.38 + rnd() * 0.68) * (0.55 + t * 0.6);
+        const n = rnd() < 0.06 ? 2 : 1;
+        const gap = 0.26 + rnd() * 0.14, half = len / 2, pts = [];
+        for (let j = 0; j < n; j++) {
+          const off = (j - (n - 1) / 2) * gap;
+          const a0 = j % 2 ? half : -half, a1 = j % 2 ? -half : half;
+          const steps = Math.max(2, Math.round(len / 0.3));
+          for (let m = j ? 1 : 0; m <= steps; m++) {
+            const v = a0 + (a1 - a0) * (m / steps);
+            pts.push([x + dx * v - dy * off, y + dy * v + dx * off]);
+          }
+        }
+        ink(pts);
+      }
+    } else {
+      const straight = (drift, tau, pitch) => {
+        const runs = parallels(0, 0, w, h, A0 + drift, pitch * k, 0, 0.42, jit);
+        carve(runs, tone, tau, dither, 1.68 * u).forEach(r => { if (rnd() > 0.04) push(r); });
+      };
+      /* EACH WRAPPING PASS IS SPACED A LITTLE WIDER THAN THE LAST. Four runs of
+         the same field at the same separation land on the same lines — and
+         since every pass is confined to what is already darker, they would
+         stack exactly on top of each other in the shadow and ink it twice
+         instead of building it up. Widening by an eleventh a pass is enough to
+         interleave them. */
+      const wrap = (i, tau, pitch) => {
+        const runs = streamlines(w, h, tone, {
+          nib, angle: A0 + [0, 3, -2, 5][i % 4],
+          near: pitch * k * (1 + i * 0.11), far: pitch * k * 2.4 });
+        carve(runs, tone, tau, dither, 1.68 * u).forEach(r => { if (rnd() > 0.035) push(r); });
+      };
+      /* ── HOW MANY PASSES IS ASKED OF THE TONE, NOT OF THE CALLER ────────
+         Four passes each confined to what the last left dark is how you build
+         a TONE. Hand that recipe a flat region — the blob is 1 everywhere
+         inside — and all four thresholds pass everywhere at once: four
+         interleaved passes at pitch s land at s/4, which is under two nibs and
+         floods to solid black. A flat fill wants two passes, and `drawShape`
+         has always used two for exactly this reason.
+
+         So the region is asked what range it has. That is not the generator
+         peeking at the shape — it never learns what the thing IS — it is the
+         same question `carve` asks at every sample, put once instead of ten
+         thousand times. */
+      let lo = 2, hi = -2;
+      for (let gy = 1; gy < 15; gy++) for (let gx = 1; gx < 15; gx++) {
+        const t = tone(gx * w / 15, gy * h / 15);
+        if (t < 0) continue;
+        if (t < lo) lo = t; if (t > hi) hi = t;
+      }
+      const flatRegion = hi - lo < 0.12;
+      if (kind === 'cross') {
+        if (flatRegion) { straight(0, 0.5, 1.61); straight(86, 0.5, 1.61); }
+        else {
+          wrap(0, 0.12, 2.10);
+          [[20, 0.36, 1.75], [90, 0.56, 1.54], [56, 0.76, 1.33]].forEach(a => straight(a[0], a[1], a[2]));
+        }
+      } else {
+        if (flatRegion) { straight(0, 0.5, 1.96); straight(4, 0.5, 1.96); }
+        else [0.12, 0.36, 0.56, 0.76].forEach((tau, i) => wrap(i, tau, 2.17));
+      }
+    }
+
+    /* THE OUTLINE IS MADE OF THE MARKS TOO, and it is two arcs with a gap in
+       them because a hand does not close a contour in one unbroken pass. Only
+       if the region can hand back points: `edge` is path data and a hand cannot
+       ink a string. */
+    if (region.rings) region.rings(0.45).forEach(o => {
+      const n = o.length;
+      if (n < 6) return;
+      if (kind === 'random') {
+        for (let i = 0; i < Math.round(n * 1.2); i++) {
+          const j = Math.floor(rnd() * n), m = 3 + Math.floor(rnd() * 4);
+          ink(o.slice(j, j + m).map(q => q.slice()));
+        }
+      } else {
+        const c0 = Math.floor(rnd() * n), c1 = (c0 + Math.floor(n * (0.42 + rnd() * 0.16))) % n;
+        const seg = (a, b) => { const q = []; for (let i = a; i !== b; i = (i + 1) % n) q.push(o[i]); return q; };
+        [seg(c0, c1), seg(c1, c0)].forEach(q => { if (q.length > 4) ink(q); });
+      }
+    });
+    return { paths: out, nib };
+  }
+
   /* THE ONLY THREE NAMES ANYTHING OUTSIDE THIS FILE MAY USE. Kept as three
      objects rather than one because they are three different things to be:
      KIT is what a subject is made of, HANDS is a look, HATCH is a machine. */
   global.KIT   = KIT;
-  global.HANDS = { draw, drawShape };
-  global.HATCH = { scanlines, stitch, cut, toPoly, mm2: f, ends, dist };
+  global.HANDS = { draw, drawShape, fill };
+  global.HATCH = { scanlines, stitch, cut, toPoly, mm2: f, ends, dist,
+                   streamlines, squiggle, spaceFill, labyrinth, toneField };
 
 })(typeof window !== 'undefined' ? window : globalThis);

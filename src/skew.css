@@ -3833,6 +3833,32 @@ body.drawer-open .sliders i:nth-child(3),
 }
 .api dd{ margin:0; font-size:12.5px; line-height:1.5; color:#7d828b; }
 /* the rows a dev gets wrong: marked, not explained twice */
+/* A GROUP HEADING INSIDE THE LIST, because fourteen entries in one column is
+   a lookup table you have to read all of to use any of. It spans both columns
+   and takes an empty `dd` to keep the grid honest — the alternative is nesting
+   four lists, which puts four different baselines down the same page.
+
+   IT NAMES THE THREE LAYERS §02 ALREADY NAMED. A grouping that invents its own
+   categories teaches a second vocabulary for the same thing; this one is the
+   page agreeing with itself. HATCH splits in two because it is the only one
+   big enough to need it, and the split is fills against everything else —
+   which is the question you actually arrive with.
+
+   THE EMPTY `dd` IS REMOVED FROM THE GRID, NOT LEFT BLANK. A `dl` needs a `dd`
+   after every `dt` to stay a definition list, but this is a two-column grid on
+   auto-placement: a heading spanning both columns and then an empty cell puts
+   the NEXT term in column two, and every row after it is off by one. Nothing
+   throws, the list just quietly stops lining up. `display:none` takes it out
+   of the placement entirely, and the markup stays a list. */
+.api dt.api-group{
+  grid-column:1 / -1; margin-top:16px; padding-bottom:5px;
+  border-bottom:1px solid #17191c;
+  color:#c6cad1; font-size:10px; letter-spacing:.16em;
+  white-space:normal;
+}
+.api dl > dt.api-group:first-child{ margin-top:0; }
+.api dt.api-group span{ color:#575c65; letter-spacing:.10em; margin-left:8px; }
+.api dl > dd:empty{ display:none; }
 .api dt.warn{ color:#FFB273; }
 .api code{ font-family:var(--font); font-size:11px; color:#c6cad1; }
 .api-more{
@@ -3864,7 +3890,6 @@ body.drawer-open .sliders i:nth-child(3),
    the balls compares the hands on tone; down the shapes compares them on
    boundary; across a row is one hand answering both.
    ═══════════════════════════════════════════════════════════════════════════ */
-.box.handbay{ width:auto; flex:0 0 auto; }
 
 /* ── THE PAIRED STAGE ─────────────────────────────────────────────────────
    SIDE BY SIDE IS THE COMPARISON. Stacked, one hand and one machine are two
@@ -3881,8 +3906,6 @@ body.drawer-open .sliders i:nth-child(3),
    not. */
 .stage.pair{ flex-wrap:nowrap; gap:30px; justify-content:center; }
 .stage.pair > .box{ flex:0 0 auto; }
-.hh-body{ flex-direction:column; align-items:flex-start; gap:14px; }
-.hh-cell{ display:flex; flex-direction:column; gap:6px; }
 .hh-cell .bay-cap{ margin-bottom:1px; }
 .hh-cell .bay-cap em{ font-style:normal; color:#4a4f57; letter-spacing:.10em; }
 .hh-cell .bay-cap::after{ order:9; }
@@ -3894,69 +3917,188 @@ body.drawer-open .sliders i:nth-child(3),
    exactly on the property being judged. A display that adds a texture to the
    specimen is not a display, it is a filter. */
 .hh-spec::after{ background:linear-gradient(148deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.02) 26%, transparent 46%); }
-/* FIXED SIZES, NEVER FLUID, and the reason is the millimetre: each specimen's
-   viewBox is measured off its own element, so a field that stretched with the
-   window would silently change the size of the drawing being judged.
+/* WHITE STOCK, AND IT IS NOT THE BAY'S CHOICE. This block took its toned
+   #BEB5A3 from `.hb-field` on the grounds that the two should match, which was
+   never the bay's actual reason: the BAY has a white pen in its case, and
+   white on cream is not a subtle result, it is no result — an empty sheet that
+   reads as broken rather than as white ink. Toned stock is what you reach for
+   when you plot white, and that constraint is real and stays there.
 
-   HALVED, AND 1:1 SURVIVES BECAUSE THE MILLIMETRE DID NOT MOVE. 130px is
-   34.4mm and 160px is 42.3mm, so the sheets are half the paper they were and
-   the ball on them is half the ball — but the pen is still 0.35 and the pitch
-   is still 2.17, because those are properties of the PLOTTER and not of the
-   specimen. What you lose is passes: half the sheet is half the strokes across
-   the subject, so each fill has fewer of them to make its case with. What you
-   do not lose is the claim in the caption. Scaling the rendered panel instead
-   would have kept every stroke and cost the 1:1 — the opposite trade, and the
-   wrong one on a page whose whole argument is that these are real sizes. */
-.hh-pair{ display:flex; gap:9px; }
-/* THE SAME TONED STOCK AS THE BAY'S SPECIMEN, and for the bay's own reason:
-   the surface a mark is judged against cannot compete with it. There is only
-   one pen in this block — a hatch being read for its HAND has no business also
-   being read for its colour — and black on #BEB5A3 is 8.7:1, which is a
-   drawing rather than a diagram. */
+   IT DOES NOT APPLY HERE. There is exactly one pen in this block — a hatch
+   being read for its HAND has no business also being read for its colour — and
+   that pen is black. So the ground can be the ground these fills are actually
+   for, which is white paper, and the specimen stops being a rendition of the
+   plot and starts being the plot. Black on white is 18.4:1 against 8.7:1 on
+   the toned stock, and at a 0.35 nib that is the difference between reading a
+   pitch and estimating it.
+
+   THE WELL LIGHTENS WITH IT. The inner shadow was 8px at .4 alpha, which sits
+   as a well under a toned sheet and as a grey vignette under a white one —
+   dirtying the corners of the very thing being judged. The 1px rim stays,
+   because that is what says where the sheet ENDS; the glow drops to a sixth of
+   its weight, which is enough to seat the paper and not enough to tint it. The
+   glass over the top is untouched: same reflection, same bezel, same screen. */
 .hh-field{
-  --paper:#BEB5A3;
-  flex:0 0 130px; height:136px;
+  --paper:#FFFFFF;
+  width:100%; height:240px;
   border-radius:4px; position:relative; overflow:hidden;
   background:var(--paper);
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 8px rgba(0,0,0,.4);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 6px rgba(0,0,0,.16);
 }
-/* the fill test is wider and shorter — a flat shape needs no headroom for a
-   cast shadow, and giving it any would make the two look like two papers */
-/* AND IT IS `hh-shape`, NOT `flat`. `.flat` was taken at the time, by the pale
-   comparison panel that used to sit in 01, and it carried a 1px WHITE border
-   and a 16px radius. `.hh-field` overrode its background and its shadow by
-   source order and had no reason to mention `border`, so the shape sheet came
-   out wearing a white edge the tone sheet beside it did not have. Two rules
-   that never met, agreeing on everything except the one property neither
-   declared.
-
-   THE PANEL IS GONE AND THE NAME IS FREE AGAIN. The lesson is not: check what
-   the stylesheet already says about a name before reusing it. Renaming was the
-   fix, not more specificity. */
-.hh-field.hh-shape{ flex:0 0 160px; }
 .hh-field svg{ display:block; width:100%; height:100%; }
-.hh-scale{
-  display:flex; align-items:center; margin-top:7px;
+
+/* ══ THE HATCH BAY ══════════════════════════════════════════════════════
+   The instrument. The grid below it is the catalogue, and the difference is
+   that this one you turn: it is a `box`, which is what Skew calls a panel, and
+   a panel is the right thing for a surface with knobs on it. The specimens
+   below are not panels and must not become them — that distinction is the
+   whole reason both exist on one page. */
+/* THE SHEET WANTS A SHEET'S PROPORTION. At 820 wide and 300 tall the pane was
+   a 206 × 79mm strip — two and a half to one — and a teapot fitted into that is
+   a small object marooned in a lot of paper. 760 × 430 is 200 × 113mm, which is
+   a landscape sheet, and the object fills it. */
+.hatchbay{ width:auto; flex:0 0 auto; max-width:760px; margin:26px auto 0; }
+.bay-body{ gap:11px; }
+/* THE ROW PICKS THE MODEL. It was layer tabs with two of three dead, which is
+   a promise on a page that already has enough of them. And it is the ONLY
+   place the subject is chosen — it used to be here and again over the grid,
+   which is two controls on one key: they do not sync each other, so they drift
+   apart until something rebuilds them both. */
+.bay-subj{ width:100%; }
+.bay-panes{ display:block; }
+.bay-pane{ padding:7px; }
+/* THE FIELD IS A FIXED HEIGHT AND THE WIDTH IS THE GRID'S. Every pane measures
+   its own element at 96/25.4, so the drawing is 1:1 whatever the column comes
+   out at — but the HEIGHT has to be pinned or the two panes disagree about how
+   much paper they are showing and the same object arrives at two sizes. */
+.bay-field{
+  --paper:#FFFFFF;
+  height:430px; border-radius:4px; position:relative; overflow:hidden;
+  background:var(--paper); cursor:grab; touch-action:none;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55), inset 0 2px 6px rgba(0,0,0,.16);
+}
+.hatchbay.turning .bay-field{ cursor:grabbing; }
+.bay-field svg, .bay-field canvas{ display:block; width:100%; height:100%; }
+/* WHILE IT TURNS, THE PLOT IS STALE AND SAYS SO. It cannot keep up — the
+   labyrinth is half a second a frame — so rather than let it look merely slow
+   it steps back and lets the tone pane lead. Nothing jumps, nothing reflows;
+   only the thing that is no longer current stops claiming to be. */
+/* WORKING IS DIMMED. TURNING IS NOT. While you drag, the pane is showing the
+   silhouette at the angle you are holding, which is CURRENT — dimming it would
+   say the opposite. While the fill rebuilds, what is on screen is the last
+   angle's drawing, which is stale, and it says so. */
+.hatchbay.working .bay-pane{ opacity:.42; }
+.bay-pane{ transition:opacity .14s; }
+@media (prefers-reduced-motion:reduce){ .bay-pane{ transition:none; } }
+.bay-caps{
+  display:flex; align-items:center; gap:9px;
   font-family:var(--font); font-size:8px; letter-spacing:.10em; color:#3f7a5c;
 }
-/* each caption sits under the drawing it is about, which is what the two
-   fixed widths are for — a shared row of text under a pair of drawings makes
-   you work out which half belongs to which */
-.hh-scale .hh-a{ flex:0 0 130px; }
-.hh-scale .hh-b{ flex:0 0 160px; margin-left:9px; }
-.hh-scale .hh-a, .hh-scale .hh-b{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.hh-scale .hh-a > span:last-child, .hh-scale .hh-b > span:last-child{ color:#2f5f47; letter-spacing:.16em; }
-.handbay .bay-cap{ font-size:8px; letter-spacing:.12em; }
+.bay-caps .right{ margin-left:auto; }
+.bay-caps .lcd{ height:19px; padding:0 8px; font-size:8px; }
+.bay-controls{ display:grid; grid-template-columns:1fr auto; gap:18px; align-items:start; }
+.bay-types{ display:flex; flex-direction:column; gap:1px; margin-top:5px; }
+/* A LIST, NOT A DRUM. Nine named things you pick BY NAME want to be readable
+   at once; the drum is for when there are too many to show, and nine is not
+   too many. The marker is a rule down the left rather than a fill behind the
+   row — a highlighted row in a column of nine reads as a selected cell in a
+   table, which invites you to look for the other columns. */
+.bay-t{
+  text-align:left; border:0; background:none; cursor:pointer;
+  font-family:var(--font); font-size:11px; letter-spacing:.02em; color:#7d828b;
+  padding:3px 0 3px 11px; border-left:2px solid transparent;
+  transition:color .12s, border-color .12s;
+}
+.bay-t:hover{ color:#c6cad1; }
+.bay-t.on{ color:#FF8A3D; border-left-color:#FF6A00; }
+.bay-knobs{ display:flex; gap:14px; align-items:flex-start; }
+.bay-deep{ border-top:1px solid #17191c; padding-top:10px; }
+.bay-own{
+  margin:0; font-size:10px; line-height:1.5; color:#E3B45E;
+}
+
+/* ── ONE FRAME, AND THE GRID IS THE PAGE ────────────────────────────────
+   A specimen used to arrive inside a `box` inside a `stage`, and the box put a
+   lit head bar, a bevel and a 42px drop shadow around a thing whose only job
+   is to be a flat sheet under glass. Three surfaces before the paper, and the
+   middle one carried nothing: its head said what the `stage-note` already
+   said, and its fixed 318px is what left a 1160px column holding one small
+   panel in the middle of a great deal of nothing.
+
+   THE STAGE IS THE FRAME NOW and the tiles sit on it directly: stage, screen,
+   paper. The screen is untouched — it is the part that makes a white sheet
+   read as being under glass rather than as a hole in the page. */
+.stage.rig{ display:block; padding:44px 26px 30px; gap:0; }
+.rig-head{
+  position:absolute; left:22px; right:22px; top:13px;
+  display:flex; align-items:center; gap:12px;
+}
+.rig-head .stage-note{ position:static; }
+.rig-head .hh-note{ margin-left:auto; }
+.rig-head .piano.sm{ width:auto; flex:0 0 auto; }
+
+/* ── FIXED COLUMNS, NOT FLUID ONES, AND THAT IS THE MILLIMETRE TALKING ──
+   Three across, and they do not stretch. Every tile measures its own element
+   and converts at 96/25.4, so a column that grew with the window would
+   silently change the size of the drawing being judged — and 1:1 is the whole
+   claim this page makes. So the tile is a fixed 336px and the grid centres
+   however many fit, dropping to two and then one. 320 x 240 of sheet is
+   84.7 x 63.5mm, which is more than twice the paper the paired layout could
+   give either subject. */
+.rig-cells{
+  display:grid; grid-template-columns:repeat(3, 336px);
+  justify-content:center; gap:38px 26px;
+}
+@media (max-width:1120px){ .rig-cells{ grid-template-columns:repeat(2, 336px); } }
+@media (max-width:780px){ .rig-cells{ grid-template-columns:336px; } }
+
+/* ── A TILE IS A PICTURE, A NAME, A NUMBER AND A CALL ───────────────────
+   In that order, and with no frame of its own. An outline round each one
+   would be a fourth surface on a page that already has the sheet, the glass
+   and the stage, and in a grid the gap between tiles already says where one
+   ends. This is the whole of the card. */
+.hh-cell{ display:flex; flex-direction:column; }
+.hh-spec{ padding:8px; }
+.hh-meta{ display:flex; align-items:center; gap:8px; margin-top:12px; }
+.hh-meta .eng{ width:15px; height:15px; flex:0 0 15px; color:#575c65; }
+.hh-meta .nm{
+  font-family:var(--font); font-size:12px; font-weight:600; letter-spacing:.02em;
+  color:#e3e6eb;
+}
+/* THE COUNT IS THE PRICE, so it sits where a price sits: hard right, lit, and
+   the only number on the tile. PEN DOWNS and not lifts, because a fill that is
+   one stroke reads as 1 and not as 0. */
+.hh-meta .lcd{ margin-left:auto; height:22px; padding:0 9px; font-size:8px; }
+.hh-sub{ margin:6px 0 0; font-size:11px; line-height:1.55; color:#7d828b; }
+.hh-sub .tag{
+  display:block; font-family:var(--font); font-size:8px; letter-spacing:.14em;
+  text-transform:uppercase; color:#3f7a5c; margin-bottom:3px;
+}
+/* ── THE CALL, AND IT IS NOT A PANEL ────────────────────────────────────
+   It was a well under the sheet, which is a fourth surface holding one line of
+   type. A hairline rule above it says the same thing for the cost of one
+   pixel, which is what a rule is for. */
+.hh-call{
+  display:flex; align-items:flex-start; gap:8px;
+  margin-top:11px; padding-top:10px; border-top:1px solid #1e2024;
+}
+.hh-call code{
+  flex:1 1 auto; min-width:0;
+  display:block; white-space:pre-wrap; overflow-wrap:anywhere;
+  font-family:var(--font); font-size:10px; line-height:1.7; color:#7d828b;
+}
+.hh-call code b{ color:#c6cad1; font-weight:600; }
+.hh-call code i{ color:#3f7a5c; font-style:normal; }
+.hh-call .micro{ flex:0 0 22px; }
+/* COPIED IS A STATE OF THE CALL, not a toast. There is nowhere on this page a
+   toast could go that is not on top of a specimen, and the thing that changed
+   is the call — so the call says so, where the eye already is. */
+.hh-call.is-copied code, .hh-call.is-copied code b{ color:#3f7a5c; }
+.rig-cells .bay-cap{ font-size:8px; letter-spacing:.12em; }
 .hh-roll{ padding:0 11px; height:23px; font-family:var(--font); font-size:8.5px;
           letter-spacing:.16em; color:#8b919b; }
 .hh-note{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
           text-shadow:0 1px 0 rgba(255,255,255,.08); }
-/* THE READOUT IS THE RESULT of the machine half, not a caption on it — so it
-   is the language's lit window at the smallest size it survives, sitting in
-   the scale row where the mm note sits everywhere else. DIM is the control
-   row: the .lcd's off state is powered rather than dark, which is exactly
-   right for a number that is correct and is not the one being argued for. */
-.hh-scale .lcd{ height:17px; padding:0 7px; margin:0; font-size:8.5px; letter-spacing:.12em; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE BILL — what the language costs. Read this before adopting anything.

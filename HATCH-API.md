@@ -17,7 +17,7 @@ onto the plotter with no rescale. Get this wrong and every number here means not
 |---|---|---|
 | **`KIT`** | the subjects and the primitives — scene, blob, line families, carve | shared, global in the document |
 | **`HANDS`** | the three hand fills | filled by 08a, read by 07's dial |
-| *machine fills* | parallel and serpentine | local to 08b — **not yet exported**, see *Open* |
+| **`HATCH`** | the machine side — scanlines, six fills, the chain and its bridge | shared, global in the document |
 
 ---
 
@@ -183,6 +183,146 @@ offsets from the default `angle` of −34°.
 
 ---
 
+---
+
+## The four newer machine fills
+
+All four take a region and hand back `run[]`, so `stitch` and `cut` work on them exactly as they
+work on `scanlines`. **None of them asks what shape it is on** — the direction field below is
+derived from the tone function itself, so hand any of them the blob and it fills the blob.
+
+They split on **what carries the tone**, which is the only axis worth sorting them by:
+
+| | tone is | lifts | costs |
+|---|---|---|---|
+| `streamlines` | the **separation** | some | cheap |
+| `squiggle` | the **amplitude** | ~1 per region | cheap |
+| `spaceFill` | **curve length** per mm² | 1 per contiguous stretch | cheap |
+| `labyrinth` | the **coil spacing** | 1 | expensive |
+
+### `HATCH.streamlines(w, h, tone, opt?) → run[]`
+
+Jobard & Lefer, 1997. Seed a point, integrate the field both ways, stop the moment you come
+closer than `d` to a line already drawn, then drop fresh seeds at ±d off the line you just made.
+Tone enters as `d` itself.
+
+| `opt` | default | |
+|---|---|---|
+| `near` / `far` | `1.25` / `3.6` × nib/0.35 | the separation in mm, dark and light |
+| `bend` | `0.85` | radians of bend the field will take. `0` is plain parallels |
+| `angle` | `-34` | the base direction |
+| `field` | derived | pass your own `(x, y) → radians` and `bend`/`angle` are ignored |
+
+**This is the only fill here where tone is not a threshold.** `carve` and the serpentine draw a
+full-strength line or none; this draws every line and moves them. It has no banding to dither
+away, and it is the only one that reads as drawn rather than screened.
+
+> **The self test is not optional.** A line is not in the grid while it is still being walked, so
+> without checking its own trail it spirals onto itself wherever the field curls. The trailing
+> window is skipped because the last few samples are always within `d` of the head — that is not
+> a collision, that is the line.
+
+### `HATCH.toneField(tone, angle, bend) → (x, y) → radians`
+
+The default field: a base angle **bent** toward the iso-tone direction, by an amount weighted by
+how much gradient there actually is. Flat tone leaves the base angle alone; turning tone bends the
+lines round it. That is what "the hatching follows the form" means when you are not allowed to
+know what the form is.
+
+> **It bends the ANGLE. It does not blend two vector fields.** Blending a uniform field with a
+> rotational one always leaves a point where the two cancel, and every streamline in the
+> neighbourhood spirals into it — a whirlpool in the middle of the fill, the same failure as an
+> unplaced `latitudes` pole and arriving with no warning at all.
+
+> **It bends by `sin(2d)`, not by `d`.** The iso-tone direction is a LINE, not an arrow: it has no
+> preferred end, so any formula that folds it into a half-turn range has a seam where the fold
+> happens and the fill draws it as a staircase straight across the region. `sin(2d)` is π-periodic
+> so the seam cannot exist, and it is zero at 0° and 90° and peaks at 45° — which is also the
+> right shape, because those two are the angles with nothing to bend toward.
+
+### `HATCH.squiggle(w, h, tone, opt?) → run[]`
+
+Ahmed & Deussen. Rows at the base angle, and the tone is the **amplitude** of a wave riding along
+each one rather than whether the row is drawn. Nothing is ever broken, so a region comes back as
+rows that `stitch` folds into a single stroke.
+
+| `opt` | default | |
+|---|---|---|
+| `pitch` | `2.6` × nib/0.35 | row spacing, mm |
+| `amp` | `0.44` | peak, as a fraction of the pitch |
+| `wave` | `4.6` × nib/0.35 | wavelength at zero tone, mm. It shortens as the tone rises |
+| `angle` | `-34` | |
+
+> **The amplitude ceiling is the whole of the tuning.** Peak-to-peak has to stay under the pitch
+> or neighbouring rows collide, and when they collide the dark end stops getting darker and starts
+> getting muddled — the tone inverts and the shading reads as a smear. `0.44` leaves an eighth of
+> the pitch as margin.
+
+> **The phase advances by arc length, not by the parameter.** Advance it by the parameter and the
+> wavelength stretches with each row's own direction, so every angled row comes out a different
+> frequency from the ones beside it. That reads as a moiré nobody asked for.
+
+> **The region test is on the DISPLACED point.** Test the centreline and a crest near the edge
+> swings outside the shape. The amplitude is pulled in until it fits rather than the run being
+> cut, so the wave hugs the boundary instead of fraying against it.
+
+### `HATCH.spaceFill(w, h, tone, opt?) → run[]`
+
+Velho & Gomes. A Hilbert curve that recurses a level deeper wherever the region is darker, so tone
+becomes how much curve length is spent per square millimetre.
+
+| `opt` | default | |
+|---|---|---|
+| `pitch` | `2.6` × nib/0.35 | sets the shallow depth, so it lands at the same density as the others |
+| `depth` | from `pitch` | the shallow depth, if you would rather say it outright |
+| `levels` | `3` | how many deeper it may go |
+
+**Every sub-cell of a Hilbert curve enters and leaves at fixed corners**, which is why you may
+stop the recursion at different depths in different places and the curve is *still continuous*.
+That property is the entire reason this works and no other subdivision substitutes for it without
+redoing the corners.
+
+Its honest weakness is the grid: the curve is axis-aligned and its lattice is visible in any flat
+area, which is a texture and not a shading. Segerman's pinwheel curve is the published answer and
+is not built here. Cells outside the region are dropped, which breaks the one line into one run
+per contiguous stretch — correct, not a failure to chain. A connector across the outside is a mark
+on the paper.
+
+### `HATCH.labyrinth(w, h, tone, opt?) → run[]`
+
+Pedersen & Singh, NPAR 2006. A closed polyline under four forces — fairing toward the neighbours'
+midpoint, an edge spring holding the node spacing, Brownian jitter, and repulsion from every
+non-adjacent node inside a radius — resampling itself as it goes. The tone drives the repulsion
+radius, so the coils crowd where the region is dark.
+
+| `opt` | default | |
+|---|---|---|
+| `near` / `far` | `2.0` / `4.2` × nib/0.35 | coil spacing, dark and light |
+| `iters` | `240` | |
+| `cap` | `2600` | node budget. It is what stops the thing |
+| `seed` | `1` | |
+
+**It is by far the most expensive fill here** — an n-body relaxation with a neighbour query per
+node per step, a few hundred milliseconds against one for the other three — and it does not hold
+fine tone. What it holds is *texture*, which nothing else in this file can make.
+
+> **Growth is an injection, and this is the part that is not obvious.** Repulsion cannot lengthen
+> a small loop, because a small loop has no non-adjacent neighbours inside the radius to push
+> against: leave it to the forces and the curve sits there as a circle for as long as you care to
+> iterate.
+
+> **And the injection is gated on room.** A lobe that has filled cannot take more nodes — the
+> repulsion has nowhere to put them, the wall pins them, and the next injection lands on the pile.
+> It knots, solid black where the coils should be, and no amount of iterating undoes it because
+> the crossings are already made. Gate it and the curve grows until the region is full and stops
+> on its own, which is also the only sensible definition of *full*.
+
+> **The room test's window is along the CURVE, not in space.** A node's own near neighbours sit a
+> node-spacing from the midpoint by definition; count those and every injection is refused by the
+> run it is being inserted into. What the test is asking about is another *coil*.
+
+---
+
 ## The machine fills — parallel and serpentine
 
 Currently local to 08b (see *Open* below). Signatures as they stand:
@@ -215,6 +355,15 @@ bridge(a, b) → points[] | null      // the line the pen draws on the way, or "
 **and** five sample points along it are all inside the region. That second test is not optional —
 skip it and the fill grows whiskers across the white paper between its islands, which is worse
 than the lift it saved.
+
+**`cut` publishes its own reach as `bridge.reach`, and `stitch` reads it.** With a reach the free
+ends go in a bucket grid sized to it and only the neighbours are considered; without one the
+search stays exhaustive. That is not an approximation of the greedy rule, it is the same rule —
+`cut` refuses every gap wider than `reach`, so a candidate outside the neighbourhood could never
+have been taken however long it was looked at. It matters because the search was O(n²) per stroke
+and O(n³) over a fill: fine at the two hundred runs a specimen makes, minutes at the ten thousand
+a streamline fill on a big sheet makes. A bridge that walks a wall, or does anything else with no
+distance bound, simply does not set `reach` and gets what it needs.
 
 ### The rule that is deliberately not implemented
 
@@ -250,10 +399,13 @@ is the only condition under which what you see is what the pen puts down.
 
 ## Open
 
-- **The machine fills are not exported.** `HANDS` is, via a top-level `let` that 08a fills and
-  07 reads; the parallel/serpentine pair has no equivalent, so the bay's `Serpentine` dial
-  position runs its own generator rather than this one. Two implementations of one idea drift
-  apart — the same argument `KIT` exists to settle. One line, once section 07's rewiring lands.
+- **The hatch bay's `Serpentine` dial still runs its own generator** rather than this one. Two
+  implementations of one idea drift apart — the same argument `KIT` exists to settle.
+- **`spaceFill` shows its grid**, which is a texture and not a shading. Segerman's pinwheel curve
+  over Conway pinwheel tiles is the published fix and is unbuilt.
+- **Nothing here reaches one stroke on an arbitrary region.** Connected Fermat Spirals (Zhao et
+  al., SIGGRAPH 2016) is the algorithm that does — decompose the region, one spiral per piece,
+  joined at the boundary — and it is the largest single thing missing from this file.
 - **Chaining is per pass, never across passes**, so the pen lifts at least three times on the
   ball before anything else. Joining across thresholds means drawing a connector in a region it
   does not belong to — the same objection as the wall walk, one step smaller, and untried.

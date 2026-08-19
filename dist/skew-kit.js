@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.34.1
+     at       Skew v1.48.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -108,18 +108,18 @@ const ENG = {
   serp: eng('<path d="M4 5h13a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h13"/>'),
   // the pen cap, for the colour row
   ink: eng('<path d="M8.5 21V8.5C8.5 5 10 3 12 3s3.5 2 3.5 5.5V21z"/><line x1="8.5" y1="17" x2="15.5" y2="17"/>'),
-  // THE THREE HANDS, and each one is its own marks rather than a picture of
-  // them: strokes that bend, strokes that cross, strokes that agree on nothing
-  hhand: eng('<path d="M4 16.5C7 9.5 11 6 17 5"/><path d="M7 19C10 12 14 8.5 20 7.5"/>' +
-             '<path d="M3.5 11.5C6 7.5 8.5 5.5 12.5 4.5"/>'),
-  hcross: eng('<path d="M3.5 14C7 8 11 5 17 4"/><path d="M6.5 19.5C10 13.5 14 10.5 20.5 9.5"/>' +
-              '<path d="M7 3.5C9 9 12.5 15 17.5 20"/><path d="M3 8.5C5 13 8 17.5 11.5 21"/>'),
-  // the serpentine: three passes and the two turns that make them one stroke
-  serp: eng('<path d="M4 5h13a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h13"/>'),
-  hrand: eng('<line x1="3.5" y1="7" x2="7" y2="4.5"/><line x1="10" y1="5.5" x2="12" y2="9.5"/>' +
-             '<line x1="16" y1="4" x2="19.5" y2="6.5"/><line x1="5" y1="13" x2="8.5" y2="11"/>' +
-             '<line x1="12.5" y1="14.5" x2="15" y2="11.5"/><line x1="18" y1="13.5" x2="20.5" y2="16"/>' +
-             '<line x1="4" y1="19.5" x2="6" y2="16.5"/><line x1="10" y1="20" x2="14" y2="18.5"/>'),
+  /* FOUR MORE MACHINE FILLS. Same rule as the hands above: the mark is the
+     PARAMETER, not a picture of the result — what each one draws is what makes
+     it a different generator from the other three. */
+  // streamlines: evenly spaced lines that bend round something
+  stream: eng('<path d="M3 7C8 7 10 12 15 12s7-5 6-5"/><path d="M3 12C8 12 10 17 15 17s7-5 6-5"/>' +
+              '<path d="M3 17C8 17 10 22 15 22"/><path d="M4.5 3C9 3 11 7 15 7s6-4 6-4"/>'),
+  // squiggle: one line, and the amplitude is the tone
+  squig: eng('<path d="M2 12h3l1-1.5 1 3 1-4.5 1 6 1-7.5 1 9 1-9 1 7.5 1-6 1 4.5 1-3 1 1.5h3"/>'),
+  // space-filling curve: the four cells of a Hilbert order, joined
+  sfc: eng('<path d="M5 5v6h6V5m0 6h6V5m-6 6v8"/><path d="M5 11v8h6"/><path d="M11 19h6v-8"/>'),
+  // labyrinth: one closed curve, folded until it fills
+  laby: eng('<path d="M12 21a9 9 0 1 1 0-18 5.5 5.5 0 0 1 0 11 2.2 2.2 0 0 1 0-4.4"/>'),
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1739,6 +1739,6 @@ windowise.top = 10;
 
 window.SkewKit = {
   el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, key, pkey, swBtn, toggle, chevBtn, openPicker, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, SFX, clicky,
-  VERSION: '1.34.1',
+  VERSION: '1.48.0',
 };
 })();

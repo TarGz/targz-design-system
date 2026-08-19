@@ -821,9 +821,9 @@ h2 span{ color:#3d4149; }
                  a floor meets its walls in shadow. This is the part that
                  lights, and what lights is a painted surface catching a lamp,
                  not a coloured rectangle
-     .sl-act     the ACTUATOR: an aluminium extrusion, chamfered top and left
-                 where the lamp is, falling to shade bottom and right, standing
-                 on a skirt and casting onto the plate
+     .sl-act     the ACTUATOR: a moulded grip, chamfered top and left where the
+                 lamp is, falling to shade bottom and right, standing on a
+                 skirt and casting onto the plate
      ::before    the KNURL, cut into the middle of its face
      ::after     the SPECULAR, one anisotropic streak across the crowns
 
@@ -835,12 +835,14 @@ h2 span{ color:#3d4149; }
    switch has this flange, because the actuator has to hold itself in the
    panel.
 
-   ── THE MATERIAL IS ALUMINIUM, AND IT IS THE ONLY ONE HERE ─────────────────
-   The keys in this language are moulded plastic caps and the plates are
-   anodised. This is bead-blasted aluminium: a lighter grey, a bright hard
-   chamfer, sharp groove shadows, and one specular streak that runs ACROSS the
-   part because that is how a machined finish scatters. A second material used
-   once, for one part, the way the brass tone plate is. */
+   ── THE MATERIAL IS THE KIT'S OWN, AND THERE IS NO METAL IN IT ─────────────
+   THIS KIT HAS NO ALUMINIUM ANYWHERE and this part does not get to be the
+   exception. The plates are anodised and the keys are moulded, and a bright
+   machined bar dropped into that is a part borrowed from another machine —
+   which is exactly what the first two passes at this looked like. It is a
+   moulded grip: a dark face, a hard bright chamfer along the broken edge, deep
+   groove shadows, and one soft streak across the crowns. The contrast lives in
+   the EDGE, not in the face, which is also how a real one works. */
 .slide{
   position:relative; flex:0 0 46px; width:46px; height:22px; border-radius:7px;
   /* THE CUT ITSELF. The top wall overhangs and is nearly black under it; the
@@ -890,8 +892,8 @@ h2 span{ color:#3d4149; }
   box-shadow:
     inset 0 1px 2px rgba(0,0,0,.6),
     inset 0 0 0 1px rgba(0,0,0,.4),
-    0 0 7px color-mix(in srgb, var(--lyr, var(--led)) 45%, transparent),
-    0 0 16px color-mix(in srgb, var(--lyr, var(--led)) 22%, transparent);
+    0 0 4px color-mix(in srgb, var(--lyr, var(--led)) 8%, transparent),
+    0 0 9px color-mix(in srgb, var(--lyr, var(--led)) 4%, transparent);
 }
 /* ── THE ACTUATOR ──────────────────────────────────────────────────────────
    SIX STOPS, NOT TWO. An extrusion has a chamfer, a face, a turn and an
@@ -900,8 +902,20 @@ h2 span{ color:#3d4149; }
    into the underside, and it is the difference between a part sitting in a
    hole and a part pasted over one. */
 .sl-act{
-  display:block; position:absolute; top:1px; left:1px; width:24px; height:20px;
-  border-radius:5px;
+  display:block; position:absolute; top:2px; left:2px; width:22px; height:18px;
+  border-radius:4.5px;
+  /* ── THE CLEARANCE IS THE PART ───────────────────────────────────────
+     ONE PIXEL OF SLOT AROUND A CAP IS NOT A GAP, IT IS A DRAWING ERROR.
+     At 24×20 in a 46×22 cut the actuator very nearly WAS the slot, and the
+     only thing separating them was a 1px black outline — which is a
+     stroke, and a stroke around a shape is the single loudest way to say
+     "this is a picture of a switch". Every physical control in §05 has
+     air around it: the knob's cap is inset NINETEEN PER CENT of its
+     collar, and the shadow that falls in that gap is most of why it reads
+     as an object sitting in a fitting rather than as a disc on a circle.
+     22×18 leaves two pixels on every side. The travel is untouched — 2 +
+     22 + 20 + 2 = 46 — so the throw, the timing and the end stops are
+     exactly what they were and only the air is new. */
   /* THE CHAMFERS ARE BACKGROUND BANDS, NOT INSET HAIRLINES. A background is
      clipped by the border-radius, so a 1px bright band across the top simply
      STOPS where the corner rolls away from the lamp — which is what a chamfer
@@ -909,24 +923,47 @@ h2 span{ color:#3d4149; }
      and it left a lit dot in each top corner and a pale one at the bottom
      right. Those were the two dots.
 
-     AND THE METAL IS DARKER. It was reading as bright alloy against a black
-     plate — the lightest object on the panel, which a small switch has no
-     business being. It sits a full stop down now and the chamfer carries the
-     contrast instead, which is also how a real one works: the face is dull and
-     the broken edge is what catches the lamp. */
+     AND IT IS PLASTIC, NOT ALLOY, WHICH TOOK THREE GOES TO ADMIT. It ran
+     #646b76 to #202429 — a warm blue-grey whose top end is the lightest object
+     on the panel, which a 24px cap has no business being. Darkening it once
+     helped and left the real problem standing: a SIX-STOP 180° LINEAR is an
+     EXTRUSION. It says "lighter at the top, darker at the bottom", which is
+     true of a bar of metal cut to length and false of anything moulded. §05's
+     cap is the material this system already has for dark plastic, and what
+     makes it read is not its colour but its RADIAL — brighter in the middle,
+     falling away in every direction, because that is what a dome does and a
+     dome is what a moulding tool makes.
+
+     SO THE BODY IS A DOME IN THE KNOB'S OWN FOUR VALUES, and the chamfer
+     bands stay exactly as they were, because their reasoning never depended
+     on the material: a background is clipped by the radius, so a 1px bright
+     band across the top STOPS where the corner rolls away from the lamp. They
+     go neutral rather than warm — the warmth was there to sell alloy. */
   background-image:
-    linear-gradient(180deg, rgba(255,248,238,.38) 0 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255,255,255,.15) 0 1px, transparent 1px),
     linear-gradient(90deg,
-      rgba(255,248,238,.10) 0 1px, transparent 12%,
-      transparent 82%, rgba(0,0,0,.32) 100%),
+      rgba(0,0,0,.26) 0%, transparent 16%,
+      transparent 82%, rgba(0,0,0,.34) 100%),
     linear-gradient(180deg,
-      #646b76 0%, #545b65 13%, #454b55 38%, #383e47 62%, #2b3038 84%, #202429 100%);
+      #34383f 0%, #2e3239 30%, #26292f 68%, #1f2227 100%);
+  /* ── THREE TIERS OF SHADOW, AND NO OUTLINE ──────────────────────────
+     THE 1px HARD RING WENT WITH THE CLEARANCE. `0 0 0 1px` at .62 is a
+     STROKE — zero blur, uniform on all four sides, indifferent to where
+     the lamp is — and it was the only thing holding the cap off the slot
+     floor. A stroke can separate two shapes; it cannot seat an object,
+     because nothing in a lit room has an even dark line all the way round
+     it.
+     What does the seating is depth, in three tiers: CONTACT at 1px, tight
+     and nearly black, which is the line where the part meets what it
+     stands on; FORM at 3px, the body of the shadow; AMBIENT at 6px, wide
+     and weak, the room. Small objects read as sitting on a surface when
+     all three are present and as floating on it when only one is. */
   box-shadow:
-    inset 0 -2px 3px rgba(0,0,0,.5),
-    inset 0 -1px 1px rgba(255,236,214,.14),
-    0 0 0 1px rgba(0,0,0,.62),
-    0 2px 2px rgba(0,0,0,.55),
-    0 4px 7px rgba(0,0,0,.55);
+    inset 0 -2px 4px rgba(0,0,0,.75),
+    inset 0 -1px 1px rgba(255,255,255,.10),
+    0 1px 2px rgba(0,0,0,.85),
+    0 3px 5px rgba(0,0,0,.7),
+    0 6px 10px rgba(0,0,0,.42);
   /* IT SNAPS. A slide switch is spring-loaded over centre — it does not ease
      into place, it arrives and stops hard, which is what the overshoot on this
      curve is. 160ms is the whole throw. */
@@ -947,15 +984,39 @@ h2 span{ color:#3d4149; }
    So it is a warm wash coming in through the left flank, hottest at the edge
    nearest the floor and gone by the middle of the face, with a lit lip on the
    left edge itself. It is the only place in this language where a colour
-   reaches something it is not printed on. */
+   reaches something it is not printed on.
+
+   AND IT IS THE PART OF THAT IDEA THAT KEEPS OVERSHOOTING. The lip is one
+   pixel of orange on the actuator's own edge, which is a correct observation —
+   the cap is standing in a lit slot and its near edge catches it — and at 58%
+   it stopped being a catch and became a STROKE, an orange outline down the
+   side of a grey part. A pixel of colour reads twice as loud as a hundred
+   pixels of the same colour, because it has a hard edge on both sides and
+   nothing to average against.
+
+   AND THE PERCENTAGE WAS NEVER THE BRIGHTNESS, which is why turning it down
+   twice barely moved it. `color-mix(var(--lyr) 22%, #e6dbcd)` is not a dim
+   orange — it is SEVENTY-EIGHT PER CENT CREAM with a little orange in it, an
+   opaque near-white hairline down the side of a charcoal part, and lowering
+   the first number made it WHITER. The number reads like an opacity and is a
+   ratio between two colours, so the whole scale ran the wrong way.
+
+   THE OTHER COLOUR IS THE FIX. Mixed into #2b2f35 — the cap's own mid grey —
+   40% lands a warm edge a shade above the material instead of a bright line
+   across it, and now the number does what it looks like it does. The bleed
+   inboard of it is a genuine alpha and comes down to 12%.
+
+   THE BLOOM CAME DOWN WITH IT, twice, and is now roughly a third of where it
+   started — 5px at 15% and 11px at 7% on the machined dress. What a lamp under
+   a 40x18 window throws onto the plate around it is not much. */
 .slide.on .sl-act{
   box-shadow:
-    inset 0 -2px 3px rgba(0,0,0,.42),
-    inset 6px 0 8px -3px color-mix(in srgb, var(--lyr, var(--led)) 55%, transparent),
-    inset 1px 0 1px color-mix(in srgb, var(--lyr, var(--led)) 58%, #e6dbcd),
-    0 0 0 1px rgba(0,0,0,.62),
-    0 2px 2px rgba(0,0,0,.55),
-    0 4px 7px rgba(0,0,0,.55);
+    inset 0 -2px 4px rgba(0,0,0,.42),
+    inset 6px 0 8px -3px color-mix(in srgb, var(--lyr, var(--led)) 12%, transparent),
+    inset 1px 0 1px color-mix(in srgb, var(--lyr, var(--led)) 40%, #2b2f35),
+    0 1px 2px rgba(0,0,0,.85),
+    0 3px 5px rgba(0,0,0,.7),
+    0 6px 10px rgba(0,0,0,.42);
 }
 /* ── THE KNURL ─────────────────────────────────────────────────────────────
    THREE RIBS, ROUNDED, CUT INTO THE MIDDLE OF THE FACE. The first cut was a
@@ -973,36 +1034,49 @@ h2 span{ color:#3d4149; }
    The overlay on top of it is the band's own vertical shading: the crowns
    catch the lamp at the top and the whole knurl sits in shade at the bottom,
    because the face it is cut into is curving away there. */
+/* THE PITCH WAS RE-OPENED AND PUT STRAIGHT BACK. Halving it to 2.6px for six
+   ribs is exactly the seven-ridge version described above, which was tried,
+   turned to grey mush and got replaced by this. The note is why the note is
+   here. What was actually cheap was never the count — it was that the ribs
+   were painted in WARM WHITE on a face with no dome under it, so they read as
+   ink rather than as cut. Same three ribs, same 5.2px, neutral now and a stop
+   quieter, over a body that curves. */
 .sl-act::before{
-  content:''; position:absolute; left:50%; top:50%; width:16px; height:12px;
+  content:''; position:absolute; left:50%; top:50%; width:15px; height:11px;
   transform:translate(-50%, -50%); border-radius:2px;
   background-image:
     linear-gradient(180deg,
-      rgba(255,252,246,.15) 0%, rgba(255,252,246,.02) 24%,
-      rgba(0,0,0,.05) 58%, rgba(0,0,0,.30) 100%),
+      rgba(255,255,255,.11) 0%, rgba(255,255,255,.02) 24%,
+      rgba(0,0,0,.05) 58%, rgba(0,0,0,.26) 100%),
     repeating-linear-gradient(90deg,
-      rgba(255,249,240,.32) 0px,
-      rgba(255,249,240,.07) 1.5px,
-      rgba(0,0,0,.18) 2.3px,
-      rgba(0,0,0,.62) 3.3px,
-      rgba(0,0,0,.18) 4.1px,
-      rgba(255,249,240,.32) 5.2px);
+      rgba(255,255,255,.11) 0px,
+      rgba(255,255,255,.025) 1.5px,
+      rgba(0,0,0,.14) 2.3px,
+      rgba(0,0,0,.40) 3.3px,
+      rgba(0,0,0,.14) 4.1px,
+      rgba(255,255,255,.11) 5.2px);
   box-shadow:inset 0 1px 1px rgba(0,0,0,.3);
 }
-/* ── THE SPECULAR ──────────────────────────────────────────────────────────
-   ONE STREAK, ACROSS THE PART. A bead-blasted or extruded finish scatters
-   along the direction it was worked, so the highlight is not a point — it is a
-   band, and it runs the long way. Half a pixel of blur, because a scattered
-   highlight has no edge. Kept off pure white: the lamp has a colour, the metal
-   has a colour, and their product never lands on #fff. */
-.sl-act::after{
-  content:''; position:absolute; left:3.5px; right:3.5px; top:2px; height:3px;
-  border-radius:3px; pointer-events:none;
-  background-image:linear-gradient(90deg,
-    transparent 0%, rgba(255,252,245,.15) 22%, rgba(255,252,245,.23) 50%,
-    rgba(255,252,245,.10) 78%, transparent 100%);
-  filter:blur(.5px);
-}
+/* ── THERE IS NO SPECULAR, AND THAT IS THE ANSWER ────────────────────────
+   THIS HAS NOW BEEN A STREAK, A BLOB AND A DOT, and all three were the same
+   mistake at different sizes: a separate layer of white put on top of the part
+   to say "this is shiny". Every reference for it — the toggles, the knob
+   collar, the two recessed keys — has NONE. What they have is a face whose own
+   gradient does the whole job, over a very narrow range, with the light at the
+   top and the value falling steadily to the bottom, and a single hairline of
+   rim where the moulding radius breaks.
+
+   THE RANGE IS THE POINT: #34383f to #1f2227 is about a stop and a half, and
+   the parts read as SOLID because nothing on them is far from anything else.
+   Wide-range shading is what makes small plastic look like a rendering of
+   plastic. A moulded matte face has almost no specular to give — it scatters —
+   and the light you do see on one is the ambient of the room arriving at a
+   surface that is tilted slightly toward it.
+
+   THE SIDES TURN AWAY INSTEAD. The 90° layer used to put a light pixel on the
+   leading edge; it darkens both ends now, hard at the far one and soft at the
+   near, because that is what a rounded edge does and it is the only shading
+   here that is about form rather than finish. */
 .tog:hover .sl-act{ filter:brightness(1.07); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1015,7 +1089,8 @@ h2 span{ color:#3d4149; }
    decision nobody made.
 
    WHAT IT ARGUES. The machined version puts the material in the ACTUATOR: a
-   bright aluminium extrusion, knurled, and the colour is a floor behind it.
+   knurled moulded grip with the light on its broken edges, and the colour is a
+   floor behind it.
    This one inverts that. The actuator goes matte charcoal and nearly vanishes,
    and the lit half becomes the whole object — a glowing window with a word in
    it, blooming out onto the plate. It is louder, it is legible from further
@@ -1038,8 +1113,8 @@ h2 span{ color:#3d4149; }
   box-shadow:
     inset 0 1px 2px rgba(0,0,0,.45),
     inset 0 0 0 1px rgba(0,0,0,.35),
-    0 0 10px color-mix(in srgb, var(--lyr, var(--led)) 65%, transparent),
-    0 0 26px color-mix(in srgb, var(--lyr, var(--led)) 38%, transparent);
+    0 0 5px color-mix(in srgb, var(--lyr, var(--led)) 10%, transparent),
+    0 0 11px color-mix(in srgb, var(--lyr, var(--led)) 5%, transparent);
 }
 /* ── THE ENGRAVED ENDS ─────────────────────────────────────────────────────
    Silkscreened, not backlit: the word is INK on the floor, so it goes dark
@@ -1066,32 +1141,33 @@ h2 span{ color:#3d4149; }
 .slide.pill .sl-act{
   border-radius:999px;
   background-image:
-    linear-gradient(180deg, rgba(226,232,240,.16) 0 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255,255,255,.11) 0 1px, transparent 1px),
     linear-gradient(90deg,
-      rgba(226,232,240,.05) 0 1px, transparent 14%,
+      rgba(0,0,0,.24) 0%, transparent 16%,
       transparent 84%, rgba(0,0,0,.30) 100%),
-    linear-gradient(180deg, #3b424b 0%, #333941 42%, #262b32 74%, #1a1e23 100%);
+    linear-gradient(180deg,
+      #31353c 0%, #2b2f35 30%, #24272d 68%, #1d2025 100%);
   box-shadow:
-    inset 0 -2px 3px rgba(0,0,0,.55),
-    inset 0 -1px 1px rgba(226,232,240,.07),
-    0 0 0 1px rgba(0,0,0,.7),
-    0 2px 2px rgba(0,0,0,.6),
-    0 4px 8px rgba(0,0,0,.6);
+    inset 0 -2px 4px rgba(0,0,0,.7),
+    inset 0 -1px 1px rgba(255,255,255,.07),
+    0 1px 2px rgba(0,0,0,.85),
+    0 3px 5px rgba(0,0,0,.7),
+    0 6px 10px rgba(0,0,0,.45);
 }
 .slide.pill.on .sl-act{
   box-shadow:
-    inset 0 -2px 3px rgba(0,0,0,.5),
-    inset 7px 0 9px -4px color-mix(in srgb, var(--lyr, var(--led)) 60%, transparent),
-    inset 1px 0 1px color-mix(in srgb, var(--lyr, var(--led)) 62%, #e6dbcd),
-    0 0 0 1px rgba(0,0,0,.7),
-    0 2px 2px rgba(0,0,0,.6),
-    0 4px 8px rgba(0,0,0,.6);
+    inset 0 -2px 4px rgba(0,0,0,.5),
+    inset 7px 0 9px -4px color-mix(in srgb, var(--lyr, var(--led)) 13%, transparent),
+    inset 1px 0 1px color-mix(in srgb, var(--lyr, var(--led)) 44%, #2b2f35),
+    0 1px 2px rgba(0,0,0,.85),
+    0 3px 5px rgba(0,0,0,.7),
+    0 6px 10px rgba(0,0,0,.45);
 }
 /* THE DIMPLES. Two circles per cell: the pit, and the crescent of its far wall
    catching the lamp half a pixel below. Five across, three down, in a patch
    that stops short of the ends. */
 .slide.pill .sl-act::before{
-  width:17px; height:10.5px; border-radius:0;
+  width:16px; height:10.5px; border-radius:0;
   background-image:
     radial-gradient(circle at 1.2px 1.2px, rgba(0,0,0,.62) .62px, transparent .72px),
     radial-gradient(circle at 1.2px 1.9px, rgba(226,232,240,.17) .62px, transparent .72px);
@@ -1100,10 +1176,493 @@ h2 span{ color:#3d4149; }
   background-repeat:repeat, repeat;
   box-shadow:none;
 }
-/* NO SPECULAR ON A MATTE PART. The streak is what a machined finish does; a
-   moulded charcoal cap scatters in every direction and has no highlight to
-   run. */
-.slide.pill .sl-act::after{ display:none; }
+/* THE ORIGINAL NOTE HERE SAID "NO SPECULAR ON A MATTE PART" and it was right
+   the first time. It got argued out of on the grounds that matte scatters
+   BROADLY rather than not at all — true of a big surface and useless at 22px,
+   where a broad dim highlight is indistinguishable from the part simply being
+   lighter. Both dresses have none now; the rule moved up to §A where it
+   belongs, and B needs no override to say the same thing. What B still does
+   differently is start a stop lower, so the cap stands back and the window is
+   the object. */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VARIANT C — THE ROCKER · ALTERNATIVE, WIP, NOT VALIDATED
+   ═══════════════════════════════════════════════════════════════════════════
+   NOTHING BELOW THIS LINE IS SETTLED. A and B are two dresses of one part and
+   one of them is going to be deleted; C is a third thing that arrived after
+   them and has not been picked. It has been rebuilt four times — an SVG
+   trapezoid, one flat slab under a perspective, two folded faces, and finally
+   the rigid bent slab that is here now — and every one of those rewrites
+   changed the geometry rather than the finish, which is what an unsettled part
+   looks like.
+
+   IT IS FLAGGED ON THE PAGE, on its own cap, in §06. Do not copy it into an
+   app yet: the class names, the element count and the state mapping have all
+   moved inside a single afternoon and they may move again. What IS worth
+   keeping out of it is written in the notes below — the projection arithmetic,
+   the two-value crease, the wall normal, the rule about foreshortening pulling
+   marks toward the seam. Those are true whatever this ends up being.
+   ───────────────────────────────────────────────────────────────────────────
+   THE FIRST TWO ATTEMPTS BOTH DREW THE WRONG MACHINE. Eight passes of stacked
+   gradients gave a light pill in a dark slot, and the SVG that replaced them
+   gave a trapezoid that MIRRORED — one geometry flipped about its centre, so
+   throwing it read as a card turning over rather than a part moving. Both were
+   solving the same problem the same wrong way: BAKING THE PERSPECTIVE INTO THE
+   DRAWING. A shape with the foreshortening painted on has only two states and
+   no way to be between them, and the in-between is the entire thing you feel
+   when a switch throws.
+
+   SO THE PERSPECTIVE IS REAL AND THE MOTION IS THE GEOMETRY:
+
+     THE HOLE IS A HOLE. `.slide.rocker` is the CUT — its own black, its own
+     overhang, and `overflow:hidden` on the well inside it, so the end that
+     goes down is swallowed by the plate rather than drawn shorter. A rocker is
+     a part you can see less of, not a part that shrinks.
+     THE PADDLE IS ONE FLAT SLAB, `rotateY` about its own middle, under a
+     120px perspective. The near end genuinely comes at you and the far end
+     genuinely goes away — the taper, the difference in height end to end, the
+     way the sunk end loses its edge, all of it falls out of the projection
+     instead of being approximated by a path.
+     THE PIVOT IS BEHIND THE FACE (`transform-origin` z of -7px), because the
+     pin in a real one is inside the housing and not on the surface you touch.
+     IT PASSES THROUGH FLAT. Halfway through the throw the paddle IS flat and
+     the lighting IS even, which is exactly what the part does at the moment
+     the spring goes over centre. Nothing mirrors, so nothing can flip.
+
+   THE LIGHTING IS TWO OVERLAYS CROSS-FADING, not one gradient reversing. A
+   gradient that swaps direction has to swap at some frame and that frame is a
+   pop; two of them at opposing weights sum to even light exactly when the
+   paddle is level. Same for the marks: they are printed on the panel's own
+   left and right, and the one on the end that has turned away dims, because a
+   surface out of the light does not show its legend either.
+
+   AND THE CORNERS ARE SQUARE. It went 11px, then 6, then 4, and each step
+   helped, which was the signal that the answer was 0 and the steps were
+   flinching. A radius on a part this small is a TAX ON EVERYTHING ELSE: the
+   end wall has to be inset to stay behind it, the seam cannot be a clean
+   butt joint, the cut's own edge has to curve away where the light is
+   strongest, and every one of those compromises spends detail on softening a
+   corner nobody asked to be soft. The reference part is square. Take the
+   radius out and the walls, the seam and the crease all get simpler at once
+   — which is what SQUARE BUYS: not a look, a budget. The cut keeps 1.5px,
+   because a hole drilled in a plate is not razored either. */
+.slide.rocker{
+  flex:0 0 auto; width:60px; height:30px; border-radius:1.5px;
+  /* THE WALL OF THE CUT, blackest thing in the assembly, and darkest right
+     under the top lip where nothing reaches. */
+  background:linear-gradient(180deg,#020304 0%,#07090b 52%,#0c0f13 100%);
+  box-shadow:
+    inset 0 3px 4px rgba(0,0,0,.95),
+    inset 1px 0 3px rgba(0,0,0,.7),
+    inset 0 -1px 1px rgba(255,255,255,.07),
+    0 1px 0 rgba(255,255,255,.06);
+}
+/* the CSS children are the other dresses' — this one has its own parts */
+.slide.rocker .sl-bed,
+.slide.rocker .sl-act{ display:none; }
+/* ── THE WELL: the clip, and the eye ──────────────────────────────────────
+   THE CLIP IS WHAT MAKES IT A HOLE. Without it the paddle's sunk end hangs
+   out past the plate and the part is a tile lying on the panel. And the
+   perspective origin sits ABOVE centre because a console is seen from above:
+   you look slightly down into the cut, so the top wall is the one you see the
+   inside of. */
+/* ── WHAT STANDS PROUD THROWS ONTO WHAT IT STANDS ON ─────────────────────
+   THE RAISED HALF IS OUT OF THE PLATE, so it has to darken the plate. Every
+   other shadow on this part is INSIDE the cut and the well clips them all,
+   which is right for them and wrong for this one: the shadow of something
+   sticking up lands on the panel, outside the hole entirely, and a part that
+   is proud of a surface and leaves that surface clean is a part pasted on.
+
+   IT IS ITS OWN ELEMENT, ahead of the well and outside its clip, transparent
+   with nothing but an OUTER box-shadow — a shadow drawn outside a border box
+   never paints inside it, so this covers the plate and never the switch.
+   `::before` is the lamp and `::after` is the cut's near lip; both are spoken
+   for, and neither is outside the clip anyway.
+
+   AND IT IS NOT THE SAME SHADOW IN BOTH POSITIONS, which is the whole reason
+   it is worth having. The lamp is up and to the left, so what is thrown goes
+   down and to the RIGHT — always, whichever end is up. With the right half
+   raised that lands on open plate and reads long and dark. With the LEFT half
+   raised it falls across the cut's own mouth, into a hole that is already
+   black, and almost nothing reaches the panel. Same light, same part, two
+   different marks, and drawing them the same is the tell. */
+.slide.rocker .rk-cast{
+  position:absolute; inset:0; border-radius:inherit; z-index:0;
+  pointer-events:none;
+  box-shadow:12px 6px 11px -3px rgba(0,0,0,.62);
+  transition:box-shadow .16s;
+}
+.slide.rocker.on .rk-cast{ box-shadow:3px 6px 9px -3px rgba(0,0,0,.40); }
+
+.slide.rocker .rk-well{
+  position:absolute; inset:0; border-radius:inherit; overflow:hidden;
+  perspective:100px; perspective-origin:50% 34%;
+  pointer-events:none;
+}
+/* ── THE PADDLE IS A BENT SLAB ────────────────────────────────────────────
+   FROM A SIDE-VIEW SKETCH OF THE REAL PART, which settled three arguments at
+   once and killed the two versions before it.
+
+   THE CROSS-SECTION IS `___/` — a slab of CONSTANT THICKNESS, level for its
+   first half, kinked at the middle, rising for its second. Not a plane. Not
+   two planes fanned symmetrically about a centre. A moulding with a permanent
+   26° bend in it, and the bend never changes, because the part is RIGID.
+
+   WHICH MAKES THE THROW OBVIOUS AND MAKES THE OLD ONE WRONG. If the bend is
+   fixed and one half comes to rest LEVEL — which is what the sketch shows, and
+   what the photograph shows, the sunk half lying flat in the plate — then the
+   two positions are: left flat and right up 26°, or left up 26° and right
+   flat. Never both leaning. Every version before this rotated the whole part
+   and folded the halves symmetrically on top, so neither half was ever level
+   and the thing read as a card creased down the middle.
+
+   SO THERE IS NO PAD ROTATION AT ALL. Each half is either 0° or 26°, and each
+   animates between its own two numbers:
+
+       state        left face      right face
+       ─────────────────────────────────────────
+       off           0° flat       −26° raised
+       on          +26° raised       0° flat
+
+   THE DIFFERENCE IS ALWAYS 26°, at rest and on every frame in between, which
+   is the definition of a rigid body and is why the throw looks like a part
+   moving rather than two parts negotiating. Halfway across, the two are at
+   +13° and −13° — the symmetric trough — and that is the moulding passing
+   level, not a shape being interpolated.
+
+   AND IT HAS THICKNESS, which is the other thing the sketch is about: the
+   raised half shows its END WALL, a 4px cut edge square to its own face,
+   hinged off the outer edge and folded back into the part. It is the only
+   surface here facing the lamp head-on and it is the whole of what says
+   SOLID. The flat half has one too and you never see it — at 0° that wall is
+   exactly edge-on, which is correct and costs nothing.
+
+   THE PART SITS 3px INTO THE PLATE (`translateZ` on the pad), so the level
+   half is BELOW the rim rather than flush with it. A rocker whose sunk half
+   is level with the panel has not been pressed, it has been drawn. */
+.slide.rocker .rk-pad{
+  position:absolute; inset:3px 2px;
+  transform-style:preserve-3d;
+  transform:translateZ(-4px);
+  /* THE SHADOW STAYS ON THE PAD, not on the faces. Put it on each face and
+     the two shadows meet at the seam and draw a dark seam of their own, which
+     is the one line on the part that has to be built out of value. */
+  box-shadow:0 4px 7px rgba(0,0,0,.8);
+}
+
+/* ── THE TWO HALVES ───────────────────────────────────────────────────────
+   EACH HINGES ON THE SEAM: the left one's origin is its RIGHT edge, the right
+   one's its LEFT, so the two share one line and cannot drift apart however
+   far either turns.
+
+   A SPRING GOES OVER CENTRE AND THE PART HITS ITS STOP. Fast, and just enough
+   overshoot to be a stop being hit rather than a value being eased to — a long
+   soft curve here is the single thing that made the first version feel like
+   software.
+
+   AND THERE IS NO RADIUS ON EITHER, which is what lets the end wall run the
+   FULL height of its half rather than being inset to hide behind a corner it
+   would otherwise poke through. Square corners are why the thickness can be
+   the thickness. */
+/* THE PLASTIC IS THE KNOB'S PLASTIC, and not a family of its own. It had been
+   running #171c23 to #525a65 — a blue-grey whose light end is a full stop
+   above anything else on the panel, which is what made a moulded switch arrive
+   as a machined one. §05's cap is the material this system already has for
+   dark plastic and it tops out at #3a3e45, so the face is that cap's own four
+   values top-lit. A part invented its own palette; the fix was to stop. */
+.slide.rocker .rk-f{
+  position:absolute; top:0; width:50%; height:100%;
+  transform-style:preserve-3d;
+  background:linear-gradient(180deg,#3a3e45 0%,#34383f 8%,#23262b 62%,#1c1e22 100%);
+  transition:transform .16s cubic-bezier(.34,1.28,.5,1);
+}
+.slide.rocker .rk-f-l{
+  left:0;
+  transform-origin:100% 50%; transform:rotateY(0deg);
+}
+.slide.rocker .rk-f-r{
+  right:0;
+  transform-origin:0 50%; transform:rotateY(-42deg);
+}
+.slide.rocker.on .rk-f-l{ transform:rotateY(42deg); }
+.slide.rocker.on .rk-f-r{ transform:rotateY(0deg); }
+/* THE FINGER GETS AN ANSWER BEFORE THE STATE DOES. Pressing takes the raised
+   half down about 40% of its travel and brings the level one up by the same
+   amount — the part still rigid, still 26° across the bend, just short of the
+   detent. That is the travel before the spring goes, which is the half of the
+   action a click handler cannot show you. */
+.tog:active .slide.rocker .rk-f-l{ transform:rotateY(17deg); }
+.tog:active .slide.rocker .rk-f-r{ transform:rotateY(-25deg); }
+.tog:active .slide.rocker.on .rk-f-l{ transform:rotateY(25deg); }
+.tog:active .slide.rocker.on .rk-f-r{ transform:rotateY(-17deg); }
+
+/* ── THE END WALL: the cut edge of the moulding ───────────────────────────
+   HINGED OFF THE OUTER EDGE AND FOLDED BACK, which is the only way to get a
+   wall that stays square to a face that is turning. 90° about that edge sends
+   its 5px straight into -Z, so the wall is the part's thickness and nothing
+   else has to know about it.
+
+   A WALL HAS TWO THINGS TO GET RIGHT AND THEY PULL AGAINST EACH OTHER: where
+   its body goes, and which way its face LOOKS. The first build got the body
+   right and the normal backwards, and the whole thing was invisible — a strip
+   whose front pointed back at the middle of the paddle, so what you had a line
+   of sight on was its unlit reverse, behind the face that was casting it.
+   Nothing renders and nothing errors, which is the worst kind of wrong.
+
+   An element's face looks along +Z, and rotateY(90°) turns that to +X while
+   sweeping the element's own width into -Z. So the strip has to START at the
+   outer edge and run OUTWARD — `left:100%` on the right half, `right:100%` on
+   the left — with the origin on the edge it hinges about. Put it inside the
+   face instead and the same rotation lands the body in the same place with the
+   normal reversed, which is exactly the bug.
+
+   IT NEEDS NO STATE. At 0° the wall is edge-on and projects to nothing; at 42°
+   it opens to about 6.7px of lit cut edge. The geometry hides and shows it, so
+   there is no rule here that can fall out of step with the rule above.
+
+   AND THE NUMBER TO WATCH IS NOT THE DEPTH, IT IS THE PROJECTION. Nine pixels
+   of wall at 26° looks like four until you work it through the lens, and then
+   it is 1.44 — the far edge of the wall is a third of the way to the eye
+   further back than the near one, so perspective eats nearly two thirds of it
+   before it reaches the screen. That is why three passes of `make the wall
+   thicker` moved almost nothing. What opens a wall is the ANGLE, because the
+   angle turns it toward you and shortens the run away from you at the same
+   time. 26°/9px gives 1.44px. 42°/13px gives 6.7px — four and a half times the
+   edge for less than half again the material. Measure the projection, never
+   the part. */
+/* AND THE CUT EDGE IS THE SAME PLASTIC AS THE FACE. It was #7b8490 at its top
+   — brighter than any surface in §05 and the single loudest thing on the
+   panel, which is a lot to spend on 6px of a switch. It is the brightest
+   surface HERE because it faces the lamp square, and that is a ranking within
+   one material, not a licence for a second one. */
+.slide.rocker .rk-w{
+  position:absolute; top:0; height:100%; width:13px;
+  background:linear-gradient(180deg,#3a3e45 0%,#2b2f35 50%,#1c1e22 100%);
+}
+.slide.rocker .rk-f-l .rk-w{ right:100%; transform-origin:100% 50%; transform:rotateY(-90deg); }
+.slide.rocker .rk-f-r .rk-w{ left:100%;  transform-origin:0 50%;    transform:rotateY(90deg); }
+
+/* ── WHICH HALF IS IN THE LIGHT ───────────────────────────────────────────
+   TWO LAYERS PER HALF, CROSS-FADING, and every half carries both: `::before`
+   is how it looks RAISED, `::after` how it looks lying flat in the plate.
+   They swap together with the tilt, and because they are opacities rather
+   than one gradient reversing, the moment halfway through the throw is both
+   at half — even light on a level paddle, exactly right, and impossible to
+   get from a gradient that has to flip on some frame.
+
+   THE CREASE IS THE VALUE STEP BETWEEN THEM, not a line drawn on either. A
+   half tilted 26° toward the lamp against a half lying flat in a hole is
+   already the largest difference on the part; the seam is where those two
+   meet and it needs no help. What it gets is one hard band, 3% of a half
+   wide, at the RAISED side's inner edge — the bottom of the bend, the one
+   place on that half the light cannot reach. Dark against dark, then bright
+   above it. That is a fold. */
+.slide.rocker .rk-f::before,
+.slide.rocker .rk-f::after{
+  content:''; position:absolute; inset:0; border-radius:inherit; z-index:0;
+  transition:opacity .16s linear;
+}
+/* THE TWO HALVES ARE THE SAME PIECE OF PLASTIC, and the first pass forgot it:
+   the raised half went to +20% white and the level one under a 78% black
+   veil, which is a two-stop range on a part that has one material and one
+   lamp. It read as a lit tile beside a dead one. Tilt buys a MODEST amount of
+   extra light — enough to tell which half is up, nowhere near enough to change
+   what the half is made of. What carries the read is the crease and the cut
+   edge, which is the right way round: geometry says which half is up, shading
+   only agrees.
+
+   AND THE LIFT IS A SPECULAR, NOT A WASH. A broad white ramp along the raised
+   half is how it went grey: spread thin enough to cover a face, white stops
+   being a highlight and becomes the colour of the material, and dark plastic
+   lit across its whole width is aluminium. The knob had already solved this —
+   ONE tight bright spot out to 46% of a radius, everything else left alone —
+   so the raised half gets the same thing at the same .30, sitting over its
+   outer end. Small and bright reads as a lamp on plastic. Wide and pale reads
+   as metal, every time. */
+/* RAISED: brightest at the outer end, which is the end nearest the lamp and
+   the end the cut edge is on, falling away to the fold */
+.slide.rocker .rk-f-l::before{
+  background:
+    radial-gradient(circle at 16% 24%, rgba(255,255,255,.20) 0%, transparent 46%),
+    linear-gradient(90deg,
+      rgba(0,0,0,0) 0%, rgba(0,0,0,0) 50%,
+      rgba(0,0,0,.18) 86%, rgba(0,0,0,.24) 97%,
+      rgba(0,0,0,.44) 97.01%, rgba(0,0,0,.44) 100%);
+}
+.slide.rocker .rk-f-r::before{
+  background:
+    radial-gradient(circle at 84% 24%, rgba(255,255,255,.20) 0%, transparent 46%),
+    linear-gradient(270deg,
+      rgba(0,0,0,0) 0%, rgba(0,0,0,0) 50%,
+      rgba(0,0,0,.18) 86%, rgba(0,0,0,.24) 97%,
+      rgba(0,0,0,.44) 97.01%, rgba(0,0,0,.44) 100%);
+}
+/* FLAT: level, in the plate, under its overhang. EVEN, and that evenness is
+   the point — a flat plane has no reason to grade across itself, and the
+   gentle turn-down at the outer end is the hole's own top wall reaching over
+   it, not the part doing something. */
+.slide.rocker .rk-f-l::after{
+  background:linear-gradient(90deg,
+    rgba(0,0,0,.42) 0%, rgba(0,0,0,.30) 46%, rgba(0,0,0,.34) 100%);
+}
+.slide.rocker .rk-f-r::after{
+  background:linear-gradient(270deg,
+    rgba(0,0,0,.42) 0%, rgba(0,0,0,.30) 46%, rgba(0,0,0,.34) 100%);
+}
+/* OFF is the right half raised, which is the half the ring is on. */
+.slide.rocker .rk-f-l::before{ opacity:0; }
+.slide.rocker .rk-f-l::after { opacity:1; }
+.slide.rocker .rk-f-r::before{ opacity:1; }
+.slide.rocker .rk-f-r::after { opacity:0; }
+.slide.rocker.on .rk-f-l::before{ opacity:1; }
+.slide.rocker.on .rk-f-l::after { opacity:0; }
+.slide.rocker.on .rk-f-r::before{ opacity:0; }
+.slide.rocker.on .rk-f-r::after { opacity:1; }
+/* ── THE LEGENDS: A GRIP AND A LENS ───────────────────────────────────────
+   `|` AND `○` WERE THE WRONG PAIR, and the reason is not that they are the
+   wrong symbols — they are the right ones, on a part that is not asking that
+   question. IEC's pair says MAINS ON and MAINS OFF, and half of it is always
+   the mark for the state you are NOT in, sitting there in the dark being read
+   as an option. At 11px a side there is no room to also explain that one of
+   them is a label and the other is a leftover.
+
+   SO THERE IS ONE LEGEND, NOT TWO, AND IT IS A LAMP. The right half carries a
+   round lens in a black bezel: dark when the switch is off, lit through when
+   it is on. Nothing has to be read — a lit thing is on. That is the whole of
+   why this beat the bar, which lit perfectly well and still looked like a
+   glowing dash rather than a light behind glass. A ring reads as a LENS
+   because a bezel is a thing that holds glass, and a dash is a thing that is
+   printed.
+
+   AND THE OTHER HALF IS NOT BLANK, IT IS THE GRIP. A rocker's other end is
+   where your thumb goes, so it gets the knurl §04's pill switch already uses,
+   at the same numbers — a pit and the crescent of its far wall catching the
+   lamp half a pixel below, 3.5px on centre. Texture, not a symbol: it says
+   PRESS HERE, which is true of that end in both states, rather than naming a
+   state that is not the one you are in.
+
+   ON IS THE RIGHT HALF LYING FLAT, AND THAT IS WHERE THE LAMP IS. It was
+   built the other way up first — lamp on the end that stands proud, on the
+   theory that a light aimed at you beats a light down in the plate. That
+   theory is about lamps and this is a SWITCH: you press a side down and it
+   STAYS down for as long as the thing is on, so the pressed side IS the state
+   and the lit legend belongs on it. Every illuminated rocker on a wall works
+   this way, and the giveaway that the other version was wrong is that its
+   light moved to whichever end happened to be up — which is a lamp with an
+   opinion about geometry rather than about the circuit.
+
+   WHICH ALSO PUTS THE LIT LENS ON THE FLAT FACE, so it is seen square and
+   whole rather than foreshortened 42° away — the glow reads as a round lamp
+   instead of an ellipse, and it stops moving under your eye as the part
+   throws. What the earlier version gained in aim it lost twice over in shape.
+
+   AND BOTH MARKS SIT NEAR THEIR OUTER ENDS, NOT MID-HALF, which is a
+   consequence of the 42° and not a taste. A mark centred in its half is at 14
+   of 28, and once that half turns 42° it projects to 68.7% of the switch —
+   four per cent from where the same mark sits when the half is level. It read
+   as a ring near the middle that changes colour rather than as the right-hand
+   lamp. Out at 18 of 28 it lands at 74.6% turned against 79.2% flat: still
+   barely any travel, but unmistakably at one END. Foreshortening pulls
+   everything toward the seam, so anything that has to stay in its half has to
+   start further out than looks right on the flat. */
+.slide.rocker .rk-mk{
+  position:absolute; top:50%; z-index:1; box-sizing:border-box;
+  transform:translateY(-50%);
+  transition:opacity .16s;
+}
+/* the thumb pad — §04's knurl, same pit, same crescent, same 3.5px pitch */
+.slide.rocker .rk-grip{
+  left:5px; width:14px; height:11px;
+  background-image:
+    radial-gradient(circle at 1.2px 1.2px, rgba(0,0,0,.62) .62px, transparent .72px),
+    radial-gradient(circle at 1.2px 1.9px, rgba(226,232,240,.17) .62px, transparent .72px);
+  background-size:3.5px 3.5px, 3.5px 3.5px;
+  background-position:center, center;
+  background-repeat:repeat, repeat;
+  opacity:.52;
+}
+/* THE MARK IS THE RING, AND THE RING IS WHAT LIGHTS. First pass lit the disc
+   inside it and kept the ring black around the outside — a lit lens in a
+   bezel, which is a real object and the wrong one. It fills in the O. What is
+   on this paddle is a legend CUT THROUGH the moulding, and the cut is the
+   stroke: light comes through the shape you drew and nowhere else, so the
+   middle stays plastic. A filled circle is a different symbol from an O, and
+   at 9.5px it is the only difference there is room for. */
+.slide.rocker .rk-lens{
+  right:5px; width:9.5px; height:9.5px; border-radius:50%;
+  border:2px solid #04060a; box-shadow:0 .6px 0 rgba(255,255,255,.15);
+  opacity:1;
+}
+/* LIT IS THE STROKE GOING HOT AND THROWING. The border takes the lamp colour
+   with a little white in it — the core of a lit edge is always paler than the
+   light it is made of — and three shadows carry it out to 20px. No inset: an
+   inner glow is colour in the middle of the O, which is the thing this is not.
+   The glows are §04's jewel radii walked in one step, because a 2px stroke
+   throws less far than a 11px lamp and a bloom wider than its source reads as
+   fog rather than as light. */
+.slide.rocker.on .rk-lens{
+  opacity:1;
+  border-color:color-mix(in srgb,var(--lyr,var(--led)) 84%,#fff);
+  box-shadow:
+    0 0 4px color-mix(in srgb,var(--lyr,var(--led)) 80%,transparent),
+    0 0 11px color-mix(in srgb,var(--lyr,var(--led)) 45%,transparent),
+    0 0 20px color-mix(in srgb,var(--lyr,var(--led)) 22%,transparent);
+}
+/* THE LEGEND ON THE HALF THAT HAS GONE LEVEL DIMS — a surface out of the
+   light does not show its legend either. WITH ONE EXCEPTION, and it is the
+   whole point of the part: the lens on the flat half does not dim when it is
+   LIT, because a lamp is not a surface catching light, it is a source. The
+   dimming rule is about reflectance and it does not apply to something making
+   its own. */
+.slide.rocker.on .rk-grip{ opacity:1; }
+/* ── THE BROKEN EDGE OF THE CUT, over the part that sits in it ────────────
+   The plate is thick and the paddle is inside it, so the near lip of the hole
+   is IN FRONT of the switch and has to be drawn after it. Every inset here
+   carries blur for the reason the top of this file gives: an offset with none
+   pulls away from the radius at each corner and leaves a dot in the turn. */
+.slide.rocker::after{
+  content:''; position:absolute; inset:0; border-radius:inherit; z-index:3;
+  pointer-events:none;
+  box-shadow:
+    inset 0 2.5px 3px rgba(0,0,0,.75),
+    inset 1.5px 0 3px rgba(0,0,0,.45),
+    inset 0 -2px 2px rgba(0,0,0,.4),
+    inset 0 -1px 1px rgba(255,255,255,.10);
+}
+
+/* ── THERE IS NO PILOT LAMP. THE LENS IS THE LAMP ─────────────────────────
+   A SEPARATE LED ABOVE THE SWITCH IS A SECOND OBJECT SAYING THE SAME THING
+   the switch has already said with its own position, and the assembly was
+   paying for it twice: once in the 15px of plate it needed above the cut, and
+   once in the reading — eye goes to the lamp, then down to the switch, then
+   back up to check they agree. They always agree. That is the definition of a
+   part that is not needed.
+
+   SO THE LIGHT MOVED INTO THE PART, and it went into the LENS rather than into
+   a legend — see the block above. Every illuminated rocker ever made works the
+   same way: the mark is not printed on the plastic and lit from outside, it is
+   a hole in the plastic with a lamp behind it. The rule lives with the lens
+   now, which is where the numbers are. */
+
+/* ── THE ASSEMBLY — the row stands up ─────────────────────────────────────
+   `.tog` is a line: switch, then name. A rocker is a COLUMN, so the same
+   button turns ninety degrees and the name becomes an engraved plate under the
+   switch — which is what a console does, because a bank needs its names in a
+   row you can read across.
+
+   AND THE 20px ABOVE IT WENT WITH THE LAMP. That padding was clearance for a
+   part that no longer exists, and clearance for nothing is just a bank that
+   does not stack as tight as it should. */
+.tog.stack{
+  flex-direction:column; gap:7px; width:auto;
+  min-height:0; padding:5px;
+}
+.tog.stack .name{
+  max-width:64px; text-align:center;
+  font-size:8px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:#6d727a; text-shadow:0 1px 0 rgba(255,255,255,.08);
+}
+.tog.stack.off .name{ color:#585d65; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE TOGGLE — a switch mounted on the faceplate, its name engraved beside it
@@ -3109,20 +3668,30 @@ input:focus-visible{ outline-offset:3px; }
    was right for one. */
 .pens{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
        gap:4px; padding:5px 0 3px; }
-/* GLASS SHADING WAS TRIED HERE AND REVERTED, once. Bright walls, a hard
-   specular and the ink as a core — the recipe that is correct for a tube and
-   is wrong for a 28px square, because at that size the two lit walls and the
-   specular are most of the object and the colour is what is left over. On a
-   swatch the COLOUR IS THE POINT, and any treatment that spends the width on
-   describing the material has already lost. The modelled cap stands. */
+/* GLASS AS A SHEET ON TOP, NOT AS THE BODY — and the distinction is the whole
+   of why the first attempt failed and this one does not. That one remodelled
+   the cap AS glass: bright walls, a hard specular and the ink as a core seen
+   through them, which is the recipe for a tube and is wrong for a 22px square,
+   because at that size the two lit walls and the specular are most of the
+   object and the colour is what is left over. On a swatch the COLOUR IS THE
+   POINT.
+
+   This adds no walls and no core. The modelled cap is untouched — same size,
+   same corners, same seating in the case, same colour across the whole face —
+   and a pane of glass is laid over it. The only thing that MOVED is the
+   specular, off the painted face and onto the sheet, which is the rule this
+   language already wrote at the loupe: "the specular is on the outside of the
+   glass and does not care what is under it". Two speculars at the same 158°
+   in the same corner is one specular drawn twice, and on a light ink it blows
+   the top-left corner out. */
 .pencap{
   --ink:#FF6A00;
   --ring-r:11px;
   width:22px; height:22px; flex:0 0 22px;
   border:0; padding:0; cursor:pointer; position:relative;
   border-radius:7px;
+  /* the painted face, and nothing else on it — the specular is on the glass */
   background:
-    radial-gradient(115% 85% at 30% 16%, rgba(255,255,255,.36), transparent 60%),
     linear-gradient(158deg,
       color-mix(in srgb,var(--ink) 74%,#fff) 0%,
       var(--ink) 44%,
@@ -3164,6 +3733,62 @@ input:focus-visible{ outline-offset:3px; }
           mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite:xor; mask-composite:exclude;
   filter:blur(.4px);
+}
+/* ── THE GLASS CAP ON THE FACE ────────────────────────────────────────────
+   A SMALL LENS INSIDE THE FACE — about 3px in on the 22px cap, with the
+   colour running all the way round it. That margin is the whole of what makes
+   it an OBJECT SITTING ON the colour rather than a finish on the paint: at
+   this size a highlight only reads as a separate part if it is visibly smaller
+   than the thing it sits on. It was 5px in, which was a lens with a border
+   round it rather than a cap on a face.
+
+   THE WHITE LINE IS LIT ON ONE DIAGONAL HALF AND DARK ON THE OTHER, and that
+   is the difference between an edge and an outline. A ring all the way round
+   is a drawn shape; light lands on the two sides facing the lamp and the other
+   two go quiet, so the top and the left carry the line and it thins away
+   through the top-right and bottom-left corners on its own — the offset does
+   that, not a stop. Same lamp as everything else here.
+
+   AND A DARK HAIRLINE OUTSIDE IT, so the lens is seated ON the face rather
+   than scratched into it, with the cast shadow every raised thing here has.
+
+   THE FACE OF THE LENS IS MILKY, not clear — a flat 20% white across the
+   whole of it, under the specular. Clear glass over a colour is the colour,
+   which is to say nothing at all happened; the veil is what gives the pane a
+   substance of its own and is the reason the lens now reads at a glance rather
+   than only at its lit edge. It is FLAT and not graded: the 158° specular over
+   it is already the gradient, and a second one under it fights it.
+
+   IT IS ONLY ON THE LENS, WHICH IS THE WHOLE LICENCE FOR IT. The colour is the
+   point of a swatch and a veil over the whole face would be a swatch of the
+   wrong colour — the margin outside the lens keeps the ink exactly as mixed,
+   so there is always true colour on the cap to read.
+
+   THE SPECULAR OVER IT IS THE LOUPE'S PANE, unchanged: the same two layers at
+   the same numbers, running off the top-left and dying by 46% with the room
+   going dark into the bottom-right. Copied rather than re-tuned — a second set
+   of values for the same material is two materials the first time either is
+   touched. It is confined to the lens, and that is the only difference.
+
+   PER CENT AND NOT PIXELS, because this rail is built at two sizes: 22px on
+   the panel and 17px in the picker's well. In pixels the small one gets a lens
+   at the wrong scale with corners that do not follow the case's.
+
+   AN EMPTY SLOT GETS NONE OF IT. That state is a hole in the case with no cap
+   in it, and a hole has no face to glaze. */
+.pencap:not(.empty)::after{
+  content:''; position:absolute; inset:13.5%; border-radius:26%;
+  pointer-events:none;
+  background:
+    linear-gradient(158deg,
+      rgba(255,255,255,.42) 0%, rgba(255,255,255,.14) 15%,
+      rgba(255,255,255,.02) 30%, transparent 46%),
+    radial-gradient(120% 120% at 78% 88%, rgba(0,0,0,.16), transparent 52%),
+    linear-gradient(rgba(255,255,255,.20), rgba(255,255,255,.20));
+  box-shadow:
+    inset 1.1px 1.1px 0 -.1px rgba(255,255,255,.85),
+    0 0 0 1px rgba(0,0,0,.28),
+    0 1px 2px rgba(0,0,0,.32);
 }
 /* HOVER COMES PART WAY UP OUT OF THE TRAY — the walls shallow out and the rim
    catches a little light. Not all the way: it is not selected. */
@@ -4153,7 +4778,23 @@ footer{ margin-top:80px; padding-top:22px; border-top:1px solid #1c1e22;
 .nav-sentinel{ height:1px; margin:0; }
 
 /* the wordmark is .demo-etch at nav size: engraved, not printed */
-.nav-mark{ font-size:12.5px; letter-spacing:.2em; padding:0 8px 0 5px; }
+/* NO UNDERLINE, EVER, and it is set on the CLASS rather than on the anchor.
+   The mark is a span on the home page and an anchor everywhere else, so a rule
+   that only names `a.nav-mark` is a rule that describes half the cases and
+   leaves the other half depending on which element it happened to be. Declared
+   once, on the thing that is always true: this is an engraved badge, and an
+   engraved badge is not underlined. */
+.nav-mark{ font-size:12.5px; letter-spacing:.2em; padding:0 8px 0 5px; text-decoration:none; }
+.nav-mark:hover, .nav-mark:focus, .nav-mark:active{ text-decoration:none; }
+/* AND IT IS THE WAY HOME, so it has to say so on approach. The HOME key that
+   used to sit in the bar is gone — the same door twice, and the one that cost
+   a slot in a bar that has to fit on a phone. An engraved wordmark gives no
+   hint that it is pressable, so the affordance is the hover: it lifts toward
+   the lit end of its own range rather than turning into a link, because a blue
+   underline on a machine's badge is a web page wearing a panel. */
+a.nav-mark{ cursor:pointer; transition:color .14s, text-shadow .14s; }
+a.nav-mark:hover{ color:#9aa0aa; text-shadow:0 1px 0 rgba(255,255,255,.2), 0 -1px 0 rgba(0,0,0,.8); }
+a.nav-mark:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:3px; border-radius:3px; }
 
 .nav-pages{ padding:5px; gap:6px; }
 /* AN ANCHOR, NOT A BUTTON. These go to documents, so the part underneath has
@@ -4174,11 +4815,20 @@ span.nav-link{ cursor:default; }
   .navdock > .strip{ transition:none; }
 }
 
-/* under 620px the switcher is the bar: the wordmark and the version window go,
-   because three destinations are the only part of it that is load-bearing */
+/* Under 620px the version window and the channel go, because the destinations
+   are the load-bearing part.
+
+   THE WORDMARK STAYS, AND IT DID NOT USED TO. It went with them, and that was
+   correct for exactly as long as HOME was a key in the bar — the bar carried
+   the way home and the mark was decoration. It is the way home now, so hiding
+   it on a phone leaves a narrow screen with no route back to the index at all.
+   The arithmetic works out better than before, too: dropping the HOME key
+   freed about seventy pixels and the mark costs about sixty, so the bar has
+   more room at 375px than it had when the mark was hidden. */
 @media (max-width:620px){
   .navdock{ padding:0 12px; }
-  .nav-mark, .nav-ver, .navdock .chan{ display:none; }
+  .nav-ver, .navdock .chan{ display:none; }
+  .nav-mark{ font-size:11px; letter-spacing:.14em; padding:0 6px 0 2px; }
   .nav-link{ padding:0 11px; }
 }
 

@@ -188,7 +188,7 @@
     second part.
   </p>
   <div class="stage">
-    <div class="stage-note">two candidates, then three places it lives &middot; throw them</div>
+    <div class="stage-note">three candidates, then three places it lives &middot; throw them</div>
     <div class="togrig" id="togrig"></div>
   </div>
 
@@ -229,15 +229,20 @@
           is genuinely the absence of the thing, and wrong the moment the two states both have
           names</td></tr>
       <tr class="trap">
-        <td>Open &mdash; two dresses, one survives</td>
-        <td><code>.slide</code> and <code>.slide.pill</code> are the same part, the same markup and
-            the same 46&times;22, differing in where the material is. <b>A</b> puts it in the
-            actuator: a bright knurled extrusion, ribs, a specular streak, and the colour is a
-            floor behind it. <b>B</b> inverts that &mdash; the actuator goes matte charcoal with a
-            dimple grip and nearly vanishes, and the lit window becomes the whole object, blooming
-            onto the plate with the engraved end of the slot showing through it. B is louder and
-            reads from further away; A is quieter and is the only part here made of metal. The
-            loser is <b>deleted</b>, not kept as an option: an option is a decision nobody made.</td>
+        <td>Open &mdash; three dresses, one survives</td>
+        <td>The same call and the same markup; A and B are the same 46&times;22 and C is its own shape.
+            They differ in where the light and the material are. <b>A</b> <code>.slide</code> puts the material in the actuator: a knurled moulded grip, ribs, a
+            specular streak, and the colour is a floor behind it. <b>B</b>
+            <code>.slide.pill</code> inverts that &mdash; matte charcoal actuator with a dimple
+            grip, and the lit window becomes the whole object with the engraved end of the slot
+            showing through it. <b>C</b> <code>.slide.rocker</code> stops being one object in a row: it is a
+            pilot LAMP, a SWITCH and an ENGRAVED NAME stacked in a column, the way a console mounts
+            one, with a paddle whose half that is OUT catches the lamp and throws a shadow into the
+            well, and whose half that is IN shows no edge at all. A is the quietest; B reads from
+            furthest away; C is the only one that reads as a real control &mdash; and it costs 42px
+            of height, three parts, and a bank instead of a list. A column of nineteen is a
+            different panel from the one this app has. Two are <b>deleted</b>, not kept as options: an option is a decision
+            nobody made.</td>
       </tr>
       <tr class="trap">
         <td>Not a lamp, and the capsule is B's alone</td>
@@ -682,7 +687,9 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      `<span class="slide on"><i class="sl-bed"></i><i class="sl-act"></i></span>` +
      `<span class="slide"><i class="sl-bed"></i><i class="sl-act"></i></span>` +
      `<span class="slide pill on"><i class="sl-bed"></i><i class="sl-act"></i></span>` +
-     `<span class="slide pill"><i class="sl-bed"></i><i class="sl-act"></i></span>`],
+     `<span class="slide pill"><i class="sl-bed"></i><i class="sl-act"></i></span>` +
+     `<span class="slide rocker on" data-rk></span>` +
+     `<span class="slide rocker" data-rk></span>`],
     ['Jewel LED',
      '<span class="jewel" style="--lyr:#FF6A00"></span><span class="jewel" style="--lyr:#2C6BFF"></span><span class="jewel" style="--lyr:#4CE04C"></span>'],
     ['Light pipe',
@@ -763,6 +770,11 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
   const placed = GROUPS.flatMap(g => g[1]);
   const lost = tiles.map(t => t[0]).filter(n => !placed.includes(n));
   if (lost.length) console.warn('mats: not in any group →', lost);
+  /* THE TILE'S TWO ROCKERS GET THE SAME SKELETON THE STAGE USES. A specimen
+     built from different markup than the part is a specimen that can be right
+     here and broken in §06. */
+  box.querySelectorAll('[data-rk]').forEach(n => n.insertAdjacentHTML('beforeend', ROCKER()));
+
   // the knob tile gets a live one
   document.getElementById('mat-knob')
           .replaceWith(knob({ label: '', min: 0, max: 100, value: 62, size: 58 }));
@@ -1446,6 +1458,49 @@ document.getElementById('navspec').replaceWith(navBar({
   setInk(st.ink);
 })();
 
+/* ── THE ROCKER'S PARTS ───────────────────────────────────────────────────
+   EIGHT ELEMENTS AND NO DRAWING. It has been rebuilt three times and each
+   rewrite removed a lie. The SVG drew a trapezoid with the foreshortening
+   painted into the path, so the two positions were two PICTURES and throwing
+   between them could only be a mirror. One flat slab under a real perspective
+   fixed the motion and left a plane, and a plane has no edge on it anywhere.
+   Folding it into two faces gave it a crease and left the last lie standing:
+   both halves always leaning, and no thickness at all.
+
+   A SIDE-VIEW SKETCH OF THE REAL PART SETTLED IT. The cross-section is
+   `___/` — a slab of constant thickness, level for its first half, kinked at
+   the middle, rising for its second, and RIGID, so the 26° bend never changes.
+   Which makes the two positions: left flat and right up, or left up and right
+   flat. Never both leaning. Each half animates between its own 0° and 26° and
+   the difference between them is 26° on every frame, which is what a rigid
+   body is and why it now moves like one. The geometry is in skew.css under
+   VARIANT C; this is only the skeleton.
+
+     .rk-cast   the shadow the raised half throws ON THE PLATE. Outside the
+                well's clip, because a shadow cast by something standing proud
+                lands on the panel and not in the hole
+     .rk-well   the cut, and the clip — the level half is SWALLOWED by the
+                plate, which is the difference between a hole and a tile
+     .rk-pad    the 3D space, and the part's seating 3px into the plate
+     .rk-f-l    the two halves, hinged on the shared seam
+     .rk-f-r
+     .rk-w      the end wall — 4px of cut edge folded back off each half's
+                outer edge, square to its own face. Invisible at 0° because it
+                is edge-on, about 1.8px wide at 26°. It is the whole of what
+                says solid, and it needs no state to know when to show
+     .rk-mk     one mark per half, so each foreshortens with the surface it
+                is actually on — `.rk-grip` is the thumb knurl on the left,
+                `.rk-lens` the lamp on the right, lit when the switch is
+
+   A hoisted declaration, because §04 — which runs earlier in the file — calls
+   it; a `const` alongside would still be in its temporal dead zone there. */
+function ROCKER() {
+  return '<i class="rk-cast"></i><i class="rk-well"><i class="rk-pad">' +
+         '<i class="rk-f rk-f-l"><i class="rk-w"></i><i class="rk-mk rk-grip"></i></i>' +
+         '<i class="rk-f rk-f-r"><i class="rk-w"></i><i class="rk-mk rk-lens"></i></i>' +
+         '</i></i>';
+}
+
 /* ── 06 · THE TOGGLE ──────────────────────────────────────────────────────
    THREE CELLS, TWO PARTS, and the split between them is the whole section: a
    boolean with an honest glyph gets the backlit cap, and a boolean without one
@@ -1466,16 +1521,43 @@ document.getElementById('navspec').replaceWith(navBar({
   /* ── A SETTING. No colour, no glyph, no card: the slot, the actuator, and
      the name etched on the metal beside it.
 
-     AND IT IS UP TWICE, IN TWO DRESSES, because this is a choice being made
-     rather than an option being offered. A — machined: the material is in the
-     ACTUATOR, a bright knurled extrusion, and the colour is a floor behind it.
-     B — lit: the actuator goes matte and nearly vanishes, and the window
+     AND IT IS UP THREE TIMES, IN THREE DRESSES, because this is a choice being
+     made rather than options being offered. A — machined: the material is in
+     the ACTUATOR, a knurled moulded grip, and the colour is a floor behind it. B — lit: the actuator goes matte and nearly vanishes, and the window
      becomes the whole object, blooming onto the plate with the engraved end of
-     the slot showing through it. Whichever loses gets deleted. */
-  const dress = (node, cls) => {
+     the slot showing through it. C — the rocker: not one object in a row at
+     all, but a pilot LAMP, a SWITCH and an ENGRAVED NAME stacked the way a
+     console mounts one, where the assembly carries the weight rather than the
+     shading.
+
+     TWO OF A AND B GET DELETED. C IS NOT IN THAT RACE YET — it is flagged
+     ALTERNATIVE · WIP on its own cap, because it has been rebuilt four times
+     and nobody has picked it. It stays on the page because the argument it
+     makes is worth seeing; it carries the flag so that seeing it is not
+     mistaken for it being settled. */
+  const dress = (node, cls, togCls) => {
     if (cls) node.querySelector('.slide').classList.add(cls);
+    if (togCls) node.classList.add(togCls);
+    if (cls === 'rocker') node.querySelector('.slide').insertAdjacentHTML('beforeend', ROCKER());
     return node;
   };
+
+  /* ── THE ROCKER IS A BENT SLAB, AND IT IS RIGID ───────────────────────────
+     It lives here rather than in the kit because it is a CANDIDATE: two of the
+     three dresses are going to be deleted, and a part earns its way into
+     skew-kit.js by winning, not by being written.
+
+     THE SIDE VIEW IS THE ARGUMENT, and three versions were thrown away before
+     anyone drew one. The cross-section is `___/`: constant thickness, level
+     for its first half, kinked at the middle, rising for its second. It does
+     not bend and it does not flex — the 26° is moulded in — so the only thing
+     the two positions can be is which half is the level one. Left flat and
+     right up, or left up and right flat. Never both leaning, which is what
+     every earlier version had and is why they all read as a graphic: a card,
+     then a card with a crease in it. And it has a THICKNESS, shown by the cut
+     edge on the raised half, which is the one surface facing the lamp square
+     and the whole of what says this is a solid sitting in a hole. */
+
   const SETTINGS = [['Invert tone', true], ['Apply edits', true], ['Weave crossings', false]];
   cell('Twist · A · machined',
        SETTINGS.map(([l, v]) => toggle({ label: l, value: v })),
@@ -1483,6 +1565,35 @@ document.getElementById('navspec').replaceWith(navBar({
   cell('Twist · B · lit',
        SETTINGS.map(([l, v]) => dress(toggle({ label: l, value: v }), 'pill')),
        '.slide.pill');
+  /* C IS A BANK, NOT A LIST, and it has to be shown as one: three assemblies
+     side by side with their names engraved underneath, which is how a console
+     mounts them and the only arrangement where a row of names reads. Shown
+     stacked in a list it would be answering a question nobody asked of it. */
+  (function bankC() {
+    const bank = el('div', null);
+    bank.style.cssText = 'display:flex; gap:2px; align-items:flex-end; flex-wrap:wrap';
+    SETTINGS.forEach(([l, v]) => bank.append(
+      dress(toggle({ label: l.split(' ')[0], value: v }), 'rocker', 'stack')));
+    const c = cell('Twist · C · rocker', [bank], '.slide.rocker + .tog.stack');
+
+    /* ── C IS NOT VALIDATED, AND SAYING SO IS THE POINT OF THE FLAG ────────
+       A AND B ARE A CHOICE BEING MADE. C is a third thing that arrived after
+       them, was rebuilt four times over — SVG trapezoid, one flat slab, two
+       folded faces, and finally a rigid bent slab with a real end wall — and
+       has not been picked. An unmarked alternative sitting beside two
+       candidates reads as a third candidate, and someone copying out of this
+       page has no way to tell that one of the three is still moving.
+
+       SO IT IS LABELLED WHERE THE NAME IS, not in a paragraph underneath.
+       A caveat below the specimen is a caveat you read after you have already
+       decided you like the thing. */
+    const flag = el('span', null, 'ALTERNATIVE · WIP');
+    flag.style.cssText = 'margin-left:9px; padding:1.5px 5px; border-radius:3px;' +
+      'font-size:7px; font-weight:700; letter-spacing:.13em; vertical-align:1px;' +
+      'color:#c98a4a; background:rgba(255,106,0,.09);' +
+      'box-shadow:inset 0 0 0 1px rgba(255,106,0,.26)';
+    c.querySelector('.bay-cap span').append(flag);
+  })();
 
   /* ── A LAYER, AND THE MASTER OVER THE COLUMN. One cell, because a master
      needs the column under it to mean anything — on its own it is a switch

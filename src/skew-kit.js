@@ -2605,7 +2605,13 @@ const CAP_DEEP  = 0.085;     // how far the floor sits below the rim, in radii
    at 80° it was spending a degree of it: the floor came out three quarters of
    the mouth's width and read as a funnel. At 86° the wall spends a fifth of a
    degree, and what is left of the taper is the sphere's own. */
-const CAP_STAND = 86;        // degrees the wall stands off the surface
+/* 84, AND 88 WAS A MISTAKE I MADE FOR 4% OF THE MARCHING. A wall that vertical
+   is seen EDGE ON from in front, so it occupies no pixels and says nothing: a
+   groove renders as a flat ribbon with no side to it, which does not read as a
+   channel at all — it reads as a hole through the ball. The wall IS the thing
+   that says "carved", and buying four percent by deleting it is not a trade.
+   The area was never in the wall anyway; it is in the corner fillet. */
+const CAP_STAND = 84;        // degrees the wall stands off the surface
 /* THE CORNER RADIUS, AND IT IS A RADIUS RATHER THAN A WIDTH.
 
    THE FIRST ROUNDING WAS A PARABOLA AND IT MEASURED THE WRONG THING. Its
@@ -2701,6 +2707,7 @@ const CAP_AAMAX = (CAP_ANG / CAP_RHO - 1) * .25;
    a question about the material — from "the shadow is eating the bore", which
    is a question about this curve. Those two looked identical for four rounds. */
 const CAP_SHADOW = 1;
+
 /* ── HOW TALL THE RIM IS BUDGETED, AND IT IS NOT ITS GEOMETRIC HEIGHT ────────
    THE WELL IS WIDE FOR ITS DEPTH — 0.41 — so a lamp only has to clear about
    thirty degrees to see the whole floor, and the one lighting this ball sits at
@@ -2772,6 +2779,149 @@ const RING_PX = 26;                 // the ring's width ON THE EQUATOR, in texel
 const DEG = Math.PI / 180;
 const T2D = 360 / TEX_W;            // degrees of arc per texel, on the equator
 const RING_HW = RING_PX / 2 * T2D;  // and the ring's HALF-WIDTH IN DEGREES OF ARC
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE ARCS ARE CUT, NOT PAINTED — SAME SECTION AS THE WELLS, SAME MARCH.
+
+   THEY WERE A STROKE IN A TEXTURE with a bump map pretending it had an edge,
+   which is the thing the caps stopped being three versions ago and for exactly
+   the same reasons: a painted mark cannot occlude, cannot shift as the ball
+   turns, and gets its "depth" from a lie told to the lamp. The wells proved
+   the alternative works. There is no argument for the arcs keeping the old one.
+
+   AND A GREAT CIRCLE IS AS CHEAP AS A POLE. The cap's profile is a function of
+   `|oy|` alone; a ring's is a function of `|o·A|` for its own axis, which for
+   the three coordinate circles is `|ox|`, `|oy|`, `|oz|`. All three are LINEAR
+   in the ray parameter for the same reason the cap's was — the ray only moves
+   in view z — so one march finds the nearest of four cuts with three more
+   multiplies a step and no new machinery at all.
+
+   THE DEEPEST CUT WINS, which is what `max` over the four means and what a
+   milling cutter does. Where two grooves cross, both are at full depth, and
+   the floor there belongs to neither of them — so it is black, and the
+   crossing reads as a pocket rather than as one arc painted over another.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* THE WIDTH IS THE ONE 1.90.1 SETTLED ON — `RING_HW`, a half-width in DEGREES
+   OF ARC rather than in texels, which is the whole point of that version: a
+   meridian drawn at constant texel width narrows toward the poles because the
+   sheet does. A cut has the same requirement and gets it for free, because
+   `|o·A|` is an arc measure and knows nothing about the texture at all.
+
+   AND IT IS THE FLOOR THAT GETS THAT WIDTH, NOT THE MOUTH — which is the whole
+   of why the first cut arcs came out thin. Making the LIP the old ring's width
+   leaves the two walls to be carved out of it, and at this depth they take
+   2.7px of a 4.9px half-width: the coloured part ends up smaller than half the
+   mark it replaced, and the rim shadow then covers the outer 45% of what is
+   left. Barely two pixels of colour where there used to be ten. So the floor
+   is the ring's width and the walls are cut OUTSIDE it. */
+/* ── A GROOVE HAS ITS OWN DEPTH AND ITS OWN CORNER ───────────────────────────
+   IT WAS SHARING THE WELLS', AND A WELL IS NOT A SLOT. Two hundredths of the
+   radius across a disc twenty-five pixels wide is a recess; the same drop
+   across a groove ten pixels wide is a trench you can fall into, and at the
+   crossing where two of them meet it reads as a hole punched through the ball.
+   Depth is a proportion of the mark it is cut into, not a property of the
+   cutter.
+
+   AND A SMALLER CORNER, WHICH IS WHERE THE COST ACTUALLY IS. The mouth is the
+   floor plus a fillet plus a wall, and at the wells' 2px radius the FILLET was
+   most of it — the wall is a tenth of what the corner spends. Shrinking the
+   corner is what narrows a groove's mouth; standing the wall up, which is what
+   88° was for, buys almost nothing and costs the whole read. */
+const RING_DEEP  = CAP_DEEP / 2;   // half the wells' — a slot, not a pocket
+const RING_ROUND = 0.012;    // a wider corner, so the lip rolls rather than steps
+const RNG_U1 = RING_ROUND * CAP_SIN;
+const RNG_Y1 = RING_ROUND * (1 - CAP_COS);
+const RNG_U3 = RNG_U1 + (RING_DEEP - RNG_Y1) / CAP_TW;  // the wall's own arc
+/* HALF AGAIN AS WIDE AS THE PAINTED RING WAS. `RING_HW` is what 1.90.1
+   settled on for a stroke lying on the surface; a cut is read differently —
+   the walls take angle off both sides and the contact shadow takes more, so
+   the same nominal width arrives narrower. This is the mark, not the mouth. */
+const RNG_FL = Math.sin(RING_HW * 1.69 * Math.PI / 180); // the floor — the mark's width
+const RING_LIP = RNG_FL + RNG_U3;                       // and the mouth is wider by a wall
+const RNG_AAMAX = (RING_LIP / RNG_FL - 1) * .25;
+const GLOW_FAR  = RING_LIP * 1.7;      // where the spill has fallen to nothing
+
+/* AND THEY RUN INTO THE WELLS RATHER THAN STOPPING AT THEM. Clipping them at
+   the lip left a little wall across the mouth of every groove where it met a
+   well — a piece of un-cut material standing between two cuts, which is not
+   something a cutter can leave behind. Unclipped, `max` merges them: the
+   groove notches through the well's wall and runs on into it.
+
+   AT HALF DEPTH THE JOINT IS A STEP RATHER THAN A MERGE, and that is correct
+   rather than a regression — a shallow slot running into a deeper pocket ends
+   at the pocket's wall, because the pocket has already taken the material.
+   What it must not do is stop short of it and leave a rib.
+
+   THE WELL STILL WINS ITS OWN FLOOR, because the rings only take `which` on a
+   strict `>` and inside the well the two are tied. Otherwise both meridians
+   meet at the pole, read as a crossing, and put a black patch in the middle of
+   a coloured floor. */
+function ringSink(a) {
+  if (!RING_SHOW) return 0;
+  const u = RING_LIP - a;
+  if (u <= 0) return 0;
+  if (u >= RNG_U3) return RING_DEEP;
+  if (u <= RNG_U1) return RING_ROUND - Math.sqrt(RING_ROUND * RING_ROUND - u * u);
+  return RNG_Y1 + (u - RNG_U1) * CAP_TW;
+}
+function ringSlope(a) {                  // d(sink)/d(a) — negative inside the cut
+  if (!RING_SHOW) return 0;
+  const u = RING_LIP - a;
+  if (u <= 0 || u >= RNG_U3) return 0;
+  if (u <= RNG_U1) {
+    const w = RING_ROUND * RING_ROUND - u * u;
+    return -u / Math.sqrt(w > 1e-14 ? w : 1e-14);
+  }
+  return -CAP_TW;
+}
+const RING_RGB = [[255, 74, 74], [74, 222, 128], [90, 169, 255]];
+/* how far the hovered arc throws light past its own edges, and how hard */
+const GLOW_STR = 0.28;
+
+/* ── HIDDEN. ONE FLAG, NOTHING DELETED ──────────────────────────────────────
+   `false` makes the three grooves not exist: their profile returns zero depth,
+   so nothing classifies as a ring, nothing is carved, nothing is coloured and
+   the hover has nothing to find. The wells are untouched. Set it true and the
+   carved arcs come straight back with every constant where it was. */
+const RING_SHOW = true;
+
+
+/* THE WHOLE SURFACE, AS ONE NUMBER. Four cuts, deepest wins. This is the only
+   thing the march needs, so it is the only thing that has to be fast. */
+const cutNear = v => (v < 0 ? -v : v) < RING_LIP;
+/* every floor sits at this one radius, which is what makes the fast path above
+   a single square root rather than a search */
+const CAP_RFLR = 1 - CAP_DEEP;
+const CAP_RF2  = CAP_RFLR * CAP_RFLR;
+const RNG_RFLR = 1 - RING_DEEP;
+const RNG_RF2  = RNG_RFLR * RNG_RFLR;
+
+/* IT BAILS AT FULL DEPTH, which is most of the calls that get past the first
+   test: nothing can be deeper than the floor, so the moment one cut reaches it
+   the other three are wasted work. This runs nineteen times per marched pixel
+   and there are thousands of those. */
+function cutSink(ox, oy, oz) {
+  const ay = oy < 0 ? -oy : oy;
+  let s = 0;
+  if (ay > S_LIP) {
+    s = capSink(oy);
+    if (s >= CAP_DEEP) return CAP_DEEP;
+  }
+  const ax = ox < 0 ? -ox : ox;
+  if (ax < RING_LIP) {
+    const r = ringSink(ax);
+    if (r >= CAP_DEEP) return CAP_DEEP;
+    if (r > s) s = r;
+  }
+  const az = oz < 0 ? -oz : oz;
+  if (az < RING_LIP) {
+    const r = ringSink(az);
+    if (r >= CAP_DEEP) return CAP_DEEP;
+    if (r > s) s = r;
+  }
+  if (ay < RING_LIP) { const r = ringSink(ay); if (r > s) s = r; }
+  return s;
+}
 
 /* THE EQUATOR IS A STRAIGHT LINE HERE, AND IT IS THE ONLY ONE THAT IS. The
    three rings are the coordinate great circles: the one perpendicular to Y is
@@ -2951,9 +3101,6 @@ function orbitMaterial() {
   for (let lat = -60; lat <= 60; lat += 15) {
     g.beginPath(); g.moveTo(0, TY(lat)); g.lineTo(TEX_W, TY(lat)); g.stroke();
   }
-  g.fillStyle = ORBIT_AX[0].col; bMerid(g, 90, RING_HW);
-  g.strokeStyle = ORBIT_AX[1].col; g.lineWidth = RING_PX; g.lineCap = 'butt'; tEquat(g);
-  g.fillStyle = ORBIT_AX[2].col; bMerid(g, 0, RING_HW);
   g.restore();
   const col = g.getImageData(0, 0, TEX_W, TEX_H).data;
 
@@ -2980,59 +3127,20 @@ function orbitMaterial() {
      bandStack exists: a blur lives in texture space and their arc does not.
      Their ramp is drawn and only finished with a blur, which is why this is
      two layers maxed together rather than one sheet. */
-  const hraw = twoLayer('#808080',
-    { blur: BEV_PX, draw: x => { x.strokeStyle = '#9c9c9c'; x.lineWidth = RING_PX; x.lineCap = 'butt'; tEquat(x); } },
-    { blur: BEV_BLUR, draw: x => MER_BAND.forEach(({ band }) =>
-        bandStack(x, band, drawnSig(BEV_PX, BEV_BLUR), u => grey(128 + 28 * u))) });
-  const hgt = new Float32Array(TEX_W * TEX_H);
-  for (let i = 0, j = 0; i < hgt.length; i++, j += 4) hgt[i] = hraw[j] / 255;
-
-  orbitBase = { col, hgt };
+  /* AND THE HEIGHT SHEET IS GONE ENTIRELY. It held one thing — the rings'
+     bevel — and the rings are geometry now, differentiated in closed form like
+     the wells' walls. A uniform sheet is eight megabytes of the same number
+     and a texture fetch per pixel to read it back. */
+  orbitBase = { col };
   return orbitBase;
 }
 
-/* ── INK — HOW MUCH OF THE LAMP EACH RING IS ALLOWED TO REFUSE ───────────────
-   A COLOURED ARC THAT TAKES THE SHADING LIKE THE PLASTIC DOES GOES GREY. It
-   went dark round the back, it went muddy under the socket's rim shadow, and
-   the drag highlight knocked the two rings you were not holding down to .30 on
-   top of all that — so the one thing on this ball that has to stay READABLE at
-   every attitude was the one thing the lighting was allowed to eat. Three
-   separate temperings on the same three marks.
-
-   SO THE RINGS ARE AN INLAY THAT GLOWS A LITTLE. This sheet says which texels
-   are ring and how strongly, and the renderer lifts those pixels' light toward
-   a floor instead of multiplying them down to nothing. The lift is
-   PROPORTIONAL rather than flat, so the bevel the height sheet gives them
-   still reads — a ring is still a moulded thing with a lit edge — but its
-   colour never drops out of the drawing.
-
-   AND HOLDING ONE LIFTS IT FURTHER RATHER THAN KNOCKING THE OTHERS DOWN.
-   Saying something about the third ring by taking light away from the two that
-   are not the message is a message written in the wrong place.
-
-   THIS IS THE ONLY SHEET THAT DEPENDS ON `held`, and it is a mask rather than
-   a material: one channel, blurred, no colour to build. Which is why the two
-   expensive ones above are built once. */
-const orbitInkCache = new Map();
-
-function orbitInk(held) {
-  const key = String(held);
-  if (orbitInkCache.has(key)) return orbitInkCache.get(key);
-  const lit = i => held < 0 ? 200 : i === held ? 255 : 175;
-  const kraw = twoLayer('#000',
-    { blur: GLO_PX, draw: x => { x.strokeStyle = grey(lit(1)); x.lineWidth = RING_PX; x.lineCap = 'butt'; tEquat(x); } },
-    { blur: GLO_BLUR, draw: x => MER_BAND.forEach(({ i, band }) =>
-        bandStack(x, band, drawnSig(GLO_PX, GLO_BLUR), u => grey(lit(i) * u))) });
-  const ink = new Float32Array(TEX_W * TEX_H);
-  for (let i = 0, j = 0; i < ink.length; i++, j += 4) ink[i] = kraw[j] / 255;
-  orbitInkCache.set(key, ink);
-  return ink;
-}
-
-function orbitTexture(held) {
-  const { col, hgt } = orbitMaterial();
-  return { col, hgt, ink: orbitInk(held) };
-}
+/* THE INK MASK IS GONE WITH THE PAINTED RINGS. It existed to stop the lamp
+   eating an arc that was a coloured stroke on a lit surface — three separate
+   temperings on three marks, and a whole sheet to undo them. An arc that is a
+   CUT has no such problem: its colour is a groove floor and gets the same
+   compression every well floor already gets. One mechanism instead of two. */
+function orbitTexture() { return orbitMaterial(); }
 
 function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   size = ORBIT_SIZE[size] || +size || ORBIT_SIZE.sm;
@@ -3089,17 +3197,33 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
      has done anything. 1.5 keeps the edges from stepping and lands near 10ms,
      and the marks on this thing are shaded gradients rather than hairlines —
      the one kind of drawing that loses least to a softer pixel. */
-  const DPR = Math.min(1.5, (typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1);
-  const PX  = Math.round(size * DPR);
-  cv.width = cv.height = PX;
-  cv.style.width = cv.style.height = size + 'px';
-  const ctx = cv.getContext && cv.getContext('2d');
-  const img = ctx && ctx.createImageData(PX, PX);
+  /* ── TWO RESOLUTIONS: ONE FOR LOOKING AT, ONE FOR DRAGGING ─────────────
+     A REPAINT IS ONE VISIT PER PIXEL AND THE DISC GROWS WITH THE SQUARE OF
+     THIS, so the device ratio is the cheapest lever there is by a wide margin
+     — and the only moments it costs anything are the ones where you are not
+     looking at the edges. During a drag the ball is MOVING: the eye is on the
+     rotation, motion blur is doing most of the antialiasing for free, and a
+     frame that arrives is worth more than a frame that is sharp. Let go and
+     the full pass runs once.
 
-  /* per-pixel: the index into the bitmap, and the view-space normal */
-  const IDX = [], NX = [], NY = [], NZ = [], VIG = [];
-  {
-    const rr = R * DPR;
+     0.75 IS A THIRD OF THE PIXELS OF 1.25, which is the whole difference
+     between a drag that tracks the hand and one that does not. Rebuilding the
+     grid costs about one paint and happens twice a drag, not sixty times. */
+  const DPR_HI = Math.min(1.25, (typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1);
+  const DPR_LO = Math.min(.75, DPR_HI);
+  const ctx = cv.getContext && cv.getContext('2d');
+  cv.style.width = cv.style.height = size + 'px';
+
+  let DPR = DPR_HI, PX = 0, rr = 1, img = null, N = 0;
+  let IDX = [], NX = [], NY = [], NZ = [], VIG = [];
+
+  function buildGrid(dpr) {
+    DPR = dpr;
+    PX  = Math.round(size * dpr);
+    cv.width = cv.height = PX;
+    img = ctx && ctx.createImageData(PX, PX);
+    rr  = R * dpr;
+    IDX = []; NX = []; NY = []; NZ = []; VIG = [];
     for (let py = 0; py < PX; py++) {
       const y = (PX / 2 - py - .5) / rr;
       for (let px = 0; px < PX; px++) {
@@ -3116,8 +3240,10 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
         VIG.push(q < .80 ? 1 : 1 - .62 * ((q - .80) / .20) ** 1.6);
       }
     }
+    N = IDX.length;
   }
-  const N = IDX.length;
+  buildGrid(DPR_HI);
+  const quality = dpr => { if (dpr !== DPR) { buildGrid(dpr); paint(); } };
 
   /* the lamp, and the one every other part on this site is lit by */
   const LAMP = [-0.32, 0.50, 0.805];
@@ -3132,6 +3258,12 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   const BUMP = 3.4;
 
   let held = -1;
+  /* WHICH ARC THE POINTER IS OVER, AND IT IS NOW THE ONLY THING THAT COLOURS
+     ONE. A cut arc unlit is structure; lit, it is an answer. So the ball shows
+     you its frame at rest and names the axis you are reaching for the moment
+     you arrive on it — which is the information a gizmo actually owes you, at
+     the moment you actually want it. */
+  let hover = -1;
   let proj = [];        // ring samples in screen space, for the pick
 
   function paint() {
@@ -3142,7 +3274,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     }));
     if (!img) return;
 
-    const { col, hgt, ink } = orbitTexture(held);
+    const { col } = orbitTexture();
     /* m is orthonormal, so the inverse is the transpose — into object space */
     const lx = m[0] * LAMP[0] + m[3] * LAMP[1] + m[6] * LAMP[2];
     const ly = m[1] * LAMP[0] + m[4] * LAMP[1] + m[7] * LAMP[2];
@@ -3173,7 +3305,11 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
        in-plane part and the out-of-plane part only matters at the silhouette,
        where the clamp below covers it. */
     const GXY = Math.hypot(m[1], m[4]);
-    const rr = R * DPR;
+    /* and the same for each ring's own coordinate — a well's edge is measured
+       in latitude, a groove's in `|o·A|`, and the pixel moves each at its own
+       rate, so one antialias width cannot serve four boundaries */
+    const GRA = [Math.hypot(m[0], m[3]), GXY, Math.hypot(m[2], m[5])];
+    const GVZ = [m[6] < 0 ? -m[6] : m[6], m[7] < 0 ? -m[7] : m[7], m[8] < 0 ? -m[8] : m[8]];
     let MX = 0, MY = 0, MZ = 0;        /* where the march landed */
     /* THE SUB-SAMPLE PATTERN — a triad round the pixel centre, in pixels. */
     const SSX = [.42, -.21, -.21], SSY = [0, .36, -.36];
@@ -3184,22 +3320,91 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
        few thousand pixels and an object per call is an object per call. */
     const march = (vx, vy, vz) => {
       MX = vx; MY = vy; MZ = vz;
-      const oyA = m[1] * vx + m[4] * vy, oyB = m[7];
-      if ((oyA + oyB * vz) * (oyA + oyB * vz) <= S_LIP * S_LIP) return;
+      /* ALL THREE COMPONENTS ARE LINEAR IN `t`, for the one reason this whole
+         approach works: the ray only moves in view z. So four cuts cost three
+         more multiply-adds a step and not a second pass. */
+      const axA = m[0] * vx + m[3] * vy, axB = m[6];
+      const ayA = m[1] * vx + m[4] * vy, ayB = m[7];
+      const azA = m[2] * vx + m[5] * vy, azB = m[8];
+      /* ── EVERY CUT IS MARCHED, AND TAKING THE GROOVES OFF IT WAS THE BUG ──
+         I REMOVED THEM TO BUY SPEED, ON THE ARGUMENT THAT A 10px SLOT HAS
+         LITTLE PARALLAX TO LOSE. The parallax was never the point. Without a
+         march a pixel keeps its position ON THE SPHERE, so the groove's floor
+         is drawn at the surface — a flat coloured band lying on the ball,
+         which is what a painted ring is and what this whole rewrite existed to
+         stop being.
+
+         AND IT SHOWED AS TWO. The wells are still traced, so near one the ray
+         IS displaced, lands inside the groove and draws it properly recessed —
+         while every pixel further out draws the same groove flat on the
+         surface. One groove, two renderings, at two different depths, meeting
+         exactly at the well's lip. Which is why it looked like a leftover
+         overlay that stopped where the old painted ring used to stop.
+
+         THE COST IS REAL AND IT IS THE PRICE OF THE FEATURE. Most of it comes
+         back through the closed-form floor: a groove's floor is a sphere, hit
+         in one square root, and only its walls need the search. */
+      const ey = ayA + ayB * vz;
+      if (!((ey < 0 ? -ey : ey) > S_LIP
+         || cutNear(axA + axB * vz) || cutNear(ey) || cutNear(azA + azB * vz))) return;
       const rho = vx * vx + vy * vy;
+
+      /* ── THE FLOOR IS A SPHERE, SO MOST OF A CUT NEEDS NO MARCH AT ALL ────
+         EVERY FLOOR ON THIS BALL IS AT ONE RADIUS — that is what a constant
+         depth means — so the whole of it is a sphere of radius 1 − CAP_DEEP
+         and a ray meets it in closed form, one square root, no iteration.
+         Only the WALLS need searching, and a wall is a few pixels wide where a
+         floor is most of what you can see.
+
+         THE CAPS NEVER NEEDED THIS. They are 2.2% of the sphere; three great
+         circles are 18.5%, because a band's area goes with its width along its
+         own axis and not with how thin it looks. The same march over eight
+         times the area is eight times the cost, which is the whole of why this
+         got slow — not a different technique, the same one at a scale the
+         wells never reached.
+
+         THREE PROBES CONFIRM IT. A closed-form hit is only the FIRST hit if
+         the ray was in open air the whole way down, so the quarter points get
+         tested against the surface; any of them already inside the material
+         means the ray met a wall on the way and the march has to run. */
+      /* TWO FLOOR SPHERES NOW, AND THE SHALLOW ONE IS TRIED FIRST because a
+         ray coming down meets the larger radius first. A groove floor is only
+         the surface if the deepest cut there is EXACTLY the groove's depth —
+         deeper means a well is cutting through the same point and this sphere
+         is sitting in its open air. */
+      for (let pass = 0; pass < 2; pass++) {
+        const RF2 = pass ? CAP_RF2 : RNG_RF2;
+        if (rho >= RF2) continue;
+        const iq = 1 / (pass ? CAP_RFLR : RNG_RFLR);
+        const tf = Math.sqrt(RF2 - rho);
+        const sk = cutSink((axA + axB * tf) * iq, (ayA + ayB * tf) * iq, (azA + azB * tf) * iq);
+        if (pass ? sk < CAP_DEEP : (sk < RING_DEEP - 1e-9 || sk > RING_DEEP + 1e-9)) continue;
+        let clear = true;
+        for (let k = 1; k < 4; k++) {
+          const t = vz + (tf - vz) * k * .25;
+          const q = Math.sqrt(rho + t * t), qi = 1 / q;
+          if (q <= 1 - cutSink((axA + axB * t) * qi, (ayA + ayB * t) * qi, (azA + azB * t) * qi)) {
+            clear = false; break;
+          }
+        }
+        if (clear) { MX = vx * iq; MY = vy * iq; MZ = tf * iq; return; }
+      }
+
       let above = vz, hit = null;
-      for (let st = 1; st <= 16; st++) {
-        const t = vz - CAP_DEEP * 4 * st / 16;
+      for (let st = 1; st <= 11; st++) {
+        const t = vz - CAP_DEEP * 2.6 * st / 11;
         const q = Math.sqrt(rho + t * t);
         if (q > 1) break;                      /* out through the far rim */
-        if (q <= 1 - capSink((oyA + oyB * t) / q)) { hit = t; break; }
+        const iq = 1 / q;
+        if (q <= 1 - cutSink((axA + axB * t) * iq, (ayA + ayB * t) * iq, (azA + azB * t) * iq)) { hit = t; break; }
         above = t;
       }
       if (hit === null) return;
-      for (let st = 0; st < 10; st++) {
+      for (let st = 0; st < 7; st++) {
         const t = (above + hit) * .5;
-        const q = Math.sqrt(rho + t * t);
-        if (q <= 1 - capSink((oyA + oyB * t) / q)) hit = t; else above = t;
+        const q = Math.sqrt(rho + t * t), iq = 1 / q;
+        if (q <= 1 - cutSink((axA + axB * t) * iq, (ayA + ayB * t) * iq, (azA + azB * t) * iq))
+          hit = t; else above = t;
       }
       const q = Math.sqrt(rho + hit * hit) || 1;
       MX = vx / q; MY = vy / q; MZ = hit / q;
@@ -3238,6 +3443,41 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
       const lon = Math.atan2(oz, ox);
       const cla = Math.cos(lat);
 
+      const rho = Math.PI / 2 - (lat < 0 ? -lat : lat);   /* angle off a pole */
+
+      /* ── WHICH CUT AM I IN, AND WHERE ACROSS IT ──────────────────────────
+         `which` is 0 for a well and 1..3 for a ring, `rad` runs 0 at the
+         middle of that cut's floor to 1 at its edge and past 1 up the wall —
+         the same coordinate the wells already used, so every term downstream
+         (the bore's colour, the contact shadow, the edge's antialiasing) works
+         on a groove without knowing it is one.
+
+         `cross` IS TWO FLOORS AT ONCE. Where two grooves meet, both are cut to
+         full depth and the floor belongs to neither — so it is black, and the
+         junction reads as a pocket rather than as one arc drawn over another. */
+      let sink = 0, which = -1, rad = 2, cross = false;
+      {
+        const ay = oy < 0 ? -oy : oy;
+        if (ay > S_LIP) { sink = capSink(oy); which = 0; rad = rho / CAP_RHO; }
+        let floors = 0;
+        for (let k = 0; k < 3; k++) {
+          const v = k === 0 ? ox : k === 1 ? oy : oz;
+          const a = v < 0 ? -v : v;
+          if (a >= RING_LIP) continue;
+          const rs = ringSink(a);
+          if (a <= RNG_FL) floors++;
+          if (rs > sink) { sink = rs; which = k + 1; rad = a / RNG_FL; }
+        }
+        cross = floors > 1;
+      }
+      /* WELLS AND GROOVES ARE DIFFERENT DEPTHS, so every term that reads "how
+         far down am I, as a fraction" has to ask which cut it is in. */
+      const deep = which === 0 ? CAP_DEEP : RING_DEEP;
+      const kw = which === 0 ? capSlope(oy) * cla / (1 - sink) : 0;
+      const kr = which > 0 ? ringSlope(
+        (which === 1 ? (ox < 0 ? -ox : ox) : which === 2 ? (oy < 0 ? -oy : oy)
+                     : (oz < 0 ? -oz : oz))) / (1 - sink) : 0;
+
       /* ── FILTERED, AND THE POLE IS WHY ────────────────────────────────────
          Nearest-neighbour was showing every texel edge on the rings, and at
          the top of the ball it was showing them badly: in this projection the
@@ -3260,8 +3500,16 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          on, so it would have been a line of missing pixels straight across
          the middle of the ball. */
       const span = Math.max(1, cla > 1e-4 ? Math.min(24, Math.round(.5 / cla)) : 24);
-      let cr = 0, cg = 0, cb = 0;
-      for (let k = 0; k < span; k++) {
+      let cr = 0, cg = 0, cb = 0, gr = 0, gg = 0, gb = 0;
+      /* ── AND A CUT PIXEL DOES NOT SAMPLE AT ALL ──────────────────────────
+         THE WELL AND THE GROOVES ARE PAINTED IN CLOSED FORM further down, so
+         every texel fetched here for one of them is fetched and discarded —
+         and they are the WORST pixels to fetch for. The pole filter's sample
+         count follows 1/cos(lat), which inside a well runs from four to
+         twenty-four, so the most expensive sampling on the ball was being done
+         exclusively for pixels whose colour is overwritten a few lines later.
+         A sixth of the ball, at up to twenty-four times the cost. */
+      if (sink === 0) for (let k = 0; k < span; k++) {
         const fx = (TEX_W * (.5 + lon / (2 * Math.PI)))
                  + (span > 1 ? (k / span - .5) * (TEX_W / 360) * 2 : 0) - .5;
         const c0 = Math.floor(fx), tx = fx - c0;
@@ -3275,7 +3523,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
         cg += col[iaa+1] * w00 + col[iab+1] * w10 + col[iba+1] * w01 + col[ibb+1] * w11;
         cb += col[iaa+2] * w00 + col[iab+2] * w10 + col[iba+2] * w01 + col[ibb+2] * w11;
       }
-      cr /= span; cg /= span; cb /= span;
+      if (sink === 0) { cr /= span; cg /= span; cb /= span; }
 
       /* ── THE NORMAL COMES OFF THE HEIGHT SHEET ───────────────────────────
          Central differences in both directions, which is the whole of a bump
@@ -3283,12 +3531,6 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          longitude is a shorter distance the further from the equator you are —
          without that the rings' bevels would flare out to nothing at the top
          of the ball. Clamped for the same reason the filter is. */
-      const rc = clampR(Math.round(fy));
-      const cc = wrapC(((Math.round(TEX_W * (.5 + lon / (2 * Math.PI))) % TEX_W) + TEX_W) % TEX_W);
-      const dLat = (hgt[clampR(rc - 1) * TEX_W + cc] - hgt[clampR(rc + 1) * TEX_W + cc]);
-      const dLon = (hgt[rc * TEX_W + wrapC(cc - 1)] - hgt[rc * TEX_W + wrapC(cc + 1)])
-                 / Math.max(.12, cla);
-
       /* ── AND THE WALL'S OWN NORMAL, EXACTLY ──────────────────────────────
          `ê_r − (r'/r)·ê_lat`, which is the normal of any surface of revolution
          and needs no sampling at all. It lands in the same `ê_lat` coefficient
@@ -3296,8 +3538,6 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          approximately — and the two never meet on the ball anyway: the rings
          stop at the lip and the wall starts there. Zero everywhere except the
          0.8° the wall occupies, so the body and the floor cost nothing. */
-      let sink = capSink(oy);
-      const kw = capSlope(oy) * cla / (1 - sink);
 
       /* THE LOCAL FRAME COSTS NOTHING, because the point already holds it:
          `ox = cos(lat)·cos(lon)` by construction, so a division recovers the
@@ -3308,12 +3548,34 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
       const inv = cla > 1e-6 ? 1 / cla : 0;
       const sla = oy, clo = inv ? ox * inv : 1, slo = inv ? oz * inv : 0;
 
+      /* ── THE SURFACE'S OWN NORMAL, FOR WHICHEVER CUT IS THE DEEPEST ──────
+         THE WELLS' TERM IS `ê_r − (r'/r)·ê_lat`, ALONG A LATITUDE. A ring's is
+         the same identity about a different axis: the groove is a function of
+         `a = |o·A|` and nothing else, so its normal is
+         `ê_r + (S'(a)/r)·(sgn·A − a·o)` — and the `√(1−a²)` that turns a
+         gradient in `a` into a gradient in ARC cancels against the one that
+         normalises the tangent, which is why there is no square root here at
+         all. Three multiplies and an axis that is (1,0,0), (0,1,0) or (0,0,1).
+
+         ONLY THE DEEPEST CUT CONTRIBUTES, which is what `max` means: at a
+         crossing the two grooves are both at their floor, both slopes are
+         zero, and the pocket is flat. There is nothing to blend. */
       let nx = ox, ny = oy, nz = oz;
-      if (dLat || dLon || kw) {
-        const kl = -dLat * BUMP + kw, kn = dLon * BUMP;
-        nx += kl * -sla * clo + kn * -slo;
+      if (kw) {
+        const kl = kw;
+        nx += kl * -sla * clo;
         ny += kl * cla;
-        nz += kl * -sla * slo + kn * clo;
+        nz += kl * -sla * slo;
+      } else if (kr) {
+        const A = which - 1;
+        const av = A === 0 ? ox : A === 1 ? oy : oz;
+        const sg = av < 0 ? -1 : 1;
+        const aa2 = av < 0 ? -av : av;
+        nx += kr * ((A === 0 ? sg : 0) - aa2 * ox);
+        ny += kr * ((A === 1 ? sg : 0) - aa2 * oy);
+        nz += kr * ((A === 2 ? sg : 0) - aa2 * oz);
+      }
+      if (kw || kr) {
         const nm = Math.hypot(nx, ny, nz) || 1;
         nx /= nm; ny /= nm; nz /= nm;
       }
@@ -3341,34 +3603,36 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          1 out there and clamps. The wall arrives already at full darkness, so
          the disc does not END, it fades into the bore. That is the join that
          was drawing a line. */
-      const rho = Math.PI / 2 - (lat < 0 ? -lat : lat);
-      let rad = rho / CAP_RHO;                /* 0 at the middle, 1 at the disc's rim */
-
       /* ══════════════════════════════════════════════════════════════════
-         AND THE RIM IS SUPERSAMPLED, WHICH IS THE ONLY GENERAL ANSWER.
+         THE CUT'S EDGE IS SUPERSAMPLED, WHICH IS THE ONLY GENERAL ANSWER.
 
-         THREE DIFFERENT THINGS ALIAS AT THAT EDGE and hand-antialiasing them
-         one at a time is a losing game — I have now done it three times and
-         each fix left the other two. They are: the COLOUR boundary between
-         red and bore; the SHADOW, which reaches full exactly there; and the
-         corner's own OCCLUSION, where the square lip hides a strip of floor
-         from a grazing ray and the marched depth genuinely jumps between
-         neighbouring pixels. The third one has no analytic width to widen. It
-         is a visibility discontinuity, and a renderer that takes one sample
-         per pixel cannot resolve one — that is not a tuning problem, it is
-         the sampling theorem.
+         Three things alias where a floor meets its wall: the COLOUR boundary,
+         the SHADOW, which reaches full exactly there, and the corner's own
+         OCCLUSION — a square lip hiding a strip of floor from a grazing ray,
+         where the marched depth genuinely jumps between neighbouring pixels.
+         The third has no analytic width to widen: it is a visibility
+         discontinuity, and one sample per pixel cannot resolve one.
 
-         SO THE EDGE GETS FOUR SAMPLES AND THE REST OF THE BALL GETS ONE.
-         `rad` and `sink` are the two numbers every one of those three
-         features is computed from, so averaging THEM antialiases all three at
-         once and in the right proportion, without touching the normal — which
-         wants to stay creased, because that corner is square on purpose.
+         `sink` and `rad` are what all three are computed from, so averaging
+         those antialiases all three at once and in the right proportion,
+         without touching the normal — which wants to stay creased, because
+         that corner is square on purpose. Sub-samples are measured against the
+         cut the CENTRE landed in; they sit a fifth of a pixel away, and one
+         that would disagree about which groove it is in has found a crossing,
+         where both floors are flat and the answer is the same either way.
 
-         IT COSTS ALMOST NOTHING BECAUSE IT IS ADAPTIVE. Only pixels within a
-         tenth of the disc's radius of the rim take the extra three marches:
-         an annulus of a few hundred pixels at `lg`, against a ball of forty
-         seven thousand. */
-      if (sink > 0 && (rad > .90 && rad < 1.10)) {
+         ADAPTIVE, SO IT IS NEARLY FREE — only the annulus within a tenth of an
+         edge pays for the extra three marches. */
+      /* AND IT ONLY RUNS WHERE IT EARNS ITS KEEP. The wells were four hundred
+         edge pixels; three grooves add four and a half THOUSAND, because a
+         great circle is 772px long and each cut has two sides. Three extra
+         marches on every one of those is the lag.
+
+         The colour boundary is already antialiased analytically, and the thing
+         only supersampling can fix — the corner occluding a strip of its own
+         floor — needs a GRAZING view to exist at all. Face-on there is nothing
+         hidden and nothing to average, so the gate is the view angle. */
+      if (sink > 0 && rad > .80 && rad < 1.20 && vz < .82) {
         let aS = sink, aR = rad, n = 1;
         for (let k = 0; k < 3; k++) {
           const bx = NX[i] + SSX[k] / rr, by = NY[i] + SSY[k] / rr;
@@ -3376,9 +3640,18 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
           if (q2 >= 1) continue;
           march(bx, by, Math.sqrt(1 - q2));
           const y2 = m[1] * MX + m[4] * MY + m[7] * MZ;
-          const l2 = y2 > 1 ? 1 : y2 < -1 ? -1 : y2;
-          aS += capSink(l2);
-          aR += (Math.PI / 2 - Math.abs(Math.asin(l2))) / CAP_RHO;
+          if (which === 0) {
+            const l2 = y2 > 1 ? 1 : y2 < -1 ? -1 : y2;
+            aS += capSink(l2);
+            aR += (Math.PI / 2 - Math.abs(Math.asin(l2))) / CAP_RHO;
+          } else {
+            const v2 = which === 1 ? m[0] * MX + m[3] * MY + m[6] * MZ
+                     : which === 2 ? y2
+                                   : m[2] * MX + m[5] * MY + m[8] * MZ;
+            const a2 = v2 < 0 ? -v2 : v2;
+            aS += ringSink(a2);
+            aR += a2 / RNG_FL;
+          }
           n++;
         }
         sink = aS / n; rad = aR / n;
@@ -3395,7 +3668,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          covering the answer with a picture of the answer. */
       const up = oy > 0;
       let shade = 0, bnc = 0;
-      if (sink >= CAP_DEEP) {
+      if (sink >= deep) {
         /* ── A PLATEAU, NOT A PEAK, AND THAT IS THE WHOLE OF THE EDGE BUG ────
            THE DARKEST THING ON THE BALL WAS A RING OF ZERO WIDTH. Both sides
            of the corner ramped UP to full and reached it only exactly AT the
@@ -3427,7 +3700,22 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
            THE PLATEAU IS UNCHANGED AND HAS TO BE. The last tenth of the radius
            is flat black, about two pixels at this size, and that is what the
            geometry's edge is buried in. */
-        const v = rad <= .55 ? 0 : rad >= .90 ? 1 : (rad - .55) / .35;
+        /* ── HOW ENCLOSED A FLOOR IS, IS ITS DEPTH OVER ITS WIDTH ──────────
+           ONE CURVE FOR BOTH CUTS WAS WRONG BY A FACTOR OF FIVE. A well is
+           49px across and 10 deep — ratio 0.21, a shallow dish, and leaving
+           the inner half of it unshaded is right. A groove is 9.8px across and
+           the same 10 deep — ratio 1.06, which is a slot you look INTO, and
+           almost none of its floor can see the sky. Given the same curve its
+           floor came out flat and unoccluded, and a flat bright floor on a
+           dark ball is a RIBBON LYING ON TOP however deep the geometry says it
+           is. The eye reads enclosure, not depth.
+
+           SO THE GRADE STARTS AT A TENTH OF THE WAY OUT. The colour survives
+           as a bright line down the middle of the cut with the walls closing
+           on it either side, which is what the bottom of a narrow slot looks
+           like. */
+        const v0 = which === 0 ? .55 : .10;
+        const v = rad <= v0 ? 0 : rad >= .90 ? 1 : (rad - v0) / (.90 - v0);
         shade = v * v * v;
       } else if (sink > 0) {
         /* ── AND THE WALL IS SHADED BY ITS OWN DEPTH ────────────────────────
@@ -3442,7 +3730,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
            one coming in across the red, one coming down the wall — so the
            contact shadow is continuous through the joint even though the
            SURFACE is not, which is the point of making that corner square. */
-        const w = sink / CAP_DEEP;
+        const w = sink / deep;
         /* QUARTIC, AND THE PLATEAU IS A SLIVER. Full black over the bottom
            fifth of the wall was most of the wall — it is a steep surface and
            does not occupy many pixels — so the whole bore went dark whatever
@@ -3530,9 +3818,12 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
            the band was under a pixel wide exactly where the edge is most
            compressed, which is why it looked worst turned away. */
         const gz = Math.sqrt(vx * vx + vy * vy) / (vz > .05 ? vz : .05);
-        const goy = (GXY + (m[7] < 0 ? -m[7] : m[7]) * gz) / rr;
-        const aa = Math.min(CAP_AAMAX, Math.max(.020,
-                   goy / (cla > .05 ? cla : .05) / CAP_RHO * 1.3));
+        const goy = which === 0
+          ? (GXY + GVZ[1] * gz) / rr / (cla > .05 ? cla : .05)
+          : (GRA[which - 1] + GVZ[which - 1] * gz) / rr;
+        const aa = which === 0
+          ? Math.min(CAP_AAMAX, Math.max(.020, goy / CAP_RHO * 1.3))
+          : Math.min(RNG_AAMAX, Math.max(.020, goy / RNG_FL * 1.3));
         /* ── THE BLEND IS ONE-SIDED: NOTHING OF THE DISC LEAVES THE DISC ────
            IT WAS CENTRED ON THE EDGE, half the band inside and half out, which
            is the textbook way to antialias a boundary and the wrong way here.
@@ -3559,11 +3850,51 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
            GRADED IN FROM THE LIP so there is no step where the well begins.
            At the mouth it is exactly the body, or the lip would wear a ring
            the same way the floor's edge used to. */
-        const wd = sink / CAP_DEEP;
-        const br = 32 + 60 * wd, bg = 37 + 63 * wd, bb = 43 + 67 * wd;
-        cr = br + ((up ? 224 : 213) - br) * mx;
-        cg = bg + ((up ? 123 : 217) - bg) * mx;
-        cb = bb + ((up ?  28 : 223) - bb) * mx;
+        /* ── THE LIFT IS THE WELL'S, NOT THE GROOVE'S ───────────────────
+           A BORE MACHINED INTO A MOULDING IS LIGHTER THAN THE SKIN, which is
+           true and which a WELL needs — 49px across and 10 deep, its wall has
+           nothing else to show. A groove is 10px across, and the same lift
+           makes the whole cut two to three times brighter than the ball it is
+           cut into. A light band on a dark sphere is a RIB, not a channel:
+           that is the "second overlay sitting on top". A groove is the ball's
+           own plastic and is darker for the only reason a recess ever is —
+           less light gets into it, which the shading already says. */
+        const wd = sink / deep;
+        const lf = which === 0 ? 60 : 8;
+        const br = 32 + lf * wd, bg = 37 + lf * 1.05 * wd, bb = 43 + lf * 1.12 * wd;
+        /* ── AND THE FLOOR OF THE CUT, WHICH IS THE ONLY COLOUR ON THIS BALL ─
+           A WELL IS ALWAYS ITS COLOUR; A GROOVE IS ONLY ITS COLOUR WHEN YOU
+           ARE ON IT. Unlit and cut, the three arcs are structure — you can see
+           the frame without being told anything by it — and the axis you are
+           reaching for answers when you arrive. The colour IS the hover,
+           rather than a label the hover brightens.
+
+           A CROSSING IS BLACK WHATEVER IS HOVERED. Two floors at one point
+           belong to neither groove, and lighting it for one of them would draw
+           that arc straight through the other. */
+        /* ── THE COLOUR IS THE RESTING STATE NOW, AND THE HOVER IS A GLOW ───
+           EARLIER THE COLOUR *WAS* THE HOVER: unlit grooves as structure, the
+           axis named only when you arrived on it. That reads well on paper and
+           costs the ball the one thing it exists to say — three arcs you can
+           name at a glance. So an arc wears its axis colour at rest, and
+           reaching for one ADDS light rather than adding meaning: the answer
+           was already there, the hover just brings it forward. */
+        const RG = which > 0 && !cross ? RING_RGB[which - 1] : null;
+        /* ── AN UNLIT GROOVE STILL HAS A BOTTOM ─────────────────────────
+           IT WAS (15,17,20) AGAINST A WALL OF (92,100,110), so the deepest
+           part of the cut was the darkest thing in it with lit sides around —
+           which is the signature of a hole punched THROUGH something, not a
+           channel with a floor. Nothing about "the arc has no colour until you
+           hover it" requires the floor to be a void; it requires it to be the
+           same plastic as everything else. A shade under the wall, so the
+           section still models, and the ring's colour when you are on it. */
+        const fr = which === 0 ? (up ? 224 : 213) : RG ? RG[0] : 36;
+        const fg = which === 0 ? (up ? 123 : 217) : RG ? RG[1] : 41;
+        const fb = which === 0 ? (up ?  28 : 223) : RG ? RG[2] : 48;
+        cr = br + (fr - br) * mx;
+        cg = bg + (fg - bg) * mx;
+        cb = bb + (fb - bb) * mx;
+
       }
 
       const d = nx * lx + ny * ly + nz * lz;
@@ -3597,8 +3928,59 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          one and a bit before it is fully lit. A rim shadow with a crisp edge
          is a dark shape with a boundary inside a hole, which is the same
          stroke this part has produced under four other names. */
+      /* ── AND IT IS THE WELL'S RIM, SO ONLY A WELL MAY ASK IT ─────────────
+         THIS RAN ON EVERY CUT PIXEL AND IT IS BUILT ENTIRELY FROM THE WELL:
+         `CAP_ANG` is the well's rim radius and `rho` is the angle from the
+         POLE. On a groove at the equator `rho` is 1.571 and the discriminant
+         goes negative, so `D` collapses to `-rho·c` — a number with no
+         geometry behind it that flips sign with the light's bearing. Measured
+         along one groove it hands back 100% lit, 100% lit, 0%, 0%, 0% as the
+         bearing turns: a hard shadow edge across every arc, in a place decided
+         by where the POLE happens to be. That is the "strange light", and the
+         lit half either side of it is the thing that reads as a second ring
+         laid over the groove.
+
+         A GROOVE'S OWN RIM IS TWO PARALLEL EDGES, NOT A CIRCLE, so it needs
+         its own solution and does not get to borrow this one. Until it has
+         one it takes no cast shadow at all — which is honest: a 10px slot's
+         rim throws very little, and none is much closer to the truth than a
+         hard edge in an arbitrary place. */
       let sun = 1;
-      if (sink > 0) {
+      if (which > 0 && sink > 0) {
+        /* ── AND A GROOVE'S RIM CASTS TOO — IT IS A TRENCH, NOT A CIRCLE ────
+           THE WELL'S TEST CANNOT BE BORROWED, which is why grooves had none:
+           it reaches a rim of known radius round a known centre, and a groove
+           has no centre — it has two parallel edges running away in both
+           directions. But the question is the same one and the answer is
+           simpler. The light's bearing has a component ACROSS the trench; the
+           edge it must clear is whichever one lies that way, and the distance
+           to it is `(halfWidth − a)/|c|` on the near side, `(halfWidth + a)/|c|`
+           on the far. Light running ALONG the groove clears nothing and blocks
+           nothing — `c` goes to zero, the reach goes to infinity, and the
+           trench is lit end to end. Which is exactly what a slot does.
+
+           Same comparison as the well's, same penumbra, same constant. */
+        const lu = lx * ox + ly * oy + lz * oz;
+        if (lu <= 0) sun = 0;
+        else {
+          const A = which - 1;
+          const av = A === 0 ? ox : A === 1 ? oy : oz;
+          const sg = av < 0 ? -1 : 1, a = av < 0 ? -av : av;
+          const ex = (A === 0 ? sg : 0) - a * ox;
+          const ey = (A === 1 ? sg : 0) - a * oy;
+          const ez = (A === 2 ? sg : 0) - a * oz;
+          const en = Math.sqrt(1 - a * a) || 1;
+          const h2 = 1 - lu * lu, hm = h2 > 0 ? Math.sqrt(h2) : 0;
+          const c = hm > 1e-6
+            ? ((lx - lu * ox) * ex + (ly - lu * oy) * ey + (lz - lu * oz) * ez) / (en * hm)
+            : 0;
+          const ac = c < 0 ? -c : c;
+          const D = ac > 1e-3 ? (RING_LIP - (c < 0 ? -a : a)) / ac : 1e3;
+          const need = sink * hm * CAP_CAST;
+          let tt = need <= 1e-9 ? 1 : (D * lu / need - .88) / .24;
+          sun = tt <= 0 ? 0 : tt >= 1 ? 1 : tt * tt * (3 - 2 * tt);
+        }
+      } else if (which === 0 && sink > 0) {
         const lu = lx * ox + ly * oy + lz * oz;
         if (lu <= 0) sun = 0;
         else {
@@ -3637,6 +4019,12 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
       let f = (AMB * (.46 + .54 * sun) + DIF * dif * sun) * lit;
       const hs = nx * hx + ny * hy + nz * hz;
       let sp = hs > 0 ? SPEC * lit * Math.pow(hs, SHINE) * 255 : 0;
+      /* MATTE INSIDE A GROOVE. A moulded face has a broad sheen; the bottom of
+         a machined slot does not — it is a cut surface, and a glint down there
+         is what made the arcs read as polished ribbons laid on the ball rather
+         than as material removed from it. The wells keep theirs: they are wide
+         enough for a sheen to be a shape rather than a dot. */
+      if (which > 0) sp *= .22;
       f *= VIG[i];
 
       /* ── AND THE RINGS DO NOT GO OUT ─────────────────────────────────────
@@ -3677,13 +4065,9 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          a red floor in shadow is a dark red floor, never a black one and never
          a pink one.
          ══════════════════════════════════════════════════════════════════ */
-      const RING_LOW = .68, FLOOR_LOW = .34;
+      const FLOOR_LOW = .34;
       const t = f > 1 ? 1 : f;
-      const em = ink[rc * TEX_W + cc];
-      if (em > 0) {
-        f += em * (RING_LOW + (1 - RING_LOW) * t - f);
-        sp *= 1 - em;
-      } else if (sink >= CAP_DEEP) {
+      if (sink >= deep) {
         /* THE LIFT FADES OUT ON THE SHADOW'S OWN CURVE. Applied flat across
            the disc it put a 2.4× step at the rim — the red squeezed into
            [LOW, 1] against a wall pixel that got none of it, two brightnesses
@@ -3719,10 +4103,46 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          does, so the shape of it was wrong as well as the discontinuity. */
       const bl = bnc * (.35 + .65 * Math.max(0, up ? ly : -ly));
 
+      /* ══════════════════════════════════════════════════════════════════
+         THE HOVERED ARC EMITS, AND AN EMITTER LIGHTS WHAT IS AROUND IT.
+
+         THE FIRST GLOW WAS A BRIGHTER FLOOR AND THAT IS NOT WHAT LIGHT DOES.
+         It stopped dead at the walls, so the arc got lighter and stayed a
+         stripe — the one thing that says "this is a source" is that it spills
+         PAST its own edges onto material that is not it.
+
+         SO IT IS COMPUTED FROM THE DISTANCE TO THE ARC'S OWN GREAT CIRCLE, not
+         from the cut, which lets it exist where the cut does not: full down
+         the floor, falling away through the walls, and carrying on across the
+         plain surface for about two and a half times the slot's width. Added,
+         never multiplied, and never touched by the shading — a lamp does not
+         dim because the surface it sits in is turned away, and this one has to
+         survive the back of the ball to be worth anything.
+
+         AND IT IS ALLOWED TO CLIP. At full strength the middle of the arc runs
+         past 255 and blooms toward white, which is exactly what a bright
+         source does to a sensor and the only cheap way to say "brighter than
+         this screen can print". */
+      const H = held >= 0 ? held : hover;
+      if (H >= 0) {
+        const hv = H === 0 ? ox : H === 1 ? oy : oz;
+        const ah = hv < 0 ? -hv : hv;
+        let gw = 0;
+        if (ah <= RNG_FL) gw = 1;
+        else if (ah < GLOW_FAR) {
+          const t = 1 - (ah - RNG_FL) / (GLOW_FAR - RNG_FL);
+          gw = t * t;
+        }
+        if (gw > 0) {
+          const C = RING_RGB[H], w = gw * GLOW_STR;
+          gr = C[0] * w; gg = C[1] * w; gb = C[2] * w;
+        }
+      }
+
       const o = IDX[i];
-      out[o]     = cr * f + sp + (up ? 0 : 27) * bl;
-      out[o + 1] = cg * f + sp + (up ? 0 : 28) * bl;
-      out[o + 2] = cb * f + sp + (up ? 0 : 29) * bl;
+      out[o]     = cr * f + sp + gr + (up ? 0 : 27) * bl;
+      out[o + 1] = cg * f + sp + gg + (up ? 0 : 28) * bl;
+      out[o + 2] = cb * f + sp + gb + (up ? 0 : 29) * bl;
       out[o + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
@@ -3820,10 +4240,23 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
 
   let from = null, axis = null, base = null;   // `held` is declared with the raster
 
+  /* A REPAINT ONLY WHEN IT CHANGES. `pick` is a walk over a few hundred
+     projected samples and a repaint is every pixel of the ball; doing either
+     on every `pointermove` of a hover would cost more than the drag does. */
+  const setHover = k => { if (k !== hover) { hover = k; paint(); } };
+  cv.addEventListener('pointermove', e => {
+    if (held >= 0 || from) return;              /* a drag owns the ball */
+    const r = cv.getBoundingClientRect();
+    setHover(pick((e.clientX - r.left) * size / r.width,
+                  (e.clientY - r.top) * size / r.height));
+  });
+  cv.addEventListener('pointerleave', () => setHover(-1));
+
   cv.addEventListener('pointerdown', e => {
     const r = cv.getBoundingClientRect();
     const k = pick((e.clientX - r.left) * size / r.width,
                    (e.clientY - r.top) * size / r.height);
+    quality(DPR_LO);
     base = orbitMat(val.yaw, val.pitch, val.roll);
     if (k < 0) {
       /* ── NOT ON A RING: ROLL THE BALL ────────────────────────────────────
@@ -3913,6 +4346,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     held = -1; from = axis = base = null;
     wrap.classList.remove('turning');
     delete wrap.dataset.ax;
+    quality(DPR_HI);            /* and the sharp pass runs once, on release */
   };
   cv.addEventListener('pointerup', drop);
   cv.addEventListener('pointercancel', drop);

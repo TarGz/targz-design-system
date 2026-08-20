@@ -15,14 +15,6 @@
   <div class="masthead">
     <p class="kicker">skew · 02</p>
     <h1>Machine</h1>
-    <p class="lede">
-      TargzPenPlotterCtrl as hardware. Everything is wired to everything: jog and the readout
-      moves, trip a limit and the run block dies.
-    </p>
-    <p class="sub">
-      In the order you use it: put the head somewhere, choose a pen, commit, then watch.
-      §01 and §02 are <b>one decision</b> — a console ships one of them.
-    </p>
   </div>
 
   <h2>01 <span>/</span> The jog pad</h2>
@@ -84,40 +76,6 @@
     <div class="stage-note">newest at the tear edge · colour is the direction</div>
     <div id="port" class="box"></div>
     <div id="tape" class="box xwide"></div>
-  </div>
-
-  <h2>10 <span>/</span> The bill</h2>
-  <div class="bill">
-    <div class="card good">
-      <h3>Buys</h3>
-      <ul>
-        <li><b>The language survived a second app, mostly for free.</b> Fourteen of twenty-two
-            controls needed no new part. That is the only real test of a design language.</li>
-        <li><b>A guarded key is a safety property, not a style.</b> ABORT and DELETE LAYER are the
-            two irreversible things in targz and both are a red tint today. A cover cannot be hit by
-            accident, and it is eleven lines of CSS.</li>
-        <li><b>The annunciator is legible before anything is wrong.</b> You learn the panel while it
-            is dark.</li>
-        <li><b>Here, skeuomorphism is not a costume.</b> The plotter has a physical e-stop, physical
-            limit switches and a physical carriage.</li>
-        <li><b>The dark chassis stops being a problem.</b> A control app's job is a machine, not a
-            drawing, and it is looked at from across a room, late.</li>
-      </ul>
-    </div>
-    <div class="card bad">
-      <h3>Costs</h3>
-      <ul>
-        <li><b>A second copy of the kit.</b> <code>skew-kit.js</code> and the inline copy in
-            the layers document will not stay identical. One has to become the other's import.</li>
-        <li><b>The real app is Metro4 and jQuery.</b> This is its anatomy rebuilt, not a re-skin, so
-            adopting any of it means replacing the widget underneath first.</li>
-        <li><b>Space.</b> One DRO is bigger than the app's whole position strip.</li>
-        <li><b>It has to survive being wrong.</b> A bad hatch wastes paper. A mis-reported ALARM
-            costs a plot, a pen, or a gantry.</li>
-        <li><b>The mushroom is a lie unless it is wired.</b> If it does not stop the machine, it must
-            not look like the thing that does.</li>
-      </ul>
-    </div>
   </div>
 
   <footer>targz design system · skew · exploration 02 · skew-machine.html · read from TargzPenPlotterCtrl, which is unchanged</footer>

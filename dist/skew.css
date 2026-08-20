@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.69.1
+     at       Skew v1.70.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -13,9 +13,9 @@
    CARES ABOUT.
 
    An unlayered rule beats a layered one no matter what the specificity says.
-   So an app that has its own `.card`, `.row`, `.box`, `.key`, `.head`, `.page`
-   or `.wrap` — and every app has some of those — keeps its own, without
-   renaming anything and without a single `!important`.
+   So an app that has its own `.row`, `.box`, `.key`, `.head`, `.page` or
+   `.wrap` — and every app has some of those — keeps its own, without renaming
+   anything and without a single `!important`.
 
    It also disarms the trap this file's own notes describe three times over:
    `[data-skin=light] .sw` out-ranking `.sw.on`, a material rule silently
@@ -267,6 +267,11 @@ h2{
   padding-bottom:10px; border-bottom:1px solid #212327;
 }
 h2 span{ color:#3d4149; }
+/* `.sub` IS GONE. Twelve paragraphs across four pages introduced sections that
+   introduce themselves — a heading, then a specimen you can put your hands on,
+   with a sentence in between explaining what you were about to see. The
+   `.stage-note` on each specimen already says what it is, in six words, in the
+   place you are already looking. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE STAGE — a lit desk. The light comes from above-left and every bevel,
@@ -5289,21 +5294,11 @@ body.drawer-open .sliders i:nth-child(3),
 .hh-note{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
           text-shadow:0 1px 0 rgba(255,255,255,.08); }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   THE BILL — what the language costs. Read this before adopting anything.
-   ═══════════════════════════════════════════════════════════════════════════ */
-.bill{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; margin-top:26px; }
-.card{ border:1px solid #212327; border-radius:12px; padding:18px 20px;
-       background:linear-gradient(180deg,#141518,#0f1012); }
-.card.good{ border-color:rgba(124,255,176,.22); }
-.card.bad{ border-color:rgba(255,45,45,.22); }
-.card h3{ margin:0 0 12px; font-family:var(--font); font-size:10px; letter-spacing:.16em;
-          text-transform:uppercase; color:#7CFFB0; }
-.card.bad h3{ color:#FF8A8A; }
-.card ul{ margin:0; padding-left:17px; }
-.card li{ font-size:13px; line-height:1.65; color:#8b909a; margin-bottom:9px; }
-.card li b{ color:#c6cad1; font-weight:600; }
-.card li:last-child{ margin-bottom:0; }
+/* THE BILL IS GONE, AND SO IS `.bill`. Two pages ended in a pair of cards
+   listing what the language buys and what it costs — twelve bullets of prose
+   apiece, arguing in writing about parts that were live on the same screen a
+   scroll above. The specimen is the argument. A page that has just let you
+   press every control on it does not then need to tell you how they felt. */
 
 footer{ margin-top:80px; padding-top:22px; border-top:1px solid #1c1e22;
         font-family:var(--font); font-size:10.5px; color:#4a4e56; letter-spacing:.06em; }

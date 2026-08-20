@@ -1,6 +1,16 @@
-export const version = '1.69.1';
+export const version = '1.70.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.70.0',
+    date: '2026-08-19',
+    changes: [
+      'TWELVE PARAGRAPHS OF INTRODUCTION ARE GONE — every `.lede` and every `.sub` on all four documents. They introduced sections that introduce themselves: a heading, then a specimen you can put your hands on, with a sentence in between explaining what you were about to see. THE SPECIMEN IS THE ARGUMENT, which is the rule this site was built on and the one its own prose kept talking over. `.stage-note` already says what each specimen is, in six words, in the place you are already looking.',
+      'THE BILL IS GONE FROM BOTH PAGES, and `.bill` and `.card` with it. PANELS and MACHINE each ended in a pair of cards listing what the language buys and what it costs — twelve bullets of prose apiece, arguing in writing about parts that were live on the same screen a scroll above. A page that has just let you press every control on it does not then need to tell you how they felt.',
+      'PANELS ENDS AT 06 AND MACHINE AT 09, and nothing renumbered because the bill was last on both. The mastheads are a kicker and a name now: `skew · 02` over `Machine`, and then the machine.',
+      '`.card` COMES OUT OF THE `@layer` NOTE TOO. It was listed as a class an adopting app might own and collide with, which was true for exactly as long as this file defined one.',
+    ],
+  },
   {
     version: '1.69.1',
     date: '2026-08-19',

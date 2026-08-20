@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.69.1
+     at       Skew v1.70.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -3061,6 +3061,6 @@ function keyBank({ label, options, index = 0, cols, onChange }) {
 
 window.SkewKit = {
   el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, SFX, clicky,
-  VERSION: '1.69.1',
+  VERSION: '1.70.0',
 };
 })();

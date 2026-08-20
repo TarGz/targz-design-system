@@ -1,6 +1,27 @@
-export const version = '1.70.0';
+export const version = '1.71.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.71.1',
+    date: '2026-08-19',
+    changes: [
+      'FIX — THE HATCH SWATCH WAS A SPECK ON AN ACRE OF BLANK PAPER, because the AREA IS NOT THE DRAWING. `drawShape` builds a blob inside the millimetres it is handed and sizes it off the SHORT side, so a wide strip comes back with a small subject floating in the middle: 41 x 31 of ink in a 150 x 55 field, measured. Handing that to a viewBox of the full area frames the paper and not the drawing.',
+      'SO THE FRAME IS THE INK NOW. The viewBox is set from the path\'s own bounding box once it is in the document, which cannot be wrong whatever the generator decides to make — and it is MEASURED rather than assumed, which is what the first version got wrong. One frame late and invisible, because a swatch is a still picture and nothing has read it yet.',
+      'AND THE AREA IS SQUARE, 96 x 96. A blob is roughly as tall as it is wide, so asking for a strip only bought empty margin at both ends. 142 paths, and the pen comes out at half a percent of the frame width — a real 0.35mm nib on a 74mm drawing, which is what it would measure on paper.',
+    ],
+  },
+  {
+    version: '1.71.0',
+    date: '2026-08-19',
+    changes: [
+      'THE HOME PAGE LOADS THE KIT NOW, which it never could. Two classic scripts, one `const el`, and the second throws before it runs — so the page had its own copy of `el` and `svg`, byte for byte the kit\'s. The copies are gone and the kit\'s are used; the page\'s own three icons move to `HOME_ICON`, because those are its furniture and `ICON` is the language\'s. What that buys is previews built by the REAL FACTORIES rather than hand-copied snapshots of their markup.',
+      'SYSTEM SHOWS A KNOB AND A SLIDER. It was a strip of caps, and a row of caps says the kit can draw a button — which every kit can. The argument SYSTEM actually makes is §01: a QUANTITY gets 270° of travel and a lit arc, a LENGTH gets a track, and choosing between them is the whole design. Two controls say that. Five caps said nothing, and one of them was a chip reading EXPORT.',
+      'MACHINE SHOWS THE STICK. The DRO was the wrong choice twice over — a pair of green windows with numbers in them is what every machine app on earth has, and it is the part of MACHINE least worth crossing the page for. The stick is the one control on this site that is modelled HARDWARE: sixteen barrel slices under a tilting cap, in a socket, with a collar lapping its edge.',
+      'AND IT CROPS RATHER THAN SHRINKS. 216px of stick in a 140px window, running off the top and bottom of the frame — the same rule the other previews follow and the reason the reference works: an object photographed past the edge of the frame reads as an object, where one shrunk to fit inside it reads as an icon.',
+      'THE WINDOW GOES TO 140px, still one height for all four so the grid cannot stagger. It gives the knob room for its label and the stick enough of its barrel to read as a barrel.',
+      '`skew-machine.css` LOADS ON THE HOME PAGE for the stick alone. It is not built into dist/ because only a plotter panel wants it, and the MACHINE card is a plotter panel three inches wide.',
+    ],
+  },
   {
     version: '1.70.0',
     date: '2026-08-19',

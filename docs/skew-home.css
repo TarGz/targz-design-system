@@ -77,7 +77,7 @@
      ratio, would have set the height of the whole page. 112px clears the
      tallest specimen here (a tab strip over a lamp row, 97px with its padding)
      with room to spare. */
-  gap:9px; height:112px; padding:14px 12px;
+  gap:9px; height:140px; padding:14px 12px;
   border-radius:9px; border:1px solid #1e2024;
   background:
     radial-gradient(70% 60% at 28% 0%, rgba(255,255,255,.055), transparent 60%),
@@ -89,18 +89,23 @@
   background:#BEB5A3; color:#2b2b2b;
   border-color:rgba(0,0,0,.55); padding:0;
 }
-.prev-strip{ flex:0 0 auto; }
+/* SYSTEM: a quantity beside a length, which is §01's whole argument in two
+   objects. Both are the real factories, so this row is that section at a
+   smaller value rather than a picture of it. */
+.prev-rig{ display:flex; align-items:center; gap:18px; }
+.prev-rig .fader{ width:132px; }
 
 /* an app's row: the lamp, the name, the value — PANELS §01 at its own size */
 .prev-row{ display:flex; align-items:center; gap:10px; width:100%; }
 .prev-nm{ font-size:12px; color:#9aa0aa; }
 .prev-row .lcd{ margin-left:auto; }
 
-/* the DRO: an axis letter engraved beside its window */
-.prev-dro{ display:flex; gap:10px; justify-content:center; }
-.prev-ax{ display:flex; align-items:center; gap:7px; }
-.prev-axn{ font-family:var(--font); font-size:10px; letter-spacing:.16em; color:#5f656e; }
-.prev-ax .lcd{ min-width:82px; justify-content:flex-end; }
+/* MACHINE: the stick, at its own 216px inside a 140px window, so it runs off
+   the top and bottom of the frame. That is the point — an object photographed
+   past the edge of the frame reads as an object; one shrunk to fit inside it
+   reads as an icon. `flex:0 0 216px` would make the row 216 wide and shove the
+   crop sideways, so the flex sizing is taken off and the centring does it. */
+.prev-win .stick{ flex:0 0 auto; margin:0; cursor:default; }
 
 /* THE FILL IS INK ON PAPER, so the swatch is paper — the one preview that is
    not metal, because the one document it stands for is not about panels. */

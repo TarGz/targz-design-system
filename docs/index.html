@@ -6,6 +6,10 @@
 <title>Skew Design System</title>
 <link rel="stylesheet" href="../src/skew.css">
 <link rel="stylesheet" href="skew-home.css">
+<!-- THE STICK IS THE ONE PREVIEW THAT NEEDS A SECOND SHEET. skew-machine.css
+     is not built into dist/ because only a plotter panel wants it, and the
+     MACHINE card is a plotter panel three inches wide. -->
+<link rel="stylesheet" href="../src/skew-machine.css">
 </head>
 <body>
 <script src="skew-nav.js"></script>
@@ -14,6 +18,13 @@
      nothing with this page's own helpers, which is why it can load beside them
      where skew-kit.js cannot. -->
 <script src="../src/skew-hatch.js"></script>
+<!-- AND THE KIT ITSELF, so the previews are the REAL controls rather than a
+     hand-copied snapshot of their markup. It could not load here while this
+     page declared its own `el` and `svg` at the top level — two classic
+     scripts, one `const`, and the second one throws before it runs. The fix is
+     not a rename: the kit's helpers are the same two functions this page had
+     written out again, so the copies are gone and the kit's are used. -->
+<script src="../src/skew-kit.js"></script>
 
 <div class="wrap" id="main">
 
@@ -86,14 +97,11 @@
    nav bar reads, so the cards and the bar cannot disagree about what exists.
    ══════════════════════════════════════════════════════════════════════════ */
 
-const el = (tag, cls, html) => {
-  const n = document.createElement(tag);
-  if (cls) n.className = cls;
-  if (html != null) n.innerHTML = html;
-  return n;
-};
-const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
-const ICON = {
+/* `el` AND `svg` COME FROM THE KIT NOW — byte-for-byte the functions this page
+   used to declare for itself, which is exactly why it could never load the kit.
+   The icons below stay local under a name of their own: they are this page's
+   furniture, not the language's, and `ICON` is the kit's. */
+const HOME_ICON = {
   open:  svg('<path d="M5 12h13"/><polyline points="12 6 18 12 12 18"/>'),
   paper: svg('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/>'),
   box:   svg('<path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/>'),
@@ -121,7 +129,6 @@ const PAPERS = [
    for the language, an app's tab strip and switch, a plotter's readout, and a
    real fill off the real engine. ─────────────────────────────────────────── */
 const SW_ICON = svg('<polygon points="12 2 21 7 21 17 12 22 3 17 3 7 12 2"/><circle cx="12" cy="12" r="2.5"/>');
-const KEY_ICON = svg('<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>');
 
 function preview(file) {
   /* EVERY PREVIEW STANDS ON A STAGE, and it is the same stage every specimen
@@ -139,18 +146,23 @@ function preview(file) {
   const wrap = el('div', 'prev prev-win');
 
   if (file === 'skew-system.html') {
-    /* THE LANGUAGE IS ITS CAPS. A strip holding one of each state the kit can
-       be in — a key up, a switch lit, a chip, and a window with a number in
-       it — which is §01 through §04 in four objects. */
-    const strip = el('div', 'strip prev-strip');
-    strip.append(
-      el('button', 'key skirt', KEY_ICON),
-      el('button', 'sw on', SW_ICON),
-      el('span', 'chan'),
-      el('button', 'chip', 'EXPORT'),
-      el('div', 'lcd', '16844'),
+    /* A KNOB AND A SLIDER, because those are what the language IS. A row of
+       caps says the kit can draw a button, which every kit can — the argument
+       SYSTEM actually makes is §01: a quantity gets 270° of travel and a lit
+       arc, a length gets a track, and choosing between them is the whole
+       design. Two controls say that; five caps said nothing.
+
+       BUILT BY THE REAL FACTORIES, not copied out of them. `knob()` and
+       `fader()` off skew-kit.js, so the preview cannot drift from §01 by so
+       much as a pixel — it IS §01, at a smaller value. */
+    const rig = el('div', 'prev-rig');
+    rig.append(
+      knob({ label: 'ANGLE', min: 0, max: 360, step: 1, value: 214,
+             size: 46, fmt: v => v + '°' }),
+      fader({ label: 'INK', min: 0, max: 1, step: .01, value: .62,
+              fmt: v => v.toFixed(2) }),
     );
-    wrap.append(strip);
+    wrap.append(rig);
     return wrap;
   }
 
@@ -168,15 +180,40 @@ function preview(file) {
   }
 
   if (file === 'skew-machine.html') {
-    /* A PLOTTER IS A READOUT. The DRO is the first thing on MACHINE and the
-       one part of it that is true whatever the machine is doing. */
-    const dro = el('div', 'prev-dro');
-    [['X', '148.20'], ['Y', '96.55']].forEach(([ax, v]) => {
-      const cell = el('div', 'prev-ax');
-      cell.append(el('span', 'prev-axn', ax), el('div', 'lcd', v));
-      dro.append(cell);
-    });
-    wrap.append(dro);
+    /* THE STICK, BECAUSE THAT IS WHAT MACHINE LOOKS LIKE. The DRO was here and
+       it was the wrong choice: a pair of green windows with numbers in them is
+       what every machine app on earth has, and it is the part of MACHINE least
+       worth crossing the page for. The stick is the one control on this site
+       that is a piece of MODELLED HARDWARE — sixteen barrel slices under a
+       tilting cap, in a socket, with a collar lapping its edge.
+
+       IT IS 216px IN A WINDOW HALF THAT, AND IT CROPS RATHER THAN SHRINKS —
+       the same rule the other previews follow, and the reason the ref works:
+       an object photographed running off the edge of the frame reads as an
+       object, where one shrunk to fit inside it reads as an icon.
+
+       STATIC MARKUP, and it is the one preview that is. The stick is built
+       inline on skew-machine.html rather than by a factory, so there is
+       nothing to call — but nothing here is state either: `.stick` is an
+       assembly of empty spans and every line of it is geometry in
+       skew-machine.css. Restyle the part and this restyles with it. */
+    const SLICES = 16;
+    const st = el('div', 'stick');
+    const cap = el('div', 'stick-cap');
+    cap.append(
+      el('span', 'stick-body',
+         Array.from({ length: SLICES }, (_, i) => `<i style="--i:${i + 1}"></i>`).join('')),
+      el('span', 'stick-top',
+         '<span class="stick-face">'
+         + ['n', 'e', 's', 'w'].map(d => `<span class="stick-dot ${d}"></span>`).join('')
+         + '</span>'),
+    );
+    st.append(el('span', 'stick-seat'), el('span', 'stick-ball'),
+              el('span', 'stick-mouth'), el('span', 'stick-ring'), cap);
+    ['n', 'e', 's', 'w'].forEach(d => st.append(el('span', 'stick-ch ' + d)));
+    Object.entries({ n: 'Y+', s: 'Y−', w: 'X−', e: 'X+' })
+      .forEach(([d, t]) => st.append(el('span', 'stick-ax ' + d, t)));
+    wrap.append(st);
     return wrap;
   }
 
@@ -187,10 +224,19 @@ function preview(file) {
        Guarded: a card with no picture is a smaller card, and a card that
        throws takes the grid with it. */
     try {
-      /* DRAWN AT THE STAGE'S OWN PROPORTION, in real millimetres — 150 × 55 is
-         a strip of paper the shape of the window, so the fill fills it instead
-         of being letterboxed into it or cropped to a third of itself. */
-      const W = 150, H = 55;
+      /* THE AREA IS NOT THE DRAWING. `drawShape` builds a blob inside the
+         millimetres it is given and sizes it off the SHORT side, so a wide
+         strip comes back with a small subject floating in the middle of it —
+         41 × 31 of drawing in a 150 × 55 field, measured. Handed to a viewBox
+         of the full area that renders as a speck on an acre of blank paper,
+         which is exactly what it did.
+
+         SO THE FRAME IS THE INK, NOT THE PAPER: the viewBox is set from the
+         path's own bounding box once it is in the document, which cannot be
+         wrong whatever the generator decides to make. A square area too,
+         because a blob is roughly as tall as it is wide and asking for a strip
+         only bought empty margin. */
+      const W = 96, H = 96;
       const out = HANDS.drawShape('hand', W, H, 7, { nib: 0.35 });
       const ns  = 'http://www.w3.org/2000/svg';
       const s   = document.createElementNS(ns, 'svg');
@@ -212,6 +258,17 @@ function preview(file) {
       path.setAttribute('stroke-linecap', 'round');
       s.append(path);
       wrap.append(s);
+      /* MEASURED AFTER IT IS IN THE DOCUMENT, because `getBBox` on a detached
+         node is a browser-by-browser answer. One frame late and invisible: the
+         swatch is a still picture and nothing has read it yet. A hair of margin
+         so the outermost stroke is not sliced in half by the frame. */
+      requestAnimationFrame(() => {
+        const b = path.getBBox();
+        if (!b.width || !b.height) return;
+        const m = out.nib * 2;
+        s.setAttribute('viewBox',
+          `${b.x - m} ${b.y - m} ${b.width + m * 2} ${b.height + m * 2}`);
+      });
       return wrap;
     } catch { return null; }
   }
@@ -261,7 +318,7 @@ function preview(file) {
     body.append(el('p', 'doc-line', p.line));
 
     const foot = el('div', 'doc-foot');
-    const open = el('a', 'key act go doc-open', `<span class="lens"></span>OPEN${ICON.open}`);
+    const open = el('a', 'key act go doc-open', `<span class="lens"></span>OPEN${HOME_ICON.open}`);
     open.href = p.file;
     foot.append(open, el('span', 'tagcut doc-file', p.file));
     body.append(foot);
@@ -382,7 +439,7 @@ const CROPS = [];
 (function buildPapers() {
   const well = document.getElementById('papers');
   PAPERS.forEach(([file, name, line]) => {
-    const a = el('a', 'paper', `${ICON.paper}<b>${name}</b>`);
+    const a = el('a', 'paper', `${HOME_ICON.paper}<b>${name}</b>`);
     a.href = file;
     /* THE BADGE IS THE FILE'S NAME, NOT THE HREF. They stopped being the same
        thing when the pages moved into docs/ and the papers stayed at the repo
@@ -399,7 +456,7 @@ const CROPS = [];
       it look like a fourth destination. ─────────────────────────────────── */
 (function buildArchive() {
   const a = document.getElementById('archive');
-  const link = el('a', 'arch-link', `${ICON.box}<b>${SKEW_ARCHIVE.name}</b>`);
+  const link = el('a', 'arch-link', `${HOME_ICON.box}<b>${SKEW_ARCHIVE.name}</b>`);
   link.href = SKEW_ARCHIVE.file;
   link.append(el('span', null, SKEW_ARCHIVE.line), el('span', 'tagcut', SKEW_ARCHIVE.file));
   a.append(el('p', 'paper-lab', 'Archive'), link);

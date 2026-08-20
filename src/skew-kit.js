@@ -2362,6 +2362,413 @@ function appDock({
    one on a window says nothing, while an arrow says "go somewhere" and this goes
    nowhere — it is the same panel, bigger. Corners are the only mark that says
    EXTENT, which is the only thing that changes. */
+/* ══════════════════════════════════════════════════════════════════════════
+   THE ORBIT BALL — three rings, and each one is a rotation you can drag.
+
+   THE AXIS BALL IT REPLACES WAS A PICTURE WITH BUTTONS ON IT. Six nodes, one
+   per view, and pressing one snapped the camera there — which is a useful
+   control and also the exact job the six-key pad beside it already did. Two
+   parts for one question is one part too many, and the one that went is the
+   one that could not answer the OTHER question: what if the angle you want is
+   not one of the six.
+
+   A RING IS AN AXIS SEEN EDGE ON, and that is the whole idea. Each ring is the
+   great circle perpendicular to one axis, drawn in the object's own frame, so
+   the three of them together are a picture of where the object is pointing.
+   Grab one and the object turns about that axis — and the ring you are holding
+   does not move, because a circle rotated about its own axis is the same
+   circle. Only the other two swing, which is precisely the feedback you want:
+   the thing you grabbed stays under the finger and everything else reports.
+
+   FRONT AND BACK ARE DRAWN DIFFERENTLY OR IT IS A FLAT DOODLE. A great circle
+   projected orthographically is an ellipse, and an ellipse says nothing about
+   which half is nearer. Split at the sign of the projected z, draw the near
+   half bright and full-width and the far half thin and dim, and the same three
+   ellipses become a sphere. Nothing else here is doing the depth work — no
+   shading, no perspective, no occlusion.
+
+   AND EACH RING CARRIES AN ARROWHEAD, because a ring is symmetric and a
+   rotation is not. Without it, which way a drag will turn the object is a
+   thing you find out by trying it.
+
+   IT DRIVES THREE ANGLES, NOT A QUATERNION, and that is deliberate. The panel
+   this is built for stores yaw, pitch and roll and shows all three on knobs; a
+   gizmo that owned a quaternion would have to decompose it back into Euler
+   angles to keep those readouts honest, and would drift from them the first
+   time the decomposition picked the other equivalent triple. One ring, one
+   angle, one knob.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* `inv` IS THE PITCH RING AND ONLY THE PITCH RING. The right-hand rule about
+   +X tips the nose UP when the hand pulls DOWN, which is the sign every flight
+   stick and every 3D viewport has spent thirty years NOT using. Down is nose
+   down. Yaw and roll have no such convention to break — turning the hand the
+   way you want the object to turn is already what they do — so they are +1 and
+   the exception stays one number with a reason next to it. */
+const ORBIT_AX = [
+  { key: 'pitch', col: '#FF4A4A', lab: 'X', inv: -1 },  // ring in YZ — pitch
+  { key: 'yaw',   col: '#4ADE80', lab: 'Y', inv:  1 },  // ring in ZX — yaw
+  { key: 'roll',  col: '#5AA9FF', lab: 'Z', inv:  1 },  // ring in XY — roll
+];
+
+/* R = Ry(yaw) · Rx(pitch) · Rz(roll), written out rather than multiplied at
+   runtime: it is called on every pointermove of a drag and the three matrix
+   products are the same nine lines every time. */
+function orbitMat(yaw, pitch, roll) {
+  const D = Math.PI / 180;
+  const cy = Math.cos(yaw * D),   sy = Math.sin(yaw * D);
+  const cp = Math.cos(pitch * D), sp = Math.sin(pitch * D);
+  const cr = Math.cos(roll * D),  sr = Math.sin(roll * D);
+  return [
+    cy * cr + sy * sp * sr,  -cy * sr + sy * sp * cr,  sy * cp,
+    cp * sr,                  cp * cr,                -sp,
+   -sy * cr + cy * sp * sr,   sy * sr + cy * sp * cr,  cy * cp,
+  ];
+}
+/* ROTATION ABOUT AN ARBITRARY AXIS — Rodrigues, because the axis a drag turns
+   about is wherever that ring happens to be pointing right now, and that is
+   not one of the three the Euler angles are written in. */
+function orbitAxisMat(n, th) {
+  const c = Math.cos(th), s = Math.sin(th), t = 1 - c;
+  const [x, y, z] = n;
+  return [
+    t*x*x + c,    t*x*y - s*z,  t*x*z + s*y,
+    t*x*y + s*z,  t*y*y + c,    t*y*z - s*x,
+    t*x*z - s*y,  t*y*z + s*x,  t*z*z + c,
+  ];
+}
+const orbitMul = (a, b) => {
+  const o = new Array(9);
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++)
+    o[r*3+c] = a[r*3] * b[c] + a[r*3+1] * b[3+c] + a[r*3+2] * b[6+c];
+  return o;
+};
+/* AND BACK OUT TO THREE ANGLES, because the knobs hold three angles and a
+   matrix that cannot be read back is a matrix the readouts have to guess at.
+   The decomposition matches `orbitMat` term for term — Ry·Rx·Rz — so a round
+   trip is exact everywhere except the pole, where cos(pitch) is zero, yaw and
+   roll are the same rotation, and the split between them is arbitrary. There
+   the roll is handed to yaw and roll is zeroed, which is the conventional
+   choice and the only one that does not make the knobs jitter. */
+function orbitEuler(m) {
+  const D = 180 / Math.PI;
+  const sp = Math.max(-1, Math.min(1, -m[5]));
+  const cp = Math.sqrt(1 - sp * sp);
+  if (cp < 1e-6) return {
+    yaw: Math.atan2(-m[6], m[0]) * D, pitch: Math.asin(sp) * D, roll: 0,
+  };
+  return {
+    yaw:   Math.atan2(m[2], m[8]) * D,
+    pitch: Math.asin(sp) * D,
+    roll:  Math.atan2(m[3], m[4]) * D,
+  };
+}
+const orbitApply = (m, p) => [
+  m[0] * p[0] + m[1] * p[1] + m[2] * p[2],
+  m[3] * p[0] + m[4] * p[1] + m[5] * p[2],
+  m[6] * p[0] + m[7] * p[1] + m[8] * p[2],
+];
+
+/* (-180, 180], and the only place an angle is ever bounded in here. It is not
+   a limit — it is the same rotation written where a knob can read it.
+
+   NOT CALLED `wrap`, because the factory below already has one: its root
+   element. A helper shadowed by a div is a helper that throws the first time
+   anything calls it. */
+const wrapDeg = a => { a %= 360; return a > 180 ? a - 360 : a <= -180 ? a + 360 : a; };
+
+function orbit({ size = 132, yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
+  const NS   = 'http://www.w3.org/2000/svg';
+  const C    = size / 2;
+  const R    = size * 0.335;          // the sphere, well inside the box
+  const STEP = 72;                    // samples per ring
+  /* EVERYTHING IS A FRACTION OF THE BOX, and it has to be: a stroke fixed at
+     3.2px is right at 132 and a wire at 450. What makes these rings read as
+     rings is their weight AGAINST the sphere — about 3.6% of its diameter, the
+     same ratio a real gimbal has — so the weight is derived from `size` and not
+     typed. The constants below are the values measured at 132, divided by it. */
+  const W    = size * 0.0241;         // ring, near half
+  const HUB  = size * 0.0417;
+  const HD   = size * 0.0568;         // arrowhead, along the tangent
+  const HW   = size * 0.0348;         // …and across it
+  /* THE GRAB RADIUS DOES NOT SCALE WITH THE BOX. It is a property of the hand,
+     not of the drawing — a bigger ball has its rings further apart, so a pick
+     that grew with it would start claiming the ring you did not mean. It grows
+     a little, and stops. */
+  const GRAB = Math.max(13, size * 0.05);
+
+  const val = { yaw, pitch, roll };
+
+  const wrap = el('div', 'orbit');
+  wrap.style.width = wrap.style.height = size + 'px';
+
+  const s = document.createElementNS(NS, 'svg');
+  s.setAttribute('viewBox', `0 0 ${size} ${size}`);
+  s.setAttribute('class', 'orbit-svg');
+  wrap.style.setProperty('--ow', W.toFixed(2) + 'px');
+  wrap.append(s);
+
+  const mk = (tag, attrs) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+
+  /* THE SILHOUETTE IS NOT ONE OF THE RINGS. It is the sphere's outline — the
+     one circle that does not move, so the three that do have something to move
+     against. Without it a ball at 90° is two straight lines and a circle, and
+     nothing says which is which. */
+  s.append(mk('circle', { cx: C, cy: C, r: R, class: 'orbit-sil' }));
+
+  const layer = mk('g', {});
+  s.append(layer);
+  const hub = mk('circle', { cx: C, cy: C, r: HUB, class: 'orbit-hub' });
+  s.append(hub);
+
+  /* the ring points in the object's own frame, sampled once — the projection
+     changes on every drag, the geometry never does */
+  const RINGS = ORBIT_AX.map((_, k) =>
+    Array.from({ length: STEP + 1 }, (_, i) => {
+      const t = i / STEP * Math.PI * 2, c = Math.cos(t), n = Math.sin(t);
+      return k === 0 ? [0, c, n] : k === 1 ? [n, 0, c] : [c, n, 0];
+    }));
+  const AXV = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+
+  let proj = [];        // per axis: [{x, y, z}], screen space
+
+  function paint() {
+    const m = orbitMat(val.yaw, val.pitch, val.roll);
+    proj = RINGS.map(pts => pts.map(p => {
+      const v = orbitApply(m, p);
+      return { x: C + R * v[0], y: C - R * v[1], z: v[2] };
+    }));
+
+    layer.replaceChildren();
+    ORBIT_AX.forEach((ax, k) => {
+      const pts = proj[k];
+      /* SPLIT AT THE SIGN OF z AND DRAW THE TWO HALVES AS DIFFERENT OBJECTS.
+         One polyline with a gradient would be smoother and would also make the
+         far half look like the near half in fog; these are two distances, not
+         one fading edge. */
+      let run = [], front = pts[0].z >= 0;
+      const flush = () => {
+        if (run.length < 2) { run = []; return; }
+        layer.append(mk('polyline', {
+          points: run.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' '),
+          class: 'orbit-arc' + (front ? '' : ' back'),
+          stroke: ax.col,
+        }));
+        run = [];
+      };
+      pts.forEach(p => {
+        const f = p.z >= 0;
+        if (f !== front) { flush(); front = f; }
+        run.push(p);
+      });
+      flush();
+
+      /* THE HEAD IS GLUED TO THE RING, AT A FIXED POINT IN THE OBJECT'S FRAME.
+
+         IT USED TO CHASE THE NEAREST POINT — recomputed every frame as the
+         argmax of the projected z — on the reasoning that the nearest point is
+         the one place never edge-on and never behind. It is, and the reasoning
+         still cost the part its worst bug: as a ring comes face-on, every
+         point on it has very nearly the same z, so the argmax stops being a
+         position and becomes a coin toss between indices half a ring apart.
+         The arrow teleports, every frame, and the ball looks broken.
+
+         AN ARROW WITH NO FIXED HOME IS THE BUG, so it gets one. It sits at a
+         constant parameter on its own circle, which means it TURNS WITH THE
+         RING like a mark painted on it — no argmax, nothing to flicker, and it
+         now says which way the ring is going by moving that way. Half the time
+         it is on the far side, and that is not a problem to solve: it dims
+         exactly like the arc it sits on, which is the same depth language
+         already doing that work.
+
+         SPACED A THIRD APART so the three do not stack up on one crossing. */
+      const at = (k * STEP / 3) | 0;
+      const a = pts[(at - 2 + STEP) % STEP], b = pts[(at + 2) % STEP];
+      const ang = Math.atan2(b.y - a.y, b.x - a.x);
+      const P = pts[at], back = HD * 0.27;
+      const tip = [P.x + Math.cos(ang) * HD, P.y + Math.sin(ang) * HD];
+      const nx = -Math.sin(ang) * HW, ny = Math.cos(ang) * HW;
+      layer.append(mk('polygon', {
+        points: `${tip[0]},${tip[1]} ${P.x - Math.cos(ang) * back + nx},${P.y - Math.sin(ang) * back + ny}`
+              + ` ${P.x - Math.cos(ang) * back - nx},${P.y - Math.sin(ang) * back - ny}`,
+        class: 'orbit-head' + (pts[at].z < 0 ? ' back' : ''), fill: ax.col,
+      }));
+
+      /* the spoke — hub to the ring's own axis, so the three colours also read
+         as three DIRECTIONS and not only as three circles */
+      const v = orbitApply(m, AXV[k]);
+      layer.append(mk('line', {
+        x1: C, y1: C, x2: C + R * v[0], y2: C - R * v[1],
+        class: 'orbit-spoke' + (v[2] < 0 ? ' back' : ''), stroke: ax.col,
+      }));
+    });
+  }
+
+  /* WHICH RING DID THE POINTER GRAB — nearest sample wins, and near ones win
+     over far ones at the same distance, because where two rings cross on
+     screen the one in front is the one you were looking at. */
+  function pick(px, py) {
+    let best = -1, bd = GRAB;
+    proj.forEach((pts, k) => {
+      for (const p of pts) {
+        const d = Math.hypot(p.x - px, p.y - py) - (p.z >= 0 ? 2 : 0);
+        if (d < bd) { bd = d; best = k; }
+      }
+    });
+    return best;
+  }
+
+  /* ── THE DRAG IS AN ARCBALL, WHICH IS THE WHOLE FIX ────────────────────
+     THE FIRST TWO VERSIONS MEASURED AN ANGLE FROM THE HUB, and that is not a
+     hard control to tune, it is the wrong quantity. A screen angle about a
+     centre has a singularity AT the centre — two pixels across the middle is
+     most of a half turn — and no relationship at all to the surface the hand
+     thinks it is pushing. Damping it and halving it made a wrong number
+     smaller; it did not make it the right number.
+
+     SHOEMAKE'S ARCBALL (1992) IS THE RIGHT NUMBER. The pointer is projected
+     DOWN ONTO THE SPHERE, and a drag is the arc between two points on that
+     sphere — so the hand is pushing the ball's actual surface and the ball
+     turns exactly as far as the hand pushed it. There is no gain to tune,
+     because 1:1 on the surface is what a ball is.
+
+     HOLROYD'S SHEET IS WHY IT SURVIVES THE EDGE. A plain hemisphere has no
+     answer past the rim, so a pointer leaving the silhouette either clamps or
+     goes imaginary — and the rim is where the useful travel is. Inside r²/2 it
+     is the sphere; outside, a hyperbola with the same value and slope at the
+     join, so the surface never creases and the pointer can wander off the part
+     and come back.
+
+     AND THE CONSTRAINT IS A PROJECTION, NOT A CLAMP. A ring means "about this
+     axis": both sphere points are projected onto the plane PERPENDICULAR to it
+     and the signed angle between them about that axis is the rotation. Well
+     conditioned face-on and edge-on alike — the two cases the old screen angle
+     got worst. */
+  const project = (x, y) => {           // unit sphere, origin at the hub
+    const d = x * x + y * y;
+    return d <= 0.5 ? [x, y, Math.sqrt(1 - d)] : [x, y, 0.5 / Math.sqrt(d)];
+  };
+  /* the pointer in ball radii, which is the only unit any of this works in */
+  const ballPt = (e, r) => project(
+    (e.clientX - (r.left + r.width  / 2)) / (R * r.width  / size),
+    ((r.top + r.height / 2) - e.clientY) / (R * r.height / size),
+  );
+  const norm = v => {
+    const m = Math.hypot(v[0], v[1], v[2]);
+    return m < 1e-6 ? null : [v[0] / m, v[1] / m, v[2] / m];
+  };
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  /* v with its component along n removed — v as seen by someone looking down n */
+  const flatten = (v, n) => {
+    const k = dot(v, n);
+    return norm([v[0] - k * n[0], v[1] - k * n[1], v[2] - k * n[2]]);
+  };
+  /* the signed angle from a to b about n, and the sign is the cross product's
+     agreement with n — `acos` alone loses it and the ball turns one way only */
+  const signedAngle = (a, b, n) => {
+    const cx = a[1] * b[2] - a[2] * b[1];
+    const cy = a[2] * b[0] - a[0] * b[2];
+    const cz = a[0] * b[1] - a[1] * b[0];
+    return Math.atan2(cx * n[0] + cy * n[1] + cz * n[2],
+                      Math.max(-1, Math.min(1, dot(a, b))));
+  };
+
+  let held = -1, from = null, axis = null, base = null;
+
+  s.addEventListener('pointerdown', e => {
+    const r = s.getBoundingClientRect();
+    const k = pick((e.clientX - r.left) * size / r.width,
+                   (e.clientY - r.top) * size / r.height);
+    if (k < 0) return;
+    /* THE AXIS IS WHERE THAT RING IS POINTING NOW, in world space, and the
+       whole drag turns about that one axis. Read once, because rotating about
+       an axis leaves that axis alone — so the ring you are holding does not
+       move, and the ARROW PAINTED ON IT travels round under your hand, which
+       is the thing you grabbed and the thing that should respond.
+
+       MEASURED FROM WHERE THE DRAG STARTED, not accumulated frame to frame:
+       incremental sums drift, and a drag that ends where it began has to end
+       where it began. */
+    base = orbitMat(val.yaw, val.pitch, val.roll);
+    axis = norm(orbitApply(base, AXV[k]));
+    from = axis && flatten(ballPt(e, r), axis);
+    if (!axis || !from) { axis = from = base = null; return; }
+    held = k;
+    s.setPointerCapture(e.pointerId);
+    wrap.classList.add('turning');
+    wrap.dataset.ax = ORBIT_AX[k].lab;
+    e.preventDefault();
+  });
+
+  s.addEventListener('pointermove', e => {
+    if (held < 0) return;
+    const r = s.getBoundingClientRect();
+    const to = flatten(ballPt(e, r), axis);
+    /* THE POINTER IS ON THE AXIS ITSELF — no component in the plane, so no
+       angle to read. Hold, do not guess. */
+    if (!to) return;
+    const th = signedAngle(from, to, axis) * ORBIT_AX[held].inv;
+    /* TURNED ABOUT THE RING'S OWN AXIS AND THEN READ BACK AS THREE ANGLES.
+       Adding the angle straight onto one Euler term — which is what this did
+       before — is a rotation about one of the THREE AXES THE ANGLES ARE
+       WRITTEN IN, not about the ring, so the ring swung away from the hand and
+       the two you were not touching stayed put. Exactly backwards.
+
+       NO CLAMP, EVER: the decomposition returns (-180, 180] on its own, so the
+       ball turns forever in either direction and there is no edge to run into.
+       A rotation has no ends; only a knob does, and the knob is showing the
+       same angle written the other way round. */
+    Object.assign(val, orbitEuler(orbitMul(orbitAxisMat(axis, th), base)));
+    paint();
+    onChange && onChange({ ...val }, ORBIT_AX[held].key);
+  });
+
+  const drop = () => {
+    if (held < 0) return;
+    held = -1; from = axis = base = null;
+    wrap.classList.remove('turning');
+    delete wrap.dataset.ax;
+  };
+  s.addEventListener('pointerup', drop);
+  s.addEventListener('pointercancel', drop);
+
+  /* THE KEYBOARD GETS THE TWO IT CAN REACH. Arrows are yaw and pitch because
+     those are the two a pointer would reach for; roll takes shift, because a
+     control with three axes and four arrow keys has to leave one out and roll
+     is the one you set least. */
+  wrap.tabIndex = 0;
+  wrap.setAttribute('role', 'group');
+  wrap.setAttribute('aria-label', 'Orientation — drag a ring to turn');
+  wrap.addEventListener('keydown', e => {
+    /* DOWN IS LESS, the same sentence the drag makes — an arrow key that
+       disagreed with the hand would be the same control answering twice. */
+    const d = { ArrowRight: 1, ArrowLeft: -1, ArrowUp: 1, ArrowDown: -1 }[e.key];
+    if (d === undefined) return;
+    e.preventDefault();
+    const horiz = e.key === 'ArrowRight' || e.key === 'ArrowLeft';
+    const key = e.shiftKey ? 'roll' : horiz ? 'yaw' : 'pitch';
+    val[key] = wrapDeg(val[key] + d * (e.altKey ? 1 : 5));
+    paint();
+    onChange && onChange({ ...val }, key);
+  });
+
+  paint();
+  /* SILENT, like every other `.set` in this file: a host pushing a value in is
+     syncing, not turning the ball. */
+  wrap.set = (v = {}) => {
+    if (v.yaw   != null) val.yaw   = v.yaw;
+    if (v.pitch != null) val.pitch = v.pitch;
+    if (v.roll  != null) val.roll  = v.roll;
+    paint();
+    return wrap;
+  };
+  wrap.get = () => ({ ...val });
+  return wrap;
+}
+
 const WIN_ICON = {
   close:  svg('<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>'),
   reduce: svg('<line x1="6" y1="12" x2="18" y2="12"/>'),

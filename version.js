@@ -1,6 +1,78 @@
-export const version = '1.71.1';
+export const version = '1.75.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.75.0',
+    date: '2026-08-20',
+    changes: [
+      'THE RING YOU GRAB IS THE THING THAT RESPONDS NOW, which is what the spec has claimed since 1.72.0 and what the part has never once done. The drag added its angle straight onto one Euler term — and adding to an Euler term is a rotation about ONE OF THE THREE AXES THE ANGLES ARE WRITTEN IN, not about the ring. So the ring swung away from the hand and the two rings you were not touching sat still. Exactly backwards, and reported as such: "move the selected arrow, not the ball".',
+      'IT TURNS ABOUT THE RING\'S OWN AXIS IN WORLD SPACE (Rodrigues), read once at pointerdown because rotating about an axis leaves that axis alone. The ring holds still, the ARROW PAINTED ON IT travels round under the hand, and the other two swing. Measured: the held axis drifts 2.8e-17 — machine zero — and a 40° drag moves its arrow 40.0°.',
+      'WHICH MEANS A MATRIX IN THE MIDDLE AND THREE ANGLES OUT. 1.72.0 said "three angles, not a quaternion" and that was right about the INTERFACE and wrong about the interior: the axis a ring turns about is wherever that ring is pointing, and no Euler term names it. `orbitEuler` decomposes back, matching `orbitMat` term for term, so a round trip is exact — measured to 1e-6, including at 179°.',
+      'AND THE POLE IS ARBITRARY RATHER THAN WRONG. At pitch ±90° the cosine is zero and yaw and roll are the same rotation; the whole turn goes to yaw and roll is zeroed, which is the conventional choice and the only one that does not leave two knobs trading a value back and forth every frame. It returns 30 / 90 / 0, not NaN.',
+    ],
+  },
+  {
+    version: '1.74.1',
+    date: '2026-08-20',
+    changes: [
+      'FIX — THE ORBIT BALL\'S ARROWHEADS FLICKERED, and the cause was the reasoning that put them there. Each one chased the NEAREST point of its ring, recomputed every frame as the argmax of the projected z, on the grounds that the nearest point is the one place never edge-on and never behind. It is. But as a ring comes face-on every point on it has very nearly the same z, so the argmax stops being a position and becomes a coin toss between indices half a ring apart — and the arrow teleports, every frame.',
+      'AN ARROW WITH NO FIXED HOME IS THE BUG, SO IT GETS ONE. It sits at a constant parameter on its own circle now, which means it turns with the ring like a mark painted on it: no argmax, nothing to flicker, and it says which way the ring is going by moving that way. The three are spaced a third apart so they do not stack up on one crossing.',
+      'AND HALF THE TIME IT IS ON THE FAR SIDE, WHICH IS NOT A PROBLEM TO SOLVE. It dims to the same .30 the far half of an arc takes — the depth language already in the part, now applied to the one piece that was exempt from it because it had been guaranteed to face front.',
+    ],
+  },
+  {
+    version: '1.74.0',
+    date: '2026-08-20',
+    changes: [
+      'THE ORBIT BALL DRAG IS AN ARCBALL NOW, and the two versions before it were not badly tuned — they were the WRONG QUANTITY. Both measured a screen angle about the hub, which has a singularity AT the hub (two pixels across the middle is most of a half turn) and no relationship at all to the surface the hand thinks it is pushing. Damping it in 1.73.1 and halving the gain made a wrong number smaller. It did not make it the right number, and the part was reported unusable.',
+      'SHOEMAKE (1992) IS THE RIGHT NUMBER. The pointer is projected DOWN ONTO THE SPHERE and a drag is the arc between two points on that sphere, so the hand pushes the ball\'s actual surface and the ball turns exactly as far as it was pushed. There is no gain constant left to tune, because 1:1 on the surface is what a ball IS. Measured: half a radius of travel is 30°, which is asin(.5) rather than a number anybody picked.',
+      'HOLROYD\'S SHEET IS WHY IT SURVIVES THE EDGE. A plain hemisphere has no answer past the rim — a pointer leaving the silhouette either clamps or goes imaginary — and the rim is where the useful travel is. Inside r²/2 it is the sphere; outside, a hyperbola with the same value and slope at the join, so the surface never creases and the hand can wander off the part and come back. At the rim a drag reads 63°, at twice the radius 83°, approaching 90° and never reaching it.',
+      'AND THE CONSTRAINT IS A PROJECTION RATHER THAN A CLAMP. A ring means "about this axis": both sphere points are flattened onto the plane PERPENDICULAR to it and the signed angle between them about that axis is the rotation — well conditioned face-on and edge-on alike, which are the two cases the old screen angle got worst. The axis is read once at pointerdown and the whole drag is one angle against one reference: rotating about an axis leaves that axis alone, incremental sums drift, and a drag that ends where it began has to end where it began.',
+      'THE NUMBERS, BECAUSE THIS ONE HAD TO BE MEASURED RATHER THAN EYEBALLED: a two-pixel wobble at the hub used to be most of a half turn and is now 0.5°, against 0.4° for the same wobble out at the rim. The same hand movement means the same thing anywhere on the ball, which is the whole property the part was missing. A pointer sitting exactly on the axis returns no angle and the ball holds, rather than guessing.',
+    ],
+  },
+  {
+    version: '1.73.1',
+    date: '2026-08-20',
+    changes: [
+      'FIX — THE ORBIT BALL WAS OVER-SENSITIVE, AND THAT WAS GEOMETRY RATHER THAN TASTE. The drag is an angle measured from the hub, and AN ANGLE MEASURED FROM THE CENTRE IS WORTHLESS NEAR THE CENTRE: two pixels across the middle of the box is most of a half turn. Not a rare case either — it is what happens every time a ring is near edge on and its projection runs straight through the hub. The delta is damped by how far out the hand actually is, so the arithmetic stops claiming precision the geometry cannot give it.',
+      'AND THE GAIN IS HALF. 1:1 means dragging once around the ring spins the object once, which sounds right and is not: a ring is the widest circle on the part, so a hand travelling a comfortable few centimetres has already swept most of it.',
+      'NO ROTATION LIMIT, IN EITHER DIRECTION. It wraps — past 180° it comes back at -180° and keeps going, so the ball turns forever and there is no edge to run into. A rotation has no ends; only a knob does, and the knob is showing the same angle written the other way round. The value stops being rounded to whole degrees too: the ball holds fractions and the knob quantises to its own step for the window.',
+      'TWO BUGS CAUGHT ON THE WAY IN. The wrap helper was called `wrap`, which is what the factory already calls its own root element — a helper shadowed by a div is a helper that throws the first time anything calls it. And `damp` compared a pointer in CSS pixels against a radius in viewBox units, which agree only while nothing has scaled the box; `pick` already converts, and now so does this.',
+    ],
+  },
+  {
+    version: '1.73.0',
+    date: '2026-08-20',
+    changes: [
+      'THE ORBIT BALL GETS ITS THREE KNOBS, and they go both ways. Yaw, pitch and roll beside the ball on SYSTEM 12 — drag a ring and the knob follows, turn a knob and the ball follows. NEITHER IS THE MASTER: the state is, and both parts are views of it, which is the arrangement PANELS §03 already uses for the same three angles and the reason both carry `.set()`.',
+      'EVERYTHING STARTS AT 0, 0, 0. It opened at 34° / -22° / 0° to show the projection doing its work, which is a good picture and a bad default — a control you cannot tell you have not touched yet is a control with no home to compare against.',
+      'THE SEPARATE READOUT IS GONE. An `.lcd` printing the three numbers was one thing too many the moment three knobs arrived: three knobs already carry three windows, so it was the same three facts a third time.',
+      'AND THE SYNC NEEDS A FLAG, WHICH IS A BUG AND NOT A PATTERN. `knob.set(v)` is documented silent and is not — it suppresses the SFX and still fires `onChange`, which BUGS.md has had open for a while. Without a `syncing` guard, pushing a value into a knob calls straight back and pushes it out again; it terminates, because the ball\'s own `set` calls nothing, but it is a round trip per frame of a drag for no reason. The flag is the workaround the bug entry names and it deletes the day the bug is fixed.',
+    ],
+  },
+  {
+    version: '1.72.1',
+    date: '2026-08-20',
+    changes: [
+      'THE ORBIT BALL SPECIMEN IS THREE TIMES THE SIZE — 150 to 450 on SYSTEM 12. A part whose whole argument is that three ellipses read as a sphere needs to be big enough to read as one.',
+      'AND EVERY MEASUREMENT IN IT IS A FRACTION OF THE BOX NOW, which the first version got wrong: a stroke fixed at 3.2px is right at 132 and WIRE at 450. What makes a ring read as a ring is its weight against the sphere — about 3.6% of the diameter, the ratio a real gimbal has — so the weight, the hub, the arrowhead and the silhouette are all derived from `size` rather than typed. The factory publishes one number as `--ow` and the CSS takes its ratios off that.',
+      'THE GRAB RADIUS IS THE EXCEPTION AND STAYS NEARLY FIXED. It is a property of the hand, not of the drawing — a bigger ball has its rings further apart, so a pick that grew with the box would start claiming the ring you did not mean. It grows a little and stops.',
+    ],
+  },
+  {
+    version: '1.72.0',
+    date: '2026-08-20',
+    changes: [
+      'THE ORBIT BALL — three rings, and each one is a rotation you can drag. SYSTEM 12, live. Each ring is the great circle PERPENDICULAR to one axis, drawn in the object\'s own frame, so the three together are a picture of where the object is pointing. Grab one and the object turns about that axis — and the ring you are holding does not move, because a circle rotated about its own axis is the same circle. Only the other two swing, which is exactly the feedback wanted: what you grabbed stays under the finger and everything else reports.',
+      'FRONT AND BACK ARE DRAWN AS DIFFERENT OBJECTS OR IT IS A FLAT DOODLE. A great circle projected orthographically is an ellipse, and an ellipse says nothing about which half is nearer. Split at the sign of the projected z, draw the near half full width and the far half thin at .30, and the same three ellipses become a sphere. Nothing else in the part does the depth work — no shading, no perspective, no occlusion.',
+      'DOWN IS LESS. The right-hand rule about +X tips the nose UP when the hand pulls down, which is the sign every flight stick and every 3D viewport has spent thirty years not using. The pitch ring carries `inv:-1` and the other two do not — turning the hand the way you want the object to turn is already what yaw and roll do. The arrow keys say the same sentence, or the control would be answering twice.',
+      'AN AXIS POINTING AWAY TURNS THE OTHER WAY, and that is the one piece of sign work that makes or breaks the feel: without it, grabbing the FAR side of a ring makes the ball follow your hand backwards. Edge-on the sign is undefined rather than negative, so it falls to +1 rather than flipping.',
+      'AND EACH RING CARRIES AN ARROWHEAD, because a ring is symmetric and a rotation is not. It sits on the nearest point — the one place never edge-on and never behind — and takes the ring\'s own tangent there, so it turns with the ball rather than being pinned to a corner of the box.',
+      'THREE ANGLES, NOT A QUATERNION, deliberately. The panel this is built for stores yaw, pitch and roll and shows all three on knobs; a gizmo owning a quaternion would have to decompose it back to Euler to keep those readouts honest, and would drift the first time the decomposition picked the other equivalent triple. One ring, one angle, one knob.',
+      'PANELS CANNOT USE IT YET, AND THAT IS MEASURED RATHER THAN GUESSED. The viewport is where this belongs — it is what drives yaw, pitch and roll — but that page carries its own inline copy of the kit: 35 colliding top-level names, 30 of them byte-identical and FIVE ALREADY DIVERGED (`knob`, `rotary`, `rangeFader`, `engage`, `ENG`). It cannot load skew-kit.js beside them, so no new part reaches it until that copy becomes an import. The old MACHINE bill predicted this in one line; here are the numbers.',
+    ],
+  },
   {
     version: '1.71.1',
     date: '2026-08-19',

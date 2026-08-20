@@ -11,6 +11,24 @@ This file tracks known bugs in the repo. Keep it up to date so any agent working
 
 ## Open
 
+### PANELS carries a second copy of the kit, and five parts have already drifted
+
+`docs/skew-panels.html` has an inline copy of the kit rather than loading `src/skew-kit.js` —
+**35 colliding top-level names**. Measured: 30 are byte-identical, **5 have diverged** —
+`knob`, `rotary`, `rangeFader`, `engage`, `ENG`. So the page is running older versions of three
+controls than the ones the language documents, silently.
+
+**What it costs right now.** No new kit part can reach that page. The orbit ball (SYSTEM 12) was
+written for the viewport — it is what drives yaw, pitch and roll — and had to be mounted on SYSTEM
+instead, because a classic script cannot load beside 35 duplicate `const`s.
+
+**Fix.** Delete the 30 identical definitions from the inline script and load the kit; the 5 that
+diverged need a look first, since adopting the kit's versions is a visible change to how those
+controls behave on that page. `docs/index.html` was the same problem and took two deletions —
+this one is bigger but the same shape.
+
+`docs/skew-machine.html` already loads the kit, so it is only this one page.
+
 ### Clicking the OUTER FRAME of a `.piano` still does nothing
 
 The gutters BETWEEN keys are fixed — each key reaches half the gap through `.pkey::before`. The

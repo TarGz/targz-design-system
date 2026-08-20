@@ -686,7 +686,165 @@
     </tbody>
   </table>
 
-  <h2>12 <span>/</span> Traps</h2>
+  <h2>12 <span>/</span> The orbit ball</h2>
+  <div class="stage">
+    <div class="stage-note">live · grab a ring and turn it · shift-arrows roll</div>
+    <div style="display:flex;gap:52px;align-items:center;flex-wrap:wrap;justify-content:center">
+      <div id="orbitspec"></div>
+      <div id="orbitspec-knobs" class="knobcol"></div>
+    </div>
+  </div>
+  <table class="spec">
+    <thead><tr><th>Field</th><th>Contract</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>A ring is an axis seen edge on</td>
+        <td>Each ring is the great circle <b>perpendicular</b> to one axis, drawn in the object's
+            own frame — so the three together are a picture of where the object is pointing. Grab
+            one and the object turns about that axis: <b>the ring stays put and the arrow painted
+            on it travels round under your hand</b>, while the other two swing. What you grabbed is
+            what responds.</td>
+      </tr>
+      <tr class="trap">
+        <td>Turn about the ring, not about the angle that names it</td>
+        <td>The drag used to add its angle straight onto one Euler term, which is a rotation about
+            <b>one of the three axes the angles are written in</b> — not about the ring. So the
+            ring swung away from the hand and the two you were not touching sat still.
+            <b>Exactly backwards</b>, and the spec above claimed the opposite for two versions.
+            It turns about the ring's own axis in world space now (Rodrigues) and reads the result
+            back out as three angles. Measured: the held axis drifts <code>2.8e-17</code> — machine
+            zero — and a 40° drag moves its arrow 40°.</td>
+      </tr>
+      <tr class="trap">
+        <td>Front and back are different objects</td>
+        <td>A great circle projected orthographically is an <b>ellipse</b>, and an ellipse says
+            nothing about which half is nearer. Split at the sign of the projected z, draw the near
+            half full width and the far half thin at <code>.30</code>, and the same three ellipses
+            become a sphere. Nothing else here does the depth work — no shading, no perspective,
+            no occlusion. <b>Drawn as one polyline with a gradient it is a flat doodle.</b></td>
+      </tr>
+      <tr>
+        <td>Down is less</td>
+        <td>The right-hand rule about +X tips the nose <b>up</b> when the hand pulls down, which is
+            the sign every flight stick and every 3D viewport has spent thirty years not using. The
+            pitch ring carries <code>inv:-1</code> and the other two do not — turning the hand the
+            way you want the object to turn is already what yaw and roll do. The arrow keys say the
+            same sentence, or the control would answer twice.</td>
+      </tr>
+      <tr class="trap">
+        <td>An axis pointing away turns the other way</td>
+        <td>The sign of the drag is the sign of the axis's projected z. Without it, grabbing the
+            <b>far side</b> of a ring makes the ball follow your hand backwards — the single thing
+            that makes one of these feel broken. Edge-on the sign is undefined rather than
+            negative, so it falls to <code>+1</code> rather than flipping.</td>
+      </tr>
+      <tr>
+        <td>The head, and why each ring has one</td>
+        <td>A ring is symmetric and a rotation is not, so without an arrowhead which way a drag
+            turns the object is something you find out by trying it. It sits on the <b>nearest
+            point</b> of the ring — the one place never edge-on and never behind — and takes the
+            ring's own tangent there, so it turns with the ball instead of being pinned to a corner
+            of the box.</td>
+      </tr>
+      <tr>
+        <td>Three angles out, a matrix in the middle</td>
+        <td>The panel this is built for stores yaw, pitch and roll and shows all three on knobs, so
+            three angles is what it hands back — <code>onChange({yaw,pitch,roll}, key)</code>, and
+            <code>.set({…})</code> is silent like every other setter here. What it does <b>during</b>
+            a drag is a matrix, because the axis a ring turns about is wherever that ring is
+            pointing and that is not one of the three the angles are written in. The decomposition
+            matches <code>orbitMat</code> term for term, so a round trip is <b>exact</b> — measured
+            to 1e-6, including at 179°.</td>
+      </tr>
+      <tr class="trap">
+        <td>The pole is arbitrary, and picking is the job</td>
+        <td>At <code>pitch = ±90°</code> the cosine is zero, yaw and roll become <b>the same
+            rotation</b>, and the split between them is undefined rather than wrong. The whole turn
+            goes to yaw and roll is zeroed — the conventional choice, and the only one that does
+            not leave the two knobs trading a value back and forth every frame. It returns
+            <code>30 / 90 / 0</code> rather than <code>NaN</code>.</td>
+      </tr>
+      <tr class="trap">
+        <td>The cursor is on the box, not the ring</td>
+        <td>An SVG stroke is a hit area two pixels wide, and a <code>grab</code> cursor that only
+            appears once you are already on target is a cursor that never appears. The pick radius
+            is <b>13px</b> and near rings beat far ones where two cross on screen — the one in
+            front is the one you were looking at.</td>
+      </tr>
+      <tr>
+        <td>Not the axis ball</td>
+        <td>PANELS §03 carries a flat ball whose six nodes each snap to a view. That is a
+            <b>destination</b> picker and this is a <b>rotation</b>, and the six-key pad beside it
+            already does the snapping. This one answers the question neither can: what if the angle
+            you want is not one of the six.</td>
+      </tr>
+      <tr class="trap">
+        <td>The drag is an arcball, and the first two versions were the wrong quantity</td>
+        <td>They measured a <b>screen angle about the hub</b>. That is not a hard control to tune,
+            it is the wrong number: an angle about a centre has a <b>singularity at the centre</b>
+            — two pixels across the middle is most of a half turn — and no relationship at all to
+            the surface the hand thinks it is pushing. Damping it and halving it made a wrong
+            number smaller. <b>Shoemake's arcball</b> is the right number: the pointer is projected
+            down onto the sphere and a drag is the arc between two points on it, so the ball turns
+            exactly as far as the hand pushed it. There is no gain to tune, because 1:1 on the
+            surface is what a ball is. Measured: half a radius of travel is 30°, which is
+            <code>asin(.5)</code> and not a constant anybody chose.</td>
+      </tr>
+      <tr>
+        <td>Holroyd's sheet, past the rim</td>
+        <td>A plain hemisphere has no answer outside the silhouette — a pointer leaving it either
+            clamps or goes imaginary — and <b>the rim is where the useful travel is</b>. Inside
+            <code>r²/2</code> it is the sphere; outside, a hyperbola with the same value and slope
+            at the join, so the surface never creases and the hand can wander off the part and come
+            back. At the rim a drag reads 63°, at twice the radius 83°, approaching 90° and never
+            reaching it.</td>
+      </tr>
+      <tr>
+        <td>The constraint is a projection, not a clamp</td>
+        <td>A ring means <i>about this axis</i>: both sphere points are projected onto the plane
+            <b>perpendicular</b> to it, and the signed angle between them about that axis is the
+            rotation. Well conditioned face-on and edge-on alike — the two cases the old screen
+            angle got worst. The axis is read <b>once, at pointerdown</b>, and the whole drag is one
+            angle against one reference: rotating about an axis leaves that axis alone, incremental
+            sums drift, and a drag that ends where it began has to end where it began.</td>
+      </tr>
+      <tr>
+        <td>No limit, in either direction</td>
+        <td>It <b>wraps</b> — past 180° it comes back at −180° and keeps going, so the ball turns
+            forever and there is no edge to run into. A rotation has no ends; only a knob does, and
+            the knob is showing the same angle written the other way round. The value is not
+            rounded either: the ball holds fractions of a degree and the knob quantises to its own
+            <code>step</code> for the window.</td>
+      </tr>
+      <tr>
+        <td>The knobs are the readout</td>
+        <td>And they are the other way in. <b>Neither is the master</b> — the state is, and the
+            ball and the three knobs are both views of it, which is the arrangement PANELS §03 uses
+            for the same three angles and the reason both parts carry <code>.set()</code>. Drag a
+            ring and the knob follows; turn a knob and the ball follows. A separate
+            <code>.lcd</code> printing the three numbers was here first and was one thing too many:
+            three knobs already carry three windows.</td>
+      </tr>
+      <tr class="trap">
+        <td>The sync needs a flag, and that is a bug not a pattern</td>
+        <td><code>knob.set(v)</code> is documented silent and is not — it suppresses the SFX and
+            still fires <code>onChange</code> (BUGS.md). Without a <code>syncing</code> guard,
+            pushing a value into a knob calls straight back and pushes it out again. It terminates,
+            because the ball's own <code>set</code> calls nothing, but it is a round trip per frame
+            of a drag for no reason. <b>The flag deletes the day the bug is fixed.</b></td>
+      </tr>
+      <tr class="trap">
+        <td>PANELS cannot use it yet</td>
+        <td>That page carries its own inline copy of the kit — <b>35 colliding top-level names</b>,
+            30 byte-identical and <b>5 already diverged</b> (<code>knob</code>, <code>rotary</code>,
+            <code>rangeFader</code>, <code>engage</code>, <code>ENG</code>). It cannot load
+            <code>skew-kit.js</code> beside them, so no new part reaches it until that copy becomes
+            an import. Measured, not guessed.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>13 <span>/</span> Traps</h2>
   <table class="spec">
     <tbody>
       <tr class="trap">
@@ -1574,6 +1732,61 @@ document.getElementById('navspec').replaceWith(navBar({
   items: [{ nav: 'VIEW A' }, { nav: 'VIEW B' }, { nav: 'VIEW C' }],
   onSelect: (i, v) => { document.getElementById('navspec-out').textContent = v.nav; },
 }));
+
+/* ── 12 · THE ORBIT BALL SPECIMEN ─────────────────────────────────────────
+   THE KNOBS ARE THE READOUT, AND THEY ARE ALSO THE OTHER WAY IN. A lone `.lcd`
+   printing three numbers was here first and it was one thing too many: three
+   knobs already carry three windows, so the readout was the same three facts a
+   third time. It went.
+
+   NEITHER IS THE MASTER. `st` is, and the ball and the knobs are both views of
+   it — which is the arrangement PANELS §03 uses for the same three angles, and
+   the reason both parts carry `.set()`. Drag a ring, the knob follows; turn a
+   knob, the ball follows.
+
+   `syncing` IS NOT BELT AND BRACES, IT IS THE OPEN BUG. `knob.set(v)` is
+   documented to be silent and is not — it suppresses the SFX and still fires
+   `onChange` (see BUGS.md). Without the flag, pushing a value into a knob calls
+   back into this handler and pushes it straight back out. It terminates,
+   because the ball's own `set` does not call anything, but it is a round trip
+   per frame of a drag for no reason. The flag is the workaround the bug entry
+   names, and it deletes the day the bug is fixed. ────────────────────────── */
+(function orbitSpec() {
+  const st = { yaw: 0, pitch: 0, roll: 0 };
+  const knobs = {};          // filled below; the ball's handler only reads it
+                             // on a user drag, which cannot happen before then
+  let syncing = false;
+
+  const ball = orbit({
+    size: 450, yaw: st.yaw, pitch: st.pitch, roll: st.roll,
+    onChange: v => {
+      Object.assign(st, v);
+      if (syncing) return;
+      syncing = true;
+      knobs.yaw.set(v.yaw); knobs.pitch.set(v.pitch); knobs.roll.set(v.roll);
+      syncing = false;
+    },
+  });
+  document.getElementById('orbitspec').replaceWith(ball);
+
+  /* YAW, PITCH, ROLL — the order PANELS §03 prints them in, so the one part
+     that exists on two pages does not list its own axes two ways. */
+  const col = document.getElementById('orbitspec-knobs');
+  [['yaw', 'Yaw'], ['pitch', 'Pitch'], ['roll', 'Roll']].forEach(([k, label]) => {
+    knobs[k] = knob({
+      label, min: -180, max: 180, step: 1, bipolar: true, value: st[k],
+      fmt: v => `${Math.round(v)}°`,
+      onChange: v => {
+        st[k] = v;
+        if (syncing) return;
+        syncing = true;
+        ball.set({ [k]: v });
+        syncing = false;
+      },
+    });
+    col.append(knobs[k]);
+  });
+})();
 
 /* ── 09 · THE APP DOCK SPECIMEN ───────────────────────────────────────────
    THE REAL FACTORY, WITH THE HANDLERS REPLACED AND NOTHING ELSE. Every key,

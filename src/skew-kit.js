@@ -799,6 +799,27 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   // does the opposite — drag up to raise — but that is a fader's gesture
   // borrowed by a knob, and this panel has real faders for that.) Shift
   // divides the travel by five.
+  /* ── A DRAG ENDS ON `lostpointercapture`, NOT ON `pointerup` ─────────────
+     THE STUCK KNOB. Every drag in this file captured the pointer and then
+     waited for `pointerup` to let go, and a pointerup is NOT GUARANTEED TO
+     ARRIVE. Release over the browser's own chrome, drag off the window and let
+     go, alt-tab away mid-turn, open a context menu, or have the panel rebuild
+     the control under your hand — in every one of those the capture ends and
+     no pointerup is delivered. `pointercancel` does not cover them either; it
+     is for the browser taking the gesture away, not for the gesture ending
+     somewhere the element cannot see.
+
+     So the control keeps its `dragging` flag AND its capture, which is the
+     worst possible pair: it still owns every pointermove on the page, so the
+     knob goes on turning with the mouse after you have let go of it.
+
+     `lostpointercapture` FIRES WHENEVER CAPTURE ENDS, FOR ANY REASON — the
+     implicit release at pointerup, the element being removed, the browser
+     dropping it, the window losing focus. It cannot be missed, which is
+     exactly what an end-of-drag needs to be. pointerup and pointercancel stay:
+     they arrive first in the ordinary case and the handler is idempotent, so
+     the sound and the state land at the moment you release rather than a tick
+     later. This is the rule for every capturing control in this file. */
   let sx = 0, sy = 0, sv = 0;
   k.addEventListener('pointerdown', e => {
     k.setPointerCapture(e.pointerId); k.classList.add('dragging');
@@ -812,6 +833,7 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   const end = () => k.classList.remove('dragging');
   k.addEventListener('pointerup', end);
   k.addEventListener('pointercancel', end);
+  k.addEventListener('lostpointercapture', end);
   k.addEventListener('wheel', e => {
     e.preventDefault();
     set(v + Math.sign(e.deltaY) * step * (e.shiftKey ? 1 : 10));
@@ -905,10 +927,11 @@ function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
     track.setPointerCapture(e.pointerId); track.dataset.on = '1'; SFX.grab(); fromX(e, true);
   });
   track.addEventListener('pointermove', e => { if (track.dataset.on) fromX(e, false); });
-  track.addEventListener('pointerup', () => {
-    if (track.dataset.on) SFX.drop();
-    delete track.dataset.on;
-  });
+  // see the note on the knob: capture can end without a pointerup
+  const fEnd = () => { if (track.dataset.on) SFX.drop(); delete track.dataset.on; };
+  track.addEventListener('pointerup', fEnd);
+  track.addEventListener('pointercancel', fEnd);
+  track.addEventListener('lostpointercapture', fEnd);
 
   [capA, capB].forEach((c, n) => {
     c.tabIndex = 0;
@@ -1035,10 +1058,11 @@ function fader({ label, min, max, step = 0.01, value, fmt, mode = 'level',
     track.setPointerCapture(e.pointerId); track.dataset.on = '1'; SFX.grab(); fromXY(e);
   });
   track.addEventListener('pointermove', e => { if (track.dataset.on) fromXY(e); });
-  track.addEventListener('pointerup', () => {
-    if (track.dataset.on) SFX.drop();
-    delete track.dataset.on;
-  });
+  // see the note on the knob: capture can end without a pointerup
+  const rEnd = () => { if (track.dataset.on) SFX.drop(); delete track.dataset.on; };
+  track.addEventListener('pointerup', rEnd);
+  track.addEventListener('pointercancel', rEnd);
+  track.addEventListener('lostpointercapture', rEnd);
   track.addEventListener('wheel', e => {
     e.preventDefault(); set(v - Math.sign(e.deltaY) * (e.shiftKey ? step : (max - min) / 40));
   }, { passive: false });
@@ -1225,7 +1249,11 @@ function openPicker(anchor, value, onChange, swatches) {
     fieldEl.setPointerCapture(e.pointerId); fieldEl.dataset.on = '1'; fromXY(e);
   });
   fieldEl.addEventListener('pointermove', e => { if (fieldEl.dataset.on) fromXY(e); });
-  fieldEl.addEventListener('pointerup', () => delete fieldEl.dataset.on);
+  // see the note on the knob: capture can end without a pointerup
+  const pEnd = () => delete fieldEl.dataset.on;
+  fieldEl.addEventListener('pointerup', pEnd);
+  fieldEl.addEventListener('pointercancel', pEnd);
+  fieldEl.addEventListener('lostpointercapture', pEnd);
 
   // EDITABLE IN PLACE. `typing` stops the field writing over the box you are
   // in the middle of typing into — the classic two-way-binding cursor jump.
@@ -1423,6 +1451,7 @@ function drum({ options, index = 0, label, onChange }) {
   const end = () => { on = false; };
   grip.addEventListener('pointerup', end);
   grip.addEventListener('pointercancel', end);
+  grip.addEventListener('lostpointercapture', end);
   /* the wheel still works over the whole thing — a scroll is not a grab, and
      nobody aims a trackpad at a 24px strip */
   grip.addEventListener('wheel', e => win.dispatchEvent(new WheelEvent('wheel', e)),
@@ -1682,7 +1711,11 @@ function rotary({ options, index, onChange, compact = false }) {
     // printed in — the gesture, the rotation and the reading all agree
     set(si + Math.round((e.clientY - sy) / 26));
   });
-  knob.addEventListener('pointerup', () => knob.classList.remove('dragging'));
+  // see the note on the knob: capture can end without a pointerup
+  const kEnd = () => knob.classList.remove('dragging');
+  knob.addEventListener('pointerup', kEnd);
+  knob.addEventListener('pointercancel', kEnd);
+  knob.addEventListener('lostpointercapture', kEnd);
   knob.addEventListener('keydown', e => {
     if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); set(i + 1); }
     if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); set(i - 1); }
@@ -2398,16 +2431,34 @@ function appDock({
    time the decomposition picked the other equivalent triple. One ring, one
    angle, one knob.
    ══════════════════════════════════════════════════════════════════════════ */
-/* `inv` IS THE PITCH RING AND ONLY THE PITCH RING. The right-hand rule about
-   +X tips the nose UP when the hand pulls DOWN, which is the sign every flight
-   stick and every 3D viewport has spent thirty years NOT using. Down is nose
-   down. Yaw and roll have no such convention to break — turning the hand the
-   way you want the object to turn is already what they do — so they are +1 and
-   the exception stays one number with a reason next to it. */
+/* NO PER-AXIS SIGN, AND THE ONE THAT WAS HERE WAS FIGHTING THE MODEL.
+
+   The pitch ring carried `inv:-1`, added back when a drag was an angle bolted
+   onto an Euler term: the right-hand rule about +X tips the nose UP when the
+   hand pulls DOWN, and that is the sign no flight stick and no 3D viewport has
+   used in thirty years. Correct then.
+
+   IT STOPPED BEING CORRECT WHEN THE DRAG BECAME AN ARCBALL. The whole promise
+   of that model is that the point you grabbed goes where your hand goes — and
+   a sign flip is exactly the instruction to send it the OTHER way. The red
+   ring's arrow was running backwards out from under the pointer while the
+   other two followed it, which is the thing that got reported.
+
+   So there is no sign to carry. All three rings follow the hand, because that
+   is what an arcball is, and the keyboard states its own convention separately
+   below where a key press has no hand to agree with. */
+/* RED ON X AFTER ALL, AND THE ORANGE THAT SAT HERE FOR ONE VERSION LOST TO A
+   COLLISION IT MADE ITSELF. The argument for orange was sound in the abstract
+   — red already means fault on this panel, orange is the language's own accent
+   and separates further from the green and the blue. Then the caps became
+   wells with coloured floors, one of them red, and the ball had an orange ring
+   crossing an orange-adjacent body over a red hole. Red/green/blue is what
+   every 3D viewport uses and the eye arrives already knowing it; spending that
+   to avoid a clash, and buying a worse clash, is a bad trade twice. */
 const ORBIT_AX = [
-  { key: 'pitch', col: '#FF4A4A', lab: 'X', inv: -1 },  // ring in YZ — pitch
-  { key: 'yaw',   col: '#4ADE80', lab: 'Y', inv:  1 },  // ring in ZX — yaw
-  { key: 'roll',  col: '#5AA9FF', lab: 'Z', inv:  1 },  // ring in XY — roll
+  { key: 'pitch', col: '#FF4A4A', lab: 'X' },   // ring in YZ — pitch
+  { key: 'yaw',   col: '#4ADE80', lab: 'Y' },   // ring in ZX — yaw
+  { key: 'roll',  col: '#5AA9FF', lab: 'Z' },   // ring in XY — roll
 ];
 
 /* R = Ry(yaw) · Rx(pitch) · Rz(roll), written out rather than multiplied at
@@ -2476,64 +2527,450 @@ const orbitApply = (m, p) => [
    anything calls it. */
 const wrapDeg = a => { a %= 360; return a > 180 ? a - 360 : a <= -180 ? a + 360 : a; };
 
-function orbit({ size = 132, yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
-  const NS   = 'http://www.w3.org/2000/svg';
+/* THREE SIZES, NAMED, AND A NUMBER STILL WORKS.
+
+   A PART WITH A FREE `size` HAS NO SIZE. Every adopter picks its own, they all
+   land a few pixels apart, and the one thing a shared language is for — that
+   the same control is the same control in two apps — is the first thing lost.
+   Three is what this needs: one that fits a knob row, one for a panel that has
+   room, and one for a page that is ABOUT the orientation.
+
+   THEY ARE 1 : 1.5 : 2 off the small one, which is the only ratio that matters
+   here — the graticule and the ring weight are fractions of the box, so a step
+   has to be big enough to be a decision rather than a nudge. `sm` is the
+   default because a control that has to be asked for is a control that gets
+   forgotten at the size it was prototyped at. */
+const ORBIT_SIZE = { sm: 132, md: 198, lg: 264 };
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE MAP — the ball's material, drawn once, flat.
+
+   EVERY MARK ON THIS BALL USED TO BE A STROKE, and that is why the junction
+   between the black body and the coloured cap never looked like anything but
+   a line: it WAS a line. Three concentric circles with opacities on them. No
+   surface, nothing with a normal, nothing that could darken because of the way
+   it happens to be tilted. Six versions went into adjusting the width and the
+   softness of a drawn line, and every one of them produced a better-drawn
+   line.
+
+   SO THE MATERIAL IS A MAP AND THE BALL IS RENDERED. Equirectangular, latitude
+   down and longitude across, which is the flat sheet the sphere is wrapped in
+   — the same thing a globe's paper gores are. It is drawn once with ordinary
+   2D calls, and then every pixel of the ball asks it what it is made of.
+
+   TWO CHANNELS, AND THE SECOND ONE IS THE WHOLE POINT. The first is colour:
+   one dark plastic throughout, the graticule, and the three rings.
+   The second is SLOPE — how far the surface tilts at that point, in latitude.
+   Flat everywhere except the two grooves, where it runs down one wall and up
+   the other. The renderer bends the normal by it, so the groove's walls face
+   different directions and take different amounts of light: one is bright and
+   one is dark, from one lamp, because that is what a channel cut in a solid
+   does. Nothing is painted dark. The dark is a consequence.
+   ══════════════════════════════════════════════════════════════════════════ */
+const TEX_W = 2048, TEX_H = 1024;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE CAPS ARE HOLES, AND A HOLE IS A SHAPE RATHER THAN A LINE.
+
+   THEY USED TO BE A STROKE. Two dark lines round the ball at ±75°, blurred
+   into the height sheet so the bump map put a bevel on each side of them —
+   which is a GROOVE: body, a channel, body again. But there is no body beyond
+   the top of this one. What is up there is a different material and a
+   different level, and a groove cannot say that, because a groove is symmetric
+   and a step is not. It read as a line drawn round the ball, because it was.
+
+   SO THE CAP IS SUNK. One lip at CAP_LAT, one wall CAP_WALL degrees deep, then
+   a floor at CAP_DEEP below the ball's own radius, all the way to the pole.
+   And nothing is drawn on it — no ring, no graticule, no seam. Where the body
+   ends is told by the hole, and a line along the top of a hole is a line
+   repeating what the hole already said.
+
+   AND IT IS TRACED RATHER THAN FAKED. A bump map moves no surface: it lies to
+   the lamp about which way a pixel faces and leaves the pixel exactly where it
+   was, so a recess drawn that way never occludes, never shifts as the ball
+   turns, and looks like paint the moment you drag it. The renderer marches the
+   view ray down onto the sunk surface instead — cheap here because the profile
+   is a function of LATITUDE and nothing else, so the object-space y along the
+   ray is LINEAR in the ray parameter and a step costs one square root. The
+   ball's own equatorial band pays nothing at all: if the ray meets the sphere
+   above the lip, the sphere is the surface there and there is nothing to
+   march.
+   ══════════════════════════════════════════════════════════════════════════ */
+const CAP_LAT  = 75;         // the lip — where the body stops
+const CAP_DEEP  = 0.064;     // how far the floor sits below the rim, in radii
+/* 86°, AND THE FLOOR'S WIDTH IS WHY. A hole on the pole of a sphere, written
+   as r(lat), CANNOT have parallel sides — its floor's radius is `r·cos(lat)`
+   and both factors shrink on the way down, so it always converges somewhat.
+   What is controllable is how much LATITUDE the wall spends getting there, and
+   at 80° it was spending a degree of it: the floor came out three quarters of
+   the mouth's width and read as a funnel. At 86° the wall spends a fifth of a
+   degree, and what is left of the taper is the sphere's own. */
+const CAP_STAND = 86;        // degrees the wall stands off the surface
+/* THE CORNER RADIUS, AND IT IS A RADIUS RATHER THAN A WIDTH.
+
+   THE FIRST ROUNDING WAS A PARABOLA AND IT MEASURED THE WRONG THING. Its
+   fillet was one pixel WIDE, which sounded like the brief and was not it: a
+   parabola's curvature is tightest at its vertex, so the corner it puts on an
+   80° wall has an actual radius of about a fifth of a pixel and the remaining
+   four fifths of the pixel are spent nearly straight. It read as sharp because
+   it was sharp — the width was in the flat part.
+
+   SO THE CORNER IS A CIRCULAR ARC, specified the way a machinist specifies
+   one: a radius. At `lg` this is one pixel of it, and the arc's horizontal
+   extent falls out at about a fifth of that, because a rounding on a wall that
+   steep is mostly a VERTICAL feature. Both corners get the same radius — the
+   lip at the top and where the wall meets the floor. */
+const CAP_ROUND = 0.0082;    // in ball radii — one pixel at `lg`
+
+const CAP_ANG = (90 - CAP_LAT) * Math.PI / 180;   // the rim, as a half-angle
+const S_LIP   = Math.sin(CAP_LAT * Math.PI / 180);
+
+/* ── THE SECTION: ARC, DROP, ARC ─────────────────────────────────────────────
+   THE BAND IS NOT CHOSEN ANY MORE, IT IS SOLVED FOR. It used to be the input —
+   "the wall takes N degrees of latitude" — which is the one number nobody has
+   an opinion about. What you have an opinion about is how deep the hole is,
+   how square the wall stands and how sharp the corner is; how wide the band
+   ends up is arithmetic. Three inputs that mean something, and the fourth
+   derived, rather than four that have to be kept consistent by hand.
+
+   IT IS SPECIFIED IN ARC AND SAMPLED IN SIN(LAT). Arc is what a radius means
+   and what a pixel measures; sin(lat) is what a normalised point hands over
+   for free, and an `asin` in the march would be the most expensive thing in
+   the loop. `CAP_K` converts. The band is 1.6° wide and cos(lat) moves 10%
+   across it — a twentieth of a pixel on the corner — so one constant does it.
+   ─────────────────────────────────────────────────────────────────────────── */
+const CAP_K  = Math.cos(CAP_LAT * Math.PI / 180);
+const CAP_TW = Math.tan(CAP_STAND * Math.PI / 180);
+const CAP_U1 = CAP_ROUND * Math.sin(CAP_STAND * Math.PI / 180) * CAP_K;  // arc spent on the lip corner
+const CAP_Y1 = CAP_ROUND * (1 - Math.cos(CAP_STAND * Math.PI / 180));    // depth  spent on it
+const CAP_U2 = CAP_U1 + (CAP_DEEP - 2 * CAP_Y1) / CAP_TW * CAP_K;        // where the straight run ends
+const CAP_U3 = CAP_U2 + CAP_U1;                                          // and the floor begins
+const S_FLOOR = S_LIP + CAP_U3;
+
+/* THE PROFILE, AND THE ONLY DESCRIPTION OF IT THE GEOMETRY USES.
+
+   FIVE DEGREES OF WALL WAS A DISH, NOT A HOLE — a slope of about nine degrees
+   off the surface, a saucer pressed into the ball. A hole is a wall you could
+   set a square against. */
+function capSink(s) {
+  const u = (s < 0 ? -s : s) - S_LIP;
+  if (u <= 0) return 0;
+  if (u >= CAP_U3) return CAP_DEEP;
+  if (u <= CAP_U1) {                                   /* the lip's corner */
+    const x = u / CAP_K;
+    return CAP_ROUND - Math.sqrt(CAP_ROUND * CAP_ROUND - x * x);
+  }
+  if (u >= CAP_U2) {                                   /* the floor's corner */
+    const x = (CAP_U3 - u) / CAP_K;
+    return CAP_DEEP - CAP_ROUND + Math.sqrt(CAP_ROUND * CAP_ROUND - x * x);
+  }
+  return CAP_Y1 + (u - CAP_U1) * CAP_TW / CAP_K;       /* the wall itself */
+}
+/* AND ITS DERIVATIVE, WHICH IS THE WALL'S NORMAL AND HAS TO BE EXACT.
+
+   A BUMP MAP CANNOT DRAW AN EDGE THIS STEEP. It was doing the job while the
+   wall was a dish — the cap was a ramp painted into the height sheet, the
+   renderer differentiated it, and over five degrees there were twenty-eight
+   texels to differentiate ACROSS. Stand the wall up and the same feature is a
+   handful of texels under a five-pixel blur, which is not a steep slope, it is
+   a smeared one. Every version of that trade is a choice between mush and a
+   stair.
+
+   SO THE WALL IS DIFFERENTIATED IN CLOSED FORM INSTEAD. This is a surface of
+   revolution, r = r(lat) and nothing else, whose normal is exactly
+   `ê_r − (r'/r)·ê_lat` — no sampling, no blur, and as near vertical as the
+   profile says with no resolution to run out of. The height sheet goes back to
+   being about the RINGS, which is the one thing on this ball that genuinely is
+   a shallow relief. */
+function capSlope(s) {              // d(sink)/d(sin lat), signed by hemisphere
+  const u = (s < 0 ? -s : s) - S_LIP;
+  if (u <= 0 || u >= CAP_U3) return 0;
+  let d;
+  if (u <= CAP_U1 || u >= CAP_U2) {
+    const x = (u <= CAP_U1 ? u : CAP_U3 - u) / CAP_K;
+    const w = CAP_ROUND * CAP_ROUND - x * x;
+    d = x / CAP_K / Math.sqrt(w > 1e-14 ? w : 1e-14);
+  } else d = CAP_TW / CAP_K;
+  return s < 0 ? -d : d;
+}
+
+const TY = lat => (90 - lat) / 180 * TEX_H;
+const TX = lon => (lon + 180) / 360 * TEX_W;
+
+const RING_PX = 26;
+/* THREE MERIDIAN LONGITUDES, NOT TWO, AND THE THIRD IS THE SEAM. A meridian
+   pair at 0° draws at x = TEX_W/2 and x = 0 — and the one at 0 is half a
+   stroke, because the other half belongs to x = TEX_W, which is off the sheet.
+   Everything downstream wraps its lookups, so that meridian sampled a ring
+   half the width of the other two, on one side only. */
+const tMerid = (c, a) => {
+  c.beginPath();
+  for (const lon of [a, a - 180, a + 180]) { c.moveTo(TX(lon), 0); c.lineTo(TX(lon), TEX_H); }
+  c.stroke();
+};
+const tEquat = c => { c.beginPath(); c.moveTo(0, TY(0)); c.lineTo(TEX_W, TY(0)); c.stroke(); };
+/* THE THREE RINGS ARE STRAIGHT LINES HERE, because they are the coordinate
+   great circles: the ring perpendicular to Y is the equator, and the ones
+   perpendicular to X and Z are meridian pairs a quarter turn apart. */
+const RING_DRAW = [
+  c => tMerid(c, 90),   // X · pitch
+  tEquat,               // Y · yaw
+  c => tMerid(c, 0),    // Z · roll
+];
+
+const texSheet = () => {
+  const cv = document.createElement('canvas');
+  cv.width = TEX_W; cv.height = TEX_H;
+  return [cv, cv.getContext('2d')];
+};
+/* EVERYTHING INBOARD OF THE LIP, which is the only place anything is drawn */
+const bandClip = c => {
+  c.beginPath();
+  c.rect(0, TY(CAP_LAT), TEX_W, TY(-CAP_LAT) - TY(CAP_LAT));
+  c.clip();
+};
+
+/* ── THE MATERIAL ────────────────────────────────────────────────────────────
+   COLOUR AND SURFACE, BUILT ONCE. Neither depends on which ring is held any
+   more — that moved into the ink mask below, which is a tenth of the work —
+   so the two expensive sheets are built on the first paint and never again. */
+let orbitBase = null;
+
+function orbitMaterial() {
+  if (orbitBase) return orbitBase;
+
+  /* ── COLOUR ──────────────────────────────────────────────────────────────
+     LIGHTER THAN IT WAS. The body was #0e1013, which is a black that has
+     nowhere to go: the shading multiplies it, so a near-black base means the
+     lit side is dark grey and the dark side is a hole. A plastic that reads as
+     plastic has to have some value in it for the lamp to take away. */
+  const [, g] = texSheet();
+  /* ONE MATERIAL, AND THE CAPS STOPPED BEING A DIFFERENT ONE. They were an
+     orange moulding at the top and a bone one at the bottom — which made sense
+     while they were CAPS, parts fitted onto a body, and stopped making any
+     the moment they became holes. A hole is not a component, it is an absence,
+     and it is made of whatever the thing it is cut into is made of. Painting
+     the inside of it a second colour is the same mistake as drawing a line
+     round the top of it: a mark saying what the shape already says. */
+  g.fillStyle = '#20252b'; g.fillRect(0, 0, TEX_W, TEX_H);
+  /* THE FLOOR OF EACH WELL IS THE SAME PLASTIC IN RED. Not a light and not a
+     coating — a moulding, which is why it is a fill on this sheet like every
+     other material and takes the lamp, the rim's cast shadow and the well's
+     occlusion exactly as the body does. It stops where the WALL stops: the
+     wall is body-coloured all the way down, so what you see down a hole is a
+     dark bore with a coloured bottom, and how much of that bottom you see is
+     the angle you are looking from. Paint the wall too and the hole becomes a
+     coloured dish with no depth to read.
+
+     AND THE TWO ARE DIFFERENT COLOURS, WHICH IS THE ONLY THING ON THIS BALL
+     THAT TELLS TOP FROM BOTTOM. Everything else is symmetric — the body, the
+     graticule, all three rings — so a ball turned upside down is a ball you
+     cannot tell is upside down. Red up, white down, and the pole you are
+     looking at is a fact rather than an inference. */
+  const FLOOR_LAT = Math.asin(S_FLOOR) * 180 / Math.PI;
+  g.fillStyle = '#c8301f'; g.fillRect(0, 0, TEX_W, TY(FLOOR_LAT));
+  g.fillStyle = '#d5d9df'; g.fillRect(0, TY(-FLOOR_LAT), TEX_W, TEX_H - TY(-FLOOR_LAT));
+
+  g.save(); bandClip(g);
+  g.strokeStyle = 'rgba(198,214,236,.13)'; g.lineWidth = 4;
+  for (let lon = -180; lon < 180; lon += 22.5) {
+    g.beginPath(); g.moveTo(TX(lon), 0); g.lineTo(TX(lon), TEX_H); g.stroke();
+  }
+  for (let lat = -60; lat <= 60; lat += 15) {
+    g.beginPath(); g.moveTo(0, TY(lat)); g.lineTo(TEX_W, TY(lat)); g.stroke();
+  }
+  g.lineWidth = RING_PX; g.lineCap = 'butt';
+  RING_DRAW.forEach((draw, k) => { g.strokeStyle = ORBIT_AX[k].col; draw(g); });
+  g.restore();
+  const col = g.getImageData(0, 0, TEX_W, TEX_H).data;
+
+  /* ── HEIGHT ──────────────────────────────────────────────────────────────
+     The rings stand a little proud of the body and the caps step down into it;
+     the renderer differentiates this sheet and bends the normal by the result,
+     so every boundary gets a bevel that catches the lamp on one side and loses
+     it on the other.
+
+     THE CAP IS NOT IN HERE ANY MORE. It was — a ramp and a floor drawn in the
+     same numbers `capSink` uses — and that worked while the wall was a dish
+     five degrees wide, which is twenty-eight texels to differentiate across.
+     The wall is 0.8° now, which is four texels under a five-pixel blur, and no
+     amount of tuning gets a vertical edge out of that. Its normal is solved in
+     closed form instead (`capSlope`), and this sheet is left doing the one job
+     it is actually good at: the rings, which really are a shallow relief.
+
+     AND IT IS BLURRED AFTERWARDS RATHER THAN WHILE DRAWING, because a canvas
+     filter applies per call, and a bevel is the blur: a step edge
+     differentiates to one infinitely-steep texel and reads as a hard line,
+     where a few texels of spread is a chamfer with a width. */
+  const [hc, h] = texSheet();
+  h.fillStyle = '#808080'; h.fillRect(0, 0, TEX_W, TEX_H);
+  h.save(); bandClip(h);
+  h.strokeStyle = '#9c9c9c'; h.lineWidth = RING_PX; h.lineCap = 'butt';
+  RING_DRAW.forEach(draw => draw(h));
+  h.restore();
+
+  const [, hb] = texSheet();
+  if ('filter' in hb) hb.filter = 'blur(5px)';
+  hb.drawImage(hc, 0, 0);
+  const hraw = hb.getImageData(0, 0, TEX_W, TEX_H).data;
+  const hgt = new Float32Array(TEX_W * TEX_H);
+  for (let i = 0, j = 0; i < hgt.length; i++, j += 4) hgt[i] = hraw[j] / 255;
+
+  orbitBase = { col, hgt };
+  return orbitBase;
+}
+
+/* ── INK — HOW MUCH OF THE LAMP EACH RING IS ALLOWED TO REFUSE ───────────────
+   A COLOURED ARC THAT TAKES THE SHADING LIKE THE PLASTIC DOES GOES GREY. It
+   went dark round the back, it went muddy under the socket's rim shadow, and
+   the drag highlight knocked the two rings you were not holding down to .30 on
+   top of all that — so the one thing on this ball that has to stay READABLE at
+   every attitude was the one thing the lighting was allowed to eat. Three
+   separate temperings on the same three marks.
+
+   SO THE RINGS ARE AN INLAY THAT GLOWS A LITTLE. This sheet says which texels
+   are ring and how strongly, and the renderer lifts those pixels' light toward
+   a floor instead of multiplying them down to nothing. The lift is
+   PROPORTIONAL rather than flat, so the bevel the height sheet gives them
+   still reads — a ring is still a moulded thing with a lit edge — but its
+   colour never drops out of the drawing.
+
+   AND HOLDING ONE LIFTS IT FURTHER RATHER THAN KNOCKING THE OTHERS DOWN.
+   Saying something about the third ring by taking light away from the two that
+   are not the message is a message written in the wrong place.
+
+   THIS IS THE ONLY SHEET THAT DEPENDS ON `held`, and it is a mask rather than
+   a material: one channel, blurred, no colour to build. Which is why the two
+   expensive ones above are built once. */
+const orbitInkCache = new Map();
+
+function orbitInk(held) {
+  const key = String(held);
+  if (orbitInkCache.has(key)) return orbitInkCache.get(key);
+  const [kc, k] = texSheet();
+  k.fillStyle = '#000'; k.fillRect(0, 0, TEX_W, TEX_H);
+  k.save(); bandClip(k);
+  k.lineWidth = RING_PX; k.lineCap = 'butt';
+  RING_DRAW.forEach((draw, i) => {
+    const v = held < 0 ? 200 : i === held ? 255 : 175;
+    k.strokeStyle = `rgb(${v},${v},${v})`;
+    draw(k);
+  });
+  k.restore();
+  const [, kb] = texSheet();
+  if ('filter' in kb) kb.filter = 'blur(3px)';
+  kb.drawImage(kc, 0, 0);
+  const kraw = kb.getImageData(0, 0, TEX_W, TEX_H).data;
+  const ink = new Float32Array(TEX_W * TEX_H);
+  for (let i = 0, j = 0; i < ink.length; i++, j += 4) ink[i] = kraw[j] / 255;
+  orbitInkCache.set(key, ink);
+  return ink;
+}
+
+function orbitTexture(held) {
+  const { col, hgt } = orbitMaterial();
+  return { col, hgt, ink: orbitInk(held) };
+}
+
+function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
+  size = ORBIT_SIZE[size] || +size || ORBIT_SIZE.sm;
   const C    = size / 2;
-  const R    = size * 0.335;          // the sphere, well inside the box
-  const STEP = 72;                    // samples per ring
-  /* EVERYTHING IS A FRACTION OF THE BOX, and it has to be: a stroke fixed at
-     3.2px is right at 132 and a wire at 450. What makes these rings read as
-     rings is their weight AGAINST the sphere — about 3.6% of its diameter, the
-     same ratio a real gimbal has — so the weight is derived from `size` and not
-     typed. The constants below are the values measured at 132, divided by it. */
-  const W    = size * 0.0241;         // ring, near half
-  const HUB  = size * 0.0417;
-  const HD   = size * 0.0568;         // arrowhead, along the tangent
-  const HW   = size * 0.0348;         // …and across it
-  /* THE GRAB RADIUS DOES NOT SCALE WITH THE BOX. It is a property of the hand,
-     not of the drawing — a bigger ball has its rings further apart, so a pick
-     that grew with it would start claiming the ring you did not mean. It grows
-     a little, and stops. */
+  /* THE BOX IS THE HOLE. This part used to draw its own round faceplate with
+     the socket sunk into the middle of it, which meant every panel adopting it
+     got a disc of somebody else's metal pasted onto its own — and a plate on a
+     plate reads as a boss, not as a cut. What is left is the cut itself: the
+     collar's knife line at the very edge of the box, then socket wall, then
+     ball. The plate is whatever it is set into, which is the host's. */
+  const R    = size * 0.465;
+  const STEP = 72;                    // ring samples, for the pick only
+  const W    = size * 0.0241;
   const GRAB = Math.max(13, size * 0.05);
 
   const val = { yaw, pitch, roll };
 
   const wrap = el('div', 'orbit');
   wrap.style.width = wrap.style.height = size + 'px';
-
-  const s = document.createElementNS(NS, 'svg');
-  s.setAttribute('viewBox', `0 0 ${size} ${size}`);
-  s.setAttribute('class', 'orbit-svg');
   wrap.style.setProperty('--ow', W.toFixed(2) + 'px');
-  wrap.append(s);
+  wrap.style.setProperty('--osc', (size / 216).toFixed(4));
 
-  const mk = (tag, attrs) => {
-    const n = document.createElementNS(NS, tag);
-    for (const k in attrs) n.setAttribute(k, attrs[k]);
-    return n;
-  };
+  /* THE SOCKET, AND IT IS THE STICK'S SOCKET WITH THE STICK TAKEN OUT. Seat
+     under, mouth and collar over — the collar sits at the CUT IN THE PLATE and
+     not at the ball's rim, because a machined edge is a plate that stops and a
+     sphere never stops. Everything inboard of it is tone only. */
+  wrap.append(el('div', 'orbit-seat'));
+  const cv = el('canvas', 'orbit-cv');
+  wrap.append(cv, el('div', 'orbit-mouth'), el('div', 'orbit-collar'));
 
-  /* THE SILHOUETTE IS NOT ONE OF THE RINGS. It is the sphere's outline — the
-     one circle that does not move, so the three that do have something to move
-     against. Without it a ball at 90° is two straight lines and a circle, and
-     nothing says which is which. */
-  s.append(mk('circle', { cx: C, cy: C, r: R, class: 'orbit-sil' }));
+  /* ── THE RASTER ──────────────────────────────────────────────────────────
+     THE ONLY WAY A JUNCTION LOOKS REAL IS IF IT IS SHADED BY ITS OWN SHAPE,
+     and that means a pixel at a time. Every pixel inside the silhouette is a
+     point on a sphere, and on a UNIT sphere the point is its own normal — the
+     one piece of luck this part has had throughout. So there is no geometry to
+     intersect and no depth to sort: turn the pixel into a direction, ask the
+     map what is painted there, bend the normal by the map's slope, and light
+     it.
 
-  const layer = mk('g', {});
-  s.append(layer);
-  const hub = mk('circle', { cx: C, cy: C, r: HUB, class: 'orbit-hub' });
-  s.append(hub);
+     THE GEOMETRY IS PRECOMPUTED BECAUSE IT NEVER CHANGES. Which pixels are
+     inside the disc, and what direction each one faces, are properties of the
+     BOX and not of the rotation. They are worked out once at construction; a
+     drag only re-runs the lighting.
 
-  /* the ring points in the object's own frame, sampled once — the projection
-     changes on every drag, the geometry never does */
-  const RINGS = ORBIT_AX.map((_, k) =>
-    Array.from({ length: STEP + 1 }, (_, i) => {
-      const t = i / STEP * Math.PI * 2, c = Math.cos(t), n = Math.sin(t);
-      return k === 0 ? [0, c, n] : k === 1 ? [n, 0, c] : [c, n, 0];
-    }));
-  const AXV = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+     AND THE LIGHT IS ROTATED, NOT THE SPHERE. Turning every pixel's normal
+     into world space would be a matrix multiply per pixel per frame; turning
+     the lamp into the object's space is one multiply per frame, and then the
+     whole loop happens in the frame the map is written in. Same answer,
+     fifty thousand times less arithmetic. */
+  /* 1.5×, NOT THE SCREEN'S, AND THAT IS A MEASUREMENT RATHER THAN A TASTE.
+     A repaint is one pass over every pixel inside the disc, and the disc grows
+     with the square of the ratio: at `lg` it is 4.6ms at 1× and about 18 at
+     2×, which is over a frame for ONE ball before anything else on the page
+     has done anything. 1.5 keeps the edges from stepping and lands near 10ms,
+     and the marks on this thing are shaded gradients rather than hairlines —
+     the one kind of drawing that loses least to a softer pixel. */
+  const DPR = Math.min(1.5, (typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1);
+  const PX  = Math.round(size * DPR);
+  cv.width = cv.height = PX;
+  cv.style.width = cv.style.height = size + 'px';
+  const ctx = cv.getContext && cv.getContext('2d');
+  const img = ctx && ctx.createImageData(PX, PX);
 
-  let proj = [];        // per axis: [{x, y, z}], screen space
+  /* per-pixel: the index into the bitmap, and the view-space normal */
+  const IDX = [], NX = [], NY = [], NZ = [], VIG = [];
+  {
+    const rr = R * DPR;
+    for (let py = 0; py < PX; py++) {
+      const y = (PX / 2 - py - .5) / rr;
+      for (let px = 0; px < PX; px++) {
+        const x = (px + .5 - PX / 2) / rr;
+        const d2 = x * x + y * y;
+        if (d2 >= 1) continue;
+        IDX.push((py * PX + px) * 4);
+        NX.push(x); NY.push(y); NZ.push(Math.sqrt(1 - d2));
+        /* THE SOCKET STEALS LIGHT FROM EVERY SIDE AT ONCE — not directional
+           like the lamp, so the outer few millimetres go dark whichever way
+           you look. It is what dissolves the ball's edge into the socket wall
+           rather than leaving it cut out against it. */
+        const q = Math.sqrt(d2);
+        VIG.push(q < .80 ? 1 : 1 - .62 * ((q - .80) / .20) ** 1.6);
+      }
+    }
+  }
+  const N = IDX.length;
+
+  /* the lamp, and the one every other part on this site is lit by */
+  const LAMP = [-0.32, 0.50, 0.805];
+  /* LESS SHINE AND MORE FLOOR. The specular was at .30 with a tight exponent,
+     which is a wet look — a moulded plastic has a broad soft sheen rather than
+     a glint, and at this size a glint reads as a bright dot stuck to the
+     glass. Ambient comes up to match: the dark side of a solid in a room is
+     lit by the room. */
+  const AMB = 0.34, DIF = 0.66, SPEC = 0.11, SHINE = 12;
+  /* how far a step in the height sheet bends the normal — the bevel's ANGLE,
+     where the blur that made it was its width */
+  const BUMP = 3.4;
+
+  let held = -1;
+  let proj = [];        // ring samples in screen space, for the pick
 
   function paint() {
     const m = orbitMat(val.yaw, val.pitch, val.roll);
@@ -2541,80 +2978,276 @@ function orbit({ size = 132, yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
       const v = orbitApply(m, p);
       return { x: C + R * v[0], y: C - R * v[1], z: v[2] };
     }));
+    if (!img) return;
 
-    layer.replaceChildren();
-    ORBIT_AX.forEach((ax, k) => {
-      const pts = proj[k];
-      /* SPLIT AT THE SIGN OF z AND DRAW THE TWO HALVES AS DIFFERENT OBJECTS.
-         One polyline with a gradient would be smoother and would also make the
-         far half look like the near half in fog; these are two distances, not
-         one fading edge. */
-      let run = [], front = pts[0].z >= 0;
-      const flush = () => {
-        if (run.length < 2) { run = []; return; }
-        layer.append(mk('polyline', {
-          points: run.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' '),
-          class: 'orbit-arc' + (front ? '' : ' back'),
-          stroke: ax.col,
-        }));
-        run = [];
-      };
-      pts.forEach(p => {
-        const f = p.z >= 0;
-        if (f !== front) { flush(); front = f; }
-        run.push(p);
-      });
-      flush();
+    const { col, hgt, ink } = orbitTexture(held);
+    /* m is orthonormal, so the inverse is the transpose — into object space */
+    const lx = m[0] * LAMP[0] + m[3] * LAMP[1] + m[6] * LAMP[2];
+    const ly = m[1] * LAMP[0] + m[4] * LAMP[1] + m[7] * LAMP[2];
+    const lz = m[2] * LAMP[0] + m[5] * LAMP[1] + m[8] * LAMP[2];
+    /* ── THE EYE GOES THE SAME WAY THE LAMP DOES, AND IT WAS GOING THE OTHER ──
+       Both halves of a specular term have to be in the frame the normal is in,
+       and the normal here is in the OBJECT's. The lamp is carried there by the
+       transpose, three lines up — the eye was being carried by the matrix
+       itself. `(m2, m5, m8)` is M·ẑ, the ball's own z-axis written in view
+       space; what this needs is Mᵀ·ẑ, the VIEWER written in the ball's space,
+       which is `(m6, m7, m8)`.
 
-      /* THE HEAD IS GLUED TO THE RING, AT A FIXED POINT IN THE OBJECT'S FRAME.
+       AT REST THE TWO ARE THE SAME COLUMN, which is exactly why it survived:
+       every check was made on a ball sitting at zero. Turn it and they diverge,
+       the half-vector swings with the rotation, and the sheen crawls across the
+       surface as though the lamp were bolted to the ball. One character each in
+       two places, and the highlight now stays where the room's light is. */
+    let hx = lx + m[6], hy = ly + m[7], hz = lz + m[8];
+    const hm = Math.hypot(hx, hy, hz) || 1;
+    hx /= hm; hy /= hm; hz /= hm;
 
-         IT USED TO CHASE THE NEAREST POINT — recomputed every frame as the
-         argmax of the projected z — on the reasoning that the nearest point is
-         the one place never edge-on and never behind. It is, and the reasoning
-         still cost the part its worst bug: as a ring comes face-on, every
-         point on it has very nearly the same z, so the argmax stops being a
-         position and becomes a coin toss between indices half a ring apart.
-         The arrow teleports, every frame, and the ball looks broken.
+    const out = img.data;
+    const wrapC = c => c < 0 ? c + TEX_W : c >= TEX_W ? c - TEX_W : c;
+    const clampR = r => r < 0 ? 0 : r >= TEX_H ? TEX_H - 1 : r;
 
-         AN ARROW WITH NO FIXED HOME IS THE BUG, so it gets one. It sits at a
-         constant parameter on its own circle, which means it TURNS WITH THE
-         RING like a mark painted on it — no argmax, nothing to flicker, and it
-         now says which way the ring is going by moving that way. Half the time
-         it is on the far side, and that is not a problem to solve: it dims
-         exactly like the arc it sits on, which is the same depth language
-         already doing that work.
+    for (let i = 0; i < N; i++) {
+      let vx = NX[i], vy = NY[i], vz = NZ[i];
 
-         SPACED A THIRD APART so the three do not stack up on one crossing. */
-      const at = (k * STEP / 3) | 0;
-      const a = pts[(at - 2 + STEP) % STEP], b = pts[(at + 2) % STEP];
-      const ang = Math.atan2(b.y - a.y, b.x - a.x);
-      const P = pts[at], back = HD * 0.27;
-      const tip = [P.x + Math.cos(ang) * HD, P.y + Math.sin(ang) * HD];
-      const nx = -Math.sin(ang) * HW, ny = Math.cos(ang) * HW;
-      layer.append(mk('polygon', {
-        points: `${tip[0]},${tip[1]} ${P.x - Math.cos(ang) * back + nx},${P.y - Math.sin(ang) * back + ny}`
-              + ` ${P.x - Math.cos(ang) * back - nx},${P.y - Math.sin(ang) * back - ny}`,
-        class: 'orbit-head' + (pts[at].z < 0 ? ' back' : ''), fill: ax.col,
-      }));
+      /* ── DOWN THE RAY, INTO THE HOLE ─────────────────────────────────────
+         The pixel starts on the ball's own surface, which is where it ends up
+         for nine tenths of them: above the lip the sphere IS the surface and
+         there is nothing to look for. Below it the surface has moved inward,
+         so the ray keeps going.
 
-      /* the spoke — hub to the ring's own axis, so the three colours also read
-         as three DIRECTIONS and not only as three circles */
-      const v = orbitApply(m, AXV[k]);
-      layer.append(mk('line', {
-        x1: C, y1: C, x2: C + R * v[0], y2: C - R * v[1],
-        class: 'orbit-spoke' + (v[2] < 0 ? ' back' : ''), stroke: ax.col,
-      }));
-    });
+         AND THE WHOLE MARCH IS ONE SQUARE ROOT A STEP, because the profile
+         depends on latitude alone. Object-space y is a linear function of the
+         ray parameter — the ray only moves in view z — so `oyA + oyB·t` is
+         exact at every step with no matrix multiply, and the only real
+         arithmetic is turning the point into a radius. Sixteen steps to find
+         the crossing, six bisections to place it — a wall 0.8° wide is 0.014
+         of arc, and a bracket landing anywhere in it has to be squeezed well
+         under that or the sharp edge comes back as a stair. This lands at
+         2.7e-4, a twentieth of the wall. */
+      const oyA = m[1] * vx + m[4] * vy, oyB = m[7];
+      if ((oyA + oyB * vz) * (oyA + oyB * vz) > S_LIP * S_LIP) {
+        const rho = vx * vx + vy * vy;
+        let above = vz, hit = null;
+        for (let st = 1; st <= 16; st++) {
+          const t = vz - CAP_DEEP * 4 * st / 16;
+          const q = Math.sqrt(rho + t * t);
+          if (q > 1) break;                    /* out through the far rim */
+          if (q <= 1 - capSink((oyA + oyB * t) / q)) { hit = t; break; }
+          above = t;
+        }
+        if (hit !== null) {
+          for (let st = 0; st < 6; st++) {
+            const t = (above + hit) * .5;
+            const q = Math.sqrt(rho + t * t);
+            if (q <= 1 - capSink((oyA + oyB * t) / q)) hit = t; else above = t;
+          }
+          const q = Math.sqrt(rho + hit * hit) || 1;
+          vx /= q; vy /= q; vz = hit / q;
+        }
+      }
+
+      const ox = m[0] * vx + m[3] * vy + m[6] * vz;
+      const oy = m[1] * vx + m[4] * vy + m[7] * vz;
+      const oz = m[2] * vx + m[5] * vy + m[8] * vz;
+
+      const lat = Math.asin(oy > 1 ? 1 : oy < -1 ? -1 : oy);
+      const lon = Math.atan2(oz, ox);
+      const cla = Math.cos(lat);
+
+      /* ── FILTERED, AND THE POLE IS WHY ────────────────────────────────────
+         Nearest-neighbour was showing every texel edge on the rings, and at
+         the top of the ball it was showing them badly: in this projection the
+         longitude lines CONVERGE at the pole, so a few screen pixels up there
+         are covering hundreds of texels across. One sample out of hundreds is
+         noise, and it looked like it.
+
+         So it is bilinear — and near the pole it takes several samples ACROSS
+         longitude and averages them, which is the direction the compression
+         happens in. The count follows 1/cos(lat), which is exactly how much
+         the sheet is stretched at that latitude, and it is capped because at
+         the pole itself the factor is infinite and one sample of a converged
+         point is as good as a thousand. */
+      const fy = (TEX_H * (.5 - lat / Math.PI)) - .5;
+      const r0 = Math.floor(fy), ty = fy - r0;
+      const ra = clampR(r0), rb = clampR(r0 + 1);
+      /* AT LEAST ONE, and that is not defensive coding — at the equator the
+         factor is .5 and rounds to zero, which divides the accumulator by
+         nothing and paints NaN. It is exactly the latitude the yaw ring sits
+         on, so it would have been a line of missing pixels straight across
+         the middle of the ball. */
+      const span = Math.max(1, cla > 1e-4 ? Math.min(24, Math.round(.5 / cla)) : 24);
+      let cr = 0, cg = 0, cb = 0;
+      for (let k = 0; k < span; k++) {
+        const fx = (TEX_W * (.5 + lon / (2 * Math.PI)))
+                 + (span > 1 ? (k / span - .5) * (TEX_W / 360) * 2 : 0) - .5;
+        const c0 = Math.floor(fx), tx = fx - c0;
+        const ca = wrapC(((c0 % TEX_W) + TEX_W) % TEX_W);
+        const cb2 = wrapC(ca + 1);
+        const iaa = (ra * TEX_W + ca) * 4, iab = (ra * TEX_W + cb2) * 4;
+        const iba = (rb * TEX_W + ca) * 4, ibb = (rb * TEX_W + cb2) * 4;
+        const w00 = (1 - tx) * (1 - ty), w10 = tx * (1 - ty);
+        const w01 = (1 - tx) * ty,       w11 = tx * ty;
+        cr += col[iaa] * w00 + col[iab] * w10 + col[iba] * w01 + col[ibb] * w11;
+        cg += col[iaa+1] * w00 + col[iab+1] * w10 + col[iba+1] * w01 + col[ibb+1] * w11;
+        cb += col[iaa+2] * w00 + col[iab+2] * w10 + col[iba+2] * w01 + col[ibb+2] * w11;
+      }
+      cr /= span; cg /= span; cb /= span;
+
+      /* ── THE NORMAL COMES OFF THE HEIGHT SHEET ───────────────────────────
+         Central differences in both directions, which is the whole of a bump
+         map. The longitude one is divided by cos(lat) because a degree of
+         longitude is a shorter distance the further from the equator you are —
+         without that the rings' bevels would flare out to nothing at the top
+         of the ball. Clamped for the same reason the filter is. */
+      const rc = clampR(Math.round(fy));
+      const cc = wrapC(((Math.round(TEX_W * (.5 + lon / (2 * Math.PI))) % TEX_W) + TEX_W) % TEX_W);
+      const dLat = (hgt[clampR(rc - 1) * TEX_W + cc] - hgt[clampR(rc + 1) * TEX_W + cc]);
+      const dLon = (hgt[rc * TEX_W + wrapC(cc - 1)] - hgt[rc * TEX_W + wrapC(cc + 1)])
+                 / Math.max(.12, cla);
+
+      /* ── AND THE WALL'S OWN NORMAL, EXACTLY ──────────────────────────────
+         `ê_r − (r'/r)·ê_lat`, which is the normal of any surface of revolution
+         and needs no sampling at all. It lands in the same `ê_lat` coefficient
+         the bump map writes to, because a bump map is doing this arithmetic
+         approximately — and the two never meet on the ball anyway: the rings
+         stop at the lip and the wall starts there. Zero everywhere except the
+         0.8° the wall occupies, so the body and the floor cost nothing. */
+      const sink = capSink(oy);
+      const kw = capSlope(oy) * cla / (1 - sink);
+
+      /* THE LOCAL FRAME COSTS NOTHING, because the point already holds it:
+         `ox = cos(lat)·cos(lon)` by construction, so a division recovers the
+         longitude's sine and cosine and `oy` IS the latitude's sine. Three
+         trig calls a pixel went away when this stopped calling `Math.cos(lon)`
+         for a number it had already computed. At the pole `cla` is zero and
+         every azimuth is the same azimuth, so any pair will do. */
+      const inv = cla > 1e-6 ? 1 / cla : 0;
+      const sla = oy, clo = inv ? ox * inv : 1, slo = inv ? oz * inv : 0;
+
+      let nx = ox, ny = oy, nz = oz;
+      if (dLat || dLon || kw) {
+        const kl = -dLat * BUMP + kw, kn = dLon * BUMP;
+        nx += kl * -sla * clo + kn * -slo;
+        ny += kl * cla;
+        nz += kl * -sla * slo + kn * clo;
+        const nm = Math.hypot(nx, ny, nz) || 1;
+        nx /= nm; ny /= nm; nz /= nm;
+      }
+
+      /* ── A HOLE IS DARKER, AND ONLY THE AMBIENT KNOWS IT ─────────────────
+         AMB is the room — light arriving from everywhere at once — and the lip
+         of the cap is in the way of most of it once you are down on the floor.
+         The DIFFUSE term is not touched: one lamp in one direction either
+         reaches the floor or it does not, and the wall's own normal is what
+         decides that. Darkening both would be painting the shadow twice. */
+      const ao = 1 - .62 * (sink / CAP_DEEP);
+
+      /* ── AND THE RIM CASTS INTO ITS OWN HOLE ─────────────────────────────
+         AMBIENT OCCLUSION CANNOT SAY WHERE THE LAMP IS, which is the whole of
+         what it was missing: it darkens a pit by a fixed amount and leaves it
+         at that value however the ball is turned, so the one feature that
+         should have been ANNOUNCING the orientation was the one feature not
+         responding to it. What the eye reads on a real recess is the rim's
+         shadow sweeping across the floor as the thing rotates.
+
+         AND IT IS AN EXACT QUESTION HERE. The rim is a circle of known radius,
+         the floor sits CAP_DEEP below it, and the lamp either clears the edge
+         or it does not: reach the rim along the light's own bearing — the
+         ray-circle chord, one square root — and compare `D·sin(elev)` against
+         `depth·cos(elev)`. Weighted by how deep the point actually is, so the
+         body never darkens and the wall blends into the floor's verdict rather
+         than stepping to it. */
+      const d = nx * lx + ny * ly + nz * lz;
+      let dif = d > 0 ? d : 0;
+      if (sink > 0 && dif > 0) {
+        const lu = lx * ox + ly * oy + lz * oz;     /* the lamp's elevation */
+        let sh = 0;
+        if (lu > 0) {
+          const h2 = 1 - lu * lu;
+          const hmag = h2 > 0 ? Math.sqrt(h2) : 0;
+          const rho = Math.PI / 2 - (lat < 0 ? -lat : lat);
+          /* how much of the light's bearing runs OUTWARD, toward the rim */
+          let cdir = 1;
+          if (hmag > 1e-6 && rho > 1e-6) {
+            const sg = oy < 0 ? 1 : -1;             /* ê_out = -sign(oy)·ê_lat */
+            cdir = ((lx - lu * ox) * -sla * clo
+                  + (ly - lu * oy) * cla
+                  + (lz - lu * oz) * -sla * slo) * sg / hmag;
+          }
+          const disc = CAP_ANG * CAP_ANG - rho * rho * (1 - cdir * cdir);
+          const D = -rho * cdir + Math.sqrt(disc > 0 ? disc : 0);
+          const need = sink * hmag;
+          if (need <= 1e-9) sh = 1;
+          else {
+            const t = (D * lu - need * .55) / (need * .70);
+            sh = t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+          }
+        }
+        dif *= 1 - (1 - sh) * (sink / CAP_DEEP);
+      }
+      let f = AMB * ao + DIF * dif;
+      const hs = nx * hx + ny * hy + nz * hz;
+      const sp = hs > 0 ? SPEC * ao * Math.pow(hs, SHINE) * 255 : 0;
+      f *= VIG[i];
+
+      /* ── AND THE RINGS DO NOT GO OUT ─────────────────────────────────────
+         The lift is toward a floor and it is proportional, so the bevel the
+         height sheet gives a ring survives — it is still a moulded thing with
+         a lit edge — while the colour stops being something the back of the
+         ball and the socket's rim shadow are allowed to take away. */
+      const em = ink[rc * TEX_W + cc];
+      if (em > 0) f += em * (.74 + .42 * f - f);
+
+      /* ── AND NEITHER DOES THE FLOOR ──────────────────────────────────────
+         THE RED WAS GETTING IT FROM BOTH SIDES. It sits at the bottom of a
+         well, so the ambient occlusion took it to 38%, and then the rim's cast
+         shadow took most of what was left — a floor at f = 0.13, which on a
+         #c8301f moulding is (21, 5, 3). Black with a hint. Everything that
+         made the hole read as a hole was landing on the one surface that had
+         something to say.
+
+         SAME LIFT THE RINGS GET, AND FOR THE SAME REASON. Toward a floor and
+         proportional, so the shadow still sweeps across it — there is a 1.8×
+         range left for the rim to work in — but the colour cannot be turned
+         off. It is gated on the exact depth the sheet paints red at, so the
+         lift and the colour begin on the same pixel. */
+      if (sink >= CAP_DEEP) f += .40 + .68 * f - f;
+
+      const o = IDX[i];
+      out[o]     = cr * f + sp;
+      out[o + 1] = cg * f + sp;
+      out[o + 2] = cb * f + sp;
+      out[o + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
   }
+
+  /* THE RING SAMPLES SURVIVE THE REWRITE, and only for the pick. Nothing
+     draws them any more — they are painted into the map — but a pointer still
+     has to be told which ring it is nearest, and that is a question about
+     screen positions rather than about pixels. */
+  /* AND THEY STOP AT THE LIP, LIKE THE DRAWING DOES. The two meridian rings
+     are painted only across the body now, so their samples over the caps are
+     samples of a ring that is not there — a pick radius reaching into a hole
+     and handing back an axis nothing on screen offered. */
+  const RINGS = [0, 1, 2].map(k =>
+    Array.from({ length: STEP + 1 }, (_, i) => {
+      const t = i / STEP * Math.PI * 2, c = Math.cos(t), n = Math.sin(t);
+      return k === 0 ? [0, c, n] : k === 1 ? [n, 0, c] : [c, n, 0];
+    }).filter(p => (p[1] < 0 ? -p[1] : p[1]) <= S_LIP));
+  const AXV = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
 
   /* WHICH RING DID THE POINTER GRAB — nearest sample wins, and near ones win
      over far ones at the same distance, because where two rings cross on
      screen the one in front is the one you were looking at. */
   function pick(px, py) {
     let best = -1, bd = GRAB;
+    /* ONLY WHAT IS VISIBLE CAN BE GRABBED. The far half is not drawn any more,
+       and a ring you cannot see is not a ring you meant to take hold of. */
     proj.forEach((pts, k) => {
       for (const p of pts) {
-        const d = Math.hypot(p.x - px, p.y - py) - (p.z >= 0 ? 2 : 0);
+        if (p.z < 0) continue;
+        const d = Math.hypot(p.x - px, p.y - py);
         if (d < bd) { bd = d; best = k; }
       }
     });
@@ -2661,6 +3294,9 @@ function orbit({ size = 132, yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     return m < 1e-6 ? null : [v[0] / m, v[1] / m, v[2] / m];
   };
   const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1],
+                           a[2] * b[0] - a[0] * b[2],
+                           a[0] * b[1] - a[1] * b[0]];
   /* v with its component along n removed — v as seen by someone looking down n */
   const flatten = (v, n) => {
     const k = dot(v, n);
@@ -2676,13 +3312,41 @@ function orbit({ size = 132, yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
                       Math.max(-1, Math.min(1, dot(a, b))));
   };
 
-  let held = -1, from = null, axis = null, base = null;
+  let from = null, axis = null, base = null;   // `held` is declared with the raster
 
-  s.addEventListener('pointerdown', e => {
-    const r = s.getBoundingClientRect();
+  cv.addEventListener('pointerdown', e => {
+    const r = cv.getBoundingClientRect();
     const k = pick((e.clientX - r.left) * size / r.width,
                    (e.clientY - r.top) * size / r.height);
-    if (k < 0) return;
+    base = orbitMat(val.yaw, val.pitch, val.roll);
+    if (k < 0) {
+      /* ── NOT ON A RING: ROLL THE BALL ────────────────────────────────────
+         A BALL YOU CAN ONLY TURN BY ITS RINGS IS NOT A BALL, it is three
+         sliders bent into circles. The rings are for turning about ONE axis on
+         purpose; the body is for the other nine-tenths of the time, when what
+         you want is just to see the other side of it.
+
+         SAME ARCBALL, ONE CONSTRAINT FEWER. Where a ring drag flattens both
+         sphere points onto that ring's plane, this uses them whole: the
+         rotation is the one that carries the point you grabbed to the point
+         under the pointer now, about the axis perpendicular to both. Nothing
+         is fixed, so it goes in every direction at once, which is what rolling
+         a ball under your palm is.
+
+         ONLY FROM INSIDE THE SILHOUETTE. Past it there is socket, and a drag
+         starting on the case is not a drag on the ball — though once it has
+         started the hand may wander anywhere, because Holroyd's sheet keeps
+         answering out there. */
+      const bp = ballPt(e, r);
+      if (bp[0] * bp[0] + bp[1] * bp[1] > 1) { base = null; return; }
+      from = norm(bp);
+      if (!from) { base = null; return; }
+      held = -2; axis = null;
+      cv.setPointerCapture(e.pointerId);
+      wrap.classList.add('turning');
+      e.preventDefault();
+      return;
+    }
     /* THE AXIS IS WHERE THAT RING IS POINTING NOW, in world space, and the
        whole drag turns about that one axis. Read once, because rotating about
        an axis leaves that axis alone — so the ring you are holding does not
@@ -2692,25 +3356,37 @@ function orbit({ size = 132, yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
        MEASURED FROM WHERE THE DRAG STARTED, not accumulated frame to frame:
        incremental sums drift, and a drag that ends where it began has to end
        where it began. */
-    base = orbitMat(val.yaw, val.pitch, val.roll);
     axis = norm(orbitApply(base, AXV[k]));
     from = axis && flatten(ballPt(e, r), axis);
     if (!axis || !from) { axis = from = base = null; return; }
     held = k;
-    s.setPointerCapture(e.pointerId);
+    cv.setPointerCapture(e.pointerId);
     wrap.classList.add('turning');
     wrap.dataset.ax = ORBIT_AX[k].lab;
     e.preventDefault();
   });
 
-  s.addEventListener('pointermove', e => {
-    if (held < 0) return;
-    const r = s.getBoundingClientRect();
+  cv.addEventListener('pointermove', e => {
+    if (held === -1) return;
+    const r = cv.getBoundingClientRect();
+    if (held === -2) {
+      const to = norm(ballPt(e, r));
+      if (!to) return;
+      const c = cross(from, to), m = Math.hypot(c[0], c[1], c[2]);
+      /* the two points coincide — no axis, and no rotation to make */
+      if (m < 1e-7) return;
+      const th = Math.atan2(m, dot(from, to));
+      Object.assign(val, orbitEuler(orbitMul(
+        orbitAxisMat([c[0] / m, c[1] / m, c[2] / m], th), base)));
+      paint();
+      onChange && onChange({ ...val }, null);
+      return;
+    }
     const to = flatten(ballPt(e, r), axis);
     /* THE POINTER IS ON THE AXIS ITSELF — no component in the plane, so no
        angle to read. Hold, do not guess. */
     if (!to) return;
-    const th = signedAngle(from, to, axis) * ORBIT_AX[held].inv;
+    const th = signedAngle(from, to, axis);
     /* TURNED ABOUT THE RING'S OWN AXIS AND THEN READ BACK AS THREE ANGLES.
        Adding the angle straight onto one Euler term — which is what this did
        before — is a rotation about one of the THREE AXES THE ANGLES ARE
@@ -2727,13 +3403,14 @@ function orbit({ size = 132, yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   });
 
   const drop = () => {
-    if (held < 0) return;
+    if (held === -1) return;
     held = -1; from = axis = base = null;
     wrap.classList.remove('turning');
     delete wrap.dataset.ax;
   };
-  s.addEventListener('pointerup', drop);
-  s.addEventListener('pointercancel', drop);
+  cv.addEventListener('pointerup', drop);
+  cv.addEventListener('pointercancel', drop);
+  cv.addEventListener('lostpointercapture', drop);
 
   /* THE KEYBOARD GETS THE TWO IT CAN REACH. Arrows are yaw and pitch because
      those are the two a pointer would reach for; roll takes shift, because a
@@ -2889,6 +3566,7 @@ function windowise(box, { title, mode = 'reduce', onClose, maximise = false, onM
   const stop = () => { on = false; box.classList.remove('dragging'); };
   head.addEventListener('pointerup', stop);
   head.addEventListener('pointercancel', stop);
+  head.addEventListener('lostpointercapture', stop);
 
   box.reset = () => {
     /* STOOD DOWN THROUGH `setMax`, NOT BY DROPPING THE CLASS. The body flag and
@@ -3039,6 +3717,7 @@ function lightDir({ label = 'Light', az = 315, el: elev = 45, size = 132, onChan
   const end = () => disc.classList.remove('dragging');
   disc.addEventListener('pointerup', end);
   disc.addEventListener('pointercancel', end);
+  disc.addEventListener('lostpointercapture', end);
 
   /* LEFT AND RIGHT SWING IT, UP AND DOWN RAISE IT, which is the only mapping
      that matches what the two axes MEAN rather than where the puck happens to
@@ -3334,6 +4013,7 @@ function gate({ label, options, index = 0, width = 150, onChange }) {
   const end = () => { dragging = false; body.classList.remove('dragging'); };
   slot.addEventListener('pointerup', end);
   slot.addEventListener('pointercancel', end);
+  slot.addEventListener('lostpointercapture', end);
 
   legs.addEventListener('keydown', e => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); set(i + 1); }

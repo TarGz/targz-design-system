@@ -1,6 +1,236 @@
-export const version = '1.75.0';
+export const version = '1.88.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.88.0',
+    date: '2026-08-20',
+    changes: [
+      'THE CAPS ARE WELLS, AND THE WALL STANDS UP. 1.87.0 sank them but gave the wall five degrees of latitude to fall in, which is a slope of nine degrees off the surface — a saucer pressed into the ball, not a hole. The wall stands at 86° now and the hole is a bore with a bottom you look down into.',
+      'AND THE BAND IS SOLVED FOR RATHER THAN CHOSEN. The input used to be "the wall takes N degrees of latitude", which is the one number nobody has an opinion about. What you have an opinion about is how DEEP the hole is, how SQUARE the wall stands and how sharp the CORNER is — three things that mean something — and how wide the band ends up is arithmetic. Four constants that had to be kept consistent by hand became three that cannot disagree.',
+      'A BUMP MAP CANNOT DRAW AN EDGE THIS STEEP, and it was drawing this one. The cap was a ramp painted into the height sheet; over five degrees there were twenty-eight texels to differentiate across, and standing the wall up leaves a handful under a five-pixel blur — which is not a steep slope, it is a smeared one. Every version of that trade is a choice between mush and a stair. The wall is differentiated in CLOSED FORM instead: this is a surface of revolution, r = r(lat) and nothing else, whose normal is exactly `ê_r − (r\'/r)·ê_lat`. No sampling, no blur, no resolution to run out of. The height sheet goes back to the rings, which really are a shallow relief.',
+      'THE CORNERS ARE A RADIUS, NOT A WIDTH, AND THE FIRST ATTEMPT MEASURED THE WRONG THING. A smoothstep rounds the WHOLE wall — its slope is zero at both ends and peaks in the middle, so the profile is curved everywhere and straight nowhere, and there is no way to ask for a little rounding and a lot of drop. A parabola fixed the straightness and lied about the size: its curvature is tightest at the vertex, so a fillet one pixel WIDE puts a corner of about a fifth of a pixel on an 86° wall and spends the other four fifths nearly flat. It read as sharp because it was sharp. Both corners are circular arcs now, specified the way a machinist specifies one — a radius — and at `lg` that radius is one pixel.',
+      'THE FLOOR IS A DIFFERENT COLOUR AT EACH POLE, AND IT IS THE ONLY THING ON THE BALL THAT TELLS TOP FROM BOTTOM. Body, graticule and all three rings are symmetric, so a ball turned over is a ball you cannot tell is turned over. Red up, white down. It stops where the WALL stops — the bore is body-coloured all the way down, so what you see is a dark shaft with a coloured bottom and how much of that bottom you get is the angle you are looking from. Paint the wall too and it collapses into a coloured dish with no depth to read.',
+      'THE RIM CASTS INTO ITS OWN HOLE. Ambient occlusion cannot say where the lamp is — it darkens a pit by a fixed amount and leaves it there however the ball turns — so the one feature that should have been announcing the orientation was the one feature not responding to it. It is an exact question here: the rim is a circle of known radius and the floor sits a known depth below it, so reach the rim along the light\'s own bearing (the ray-circle chord, one square root) and compare `D·sin(elev)` against `depth·cos(elev)`. Weighted by depth, so the body never darkens and the wall blends into the floor\'s verdict instead of stepping to it.',
+      'AND THEN THE FLOOR HAD TO BE PROTECTED FROM ALL OF IT. The occlusion took it to 38% and the new cast shadow took most of what was left — f = 0.13, which on a #c8301f moulding is (21, 5, 3): black with a hint. Everything built to make the hole read as a hole was landing on the one surface with something to say. It gets the ring lift now, toward a floor and proportional, so the rim\'s shadow still sweeps across it with a 1.8× range to work in and the colour cannot be switched off.',
+      'THE CAPS STOPPED BEING A DIFFERENT MATERIAL. They were an orange moulding and a bone one, which made sense while they were CAPS — parts fitted onto a body — and none at all once they became holes. A hole is not a component, it is an absence, and it is made of whatever it is cut into.',
+      'RED GOES BACK ON X, one version after orange replaced it. The argument for orange held in the abstract: red already means fault on this panel, orange is the language\'s own accent and separates further from the green and the blue. Then the caps became wells with coloured floors, one of them red, and the ball had an orange ring crossing an orange-adjacent body over a red hole. Spending a convention the eye already knows to dodge a clash, and buying a worse one, is a bad trade twice.',
+      'THREE TRIG CALLS A PIXEL WENT AWAY. `ox = cos(lat)·cos(lon)` by construction, so a division recovers the longitude\'s sine and cosine and `oy` IS the latitude\'s sine — the loop was calling `Math.cos(lon)` for a number it had already computed. The march pays for itself twice over on the strength of it.',
+    ],
+  },
+  {
+    version: '1.87.2',
+    date: '2026-08-20',
+    changes: [
+      'THE FOCUS RING IS GONE, AND SO IS THE ONE UNDERNEATH IT. Skew was painting a 1px orange hairline on `*:focus-visible` and repeating the same idea twelve more times per component — four in orange, six as a 2px `--led` rectangle — on top of ten rules that lifted the cap in brightness. All of it is removed. A rectangle floating two pixels off a moulded cap is the one thing on this panel that is unmistakably a web page, and it lands hardest around the small keys, where the ring is nearly as big as the object it is describing.',
+      'DELETING OURS IS NOT THE SAME AS REMOVING ONE. `*:focus{outline:none}` was already there and it was never enough: drop the orange and Chrome\'s own 2-3px white-blue comes straight back underneath, which is worse than what it replaced. `:focus-visible` has to be answered explicitly, not ignored — so it is, along with Firefox\'s inner border on buttons and the highlight flash on touch.',
+      'THE ROW HIGHLIGHTS ARE NOT RINGS AND THEY STAY. `.menu-row` and `.sel-row` change colour on `:focus-visible` because that is how you see which row you are on inside an OPEN dropdown — delete those and arrow-key navigation goes blind, which is a different thing from taking a rectangle off a key cap. `.skip:focus` stays for the same reason: it is what makes the skip link appear at all.',
+      'IN THE BILL, PLAINLY: this removes the WCAG focus indicator across the whole language. Keyboard focus still moves, it just moves invisibly on every control. Deliberate, and the first thing that would need a real answer if this ever shipped as an accessible target.',
+    ],
+  },
+  {
+    version: '1.87.1',
+    date: '2026-08-20',
+    changes: [
+      'THE SHEEN WAS BOLTED TO THE BALL INSTEAD OF TO THE ROOM. Both halves of a specular term have to be in the frame the normal is in, and the normal on the orbit ball is in the OBJECT\'s. The lamp was carried there correctly, by the transpose; the EYE was being carried by the matrix itself — `(m2, m5, m8)` is M·ẑ, the ball\'s own z-axis written in view space, where what the term needs is Mᵀ·ẑ, the viewer written in the ball\'s space. So the half-vector swung with the rotation and the highlight crawled across the surface as the ball turned.',
+      'AT REST THE TWO ARE THE SAME COLUMN, WHICH IS WHY IT LASTED. Every check on this part was made on a ball sitting at zero, where M is the identity and the wrong three numbers are the right three numbers. Measured across five attitudes against the rest pose: the shading field drifted by 0.10999, which is the whole of SPEC — the highlight was not merely sliding, it was arriving and leaving. It is 0.000000 now.',
+    ],
+  },
+  {
+    version: '1.87.0',
+    date: '2026-08-20',
+    changes: [
+      'THE CAPS ARE HOLES NOW, AND THEY ARE TRACED RATHER THAN PAINTED. They used to be a stroked groove blurred into the height sheet — which is a CHANNEL: body, a dark line, body again. There is no body beyond the top of this one, there is a different material at a different level, and a groove cannot say that because a groove is symmetric and a step is not. It read as a line drawn round the ball because it was one. What is there instead is a lip at 75°, a wall five degrees deep, and a floor sitting 5.5% of the radius below the rim.',
+      'AND A BUMP MAP WOULD NOT HAVE DONE IT. It moves no surface — it lies to the lamp about which way a pixel faces and leaves the pixel where it was — so a recess drawn that way never occludes, never shifts as the ball turns, and reads as paint the first time you drag it. The renderer marches the view ray down onto the sunk surface instead. Cheap, because the profile is a function of LATITUDE and nothing else: object-space y is LINEAR in the ray parameter, so a step is one square root and no matrix multiply. Twelve steps to bracket the crossing, four bisections to place it — measured at 1.9e-3 radii of residual, about a fifth of a pixel at `lg`, and it only runs on the ~11% of pixels that are actually on a cap.',
+      'NOTHING IS DRAWN ON THEM. No ring, no graticule, no seam. Where the body ends is told by the hole, and a line along the top of a hole is a line repeating what the hole already said. The two meridian rings stop at the lip — and so do their PICK samples, which were otherwise offering an axis at a place on screen where no ring was drawn.',
+      'THE HOLE IS DARKER, AND ONLY THE AMBIENT KNOWS IT. AMB is the room, light arriving from everywhere at once, and the lip is in the way of most of it once you are down on the floor. The diffuse term is untouched: one lamp in one direction either reaches the floor or it does not, and the wall\'s own normal is what decides that. Darkening both would be painting the shadow twice.',
+      'THE ARCS ARE NOT TEMPERED ANY MORE, and there were THREE separate temperings on the same three marks: the lamp took them round the back, the socket\'s rim shadow took them at the edge, and holding one knocked the other two down to .30 on top of that. So the one thing on this ball that has to stay readable at every attitude was the one thing the lighting was allowed to eat. There is an ink sheet now — which texels are ring and how strongly — and the renderer LIFTS those pixels toward a floor instead of multiplying them down. The lift is proportional, so the bevel still reads and a ring is still a moulded thing with a lit edge; the colour just never drops out.',
+      'AND HOLDING ONE LIFTS IT FURTHER RATHER THAN KNOCKING THE OTHERS DOWN. Saying something about the third ring by taking light away from the two that are not the message is a message written in the wrong place.',
+      'ORANGE ON X. Red/green/blue for the three axes is what every 3D viewport uses, and it is right THERE — on a grey ground, next to nothing else that is red. On this panel red is the one colour that already means something, it is what a fault reads as, and the ball was the only part wearing it. Orange is this language\'s own accent, it is what the collar lights up in when a ring is held, and it separates from the green and the blue by more than the red did.',
+      'ONE SEAM BUG CAUGHT ON THE WAY THROUGH. A meridian pair drawn at 0° lands at x = TEX_W/2 and x = 0 — and the one at 0 is HALF a stroke, because its other half belongs to x = TEX_W, which is off the sheet. Every lookup downstream wraps, so the roll ring sampled half the width of the other two along one meridian, on one side only. Three longitudes are drawn now, not two.',
+      'AND THE TWO EXPENSIVE SHEETS ARE BUILT ONCE. Neither colour nor height depends on which ring is held any more — that moved into the ink mask, which is one channel and a blur — so the 2048 × 1024 material is no longer rebuilt three times over the life of a ball.',
+    ],
+  },
+  {
+    version: '1.86.0',
+    date: '2026-08-20',
+    changes: [
+      'THE ARCS ARE INLAID NOW, WHICH IS THE THING THEY WERE NEITHER OF. They took the lamp like the surface did — so they went dark round the back, which is what paint does — but they had no EDGE, and paint on a moulding has an edge you can see. Something either sits IN the material and catches light along its border, or it floats above and is not lit at all; half of each was the one thing it could not be.',
+      'SO THERE IS A HEIGHT SHEET. A second map holding the surface: body at rest, rings standing proud of it, the two cap grooves cut down into it. The renderer differentiates that sheet and bends the normal by the result, so every boundary on the ball gets a bevel that catches the lamp on one side and loses it on the other — the rings for the same reason and by the same arithmetic as the grooves. And it is BLURRED, because a bevel IS the blur: a step edge differentiates to one infinitely-steep texel and reads as a hard line, where a few texels of spread is a chamfer with a width.',
+      'THE POLE WAS THE PIXELATION, AND FILTERING IS THE FIX. In equirectangular the longitude lines CONVERGE at the pole, so a handful of screen pixels up there cover hundreds of texels across — and one nearest-neighbour sample out of hundreds is noise, which is what it looked like. It is bilinear now, and near the pole it averages several samples ACROSS longitude, which is the direction the sheet is stretched. The count follows 1/cos(lat) because that is exactly how much it is stretched, capped because at the pole itself the factor is infinite.',
+      'THE MAP DOUBLES TO 2048 × 1024, which the rings needed independently: their edges were showing texels at `lg` before the pole had anything to do with it.',
+      'THE BODY LIGHTENS AND THE SHINE COMES DOWN. #0e1013 is a black with nowhere to go — the shading multiplies it, so a near-black base leaves the lit side dark grey and the dark side a hole. A plastic that reads as plastic has to have something for the lamp to take away. And the specular was .30 at a tight exponent, which is a WET look: a moulded plastic has a broad soft sheen rather than a glint, and at this size a glint reads as a bright dot stuck to the glass.',
+      'ONE BUG CAUGHT ON THE WAY IN. The pole-filter width rounds to ZERO at the equator — 0.5 rounds down under the guard as written — which divides the colour accumulator by nothing and paints NaN. That is precisely the latitude the yaw ring sits on, so it would have been a line of missing pixels straight across the middle of the ball.',
+    ],
+  },
+  {
+    version: '1.85.0',
+    date: '2026-08-20',
+    changes: [
+      'THE BALL IS RENDERED NOW, NOT DRAWN. Every mark on it used to be a stroked polyline — the rings, the graticule, the caps, the groove — so the junction between two materials was three concentric circles with opacities on them. No surface, nothing with a normal, nothing that could darken because of the way it is tilted. Six versions went into adjusting the width and softness of a drawn line and every one produced a better-drawn line. It was the wrong tool and no amount of tuning was going to fix that.',
+      'THE MATERIAL IS A MAP. Equirectangular, latitude down and longitude across — the flat sheet a sphere is wrapped in, and the same thing a globe\'s paper gores are. Drawn once with ordinary 2D calls: black body, orange cap, bone cap, graticule, three rings. Then every pixel of the ball asks it what is painted there.',
+      'AND THE SECOND CHANNEL IS THE WHOLE POINT — SLOPE. Flat everywhere except the two grooves, where it runs down one wall and back up the other. The renderer bends the pixel\'s normal by it, so the walls of the channel face different directions and take different amounts of light: one bright, one dark, from a single lamp, because that is what a channel cut in a solid does. NOTHING IS PAINTED DARK. The dark is a consequence.',
+      'ON A UNIT SPHERE THE POINT IS ITS OWN NORMAL, which is the one piece of luck this part has had throughout — no geometry to intersect, no depth to sort. Turn the pixel into a direction, rotate it into the object\'s frame, sample the map, bend, light. The pixel geometry is precomputed because it belongs to the BOX rather than to the rotation, and the LAMP is rotated instead of the sphere: one matrix multiply a frame rather than fifty thousand.',
+      'MEASURED, BECAUSE THIS ONE HAD TO BE. 47,348 opaque pixels against 47,344 predicted for the disc. From a flat grey map the output runs 16 to 231, so every bit of that range is lighting — up-left 181, centre 156, down-right 74, which is the lamp where the rest of the site puts it. One repaint at `lg` is 4.6ms at 1×.',
+      'AND THE DEVICE RATIO IS CAPPED AT 1.5 FOR THE SAME REASON. A repaint scales with the square of it: about 18ms at 2×, which is over a frame for ONE ball before the page has done anything else. 1.5 keeps the edges from stepping and lands near 10ms — and the marks here are shaded gradients rather than hairlines, which is the kind of drawing that loses least to a softer pixel.',
+      'THE SVG CLASSES GO WITH THE STROKES THAT WORE THEM — arc, grid, cap, seam, head, hub, spoke. There is nothing left for CSS to colour: what a mark looks like is a consequence of where it sits on a lit sphere, and a stylesheet cannot know that. The socket, the arcball, the picking and the Euler handling are untouched.',
+    ],
+  },
+  {
+    version: '1.84.0',
+    date: '2026-08-20',
+    changes: [
+      'FIX — THE STUCK DRAG, and it was every drag in the kit rather than the knob. Nine controls captured the pointer and then waited for pointerup to let go, and a pointerup is NOT GUARANTEED TO ARRIVE: release over the browser own chrome, drag off the window and let go, alt-tab away mid-turn, open a context menu, or have the panel rebuild the control under your hand. In every one of those the capture ends and no pointerup is delivered.',
+      'AND pointercancel DOES NOT COVER IT. That event is for the browser TAKING the gesture away — a scroll winning, a system gesture starting — not for the gesture ending somewhere the element cannot see. Six of the nine had it and were still stuck.',
+      'SO THE CONTROL KEEPS ITS dragging FLAG AND ITS CAPTURE, which is the worst possible pair: it still owns every pointermove on the page, so the knob goes on turning with the mouse after you have let go. That is the bug as reported, and the same one was live on the fader, the range fader, the drum, the rotary, the colour field, the light picker, the gate and a dragged window head.',
+      'lostpointercapture FIRES WHENEVER CAPTURE ENDS, FOR ANY REASON — the implicit release at pointerup, the element being removed, the browser dropping it, the window losing focus. It cannot be missed, which is exactly what an end-of-drag has to be. Added to all nine.',
+      'pointerup AND pointercancel STAY, and every end handler was checked to be idempotent first. They arrive first in the ordinary case, so the sound and the state still land at the moment you release rather than a tick later; lostpointercapture is the floor under them, not a replacement.',
+      'pressFix IS DELIBERATELY NOT TOUCHED. It captures too, but it is a click fallback rather than a drag — no dragging state, no pointermove — and its pointerup ordering is documented as delicate: clearing its armed reference early makes every control in the kit actuate twice. A stale armed there is bounded and harmless, since the next pointerdown replaces it and the pointerup path proximity-checks before firing.',
+    ],
+  },
+  {
+    version: '1.83.4',
+    date: '2026-08-20',
+    changes: [
+      'THE CHANNEL IS WIDE AND ITS SHADOW IS TIGHT, which is the way round a real groove goes and the inverse of what 1.83.3 drew. A moulded channel is mostly FLOOR — a band of dark with a definite width — and the falloff either side is only the last of the wall climbing back out. That version had a hairline floor under a broad soft haze, and A BROAD HAZE AROUND A THIN LINE IS A GLOW. Glows are lights; grooves are holes.',
+      'So the floor goes from .26 of a ring width to .62, and the falloff pulls in from 4.3° of latitude to 2.6° in three steps instead of four. Same two ideas as before — a dark core, a fade into both materials — with the proportions the other way up.',
+    ],
+  },
+  {
+    version: '1.83.3',
+    date: '2026-08-20',
+    changes: [
+      'THE SEAM IS A GROOVE NOW, NOT A LINE, and that was the last thing keeping the cap on the surface instead of in it. A DRAWN LINE BETWEEN TWO COLOURS IS STILL A DRAWN LINE — one dark stroke at the boundary reads as ink on a flat surface, because that is exactly what it is. What a real join looks like is a CHANNEL: the two pieces meet at the bottom of it, so the light falls off as each material approaches and the dark is deepest where they touch.',
+      'THE FALLOFF IS THE WHOLE EFFECT. The core stroke is almost incidental — on its own it was the version that still read as UI. Four steps a side, in DEGREES OF LATITUDE rather than pixels, so the groove foreshortens with the surface exactly as everything else here does. A fixed-width shadow would stay the same thickness while the ball turned, which is the giveaway of a decal.',
+      'AND IT FALLS INTO BOTH SIDES, which it has to. Shadow on the black alone and the orange looks stuck on top of it; on the orange alone and the black looks like the hole it was set into. Two materials meeting means two materials in shadow.',
+      'RED BECOMES ORANGE — #7e3a0a at rest, coming up to #96440d when that pole turns toward the lamp. Still the unlit value of a plastic rather than the colour it presents.',
+    ],
+  },
+  {
+    version: '1.83.2',
+    date: '2026-08-20',
+    changes: [
+      'FIX — A GRATICULE RUNNING ACROSS THE CAP SAYS YOU CAN SEE THROUGH IT, and that was most of why the caps still read as UI. The grid is printed on the BLACK BODY; a line carrying on over the red is a line showing through from the far side, which is the one thing a solid insert must not do. So the grid stops where the material changes — and that, more than any colour value, is what makes the cap a separate PIECE rather than a tint over the same one.',
+      'AND TWO MOULDINGS MEET IN A DARK LINE. There is no such thing as a flush colour change in a solid: where one piece is set into another there is a join, the join is a groove, and a groove is in shadow. That hairline is what the eye reads as two objects rather than one painted one, and it costs a circle at each end.',
+      'THE JOIN IS NOT A DRAWN OUTLINE. Barely wider than a grid line and darker than anything else on the ball, because a groove is an ABSENCE of light rather than a stroke of ink. At any more weight it stops being a join and starts being a fourth ring.',
+      'THE ±75° PARALLELS COME OUT OF THE GRATICULE, because the seam is drawn exactly where they were. A grid line and a join line in the same place is one of them wasted, and the join is the one that means something.',
+    ],
+  },
+  {
+    version: '1.83.1',
+    date: '2026-08-20',
+    changes: [
+      'FIX — THE CAPS WERE LIT BY NOTHING, WHICH IS WHY THEY LOOKED LIKE UI. A flat fill is a decal: the same red at the top-left of the cap and at the bottom-right says it is EMITTING rather than being lit, and no amount of darkening fixes that — a dim flat fill is a dim decal. They take the same `shade` the rings take, off the same lamp, so a cap curving away goes down with the surface it is part of. What is inserted in the ball is lit by whatever lights the ball.',
+      'AND THEY ARE HALF THE SIZE — 15° of arc rather than 30°. A cap you can find is not a cap that has to be seen from the next room, and at 30° it was most of the face.',
+      'DARKER BEFORE THE LAMP EVEN REACHES THEM. The values are the UNLIT colours of a red and a bone plastic, not the colours they present; `shade` takes them to a third of that on the far side. Measured at rest the red runs #6c1c1f, and it comes up to #802125 only when the pole turns toward the lamp — which is the point, because a colour that does not change when the ball turns is not on the ball.',
+      'SHADED AT THE MIDDLE OF EACH RUN RATHER THAN PER SEGMENT. A cap band is a small circle 15° from the pole, so the lamp barely changes across one of them — the variation that matters is BETWEEN bands. The rings need per-segment because a great circle crosses the whole terminator; these do not, and paying for it would be twenty times the elements for a difference nobody can see.',
+    ],
+  },
+  {
+    version: '1.83.0',
+    date: '2026-08-20',
+    changes: [
+      'THE BALL IS BLACK WITH A RED TOP AND A WHITE BOTTOM. A GRATICULE SAYS THE BALL MOVED; IT DOES NOT SAY WHICH WAY UP IT IS. Every parallel looks like every other parallel and every meridian like every other, so a ball turned half a revolution sits in exactly the same picture — the surface read as textured rather than ORIENTED, and which face you are looking at is the one question a sphere is there to answer.',
+      'THE COLOUR IS THE MATERIAL, NOT A MARKING ON IT, and getting that wrong was the whole of 1.82.0: two tinted grid circles, which is a line that happens to be red. A ball with a red END is a moulded object; a ball with a red LINE near one end is a ball somebody drew on. The caps are areas of the sphere now, black everywhere else, and they turn with it because they are it.',
+      'DOWN TO 60°, SO THE BODY STAYS OVERWHELMINGLY BLACK. A cap big enough to find is not a cap big enough to be the main colour.',
+      'DRAWN AS STACKED PARALLELS RATHER THAN A FILLED OUTLINE, which is not laziness. A spherical cap in projection is bounded by an ellipse only while the pole faces you; the moment it tips past the limb the boundary becomes part parallel and part silhouette, meeting at two points that are themselves solutions. Bands need none of it — each is tested front-or-back exactly like every other line here, and the limb case falls out of the test rather than being handled.',
+      'AND 1.83.0 IS WITHDRAWN. It read "tinted plastic" as an instruction to re-light the whole sphere — a cool cast, a fresnel rim, a gloss, and the socket eased off to let them through — when what was asked for was three colours on the body and nothing else. The ball, the socket and the lamp are back to 1.82.0 exactly; only the caps are new.',
+    ],
+  },
+  {
+    version: '1.82.0',
+    date: '2026-08-20',
+    changes: [
+      'THE TWO POLE CIRCLES ARE MARKED — TOP RED, BOTTOM WHITE. A GRATICULE SAYS THE BALL MOVED; IT DOES NOT SAY WHICH WAY UP IT IS. Every parallel looks like every other parallel and every meridian like every other, so a ball turned half a revolution sits in exactly the same picture: the surface reads as textured rather than as ORIENTED, and which face you are looking at is the one question a sphere is there to answer.',
+      'IT IS THE COMPASS CONVENTION AND IT IS OLD BECAUSE IT WORKS: north end coloured, south end plain, two marks that cannot be mistaken for each other on the two places furthest apart. The tightest parallel at each end takes it — closest to the pole, so it is the one that shrinks to a dot when you are looking straight down the axis, which is exactly when you most need telling which pole.',
+      'HEAVIER THAN THE GRATICULE, LIGHTER THAN A RING. A pole cap at grid weight is a grid line that happens to be tinted; at ring weight it is a fourth ring. Twice the grid and half a ring puts it where it belongs — part of the surface, but the part you can find.',
+    ],
+  },
+  {
+    version: '1.81.0',
+    date: '2026-08-20',
+    changes: [
+      'THREE SIZES, NAMED — `sm` 132, `md` 198, `lg` 264 — because A PART WITH A FREE `size` HAS NO SIZE. Every adopter picks its own, they all land a few pixels apart, and the first thing lost is the one thing a shared language is for: that the same control is the same control in two apps. One that fits a knob row, one for a panel with room, one for a page that is ABOUT the orientation.',
+      'THEY ARE 1 : 1.5 : 2 OFF THE SMALL ONE, which is the only ratio that matters here — the graticule and the ring weight are fractions of the box, so a step has to be big enough to be a decision rather than a nudge. A raw number still works for the case the three do not cover; `sm` is the default, because a control that has to be asked for is a control that gets forgotten at whatever size it was prototyped at.',
+      'AND 450 IS GONE. The specimen was drawn at four times its shipping size, which is fine for arguing about geometry and terrible for judging a control — `lg` is 264 now and the three stand side by side, named, so the small one can be read against the large instead of being taken on trust.',
+      'ALL THREE SHARE ONE STATE with the three knobs, and none of them is the master: every one is a view of the same angles, pushed through the same guard. Turn any and they all turn — which is also the only way to see that the ring weight and the graticule really are fractions of the box rather than numbers that happen to suit one size.',
+    ],
+  },
+  {
+    version: '1.80.0',
+    date: '2026-08-20',
+    changes: [
+      'THE FACEPLATE IS GONE, AND THAT WAS ONE PLATE TOO MANY. The part drew its own round disc of metal with the socket sunk into the middle of it, so every panel adopting it got somebody else\'s plate pasted onto its own — and A PLATE ON A PLATE READS AS A BOSS, NOT AS A CUT. What is left is the hole: the collar\'s knife line at the edge of the box, then socket wall, then ball. The plate is whatever it is set into, and that belongs to the host.',
+      'WHICH LETS THE BALL FILL THE BOX. The sphere was at 0.335 of the box with a seventh of the width given over to plate; it is 0.465 now and the socket ratios opened out to match. Same assembly, same order outside in — collar, seat, mouth, ball — because each one laps over the edge of the next.',
+      'AND THE ARROWHEADS ARE GONE. They were there to say which way a drag would turn the ball, and they were the last thing on the part still EXPLAINING it rather than being it: an arrow is a triangle with a size of its own, so near the rim it climbed out of the sphere onto the socket wall, and clipping it to the silhouette only meant it got cut in half instead. The held ring coming forward while the other two drop back already says which ring you have; which way it turns, the hand says.',
+      'THAT CLEARS THE LAST OF THE DIAGRAM. Hub, spokes, arrowheads and faceplate all went for the same reason and it is worth saying once: every one of them was drawn to explain the control, and every one of them was what made it read as a picture of a ball rather than a ball.',
+    ],
+  },
+  {
+    version: '1.79.0',
+    date: '2026-08-20',
+    changes: [
+      'THE BALL ROLLS NOW. A BALL YOU CAN ONLY TURN BY ITS RINGS IS NOT A BALL, it is three sliders bent into circles — the rings are for turning about ONE axis on purpose, and the body is for the other nine-tenths of the time when what you want is just to see the other side of it. Drag anywhere on the sphere and it goes in every direction at once.',
+      'SAME ARCBALL, ONE CONSTRAINT FEWER. Where a ring drag flattens both sphere points onto that ring\'s plane, this uses them whole: the rotation is the one carrying the point you grabbed to the point under the pointer, about the axis perpendicular to both. It starts only from inside the silhouette — past that there is socket, and a drag beginning on the case is not a drag on the ball — but once started the hand may wander anywhere, because Holroyd\'s sheet keeps answering out there.',
+      'THE RING YOU ARE HOLDING GOES ON TOP AND THE OTHER TWO STAND BACK. Three rings crossing each other is three rings crossing each other; the moment one of them is the thing you are turning it has to be findable without looking for it. Drawn last so it is over the crossings rather than under half of them, and the other two dim to .28 — not hidden, because they are the readout for what your turn is doing to the other axes.',
+      'THE GRATICULE DOUBLES — meridians every 22.5°, parallels every 15°. Coarse was the safe guess and it was the wrong one: at 45° a small turn moves a line so far that the grid reads as three or four strays rather than as a SURFACE, which is the one thing it is there to be. What keeps it from competing with the rings is its weight, not its spacing.',
+      'AND THE SPECIMEN SHOWS TWO BALLS, 450 AND 132, ONE STATE. The big one is a specimen blown up so the geometry can be argued about; 132 is the size a panel actually gives this, and A PART THAT ONLY WORKS AT FOUR TIMES ITS SHIPPING SIZE IS A PART THAT DOES NOT WORK. Turning either turns everything — both balls and all three knobs are views of the same state, through the same guard.',
+    ],
+  },
+  {
+    version: '1.78.0',
+    date: '2026-08-20',
+    changes: [
+      'FIX — THE ARROWHEADS OVERFLOWED THE BALL. A head is the one piece here with a size of its own: a triangle several pixels long on the ring\'s tangent, so near the silhouette its tip landed outside the sphere and sat on the socket wall. Clamping it or hiding it near the rim both treat the symptom; PAINT ON A BALL CANNOT LEAVE THE BALL is the general statement, so the near group is clipped to the sphere. One line, and it covers the heads and any arc that overshoots by half a stroke width. A head crossing the rim now goes over the horizon, which is what a marking on a ball does.',
+      'AND THE BALL HAS A GRATICULE. A sphere with nothing on it is a circle with a gradient — the shading said round and the rings said oriented, but between them there was no SURFACE: nothing belonging to the object rather than to the control, and nothing for a small turn to move against. Every gyro horizon ever built has one for that reason. You read the attitude off the lines, not off the ball.',
+      'MERIDIANS EVERY 45°, PARALLELS AT ±30 AND ±60, in the object\'s own frame so they turn with it. Coarse on purpose: finer reads as a texture and starts competing with the three rings for the eye, and a reference you have to look at twice is decoration. Faint and flat rather than lit — a lamp on a hairline is a lamp on nothing, and the socket vignette already darkens whatever runs out to the rim.',
+      'IT IS LAID DOWN FIRST, so the rings paint over it: they are the control and it is the surface they sit on. Runs break where a line crosses the silhouette, which is what stops a meridian drawing a chord straight across the face.',
+    ],
+  },
+  {
+    version: '1.77.1',
+    date: '2026-08-20',
+    changes: [
+      'FIX — THE RED RING TURNED THE WRONG WAY, and the sign that did it had been correct once. `inv:-1` was added to the pitch ring back when a drag was an angle bolted onto an Euler term: the right-hand rule about +X tips the nose UP when the hand pulls DOWN, which is the sign no flight stick and no 3D viewport has used in thirty years.',
+      'IT STOPPED BEING CORRECT WHEN THE DRAG BECAME AN ARCBALL. The whole promise of that model is that the point you grabbed goes where your hand goes — and a sign flip is exactly the instruction to send it the other way. So the red ring\'s arrow ran backwards out from under the pointer while the other two followed it, which is what got reported. A fix that outlived the thing it was fixing.',
+      'THERE IS NO PER-AXIS SIGN AT ALL NOW. All three rings follow the hand, because that is what an arcball is, and one fewer number means one fewer place for this to go wrong again.',
+      'THE KEYBOARD KEEPS ITS OWN CONVENTION, stated where it is read: a key press has no hand to agree with, so DOWN IS LESS. Up and down are pitch, left and right are yaw, shift rolls, alt steps by 1° instead of 5°.',
+    ],
+  },
+  {
+    version: '1.77.0',
+    date: '2026-08-20',
+    changes: [
+      'THE RINGS ARE PAINTED ON THE BALL NOW, NOT STRUNG AROUND IT, and two things had been giving that away. FIRST, A MARK ON THE FAR SIDE OF AN OPAQUE BALL IS NOT VISIBLE — the far halves were drawn dim, which is what you do for a wire cage you can see through. A gyro ball with meridians on it shows one hemisphere and that is all, so the back half is not drawn, and the part stops reading as a cage with a marble in it.',
+      'SECOND, PAINT TAKES THE LAMP THE SURFACE TAKES. A flat colour is the one thing that cannot be lying on a curved lit surface: the same red at the top-left and at the bottom-right says the paint is glowing rather than being lit. Every run of arc is shaded by the surface normal under it — which on a unit sphere IS the sample point, the one piece of luck in this part — against the same lamp `.stick-ball` is lit by. A ring now darkens as it curves away exactly as the ball does.',
+      'WHICH MEANS SHORT RUNS, ONE COLOUR EACH, because a polyline can only have one stroke and the whole point is that it must not. Two samples to a run is 5° of arc — finer than the shading changes and cheap enough to rebuild sixty times a second. `butt` caps rather than round: round ones overlap at every join and each overlap is a darker dot, so a shaded ring beads.',
+      'AND AMBIENT IS NOT POLITENESS. With none, the unlit half of every ring goes to pure black and the arcs stop partway across the face — the eye reads that as the ring ENDING, not as the ring being in shadow.',
+      'THE HUB AND THE SPOKES ARE GONE. Both were drawn to say which colour was which axis and both were the giveaway that this was a diagram: a sphere has nothing at its centre to see, and three lines radiating from the middle of one are three lines in FRONT of it. The rings say which axis is which by where they lie, which is the only way a painted ball ever says it.',
+      'TWO ARROWHEADS PER RING, HALF A RING APART, AND EXACTLY ONE SHOWS. Once the far side stopped being drawn a single head was hidden most of the time — two of the three rings had no arrow at all at rest — and the arrow is the only thing saying which way a drag will turn the ball. Antipodal points sit on opposite sides of any plane through the centre, so one of the pair is always near. Swept across seven orientations including both poles: never fewer than one per ring.',
+      'AND ONLY WHAT IS VISIBLE CAN BE GRABBED. The pick ignores samples on the far side now — a ring you cannot see is not a ring you meant to take hold of.',
+    ],
+  },
+  {
+    version: '1.76.1',
+    date: '2026-08-20',
+    changes: [
+      'FIX — 1.76.0 THREW ON LOAD. Splitting the drawing into three groups so the ball could sit BETWEEN the far and near arcs left `paint` still writing to the single `layer` it had replaced, so the specimen died on its first frame. Shipped on a syntax check, which is not a check.',
+      'AND TWO SHADOWS UNDER IT. The arc loop had a local `front` for "is this run nearer than the body" and the arrowhead a local `back` for its setback — both written before either word was a group, and both now naming a `<g>` one scope out. They are `near` and `tail`; `front` and `back` are the groups, and nothing else gets to be called that in here.',
+      'EVERY PIECE IS NOW ROUTED BY WHICH SIDE OF THE BALL IT IS ON — arcs, arrowheads and spokes alike. That is the whole depth model: no z-sorting and no painter\'s algorithm, just whether a thing goes in the group before the body or the one after it.',
+      'AND THE PART IS BUILT HEADLESSLY BEFORE IT SHIPS NOW, against a DOM stub deep enough to construct it and read the tree back: seat, svg, mouth, collar; nine arcs split five behind and four in front; `set()` exercised at the gimbal pole and either side of the ±180 seam. Two runtime errors in two versions is what a syntax check buys.',
+    ],
+  },
+  {
+    version: '1.76.0',
+    date: '2026-08-20',
+    changes: [
+      'THE ORBIT BALL IS A SPHERE SEATED IN A SOCKET NOW, not three lines on nothing. What made it read flat was never the shading — it was that there was no ball: a wire outline with arcs floating through the hole in the middle, and no reason for the far half of a ring to look far except that it had been told to.',
+      'THE SOCKET IS THE JOYSTICK\'S, WITH THE STICK TAKEN OUT — seat, mouth and collar, at `.stick-*`\'s own ratios rescaled to where this sphere sits. That part already settled every question this one was about to ask, and wrote down why: a sphere HAS NO OUTLINE, because an outline says the object ends at that line and a sphere does not end anywhere, it turns away. The hard edge belongs to the plate, out at the cut in the faceplate, where aluminium meets air. Everything inboard of it is tone.',
+      'AND THE LIGHT IS THE STICK\'S LIGHT, MOVED RATHER THAN INVENTED: lamp up-left, a terminator, black at the bottom-right, and a cool BOUNCE off the socket floor — the one highlight that is not the lamp, and the thing that makes it read as a ball instead of a disc with a gradient on it. A second sphere lit a second way is two lamps.',
+      'THE RIM STEALS LIGHT FROM EVERY SIDE AT ONCE, which is not the lamp and not directional, so the outer few millimetres go dark whichever way you look. It sits OVER the rings, so an arc running out to the rim goes into the same shadow the ball does — which is the whole reason the assembly reads as one object rather than as circles drawn on a picture of a ball.',
+      'THE ORDER IS THE OTHER HALF OF IT: far arcs, then the body, then near arcs. The ball VEILS what is behind it the way a real one would, so the far halves are dim because something is in front of them rather than because an opacity was chosen.',
+      'AND THE BLURS SCALE WITH THE BOX. The socket\'s shadows were written in pixels at 216; left alone, a 450px ball gets a 216px ball\'s hairlines and the whole socket goes crisp and small in the middle of a big part.',
+    ],
+  },
   {
     version: '1.75.0',
     date: '2026-08-20',

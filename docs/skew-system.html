@@ -688,9 +688,11 @@
 
   <h2>12 <span>/</span> The orbit ball</h2>
   <div class="stage">
-    <div class="stage-note">live · grab a ring and turn it · shift-arrows roll</div>
-    <div style="display:flex;gap:52px;align-items:center;flex-wrap:wrap;justify-content:center">
-      <div id="orbitspec"></div>
+    <div class="stage-note">live · grab a ring, or roll the ball itself · three sizes, one state</div>
+    <div style="display:flex;gap:44px;align-items:center;flex-wrap:wrap;justify-content:center">
+      <div id="orbitspec-lg" class="orbcell"></div>
+      <div id="orbitspec-md" class="orbcell"></div>
+      <div id="orbitspec-sm" class="orbcell"></div>
       <div id="orbitspec-knobs" class="knobcol"></div>
     </div>
   </div>
@@ -701,9 +703,10 @@
         <td>A ring is an axis seen edge on</td>
         <td>Each ring is the great circle <b>perpendicular</b> to one axis, drawn in the object's
             own frame — so the three together are a picture of where the object is pointing. Grab
-            one and the object turns about that axis: <b>the ring stays put and the arrow painted
-            on it travels round under your hand</b>, while the other two swing. What you grabbed is
-            what responds.</td>
+            one and the object turns about that axis: <b>the ring stays put and the surface travels
+            round under your hand</b>, while the other two swing. What you grabbed is what
+            responds — and while you hold it, it is drawn over the crossings and the other two drop
+            back, so the one you are turning is findable without looking for it.</td>
       </tr>
       <tr class="trap">
         <td>Turn about the ring, not about the angle that names it</td>
@@ -713,7 +716,7 @@
             <b>Exactly backwards</b>, and the spec above claimed the opposite for two versions.
             It turns about the ring's own axis in world space now (Rodrigues) and reads the result
             back out as three angles. Measured: the held axis drifts <code>2.8e-17</code> — machine
-            zero — and a 40° drag moves its arrow 40°.</td>
+            zero — and a 40° drag moves the paint on it 40°.</td>
       </tr>
       <tr class="trap">
         <td>Front and back are different objects</td>
@@ -723,13 +726,22 @@
             become a sphere. Nothing else here does the depth work — no shading, no perspective,
             no occlusion. <b>Drawn as one polyline with a gradient it is a flat doodle.</b></td>
       </tr>
+      <tr class="trap">
+        <td>No per-axis sign, and the one that was here fought the model</td>
+        <td>The pitch ring carried <code>inv:-1</code>, added back when a drag was an angle bolted
+            onto an Euler term: the right-hand rule about +X tips the nose <b>up</b> when the hand
+            pulls down, which is the sign no flight stick and no 3D viewport has used in thirty
+            years. Correct then. It <b>stopped being correct when the drag became an arcball</b> —
+            the whole promise of that model is that the point you grabbed goes where your hand
+            goes, and a sign flip is exactly the instruction to send it the other way. The red
+            red ring ran backwards out from under the pointer while the other two followed it.
+            All three follow the hand now, because that is what an arcball is.</td>
+      </tr>
       <tr>
-        <td>Down is less</td>
-        <td>The right-hand rule about +X tips the nose <b>up</b> when the hand pulls down, which is
-            the sign every flight stick and every 3D viewport has spent thirty years not using. The
-            pitch ring carries <code>inv:-1</code> and the other two do not — turning the hand the
-            way you want the object to turn is already what yaw and roll do. The arrow keys say the
-            same sentence, or the control would answer twice.</td>
+        <td>The keyboard states its own convention</td>
+        <td>A key press has no hand to agree with, so it says what it means: <b>down is less</b>.
+            Up and down are pitch, left and right are yaw, shift makes it roll, alt steps by 1°
+            instead of 5°.</td>
       </tr>
       <tr class="trap">
         <td>An axis pointing away turns the other way</td>
@@ -738,13 +750,16 @@
             that makes one of these feel broken. Edge-on the sign is undefined rather than
             negative, so it falls to <code>+1</code> rather than flipping.</td>
       </tr>
-      <tr>
-        <td>The head, and why each ring has one</td>
-        <td>A ring is symmetric and a rotation is not, so without an arrowhead which way a drag
-            turns the object is something you find out by trying it. It sits on the <b>nearest
-            point</b> of the ring — the one place never edge-on and never behind — and takes the
-            ring's own tangent there, so it turns with the ball instead of being pinned to a corner
-            of the box.</td>
+      <tr class="trap">
+        <td>No arrowheads, and no hub, and no faceplate</td>
+        <td>All three were drawn to <b>explain</b> the part and all three were what made it read as
+            a diagram of a ball rather than a ball. A sphere has nothing at its centre to see;
+            three lines radiating from the middle of one are three lines in front of it; an arrow
+            is a triangle with a size of its own, so near the rim it climbed out of the sphere onto
+            the socket wall. And the faceplate was one plate too many — a panel adopting this got
+            somebody else's metal pasted onto its own, and <b>a plate on a plate reads as a boss,
+            not as a cut</b>. What is left is the hole: collar at the box's edge, socket wall,
+            ball. The plate belongs to the host.</td>
       </tr>
       <tr>
         <td>Three angles out, a matrix in the middle</td>
@@ -789,6 +804,16 @@
             exactly as far as the hand pushed it. There is no gain to tune, because 1:1 on the
             surface is what a ball is. Measured: half a radius of travel is 30°, which is
             <code>asin(.5)</code> and not a constant anybody chose.</td>
+      </tr>
+      <tr>
+        <td>The body rolls, and the rings are the exception</td>
+        <td>A ball you can only turn by its rings is not a ball, it is <b>three sliders bent into
+            circles</b>. The rings are for turning about one axis on purpose; the body is for the
+            other nine-tenths of the time, when what you want is to see the other side of it. Same
+            arcball with one constraint fewer — the rotation carrying the point you grabbed to the
+            point under the pointer, about the axis perpendicular to both. It starts only from
+            <b>inside the silhouette</b>, because past that there is socket and a drag beginning on
+            the case is not a drag on the ball.</td>
       </tr>
       <tr>
         <td>Holroyd's sheet, past the rim</td>
@@ -1753,21 +1778,38 @@ document.getElementById('navspec').replaceWith(navBar({
    names, and it deletes the day the bug is fixed. ────────────────────────── */
 (function orbitSpec() {
   const st = { yaw: 0, pitch: 0, roll: 0 };
-  const knobs = {};          // filled below; the ball's handler only reads it
-                             // on a user drag, which cannot happen before then
+  const knobs = {};          // filled below; a ball's handler only reads it on
+                             // a user drag, which cannot happen before then
   let syncing = false;
 
-  const ball = orbit({
-    size: 450, yaw: st.yaw, pitch: st.pitch, roll: st.roll,
-    onChange: v => {
-      Object.assign(st, v);
-      if (syncing) return;
-      syncing = true;
-      knobs.yaw.set(v.yaw); knobs.pitch.set(v.pitch); knobs.roll.set(v.roll);
-      syncing = false;
-    },
-  });
-  document.getElementById('orbitspec').replaceWith(ball);
+  /* ALL THREE SIZES, ONE STATE, AND THE SMALL ONE IS THE HONEST ONE. A part
+     that only works blown up is a part that does not work — `sm` is what a
+     knob row actually gives this, so it is the one to judge. Showing the three
+     together is the only way to see that the ring weight and the graticule are
+     fractions of the box rather than numbers that happen to suit one size.
+
+     NONE OF THEM IS THE MASTER. All three, and the three knobs, are views of
+     `st`, and every one pushes through the same guard. Turn any and they all
+     turn. */
+  const balls = {};
+  const push = (v, from) => {
+    Object.assign(st, v);
+    if (syncing) return;
+    syncing = true;
+    for (const k in balls) if (k !== from) balls[k].set(v);
+    knobs.yaw.set(v.yaw); knobs.pitch.set(v.pitch); knobs.roll.set(v.roll);
+    syncing = false;
+  };
+
+  [['lg', 'LARGE · 264'], ['md', 'MEDIUM · 198'], ['sm', 'SMALL · 132']]
+    .forEach(([key, name]) => {
+      balls[key] = orbit({
+        size: key, yaw: st.yaw, pitch: st.pitch, roll: st.roll,
+        onChange: v => push(v, key),
+      });
+      const cell = document.getElementById('orbitspec-' + key);
+      cell.append(balls[key], el('span', 'tagcut', name));
+    });
 
   /* YAW, PITCH, ROLL — the order PANELS §03 prints them in, so the one part
      that exists on two pages does not list its own axes two ways. */
@@ -1780,7 +1822,7 @@ document.getElementById('navspec').replaceWith(navBar({
         st[k] = v;
         if (syncing) return;
         syncing = true;
-        ball.set({ [k]: v });
+        for (const b in balls) balls[b].set({ [k]: v });
         syncing = false;
       },
     });

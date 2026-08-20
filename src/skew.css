@@ -327,7 +327,6 @@ body::after{
   transition:transform .1s;
 }
 .gridswatch:active{ transform:translateY(1px); }
-.gridswatch:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 
 /* ── page furniture ──────────────────────────────────────────────────────── */
 .wrap{ max-width:1160px; margin:0 auto; padding:56px 32px 120px; }
@@ -1721,7 +1720,6 @@ h2 span{ color:#3d4149; }
 .tog .pipe{ flex:0 0 3px; align-self:stretch; margin:4px 2px 4px 0; }
 .tog.off .pipe{ background:#2a2c30; box-shadow:inset 0 1px 1px rgba(0,0,0,.8); }
 .tog.off .pipe::after{ display:none; }
-.tog:focus-visible{ filter:brightness(1.25); }
 
 /* ── the jewel LED: the layer's colour as a lens ─────────────────────────── */
 .jewel{
@@ -1984,47 +1982,26 @@ h2 span{ color:#3d4149; }
 }
 .engage{ animation:engage .26s ease-out; }
 
-/* ── FOCUS, WITHOUT THE BROWSER RING ─────────────────────────────────────
-   Eleven outline rules are gone. A 2px accent rectangle floating 2px off a
-   moulded cap is the one thing on this panel that is unmistakably a web page,
-   and it lands hardest exactly where the illusion is most expensive — around
-   the small keys, where the ring is nearly as big as the object.
+/* ── NO FOCUS RING, AT ALL ───────────────────────────────────────────────
+   Skew paints no focus indicator and lets no browser paint one either.
+   `*:focus` alone is not enough: deleting our outlines does not remove a
+   focus ring, it removes the one we control — Chrome's default comes back
+   underneath, 2-3px of white-blue. `:focus-visible` has to be answered
+   explicitly, not ignored. Same for Firefox's inner border on buttons and
+   the highlight flash on touch.
 
-   It is replaced rather than deleted, because a keyboard still has to be able
-   to say where it is. The cap simply comes UP under the light: brighter face,
-   a warmer top edge. That is what a physical control does when your attention
-   is on it, it costs no geometry, and it cannot be confused with the pressed
-   state, which goes the other way.
+   Honest note, and it is in the bill: this removes the WCAG focus indicator
+   entirely. Keyboard focus moves invisibly across every control on the
+   panel. Deliberate — a rectangle floating off a moulded cap is the one
+   thing here that is unmistakably a web page, and it lands hardest exactly
+   where the illusion is most expensive.
 
-   Honest note, and it is in the bill: a brightness shift is weaker than an
-   outline. It is fine on a dark panel at this size and it is not the equal of
-   a WCAG focus indicator — if this language ever shipped, this is the first
-   thing that would need a real answer. */
-/* AND KILL THE BROWSER'S OWN RING FIRST. Deleting my outlines did not remove
-   a focus ring, it removed the one I controlled — Chrome's default came back
-   underneath, 2-3px of white-blue, which is worse than what was there before.
-   :focus-visible has to be answered, not ignored.
-
-   One hairline, everywhere: 1px, the panel's own orange, offset by 1. At that
-   weight it reads as the edge catching light rather than as a widget, which is
-   the most a focus indicator can do in this language without becoming the
-   loudest thing on screen. The cap still lifts in brightness underneath it, so
-   the cue is carried twice — a thin line and a change in the object itself. */
-*:focus{ outline:none; }
-*:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:1px; }
-input:focus-visible{ outline-offset:3px; }
-
-.key:focus-visible,
-.sw:focus-visible,
-.micro:focus-visible,
-.chev:focus-visible,
-.pkey:focus-visible,
-.chip:focus-visible,
-.rot-lab:focus-visible,
-.row:focus-visible{ filter:brightness(1.25); }
-.knob:focus-visible,
-.rot-knob:focus-visible,
-.gz-node:focus-visible{ filter:brightness(1.3) drop-shadow(0 0 4px rgba(255,150,60,.45)); }
+   Menu and listbox row highlights are NOT focus rings and stay: they are
+   how you see which row you are on in an open dropdown. See .menu-row and
+   .sel-row below, and .skip, which needs :focus to appear at all. */
+html{ -webkit-tap-highlight-color:transparent; }
+*:focus, *:focus-visible{ outline:none; }
+::-moz-focus-inner{ border:0; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE NAV BAR — a control strip screwed to the desk
@@ -2295,8 +2272,6 @@ input:focus-visible{ outline-offset:3px; }
     inset 0 -1px 1px rgba(255,255,255,.06),
     0 1px 0 rgba(255,255,255,.06);
 }
-.ldisc:focus{ outline:none; }
-.ldisc:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:3px; }
 .ld-well{
   position:absolute; inset:0; border-radius:50%; display:block;
   background:
@@ -3279,38 +3254,73 @@ input:focus-visible{ outline-offset:3px; }
    are already on target is a cursor that never appears. The factory's own pick
    radius is 13px; the cursor says "this thing turns" from anywhere on it.
    ═══════════════════════════════════════════════════════════════════════════ */
+/* NO FACEPLATE. It had one — a round disc of metal with the socket sunk into
+   the middle of it — and that is one plate too many: a panel adopting this got
+   somebody else's metal pasted onto its own, and a plate on a plate reads as a
+   BOSS rather than as a cut. This part is the HOLE. The collar's knife line is
+   at the edge of the box, the plate is whatever the box is sitting in, and
+   that plate belongs to the host. */
 .orbit{
   position:relative; flex:0 0 auto; margin:0 auto;
   cursor:grab; touch-action:none; user-select:none;
 }
 .orbit.turning{ cursor:grabbing; }
-.orbit-svg{ display:block; width:100%; height:100%; overflow:visible; }
-.orbit-sil{
-  fill:none; stroke:#31363d; stroke-width:calc(var(--ow,3.2px) * .32);
+/* THE BALL IS A RASTER NOW, and the classes that were here — arc, grid, cap,
+   seam — are gone with the strokes that wore them. Every one of them was a
+   line pretending to be a surface. The material lives in a map, the map is
+   sampled per pixel against the pixel's own normal, and there is nothing left
+   for CSS to colour: what a mark looks like is a consequence of where it sits
+   on a lit sphere, which is not a thing a stylesheet can know.
+
+   IT SITS BETWEEN THE SEAT AND THE MOUTH, in the same order the strokes did —
+   socket floor under, ball, then the socket's own shadow over the top of it,
+   so a ball edge runs into the rim shadow rather than being cut out against
+   it. */
+.orbit-cv{
+  position:relative; z-index:1; display:block;
+  width:100%; height:100%; border-radius:50%;
+}
+
+.orbit-seat{
+  position:absolute; inset:0.8%; border-radius:50%; pointer-events:none;
+  background:
+    linear-gradient(178deg,
+      #07080a 0%, #0b0d10 34%, #14181d 62%, #262b32 88%, #303640 100%),
+    #0d0e10;
+  box-shadow:
+    inset 0 calc(7px * var(--osc,1)) calc(14px * var(--osc,1)) rgba(0,0,0,.95),
+    inset 0 calc(-2px * var(--osc,1)) calc(3px * var(--osc,1)) rgba(255,255,255,.10),
+    0 1px 0 rgba(255,255,255,.06);
+}
+/* THE RIM STEALS LIGHT FROM EVERY SIDE AT ONCE — not directional like the
+   lamp — so the outer few millimetres go dark whichever way you look. This is
+   what dissolves the sphere's own circular edge into the socket wall behind
+   it, and it sits OVER the rings so a ring running out to the rim goes into
+   the same shadow the ball does. */
+.orbit-mouth{
+  position:absolute; z-index:2; inset:2.0%; border-radius:50%; pointer-events:none;
+  box-shadow:
+    inset 0 0 calc(13px * var(--osc,1)) calc(7px * var(--osc,1)) rgba(0,0,0,.88),
+    inset 0 calc(7px * var(--osc,1)) calc(16px * var(--osc,1)) calc(1px * var(--osc,1)) rgba(0,0,0,.72),
+    inset 0 0 calc(28px * var(--osc,1)) calc(2px * var(--osc,1)) rgba(0,0,0,.45),
+    inset 0 calc(-2px * var(--osc,1)) calc(2px * var(--osc,1)) rgba(255,255,255,.05);
+}
+/* THE HARD EDGE IS THE PLATE'S AND ONLY THE PLATE'S. It sits at the CUT IN THE
+   FACEPLATE, not at the ball's rim — a machined edge is a plate that stops and
+   a sphere never stops, it turns away. Two objects sharing one contour is what
+   makes a ball look stamped into a hole. Everything inboard of this is tone. */
+.orbit-collar{
+  position:absolute; z-index:2; inset:0; border-radius:50%; pointer-events:none;
+  box-shadow:
+    inset 0 calc(2px * var(--osc,1)) calc(3px * var(--osc,1)) rgba(0,0,0,.9),
+    inset 0 calc(-2px * var(--osc,1)) calc(3px * var(--osc,1)) rgba(255,255,255,.09),
+    0 0 0 1px rgba(0,0,0,.72),
+    0 1px 0 rgba(255,255,255,.07);
 }
 /* `--ow` IS THE RING WEIGHT AND THE FACTORY DERIVES IT FROM `size`. Everything
    below is a ratio of it, so a ball at 450px is the same drawing as one at 132
    rather than the same drawing with wire for rings. */
-.orbit-arc{
-  fill:none; stroke-width:var(--ow,3.2px); stroke-linecap:round;
-}
-.orbit-arc.back{ stroke-width:calc(var(--ow,3.2px) * .5); opacity:.30; }
-.orbit-head{ stroke:none; }
-/* the head is part of the ring, so it takes the ring's depth — the same .30 the
-   far half of an arc takes, for the same reason */
-.orbit-head.back{ opacity:.30; }
-.orbit-spoke{ stroke-width:calc(var(--ow,3.2px) * .75); stroke-linecap:round; }
-.orbit-spoke.back{ opacity:.28; stroke-width:calc(var(--ow,3.2px) * .44); }
-/* the hub is the one part that is not an axis — machined grey, so three lit
-   colours have somewhere to start from that is not a fourth colour */
-.orbit-hub{
-  fill:#9aa0aa; stroke:#0c0d0f; stroke-width:calc(var(--ow,3.2px) * .38);
-}
-.orbit:focus-visible{ outline:2px solid var(--led); outline-offset:4px; border-radius:50%; }
-/* WHICH RING IS HELD, SAID ONCE. The factory writes the axis letter to a data
-   attribute while a drag is live; it prints in the corner rather than on the
-   ring, because a label on a moving circle is a label that lands on the other
-   two. */
+.orbcell{ display:flex; flex-direction:column; align-items:center; gap:13px; }
 .orbit.turning::after{
   content:attr(data-ax); position:absolute; right:2px; bottom:0;
   font-family:var(--font); font-size:11px; letter-spacing:.14em; color:var(--led);
@@ -3362,7 +3372,6 @@ input:focus-visible{ outline-offset:3px; }
     inset 0 -1px 2px rgba(0,0,0,.6);
 }
 .gz-node.on:hover{ transform:scale(1.28); }
-.gz-node:focus-visible{ outline:2px solid var(--led); outline-offset:3px; }
 .gz-hub{
   position:absolute; left:50%; top:50%; width:11px; height:11px; margin:-5.5px 0 0 -5.5px;
   border-radius:50%;
@@ -3660,7 +3669,6 @@ input:focus-visible{ outline-offset:3px; }
   transition:color .12s, box-shadow .14s;
 }
 .sel:hover{ color:#eef1f5; }
-.sel:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:2px; }
 .sel-nm{ flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 /* THE CHEVRON LIES DOWN AND STAYS DOWN. It points at where the plate will
    appear, which is under the face — and it does NOT flip when the list opens:
@@ -3898,8 +3906,6 @@ input:focus-visible{ outline-offset:3px; }
   flex:1 1 auto; min-width:0; padding:7px 0;
   display:flex; flex-direction:column;
 }
-.gate-legs:focus{ outline:none; }
-.gate-legs:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:3px; border-radius:4px; }
 .gate-leg{
   height:var(--gp,24px); padding:0 8px; border:0; border-radius:4px;
   display:flex; align-items:center; width:100%;
@@ -4408,7 +4414,6 @@ input:focus-visible{ outline-offset:3px; }
 }
 .drum-win.knock::before{ animation:drum-knock .09s ease-out; }
 
-.drum-win:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 
 /* ── THE TYPE SELECTOR ────────────────────────────────────────────────────
    Four ways to fill an area, on the switch rather than on a bar of keys. A
@@ -4866,7 +4871,6 @@ body.maxed-open .drawer-tab{ visibility:hidden; pointer-events:none; }
   box-shadow:inset 0 1px 0 rgba(255,255,255,.13), inset 0 -1px 0 rgba(0,0,0,.8),
              -4px 2px 7px -2px rgba(0,0,0,.75);
 }
-.oc-tab:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 @media (prefers-reduced-motion: reduce){
   .oc-page, .oc-drawer{ transition:none; }
 }
@@ -5030,7 +5034,6 @@ body.drawer-open .drawer{ transform:translateX(0); }
 }
 .tab-sub{ font-size:11px; color:#6b7079; margin-top:-5px; }
 .drawer-tab:hover{ background:linear-gradient(96deg,#33373d 0%,#272b31 55%,#1d2024 100%); }
-.drawer-tab:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 
 /* ── THE MARK ON THE TAB ──────────────────────────────────────────────────
    A BURGER SAYS "MENU" AND THIS IS NOT ONE. Three equal bars is the mark for a
@@ -5659,7 +5662,6 @@ footer{ margin-top:80px; padding-top:22px; border-top:1px solid #1c1e22;
    underline on a machine's badge is a web page wearing a panel. */
 a.nav-mark{ cursor:pointer; transition:color .14s, text-shadow .14s; }
 a.nav-mark:hover{ color:#9aa0aa; text-shadow:0 1px 0 rgba(255,255,255,.2), 0 -1px 0 rgba(0,0,0,.8); }
-a.nav-mark:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:3px; border-radius:3px; }
 
 .nav-pages{ padding:5px; gap:6px; }
 /* AN ANCHOR, NOT A BUTTON. These go to documents, so the part underneath has
@@ -5750,7 +5752,6 @@ span.nav-link{ cursor:default; }
 }
 .detail-tab::-webkit-details-marker{ display:none; }
 .detail-tab:hover .detail-nm{ color:#aeb4be; }
-.detail-tab:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
 
 .detail-nm{
   font-family:var(--font); font-size:8.5px; letter-spacing:.16em; text-transform:uppercase;

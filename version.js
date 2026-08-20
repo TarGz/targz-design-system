@@ -1,6 +1,19 @@
-export const version = '1.67.1';
+export const version = '1.68.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.68.1',
+    date: '2026-08-20',
+    changes: [
+      'THE SHOT CAPTIONS AND THE PART CHIPS ARE GONE, and that is the section working rather than the section unfinished. Both were written by reading the images and describing what seemed to be in them — which is a caption ABOUT a screenshot rather than evidence, and both were wrong in the ordinary way a description of a picture is wrong: confident about things the picture does not actually say.',
+      'A SHOT OF A WORKING TOOL ARGUES FOR ITSELF OR IT DOES NOT ARGUE. What each one gets is the app name and the version it came out of, which are the two facts a reader cannot get by looking at it. Everything else was the page talking over its own evidence.',
+      'THE HOME PAGE §03 IN USE IS WIRED TO THE REAL SHOTS. The machinery was already there and pointed at six filenames nobody had made — typo-3d, typo-canvas, typo-drop and three more — so the section rendered a column of NO SIGNAL panels. Four screens exist and they are in: RIBBONS v0.29.0, and TYPO v10.0.0 three times over.',
+      'FOUR SHOTS, TWO APPS, AND BOTH CLAIMS AT ONCE. The note above the array used to argue they were one app on purpose: two apps at one view each would only prove the parts are PORTABLE, where one app at several views proves they hold a whole tool TOGETHER. Both are true now and there is no reason left to pick one — RIBBONS and TYPO are different tools out of different runs of the same language, and TYPO is here three times because a tool is not one screen.',
+      'AND ONE OF THEM ANSWERS A QUESTION THIS SYSTEM SPENT AN AFTERNOON GETTING WRONG. Shot 003 is the hatch bay: a strip along the top that is not a value but WHICH SURFACE the four controls under it are editing, with ALL beside it to spread one field across every surface that can take it. That is the stroke-and-substroke panel, already built, already shipping — after a version of it was invented from scratch for the drawer and deleted. The evidence section had the answer in it the whole time.',
+      'THE CROPS ARRAY IS EMPTY AND THE MACHINERY IS NOT. Four crops were written before their files existed, so the page drew four dead screens — and the NO SIGNAL state is for a file on its way, not for a file nobody is sending. The row builds itself from the array and does not append at all while it is empty.',
+      'NINE MEGABYTES OF PNG BETWEEN THEM, on a page whose first job is to be a door, so every shot is loading=lazy and decoding=async. They arrive when they are scrolled to rather than before the masthead paints.',
+    ],
+  },
   {
     version: '1.67.1',
     date: '2026-08-19',

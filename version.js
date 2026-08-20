@@ -1,6 +1,15 @@
-export const version = '1.92.0';
+export const version = '1.92.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.92.1',
+    date: '2026-08-20',
+    changes: [
+      'THE LAMP MOVES UP AND LEFT — 22° off straight-on to 48°, and 30° of elevation to 38°, which puts the hot spot at about a fifth of the way across instead of a third. Renormalised rather than nudged: a lamp vector that drifts off unit length quietly rescales every Lambert value on the ball, so a move would silently change its overall brightness as well as its direction.',
+      'AND THE HIGHLIGHT COMES BACK DOWN TO A SATIN SHEEN. The gloss pass took it to .62/90 — a near-white point at +158 that died inside twelve degrees, which is polished plastic. At .26/30 it peaks at +66 and carries to thirty degrees: dimmer in the middle, BRIGHTER at the edges, which is what "more diffuse" means physically rather than just smaller. The diffuse term takes what the spot gave back, .64 to .71, so the ball does not lose light overall.',
+      'WORTH KNOWING, AND NOT YET RESOLVED: the comment beside `LAMP` calls it "the one every other part on this site is lit by", and the CSS-drawn parts still light from 38% / 26% — the old 22°. The ball is lit from further left than its neighbours now. Invisible on its own page, visible the moment it sits in a row of knobs.',
+    ],
+  },
   {
     version: '1.92.0',
     date: '2026-08-20',

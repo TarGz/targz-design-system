@@ -3315,7 +3315,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   const quality = dpr => { if (dpr !== DPR) { buildGrid(dpr); paint(); } };
 
   /* the lamp, and the one every other part on this site is lit by */
-  const LAMP = [-0.46, 0.50, 0.734];
+  const LAMP = [-0.58, 0.62, 0.528];
   /* ── GLOSS, AND IT IS THE DARK THAT PAYS FOR IT ─────────────────────────
      THIS WENT THE OTHER WAY ONCE, on the argument that a tight bright specular
      is a WET look and that a moulded plastic has a broad soft sheen. True of
@@ -3328,7 +3328,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
      THE CUTS STAY MATTE, which is unchanged and matters more now: the sheen is
      three times what it was, and a machined face catching that would look
      lacquered. `sp` is damped to a fifth inside a groove. */
-  const AMB = 0.30, DIF = 0.64, SPEC = 0.62, SHINE = 90;
+  const AMB = 0.32, DIF = 0.71, SPEC = 0.26, SHINE = 30;
 
   /* how far a step in the height sheet bends the normal — the bevel's ANGLE,
      where the blur that made it was its width */

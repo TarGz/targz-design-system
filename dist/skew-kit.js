@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.49.3
+     at       Skew v1.67.1
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -149,6 +149,24 @@ Object.assign(ICON, {
   orbit: svg('<circle cx="12" cy="12" r="3"/><path d="M12 3a9 9 0 0 1 0 18"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)"/>'),
   arrow: svg('<polygon points="4 2 4 18 8.5 13.5 11.5 20 14 19 11 12.5 17 12.5"/>'),
   drop:  svg('<path d="M12 3s6 6.5 6 10.5a6 6 0 0 1-12 0C6 9.5 12 3 12 3z"/>'),
+  /* THE DOCK'S OWN GLYPHS. Six marks the bar could not be built without, in
+     the same stroke language as everything above: 24-box, open shapes, no
+     fill, because a filled glyph on a 16px cap is a blob. */
+  save:  svg('<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 14 8"/>'),
+  fileNew: svg('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/>'),
+  /* THE PEN IS THE SVG, and it is the nib in section — the barrel tapering to
+     the tip with the slit up the middle. A PNG is a picture of the drawing; an
+     SVG is the path the pen takes, so the mark is the pen. */
+  nib:   svg('<path d="M9 3h6l-1 9-2 9-2-9-1-9z"/><line x1="12" y1="8" x2="12" y2="17"/><line x1="9.4" y1="12" x2="14.6" y2="12"/>'),
+  /* AND THE DEBUG SVG IS THE SAME DRAWING WITH THE CONSTRUCTION LEFT IN — one
+     curve, its two anchors and the handles that made it. Not a bug, not a
+     wrench: what is different about that file is that it still shows its
+     working, and the mark says exactly that. */
+  nibDebug: svg('<path d="M3 17.5C6.5 7 17.5 7 21 17.5"/><rect x="1.5" y="16" width="3.5" height="3.5" rx=".6"/><rect x="19" y="16" width="3.5" height="3.5" rx=".6"/><rect x="10.2" y="5.2" width="3.5" height="3.5" rx=".6"/><line x1="5" y1="15.4" x2="10.4" y2="8.6"/><line x1="13.6" y1="8.6" x2="19" y2="15.4"/>'),
+  /* FOUR PANES, NOT A GRID. The mark is the WINDOWS — four of them, square,
+     where they belong. Which is why it is the right mark for the key that puts
+     them back: what you press it for is this picture. */
+  windows: svg('<rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/>'),
 });
 
 
@@ -389,6 +407,106 @@ const clicky = (b, down = SFX.press, up = SFX.release) => {
   b.addEventListener('pointerup',   () => { if (!b.disabled) up(); });
   return b;
 };
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE PRESS IS THE CLICK — one listener, and it retires an argument.
+
+   A `click` is not an event the pointer sends. It is one the browser INFERS,
+   from a pointerdown and a pointerup that resolve to the same element — and
+   the moment those two disagree there is no click at all, however obvious the
+   press was. Every way they can disagree is in play on this kit at once:
+
+     · the cap TRAVELS. `:active` lands on pointerdown and drops it 2px, so a
+       press that arrived near the top edge is left standing above the thing
+       it just pressed.
+     · the pad is INVISIBLE and its edges are exact. A release one pixel out
+       is a release on the chassis.
+     · a rounded corner is not a corner. Browsers hit-test the rounded box, so
+       the crescent outside every curve belongs to whatever is behind it.
+
+   THREE ROUNDS OF THIS FILE'S CSS WENT AFTER THOSE ONE AT A TIME — a squarer
+   pad, a longer reach, a counter-translate — and every one of them was a
+   better answer to the wrong question. The question is not which pixels belong
+   to the key. It is why a control that has visibly been pressed is waiting for
+   the browser's permission to act.
+
+   SO IT DOES NOT WAIT. Pointerdown on a control captures the pointer and arms
+   it; pointerup within reach of where it started fires the control, and the
+   browser's own click — if it turns up — is the one that wins. Press and
+   release on a key, and the key goes. That is the whole rule, and it is the
+   rule a physical key has.
+
+   IT IS NOT A CLICK ANYWHERE. Release well away from the control and nothing
+   happens, because sliding off a key you have changed your mind about is how
+   every button on every machine has always worked. `SLOP` is what "away"
+   means, and it is generous on purpose: it has to clear the travel and the
+   pad, and the cost of being wrong is a press that does nothing, which is the
+   bug this exists to end.
+
+   ONE DOCUMENT LISTENER, NOT ONE PER CONTROL, because the controls this has to
+   reach are not all built here. The doc site's nav bar writes its own `.pkey`
+   anchors and never calls `clicky`; an adopting app will do the same thing the
+   first time it wants a key the factory does not make. A rule about what a
+   press MEANS cannot live in the constructors.
+   ══════════════════════════════════════════════════════════════════════════ */
+const PRESSABLE = '.key, .pkey, .chip, .sw, .chev, .menu-row, .tab-demo, .act';
+const PRESS_SLOP = 12;
+
+function pressFix(root) {
+  let armed = null, fired = false;
+
+  root.addEventListener('pointerdown', e => {
+    if (e.button) return;                       // primary button only
+    const t = e.target.closest && e.target.closest(PRESSABLE);
+    if (!t || t.disabled) return;
+    armed = t; fired = false;
+    /* CAPTURE FIRST, and most browsers then retarget the native click here on
+       their own — which is the outcome we want and the one we do not have to
+       synthesise. The rest of this is for the ones that do not. */
+    try { t.setPointerCapture(e.pointerId); } catch { /* not capturable */ }
+  }, true);
+
+  /* THE REAL CLICK ALWAYS WINS. It carries the modifier keys, the detail count
+     and the trusted flag; a synthetic one carries none of that, so it is only
+     ever a fallback and never a duplicate. */
+  root.addEventListener('click', e => {
+    if (armed && (e.target === armed || armed.contains(e.target))) fired = true;
+  }, true);
+
+  root.addEventListener('pointerup', e => {
+    const t = armed;
+    if (!t) return;
+    const r = t.getBoundingClientRect();
+    const near = e.clientX >= r.left   - PRESS_SLOP && e.clientX <= r.right  + PRESS_SLOP
+              && e.clientY >= r.top    - PRESS_SLOP && e.clientY <= r.bottom + PRESS_SLOP;
+    if (!near) { armed = null; return; }
+    /* DISARMED IN THE TIMEOUT, NOT HERE, AND THAT ORDER IS THE WHOLE THING.
+       Pointer events run pointerdown → pointerup → click, so the browser's
+       click lands AFTER this handler. Clearing `armed` now leaves the click
+       listener above with nothing to match, `fired` never goes true, and this
+       fires a second synthetic click on top of the real one — every control in
+       the kit actuating twice. It reads as working on anything idempotent (a
+       piano key reselecting the same key) and as DEAD on anything that toggles:
+       a latch flips back, and a menu opens on the real click and shuts on the
+       duplicate. Hold the reference until the fallback has had its look. */
+    setTimeout(() => {
+      if (!fired) t.click();
+      if (armed === t) armed = null;
+    });
+  }, true);
+
+  root.addEventListener('pointercancel', () => { armed = null; }, true);
+  return root;
+}
+
+/* INSTALLED BY THE KIT, NOT BY THE APP. An adopter that has to remember to
+   call this is an adopter whose keys work everywhere except the one page where
+   they forgot. Guarded for `tools/run-page.mjs`, which runs this file with no
+   document at all. */
+if (typeof document !== 'undefined' && !document.__skewPressFix) {
+  document.__skewPressFix = true;
+  pressFix(document);
+}
 
 /* A backlit switch. `state` is on | mixed | off for the masters; per-layer
    switches pass null and use the plain on/off. */
@@ -1484,12 +1602,23 @@ function rotary({ options, index, onChange, compact = false }) {
      allowed to reserve: names 4px closer together, and a floor that comes from
      the SEAT rather than from a constant. */
   const LEAD_R = 40, LAB_GAP = compact ? 18 : 22;
-  /* AND THE NAMES COME IN, not just closer together. The leader's whole job is
-     to absorb the mismatch between a fan of ticks and a straight column, and
-     it can do that over 34px as well as 40 — which is 8px of name back on
+  /* AND THE NAMES COME IN, not just closer together — 8px of name back on
      every switch, on a panel where 8px is the difference between a word
-     fitting and being abbreviated. */
-  const ELBOW_X = compact ? 34 : 40, LAB_X = compact ? 48 : 56;
+     fitting and being abbreviated.
+
+     BUT THE ELBOW CANNOT COME IN WITH THEM, and at 34 it had. The rim of the
+     fan reaches x = 39.6 at the middle detents, so an elbow at 34 is INSIDE
+     the dial: the leader left the tick, travelled five pixels BACKWARDS
+     towards the knob, turned, and came out again. Four of the six leads on a
+     compact switch were drawn inside out, which is what "the lines go in
+     chaotic directions" was — not a fan that had opened too far, a fan
+     pointing the wrong way.
+
+     41 IS THE FLOOR AND IT IS NOT A TASTE: it is LEAD_R plus one, the first
+     whole pixel outside the rim, which is the same 1px of run the full-size
+     one has always had at its middle detents. The names keep their 48 and
+     compact keeps everything it was for. */
+  const ELBOW_X = compact ? 41 : 40, LAB_X = compact ? 48 : 56;
   const FLOOR = compact ? 84 : 130;
   /* THE BOX GROWS WITH THE LIST. It was a fixed 130px, which fits six names at
      22px apart and silently clips the seventh — and worse, the column is
@@ -1573,6 +1702,132 @@ function rotary({ options, index, onChange, compact = false }) {
   });
   paint();
   return row;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE AXIS BALL — the selector whose options are DIRECTIONS
+
+   THE THIRD SELECTOR, AND THE COUNT DOES NOT DECIDE IT. rotary() and drum()
+   are picked by how many names there are: six you can aim a lever at, or more
+   than a dial can hold. This one is picked by what the names ARE. Six
+   directions in a space, and for those the PICTURE is the control — you do not
+   read the word "Right", you click the red node on the right.
+
+   SO THE SET IS FIXED AT SIX AND THE CALLER CANNOT REARRANGE IT. A space has
+   six axis directions and this part is that fact. `views` RENAMES them — an
+   app that calls +Z "Camera" is still choosing +Z — but the order is the
+   geometry (+Z, +X, +Y, −Z, −X, −Y), because a list you could shuffle would
+   let a caller print "Top" on the right-hand node, and that is a control that
+   lies about where it points.
+
+   HOLLOW IS THE FAR SIDE. Three of the six point away from the eye, and a ball
+   drawn without that distinction is a flat cross with five beads on it: the
+   near nodes are filled and catch the lamp, the far ones are rings. It is also
+   why FRONT IS THE HUB — +Z comes straight at you, so it has no arm to draw
+   and no length to draw it at. A vector aimed at the eye is a point, which is
+   the same thing lightDir() says at the zenith and for the same reason.
+
+   AND THE CURRENT VIEW IS LIT ON THE BALL. The first build of this — inline in
+   the panels exploration — marked the choice only on the six keys beside it,
+   so the ball was an input with no readout: press Top and it looks exactly as
+   it did. A selector shows its own position or it is a row of buttons.
+   ══════════════════════════════════════════════════════════════════════════ */
+const GZ_VIEWS = ['Front', 'Right', 'Top', 'Back', 'Left', 'Bottom'];
+function gizmo({ views = GZ_VIEWS, index = 0, onChange } = {}) {
+  /* 132px of ball, 40px of arm, measured off the reference and left alone.
+     There is no `size`: .gz-node is a 15px bead in the stylesheet and the
+     knurl-and-bevel argument applies here too — a part sampled at a size the
+     document does not use is a part nobody can check. */
+  const C = 66, R = 40;
+  const AX = { x: '#FF4A4A', y: '#4ADE80', z: '#5AA9FF' };
+
+  const ball = el('div', 'gizmo');
+  ball.setAttribute('role', 'radiogroup');
+  ball.setAttribute('aria-label', 'View direction');
+
+  const arm = (deg, len, ax) => {
+    const a = el('div', 'gz-arm');
+    a.style.cssText = `width:${len}px;transform:rotate(${deg}deg) translateY(-1px)`;
+    a.style.setProperty('--ax', ax);
+    return a;
+  };
+  /* four arms in the plane of the screen, and one FORESHORTENED at 62% for the
+     axis running back into it. That single short arm is the whole reason this
+     reads as a ball rather than a compass rose. */
+  ball.append(arm(0, R, AX.x), arm(180, R, AX.x),
+              arm(-90, R, AX.y), arm(90, R, AX.y),
+              arm(-140, R * 0.62, AX.z));
+
+  //  x, y, colour, hollow, diameter — in the order the views are named in
+  const SEATS = [
+    [C, C, AX.z, false, 17],                    // Front   +Z   the hub
+    [C + R, C, AX.x, false],                    // Right   +X
+    [C, C - R, AX.y, false],                    // Top     +Y
+    [C - R * 0.48, C - R * 0.40, AX.z, true],   // Back    −Z
+    [C - R, C, AX.x, true],                     // Left    −X
+    [C, C + R, AX.y, true],                     // Bottom  −Y
+  ];
+
+  const nodes = SEATS.map(([x, y, ax, hollow, d], n) => {
+    const b = el('button', 'gz-node' + (hollow ? ' hollow' : ''));
+    b.type = 'button';
+    b.style.cssText = `left:${x}px;top:${y}px`
+      + (d ? `;width:${d}px;height:${d}px;margin:${-d / 2}px 0 0 ${-d / 2}px` : '');
+    b.style.setProperty('--ax', ax);
+    b.setAttribute('role', 'radio');
+    b.title = `${views[n]} view`;
+    b.setAttribute('aria-label', `${views[n]} view`);
+    b.addEventListener('click', () => set(n));
+    return b;
+  });
+  // the hub is laid down LAST so it sits over the five arms meeting under it
+  ball.append(...nodes.slice(1), nodes[0]);
+
+  let i = index;
+  const paint = () => {
+    nodes.forEach((b, n) => {
+      const on = n === i;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-checked', String(on));
+      /* ROVING TABINDEX. Six tab stops for one choice is five too many, so the
+         GROUP is the stop and the arrows walk inside it — which is what a
+         radio group has always done, and what the rotary's listbox does with
+         its own four. */
+      b.tabIndex = on ? 0 : -1;
+    });
+  };
+  // all detent and no travel, like the rotary, so it gets the same voice
+  const set = n => {
+    const was = i;
+    i = Math.max(0, Math.min(nodes.length - 1, n));
+    if (i !== was) SFX.clack();
+    paint();
+    onChange && onChange(views[i], i);
+  };
+  /* the handle knob(), fader() and rotary() all expose. The six keys beside a
+     ball are the reason it has to exist: two controls on one choice, and
+     neither of them may be rebuilt to follow the other. */
+  ball.set = n => { i = Math.max(0, Math.min(nodes.length - 1, n)); paint(); };
+
+  ball.addEventListener('keydown', e => {
+    const n = nodes.length;
+    let to = i;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') to = (i + 1) % n;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') to = (i + n - 1) % n;
+    else if (e.key === 'Home') to = 0;
+    else if (e.key === 'End') to = n - 1;
+    else return;
+    /* IT WRAPS, AND THE ROTARY DOES NOT. A lever has a first and a last detent
+       because it is a lever; a set of axes has neither, and stopping the walk
+       at Bottom would be a mechanical limit imported into a thing with no
+       mechanism. */
+    e.preventDefault();
+    set(to);
+    nodes[i].focus();
+  });
+
+  paint();
+  return ball;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1667,13 +1922,498 @@ function pkey(labelHtml, { down = false, title, onClick, cls = '' } = {}) {
   return clicky(b, SFX.tap, SFX.lift);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   THE ASSET ROW — load a file, and say what is loaded
 
+   THE PART WAS ALREADY HALF HERE, WHICH IS WHY IT KEPT NOT GETTING BUILT.
+   `.filmrow` and its four children have been in the stylesheet since the layer
+   editor: a thumb, a name, a source line, a stack of small keys. What was
+   missing is the half that is not CSS — the file input, the empty state, and
+   the rule about what SAVE and CLEAR may do when there is nothing loaded. So
+   every app wrote that half itself, and grepping this system for `type=file`
+   returned nothing at all while nine apps had one each.
+
+   THE INPUT IS HIDDEN AND THE FACTORY OWNS IT. `<input type=file>` cannot be
+   styled — its button is browser chrome no CSS in this file reaches, which is
+   the same reason `openPicker` exists instead of `input[type=color]`. So the
+   input is off-screen, the LOAD key clicks it, and the caller is handed a File
+   and never sees the element. It also resets `value` after every pick, because
+   choosing the same file twice in a row fires no `change` otherwise and the
+   app looks frozen on the one action a user repeats while iterating.
+
+   THREE KEYS SET THE HEIGHT, AND THE THUMB GROWS TO MEET THEM. The stack is
+   24px caps with 5px between, so two make 53 and sit inside a 56px thumb —
+   which is the row §02 has always drawn. Three make 82, and at that point the
+   thumb is no longer the tallest thing in the row: either the stack overhangs a
+   small picture or the picture grows. It grows. An 82px preview of a map is
+   also a better preview, and the row stays ONE block rather than a picture with
+   something taller floating beside it. `.filmrow.three` is that, and it is set
+   from the key count rather than by the caller — a row that is tall because
+   somebody passed `tall:true` is a row that will be tall with two keys.
+
+   EMPTY IS A REAL STATE AND IT IS NOT AN ABSENCE. A slot with no image is the
+   state every one of these rows starts in, so it gets a well rather than a gap,
+   the name says so in words, and SAVE and CLEAR are DISABLED — there is nothing
+   to write out and nothing to throw away. A live key that does nothing teaches
+   you not to trust the row.
+
+   THE DISABLE TOGGLE IS OPTIONAL AND OFF BY DEFAULT. `select ≠ active`: a slot
+   you have loaded an image into and switched off is a real state, and the
+   request for this part argues it belongs here. It is still a CONTROL, and a
+   control that appears in a panel nobody asked to put it in is a knob somebody
+   has to understand. Pass `onToggle` and you get it; leave it out and there is
+   no switch in the row.
+   ══════════════════════════════════════════════════════════════════════════ */
+function assetRow({ name, source, thumb, accept = 'image/*', label = 'No image',
+                    onLoad, onSave, onClear, onToggle, on = true } = {}) {
+  const row = el('div', 'filmrow');
+
+  const th = el('div', 'thumb');
+  const meta = el('div', 'meta');
+  const fn = el('div', 'fn');
+  const fs = el('div', 'fs');
+  meta.append(fn, fs);
+
+  const stack = el('div', 'stack');
+  const defs = [
+    ['LOAD', 'Load an image into this slot', () => input.click(), false],
+    onSave  && ['SAVE',  'Save this image out',  () => onSave(),  true],
+    onClear && ['CLEAR', 'Empty this slot',      () => onClear(), true],
+  ].filter(Boolean);
+  /* THE HEIGHT COMES FROM THE COUNT, not from a flag. 3·24 + 2·5 = 82 against
+     the thumb's own 56, so anything past two keys has to move the picture. */
+  if (defs.length > 2) row.classList.add('three');
+
+  const keys = defs.map(([lab, title, run]) => key(`<span>${lab}</span>`, { title, onClick: run }));
+  stack.append(...keys);
+  /* which keys go dead when the slot is empty — LOAD never does */
+  const needsFile = defs.map(d => d[3]);
+
+  /* the input is a real element in the DOM because a detached one does not
+     open a picker in every browser; it is simply nowhere anyone can reach it */
+  const input = el('input');
+  input.type = 'file';
+  input.accept = accept;
+  input.tabIndex = -1;
+  input.setAttribute('aria-hidden', 'true');
+  input.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none';
+  input.addEventListener('change', () => {
+    const f = input.files && input.files[0];
+    input.value = '';                       // same file twice must fire again
+    if (f && onLoad) onLoad(f);
+  });
+
+  let sw = null;
+  if (onToggle) {
+    sw = toggle({ label: 'Use', value: on, title: 'Use this image', onChange: v => onToggle(v) });
+  }
+
+  const paint = (st) => {
+    const has = !!(st && st.name);
+    fn.textContent = has ? st.name : label;
+    fn.style.color = has ? '' : '#61666f';
+    fs.textContent = (st && st.source) || (has ? '' : '—');
+    th.classList.toggle('empty', !has);
+    th.style.background = has && st.thumb ? st.thumb : '';
+    keys.forEach((k, n) => { if (needsFile[n]) k.disabled = !has; });
+  };
+
+  row.append(th, meta, stack, input);
+  if (sw) row.append(sw);
+  paint({ name, source, thumb });
+  /* the same handle every other part exposes. A slot's contents change from
+     outside the row far more often than from inside it — a config load, a
+     generate, a paint — so `.set()` is the normal way in, not the exception. */
+  row.set = (st) => paint(st || {});
+  return row;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE MENU — `.plate` was the surface; this is the mechanism.
+
+   The plate has positioned itself against the thing that summoned it since the
+   colour picker, and its own comment says "menus, tooltips and any popup want
+   it". What never existed was the part underneath: open, close, Escape,
+   click-outside, a keyboard walk. Eight of the nine Portrait apps have an
+   icon bar with dropdowns hanging off it, and all eight wrote that themselves.
+
+   ONE OPEN AT A TIME, AND THE KEY THAT OPENED IT CLOSES IT. The second half is
+   the one that gets left out: without it, clicking the lit key tears the plate
+   down and builds an identical one in the same place — a control that visibly
+   does nothing, which is worse than one that does nothing quietly, because you
+   try it twice.
+
+   THE KEY STAYS LIT FOR AS LONG AS ITS MENU IS OPEN. On a bar of eight icons
+   that lamp is the only thing saying which menu you are in. The plate carries
+   no title and should not need one — it is anchored to the key, and the key is
+   the label.
+
+   IT OPENS UPWARD, because the bar this hangs off is on the floor. `up:false`
+   for a bar at the top, and either way it flips rather than clipping: a plate
+   that opens off the edge of the window is a plate you cannot use.
+   ══════════════════════════════════════════════════════════════════════════ */
+let plateOpen = null;
+
+/* THE MECHANISM, WITH NOTHING IN IT. Everything that opens off a key shares
+   this: one open at a time, the key that opened it closes it and stays lit
+   while it is up, Escape, click-outside, a flip rather than a clip at a window
+   edge. A menu is this plus rows; the console is this plus a log.
+
+   NO TAIL, NO POINTER, NO NOTCH. The plate is anchored to the key and the key
+   is LIT — that is already two channels saying where it came from, and a
+   pointer stuck on the edge is a third that only works while the plate is
+   directly over its key. The moment a wide plate slides off a window edge the
+   tail is somewhere in the middle of the bar, pointing at whatever happens to
+   be under it. */
+function openPlate(anchor, body, { up = true, cls = '', onKey } = {}) {
+  if (plateOpen) {
+    const same = plateOpen.anchor === anchor;
+    plateOpen.close();
+    if (same) return null;
+  }
+
+  const plate = el('div', 'plate ' + cls);
+  plate.append(body);
+  document.body.append(plate);
+
+  /* Measured after it is in the DOM: the height depends on what it was given,
+     and the flip decision depends on the height. */
+  const place = () => {
+    const a = anchor.getBoundingClientRect(), p = plate.getBoundingClientRect();
+    const GAP = 11;
+    let above = up;
+    if (above && a.top - p.height - GAP < 8) above = false;
+    else if (!above && a.bottom + p.height + GAP > innerHeight - 8) above = true;
+    let x = a.left + a.width / 2 - p.width / 2;
+    x = Math.max(8, Math.min(x, innerWidth - p.width - 8));
+    plate.style.left = x + 'px';
+    plate.style.top  = Math.max(8, above ? a.top - p.height - GAP : a.bottom + GAP) + 'px';
+  };
+  place();
+
+  function close() {
+    if (plateOpen && plateOpen.plate !== plate) return;
+    plateOpen = null;
+    plate.remove();
+    anchor.classList.remove('is-down');
+    anchor.setAttribute('aria-expanded', 'false');
+    removeEventListener('resize', place);
+    removeEventListener('scroll', place, true);
+    document.removeEventListener('pointerdown', outside, true);
+    document.removeEventListener('keydown', key_, true);
+  }
+  const outside = e => {
+    if (!plate.contains(e.target) && !anchor.contains(e.target)) close();
+  };
+  const key_ = e => {
+    if (e.key === 'Escape') { e.stopPropagation(); close(); anchor.focus(); return; }
+    onKey && onKey(e, close);
+  };
+
+  anchor.setAttribute('aria-expanded', 'true');
+  plateOpen = { anchor, plate, close, body };
+  addEventListener('resize', place);
+  addEventListener('scroll', place, true);
+  // deferred, or the click that opened it closes it again in the same tick
+  setTimeout(() => document.addEventListener('pointerdown', outside, true));
+  document.addEventListener('keydown', key_, true);
+  plate.reflow = place;
+  return plate;
+}
+
+function menu(anchor, items, { up = true } = {}) {
+  const body = el('div', 'plate-body');
+  const rows = [];
+  body.setAttribute('role', 'menu');
+
+  items.forEach(it => {
+    if (it === '-') { body.append(el('div', 'menu-cut')); return; }
+    const r = el('button', 'menu-row');
+    r.type = 'button';
+    r.setAttribute('role', 'menuitem');
+    r.append(el('span', 'menu-ico', it.icon || ''), el('span', 'menu-nm', it.label));
+    /* A ROW WITH NO SHORTCUT LEAVES THE COLUMN EMPTY. `New` has none, and
+       giving it one to square the block off is inventing a key binding for the
+       sake of a straight right edge. */
+    if (it.kbd) r.append(el('kbd', 'menu-kbd', it.kbd));
+    r.disabled = !!it.disabled;
+    /* CLOSE FIRST, THEN RUN. A handler that opens a window, throws, or blocks
+       on a file dialog leaves the plate on screen over the thing it just did. */
+    r.addEventListener('click', () => {
+      const go = it.onPick;
+      if (plateOpen) plateOpen.close();
+      go && go();
+    });
+    clicky(r, SFX.tap, SFX.lift);
+    rows.push(r);
+    body.append(r);
+  });
+
+  /* THE WALK IS ARROWS, and it starts at whichever end you came in from. A
+     menu you can only reach with a pointer is a menu half the shortcuts on it
+     are lying about. */
+  const step = d => {
+    const live = rows.filter(r => !r.disabled);
+    if (!live.length) return;
+    const at = live.indexOf(document.activeElement);
+    const to = at < 0 ? (d > 0 ? 0 : live.length - 1)
+                      : (at + d + live.length) % live.length;
+    live[to].focus();
+  };
+  return openPlate(anchor, body, { up, cls: 'menu', onKey: (e, close) => {
+    if (e.key === 'ArrowDown')     { e.preventDefault(); step(1); }
+    else if (e.key === 'ArrowUp')  { e.preventDefault(); step(-1); }
+    else if (e.key === 'Tab')      { close(); }
+  }});
+}
+
+/* A KEY THAT OWNS A PLATE — a menu, a console, anything that opens. It is a
+   `.key` and nothing else; what it adds is the lamp staying on while the plate
+   is up. `open` is handed the key and returns the plate, or null if that click
+   closed one. It carries `aria-expanded` and NOT `aria-pressed`: it is not a
+   state, it is a door. */
+function plateKey(icon, { title, open, cls = '' } = {}) {
+  const b = key(icon, {
+    title, cls: 'dock-plate ' + cls, latch: true,
+    onClick: () => { b.classList.toggle('is-down', !!open(b)); },
+  });
+  b.setAttribute('aria-haspopup', 'dialog');
+  b.setAttribute('aria-expanded', 'false');
+  b.removeAttribute('aria-pressed');
+  return b;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE APP DOCK — the other bar, and the one an app runs on
+
+   THE NAV BAR CARRIES DESTINATIONS AND REFUSES VERBS, in as many words: "no
+   actions, no search, no menu. A bar carrying both makes you read it to work
+   out which is which." This is the other half of that sentence — a bar that is
+   ALL verbs, plus one readout, and it is what every Portrait app actually
+   drives from. The two are different objects and an app has both.
+
+   THE SLOT LIST IS NOT A PARAMETER, and that is the point of the factory. Eight
+   controls and one window, in this order, in every app that adopts it:
+
+     FILE ▸ Load All · Save All · New          a menu
+     EXPORT ▸ PNG · SVG · debug SVG            a menu
+     IMAGE                                     the reference image
+     LIGHT                                     the room
+     ── the channel ──
+     SOUND                                     latched, lit when on
+     RESET WINDOWS                             momentary — the way back
+     CONSOLE                                   a plate, lit while it is up
+     READOUT                                   how many strokes are on the sheet
+
+   An app that ships a subset ships a different bar, and then the one piece of
+   chrome a user carries between nine apps stops being the same object. What
+   varies between apps is what the handlers DO, not which keys exist.
+
+   THE CHANNEL SPLITS THE SHEET FROM THE ROOM, and it is not a split between
+   momentary and latching. Left of it is everything that touches the DRAWING —
+   load it, export it, the reference under it, the light on it. Right of it is
+   the workspace: the sound, the windows, the console. RESET WINDOWS is a verb
+   sitting between two states and that is correct, because what it acts on is
+   the room and not the sheet.
+
+   MOMENTARY AGAINST LATCHING IS READ PER KEY, off the lamp. A key lit while
+   nothing is touching it is a state; a key that flashes and comes back up did
+   something. That reading holds anywhere on the strip, which is why the groups
+   do not have to carry it.
+
+   THE CONSOLE KEY SHOWS THE CONSOLE. It does not turn one on. Every other key
+   right of the channel is a setting you leave somewhere, and this one is a
+   DOOR: press it and the log is up, press it again and it is gone, and there
+   is no state left behind either way. It carries `aria-expanded` like the two
+   menus and not `aria-pressed` like the sound key — same lamp, different
+   sentence. Wiring it as a latch is the easy mistake, because the two look
+   identical while the plate happens to be open.
+
+   AND THE CONSOLE IS THE READOUT WITH A HISTORY, which is why it is green
+   monospace behind glass and not a panel: the `.lcd` says how many strokes are
+   on the sheet NOW, and the log says what the app has been doing about it. The
+   app pushes with `dock.log(text)` whether the plate is up or not — a line
+   that arrives while the console is closed is still in it when you open it,
+   because a log that only records while you are watching is not a log.
+
+   RESET WINDOWS IS THE WAY BACK, and it is mandatory for the reason
+   `windowise` gives: a window dragged mostly off screen has no handle left to
+   grab, and folding does not help because the head goes with it. An app that
+   lets a panel be moved and does not carry this key has a state a user cannot
+   get out of.
+
+   IT IS CHASSIS. Like the top strip in PANELS 09 it cannot be closed, reduced
+   or dragged. A canvas whose only route to Save can be put in a corner is a
+   canvas you can lose.
+
+   EXPORT CARRIES THREE ROWS, NOT TWO. PNG is what it looks like and SVG is what
+   the pen will cut; the third is what the app THOUGHT — the same drawing with
+   the working geometry left in. On a generative tool that is the only file that
+   answers "why did it do that", and an app that hides it behind a constant and
+   a reload has a debug output nobody ever looks at.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* THE CHIP SAYS WHAT THE HAND PRESSES. ⌘ on a Mac and Ctrl everywhere else,
+   read once — and guarded, because the page audit in `tools/run-page.mjs`
+   runs this file with no `navigator` at all. */
+const MODKEY = typeof navigator !== 'undefined'
+  && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '') ? '\u2318' : 'Ctrl';
+
+function appDock({
+  onLoad, onSave, onNew,
+  onPNG, onSVG, onDebug,
+  onImage, onLight,
+  onWindows,
+  sound = true,
+  onSound,
+  strokes = 0, log = [], shortcuts = true, fixed = true,
+} = {}) {
+  const dock = el('div', 'appdock' + (fixed ? '' : ' inline'));
+  const bar  = el('div', 'strip dock-bar');
+
+  const file = plateKey(ICON.folder, { title: 'File', open: b => menu(b, [
+    { icon: ICON.folder,  label: 'Load All', kbd: MODKEY + ' O', onPick: onLoad },
+    { icon: ICON.save,    label: 'Save All', kbd: MODKEY + ' S', onPick: onSave },
+    { icon: ICON.fileNew, label: 'New',                          onPick: onNew  },
+  ])});
+  const exp = plateKey(ICON.upload, { title: 'Export', open: b => menu(b, [
+    { icon: ICON.image,    label: 'Export PNG', kbd: MODKEY + ' P', onPick: onPNG   },
+    { icon: ICON.nib,      label: 'Export SVG', kbd: MODKEY + ' E', onPick: onSVG   },
+    { icon: ICON.nibDebug, label: 'Export debug SVG',              onPick: onDebug },
+  ])});
+  const img = key(ICON.image, { title: 'Reference image', onClick: () => onImage && onImage() });
+  const lit = key(ICON.sun,   { title: 'Light',           onClick: () => onLight && onLight() });
+
+  /* A LATCH SAYS ITS STATE WITH THE LAMP, NOT WITH A SECOND GLYPH. §06 settled
+     this on the switch caps — one icon, at one weight, and what changes is
+     whether it is lit. `ICON.soundOff` exists for a switch that has no lamp;
+     a key has one. */
+  const latch = (icon, title, on, cb) => {
+    let v = on;
+    const b = key(icon, { title, down: v, latch: true, onClick: () => {
+      v = !v; b.classList.toggle('is-down', v); b.setAttribute('aria-pressed', String(v));
+      cb && cb(v);
+    }});
+    return b;
+  };
+  const snd = latch(ICON.sound, 'Sound', sound, onSound);
+  const win = key(ICON.windows, { title: 'Reset windows',
+                                  onClick: () => onWindows && onWindows() });
+
+  /* ── the console ──────────────────────────────────────────────────────────
+     THE LOG OUTLIVES THE PLATE. Lines go into an array the dock owns; the
+     plate is a view of it that exists while it is open and is thrown away when
+     it closes. Nothing is buffered, nothing is replayed, and a line pushed at
+     16:12 is there at 16:13 whether or not anybody was looking. */
+  const LOG = log.slice();
+  const stamp = () => new Date().toTimeString().slice(0, 8);
+  const conBody = () => {
+    const wrap = el('div', 'con');
+    const list = el('div', 'con-log');
+    LOG.forEach(e => {
+      const r = el('div', 'con-row');
+      r.append(el('span', 'con-t', e.t), el('span', 'con-m' + (e.lit ? ' lit' : ''), e.text));
+      list.append(r);
+    });
+    const n = el('span', 'con-n', LOG.length + (LOG.length === 1 ? ' entry' : ' entries'));
+    const clr = el('button', 'con-clear', 'Clear');
+    clr.type = 'button';
+    clr.addEventListener('click', () => { LOG.length = 0; redraw(); });
+    const foot = el('div', 'con-foot');
+    foot.append(n, clr);
+    wrap.append(list, foot);
+    /* NEWEST AT THE BOTTOM AND THAT IS WHERE IT OPENS. A log you have to scroll
+       down to read is a log whose last line — the one you pressed the key for
+       — is the one off screen. */
+    setTimeout(() => { list.scrollTop = list.scrollHeight; });
+    return wrap;
+  };
+  const trm = plateKey(ICON.term, { title: 'Console', open: b => openPlate(b, conBody(), { cls: 'console' }) });
+  /* Rebuilt in place, so a line arriving while the plate is up lands in it. */
+  const redraw = () => {
+    if (!plateOpen || plateOpen.anchor !== trm) return;
+    plateOpen.plate.replaceChildren(conBody());
+    plateOpen.plate.reflow && plateOpen.plate.reflow();
+  };
+
+  const lcd = el('div', 'lcd dock-count', strokes + ' strokes');
+  lcd.setAttribute('aria-live', 'polite');
+
+  bar.append(file, exp, img, lit, el('div', 'chan'), snd, win, trm, lcd);
+  dock.append(bar);
+
+  /* THE CHIP IS BOUND OR IT IS A LIE. A menu row that prints ⌘S and does not
+     answer to it is worse than one with no chip at all. `shortcuts:false` is
+     for a page that is SHOWING a dock rather than running one — this
+     documentation, for instance, where a global ⌘S would take the browser's. */
+  if (shortcuts) {
+    const onDoc = e => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      const go = { o: onLoad, s: onSave, p: onPNG, e: onSVG }[e.key.toLowerCase()];
+      if (!go) return;
+      e.preventDefault();
+      go();
+    };
+    document.addEventListener('keydown', onDoc);
+    dock.unbind = () => document.removeEventListener('keydown', onDoc);
+  }
+
+  /* THE READOUT IS A FACT ABOUT THE DRAWING, NOT A CONTROL. It is an `.lcd`,
+     it is never a button, and the app pushes to it — nothing in here counts
+     anything. */
+  dock.count = n => { lcd.textContent = n + ' strokes'; return dock; };
+  /* `lit` is for a line that is a RESULT — what got made, how many, how long.
+     The rest are notes, and the app decides which is which. */
+  dock.log = (text, lit) => { LOG.push({ t: stamp(), text, lit: !!lit }); redraw(); return dock; };
+  dock.keys = { file, exp, img, lit, snd, win, trm };
+  return dock;
+}
+
+
+/* THE TWO OPENED-OUT MARKS ARE FOUR CORNERS, POINTING OUT AND POINTING IN.
+   Not a rectangle and not a chevron: a rectangle is what a window IS and drawing
+   one on a window says nothing, while an arrow says "go somewhere" and this goes
+   nowhere — it is the same panel, bigger. Corners are the only mark that says
+   EXTENT, which is the only thing that changes. */
 const WIN_ICON = {
   close:  svg('<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>'),
   reduce: svg('<line x1="6" y1="12" x2="18" y2="12"/>'),
+  max:    svg('<path d="M4 9V4h5"/><path d="M20 15v5h-5"/><path d="M15 4h5v5"/><path d="M9 20H4v-5"/>'),
+  min:    svg('<path d="M9 4v5H4"/><path d="M15 20v-5h5"/><path d="M20 9h-5V4"/><path d="M4 15h5v5"/>'),
 };
 
-function windowise(box, { title, mode = 'reduce', onClose } = {}) {
+/* ── AND A WINDOW MAY OPEN OUT — `maximise: true` ──────────────────────────
+   A PANEL WITH A PICTURE IN IT OUTGROWS ITS DESK, and that is the whole case
+   for this. A map editor, a preview, a specimen sheet: the controls beside it
+   have an honest width and the picture has none — it takes whatever it is
+   given, and on a desk it is given a thumbnail. Reducing solves the opposite
+   problem. There was no part for this one, so the first app that needed it
+   built the button, the class and the chrome-hiding for itself; this is that,
+   taken back, because a second adopter composing it a second way is how a
+   language stops being one.
+
+   IT IS A SECOND BUTTON AND NOT A MODE. Reduce and open-out are not two ends of
+   one control — a panel can be neither, and the two gestures live at opposite
+   ends of the same axis — so they are two caps in the head, the maximise one
+   FIRST so the pair reads outward-then-down.
+
+   MAXIMISED AND REDUCED CANNOT BOTH BE TRUE, and the interlock runs both ways:
+   opening out clears the fold, and reducing an opened-out panel stands it down
+   first. A full-screen panel collapsed to its title bar is a title bar across
+   the whole screen.
+
+   `maxed-open` GOES ON THE BODY so a document can stand its own chrome down —
+   opened out, the panel IS the screen, and a bar lying across the top of it is
+   the furniture of a view you have left. The flag is read back off the DOM
+   rather than from the argument, so it stays true while ANY window is open: the
+   answer to "is anything maximised" is a query, not a counter.
+
+   WHAT THE HOST STILL OWNS is where the panel was. This part writes `position`
+   and `transform` from a stylesheet, and a host that pins its windows with
+   INLINE styles — as a desk that remembers where you dragged them must — beats
+   any selector with them. `onMax(on)` fires synchronously on every change and is
+   where such a host parks and restores its own inline properties. */
+function windowise(box, { title, mode = 'reduce', onClose, maximise = false, onMax } = {}) {
   const head = box.querySelector('.box-head');
   if (!head) return box;
   box.classList.add('win');
@@ -1686,17 +2426,49 @@ function windowise(box, { title, mode = 'reduce', onClose } = {}) {
   btn.title = mode === 'close' ? `Close ${title || 'this panel'}`
                                : `Reduce ${title || 'this panel'} to its title`;
   btn.setAttribute('aria-label', btn.title);
+  let setMax = null;
   btn.addEventListener('pointerdown', e => e.stopPropagation());   // not a drag
   btn.addEventListener('click', () => {
     if (mode === 'close') { SFX?.clack?.(); box.classList.add('gone'); onClose && onClose(box); }
     else {
       const to = !box.classList.contains('reduced');
+      /* REDUCING AN OPENED-OUT PANEL STANDS IT DOWN FIRST — see the interlock
+         note above. Folding one leaves a title bar the width of the screen. */
+      if (to && setMax && box.classList.contains('maxed')) setMax(false);
       box.classList.toggle('reduced', to);
       btn.setAttribute('aria-expanded', String(!to));
       SFX?.flip?.();
     }
   });
   head.append(btn);
+
+  if (maximise) {
+    const mb = el('button', 'win-btn win-max', WIN_ICON.max);
+    mb.type = 'button';
+    /* THE CAP CARRIES THE STATE IN ITS GLYPH, ITS TITLE AND ITS `aria-pressed`,
+       all three repainted together — a mark saying "open out" over a panel that
+       is already out is the same lie a switch tells when only its lamp moves. */
+    const paintMax = () => {
+      const on = box.classList.contains('maxed');
+      mb.innerHTML = on ? WIN_ICON.min : WIN_ICON.max;
+      mb.title = on ? `Restore ${title || 'this panel'}` : `Open ${title || 'this panel'} out`;
+      mb.setAttribute('aria-label', mb.title);
+      mb.setAttribute('aria-pressed', String(on));
+    };
+    setMax = (on) => {
+      box.classList.toggle('maxed', on);
+      document.body.classList.toggle('maxed-open', !!document.querySelector('.win.maxed'));
+      if (on) { box.classList.remove('reduced'); btn.setAttribute('aria-expanded', 'true'); }
+      paintMax();
+      onMax && onMax(on);
+    };
+    mb.addEventListener('pointerdown', e => e.stopPropagation());   // not a drag
+    mb.addEventListener('click', () => { SFX?.flip?.(); setMax(!box.classList.contains('maxed')); });
+    paintMax();
+    /* FIRST OF THE PAIR — outward, then down. */
+    head.insertBefore(mb, btn);
+    box.setMax = setMax;
+  }
 
   /* DRAG FROM THE HEAD, AND THE PANEL STAYS WHERE YOU PUT IT. Transform rather
      than left/top: it does not reflow anything, it composites, and a panel
@@ -1724,7 +2496,14 @@ function windowise(box, { title, mode = 'reduce', onClose } = {}) {
   head.addEventListener('pointerup', stop);
   head.addEventListener('pointercancel', stop);
 
-  box.reset = () => { dx = dy = 0; place(); box.classList.remove('gone', 'reduced'); };
+  box.reset = () => {
+    /* STOOD DOWN THROUGH `setMax`, NOT BY DROPPING THE CLASS. The body flag and
+       the cap's glyph are part of the state; clearing `maxed` on its own leaves
+       a document with its chrome hidden and a button offering to restore a
+       panel that is already restored. */
+    if (setMax && box.classList.contains('maxed')) setMax(false);
+    dx = dy = 0; place(); box.classList.remove('gone', 'reduced');
+  };
   /* SET THE RESTING STATE WITHOUT FAKING A CLICK. A demo that dispatches its
      own clicks to arrange itself makes a noise, animates on load, and lies to
      anything listening for a real one. */
@@ -1736,9 +2515,552 @@ function windowise(box, { title, mode = 'reduce', onClose } = {}) {
 }
 windowise.top = 10;
 
+/* ── THE LIGHT DIRECTION SETTER ────────────────────────────────────────────
+   TWO ANGLES ARE ONE DIRECTION, and that is the entire argument for this
+   part. Azimuth and elevation shipped as two number fields, and two fields
+   make you hold a hemisphere in your head and do the trigonometry yourself:
+   nothing on the panel says that 325°/59° is over your right shoulder and
+   high, and nothing says that nudging elevation to 0 puts the sun on the
+   horizon where every shadow goes to infinity. A knob each would be worse —
+   it would say these are two independent quantities, which is exactly the
+   wrong claim.
+
+   SO IT IS A DISC SEEN FROM ABOVE, which is how a light is aimed on any real
+   rig. The lamp is a dot you drag:
+
+     THE ANGLE ROUND THE DISC IS THE AZIMUTH, with 0° at the right and the
+     numbers running anticlockwise, because that is the convention the maths
+     already uses and the one the app's own field is written in. It is
+     labelled at the four quarters and nowhere else — a protractor is a
+     different instrument.
+     THE DISTANCE FROM THE MIDDLE IS THE ELEVATION, inverted: the CENTRE is
+     90° and straight down, the RIM is 0° and level with the ground. That is
+     not a choice, it is what a hemisphere looks like flattened — the zenith
+     is one point and the horizon is the whole edge — and it is why the ring
+     at half radius is drawn at 45°, the one elevation anybody aims for by
+     name.
+     THE PUCK IS THE LAMP AND IT IS LIT. Everything else on this control is
+     the fixture.
+
+   IT IS CLAMPED TO THE DISC AND NEVER WRAPS. Drag past the rim and elevation
+   pins at 0 while the azimuth keeps following your hand, which is a lamp
+   being swung round at the horizon. Letting the radius run past 1 would put
+   the light UNDER the ground and there is no such direction on this control.
+
+   THE NUMBERS ARE STILL THERE, under the disc, and they are still typeable.
+   A picker replaces the arithmetic, not the value: 325 is a thing you copy
+   out of one panel and into another, and a control that can only be dragged
+   cannot be given a number someone read to you. */
+function lightDir({ label = 'Light', az = 315, el: elev = 45, size = 132, onChange }) {
+  const wrap = el('div', 'lwrap');
+  const disc = el('div', 'ldisc');
+  disc.style.setProperty('--ld', size + 'px');
+  disc.tabIndex = 0;
+  disc.setAttribute('role', 'application');
+  disc.setAttribute('aria-label', label + ' direction');
+
+  /* THE MARKS ARE ONE SVG, NOT SIX ELEMENTS. Two rings, two crosshairs and
+     four legends that all have to stay concentric under one radius — as
+     divs that is six things to keep agreeing, and every one of them rounds
+     to a different pixel at a size the caller picked. */
+  const face = el('div', null,
+    `<svg class="ld-face" viewBox="0 0 100 100" aria-hidden="true">
+       <circle class="ld-ring" cx="50" cy="50" r="46"/>
+       <circle class="ld-ring ld-45" cx="50" cy="50" r="23"/>
+       <path class="ld-cross" d="M4 50 H96 M50 4 V96"/>
+       <text class="ld-deg" x="50" y="12"  text-anchor="middle">90°</text>
+       <text class="ld-deg" x="50" y="94"  text-anchor="middle">270°</text>
+       <text class="ld-deg" x="7"  y="52.5" text-anchor="start">180°</text>
+       <text class="ld-deg" x="93" y="52.5" text-anchor="end">0°</text>
+     </svg>`).firstElementChild;
+  const puck = el('i', 'ld-puck');
+  disc.append(el('i', 'ld-well'), face, puck);
+
+  const azOut = el('div', 'kval'), elOut = el('div', 'kval');
+  const field = (cap, out) => {
+    const f = el('div', 'lfield');
+    f.append(el('div', 'klab', cap), out);
+    return f;
+  };
+
+  let A = az, E = elev;
+  const norm360 = d => ((d % 360) + 360) % 360;
+
+  /* THE MARKER IS A DOT, AND IT WAS AN ARROW FOR ONE VERSION. The arrow was
+     more informative on paper — a vector says which way, a dot only says
+     where — and on a 118px disc it was worse: the head has to scale with the
+     length or it eats the shaft, so above about 60° of elevation the thing is
+     a stub, and the one shape that has to stay recognisable changes shape
+     across the range that matters. A dot is the same mark at every elevation
+     and the RINGS already carry the reading. Kept as a note because the arrow
+     is the obvious idea and will be had again. */
+  const paint = () => {
+    // r = 0 at the zenith, 1 at the horizon — the flattened hemisphere
+    const r = (1 - E / 90) * 0.46;
+    const t = A * Math.PI / 180;
+    puck.style.left = (50 + Math.cos(t) * r * 100) + '%';
+    puck.style.top  = (50 - Math.sin(t) * r * 100) + '%';
+    azOut.textContent = Math.round(A) + '°';
+    elOut.textContent = Math.round(E) + '°';
+    disc.setAttribute('aria-valuetext', `azimuth ${Math.round(A)} degrees, elevation ${Math.round(E)} degrees`);
+  };
+
+  /* THE TICK IS THE AZIMUTH'S, NOT THE VALUE'S, and it is the knob's rule
+     borrowed wholesale: a lamp swung through a full turn should ratchet a
+     few dozen times, not three hundred and sixty. Elevation gets none —
+     it is a slide, not a turn, and two ratchets from one gesture is a
+     mechanism nobody can identify. */
+  let enc = Math.round(A / 9);
+  const set = (nA, nE, quiet) => {
+    A = norm360(nA);
+    E = Math.max(0, Math.min(90, nE));
+    const e2 = Math.round(A / 9);
+    if (!quiet && e2 !== enc) SFX.step();
+    enc = e2;
+    paint();
+    onChange && onChange({ az: +A.toFixed(1), el: +E.toFixed(1) });
+  };
+
+  const fromPoint = (cx, cy) => {
+    const b = disc.getBoundingClientRect();
+    const dx = (cx - b.left) / b.width - 0.5;
+    const dy = (cy - b.top) / b.height - 0.5;
+    /* CLAMPED, NEVER WRAPPED. Past the rim the elevation pins at 0 and the
+       azimuth keeps tracking — a lamp swung round at the horizon. */
+    const r = Math.min(Math.hypot(dx, dy) / 0.46, 1);
+    // a drag that lands exactly on the middle has no angle; keep the last one
+    const ang = (dx || dy) ? norm360(Math.atan2(-dy, dx) * 180 / Math.PI) : A;
+    set(ang, (1 - r) * 90);
+  };
+
+  disc.addEventListener('pointerdown', e => {
+    disc.setPointerCapture(e.pointerId);
+    disc.classList.add('dragging');
+    e.preventDefault();
+    fromPoint(e.clientX, e.clientY);
+  });
+  disc.addEventListener('pointermove', e => {
+    if (disc.classList.contains('dragging')) fromPoint(e.clientX, e.clientY);
+  });
+  const end = () => disc.classList.remove('dragging');
+  disc.addEventListener('pointerup', end);
+  disc.addEventListener('pointercancel', end);
+
+  /* LEFT AND RIGHT SWING IT, UP AND DOWN RAISE IT, which is the only mapping
+     that matches what the two axes MEAN rather than where the puck happens to
+     be on screen — at 90° azimuth the puck moves vertically under a left
+     arrow, and that is correct: you are turning the rig, not dragging a dot. */
+  disc.addEventListener('keydown', e => {
+    const s = e.shiftKey ? 1 : 5;
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); set(A + s, E); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); set(A - s, E); }
+    if (e.key === 'ArrowUp')    { e.preventDefault(); set(A, E + s); }
+    if (e.key === 'ArrowDown')  { e.preventDefault(); set(A, E - s); }
+  });
+
+  paint();
+  typeable(azOut, () => Math.round(A), v => set(v, E));
+  typeable(elOut, () => Math.round(E), v => set(A, v));
+
+  const row = el('div', 'lrow');
+  row.append(field('Azimuth', azOut), field('Elevation', elOut));
+  wrap.append(el('div', 'klab lcap', label), disc, row);
+  wrap.set = (nA, nE) => set(nA, nE, true);   // a host drives this SILENTLY
+  return wrap;
+}
+
+/* ── THE SELECTOR — a value you pick by NAME ───────────────────────────────
+   FOR FIVE TO A DOZEN NAMES — the gap between `rotary` and `drum`, and both
+   ends of it are real. A rotary
+   is aimable to about six and then you are counting detents; a drum
+   is a cylinder, which is honest about being a mechanism and dishonest about
+   being readable — you can see three names, one of them properly, and there is
+   no way to jump.
+
+   SO: A FACE THAT READS, AND A LIST THAT OPENS. Closed, it is a window with
+   the current name engraved in it, which is already more than either of the
+   other two give you. Open, it is the rows a `menu` uses, because a list of
+   things you pick from is a list of things you pick from and this document
+   does not need two of them.
+
+   IT IS AN OVERLAY AND NOT AN EXPANDER, and that is a statement about the
+   PLATE rather than about menus. A faceplate is rigid. Nothing on a console
+   pushes its neighbours down to make room, so a control that reflows the panel
+   under it is a control that has stopped pretending the panel is a panel.
+   `openPlate` is already the lid that lifts over the face, with one open at a
+   time, Escape, click-outside, and a flip rather than a clip at the window
+   edge — all of which this gets for nothing.
+
+   WHERE IT DIFFERS FROM `menu`, AND IT IS ONE THING THAT CHANGES EVERYTHING:
+   A MENU HAS NO RESTING MARK. Its rows are commands, so the only state a row
+   can be in is "the pointer is on it" — and one highlight is enough. A value
+   list has a row that is ALREADY TRUE, sitting there before you touch
+   anything, and it needs a mark that is not the hover mark or you cannot tell
+   what you have from what you are about to get. So there are two:
+
+     THE CURRENT ROW IS PRESSED IN. It takes `.pkey.is-down`'s own language —
+     the recess, the chamfer, the lamp — because that is what this panel has
+     always meant by "this one is selected", and a selector row is the same
+     claim a lit key makes.
+     THE POINTED-AT ROW LIGHTS. Raised, warmer, exactly `.menu-row:hover`.
+
+   One is a state and one is a hover, they never look alike, and the row you
+   have can be under the pointer without either of them lying.
+
+   AND THE THING THE DRUM COULD NEVER DO: TYPE-AHEAD. Two letters get you to
+   `Detail` in a list of thirty. This is the whole of what software can offer
+   over a machined part, it costs one keydown handler, and it is the actual
+   answer to "the drum is not user friendly". */
+const TYPE_GAP = 900;
+function selector({ label, options, index = 0, width = 168, onChange }) {
+  const wrap = el('div', 'selwrap');
+  const face = el('button', 'sel');
+  face.type = 'button';
+  face.style.setProperty('--selw', width + 'px');
+  face.setAttribute('aria-haspopup', 'listbox');
+  face.setAttribute('aria-expanded', 'false');
+  if (label) face.setAttribute('aria-label', label);
+  const nm = el('span', 'sel-nm');
+  face.append(nm, el('span', 'sel-chev', ICON.chev || ''));
+
+  let i = Math.max(0, Math.min(options.length - 1, index));
+  const paint = () => { nm.textContent = options[i]; };
+
+  const set = (n, quiet) => {
+    const was = i;
+    i = (n + options.length) % options.length;
+    paint();
+    if (i !== was && !quiet) { SFX.clack(); onChange && onChange(i, options[i]); }
+    else if (i !== was) onChange && onChange(i, options[i]);
+  };
+
+  /* ── THE LIST ────────────────────────────────────────────────────────── */
+  let rows = [];
+  const build = () => {
+    const body = el('div', 'plate-body');
+    body.setAttribute('role', 'listbox');
+    if (label) body.setAttribute('aria-label', label);
+    rows = options.map((o, n) => {
+      const r = el('button', 'menu-row sel-row' + (n === i ? ' is-cur' : ''));
+      r.type = 'button';
+      r.setAttribute('role', 'option');
+      r.setAttribute('aria-selected', String(n === i));
+      r.append(el('span', 'sel-tick', ''), el('span', 'menu-nm', o));
+      r.addEventListener('click', () => {
+        if (plateOpen) plateOpen.close();
+        set(n);
+        face.focus();
+      });
+      clicky(r, SFX.tap, SFX.lift);
+      body.append(r);
+      return r;
+    });
+    return body;
+  };
+
+  /* THE WALK MOVES FOCUS AND NOTHING ELSE. Committing as you arrow means a
+     list you cannot look through without changing the value, and on a control
+     wired to a repaint that is thirty renders on the way past. Enter commits,
+     Escape leaves it as it was — which `openPlate` already does, because it
+     never touched the value in the first place. */
+  const step = d => {
+    const at = rows.indexOf(document.activeElement);
+    const to = at < 0 ? i : (at + d + rows.length) % rows.length;
+    rows[to].focus();
+  };
+
+  /* TYPE-AHEAD, and the buffer is what makes it a search rather than a jump to
+     the last letter you hit. Within nine hundred milliseconds the letters
+     accumulate — `d`, `de`, `det` — and after that it starts again, which is
+     the interval every list in every OS has used since about 1984. Matching
+     starts AFTER the current row so repeated presses of one letter cycle the
+     names beginning with it, rather than sticking on the first. */
+  let buf = '', bufAt = 0;
+  const typeAhead = (ch, now) => {
+    buf = (now - bufAt < TYPE_GAP) ? buf + ch : ch;
+    bufAt = now;
+    const from = rows.indexOf(document.activeElement);
+    const start = buf.length > 1 ? Math.max(from, 0) : from + 1;
+    for (let k = 0; k < options.length; k++) {
+      const n = (start + k + options.length) % options.length;
+      if (options[n].toLowerCase().startsWith(buf)) { rows[n].focus(); return true; }
+    }
+    return false;
+  };
+
+  const open = () => {
+    const plate = openPlate(face, build(), { up: false, cls: 'menu sellist', onKey: (e, close) => {
+      if (e.key === 'ArrowDown')      { e.preventDefault(); step(1); }
+      else if (e.key === 'ArrowUp')   { e.preventDefault(); step(-1); }
+      else if (e.key === 'Home')      { e.preventDefault(); rows[0].focus(); }
+      else if (e.key === 'End')       { e.preventDefault(); rows[rows.length - 1].focus(); }
+      else if (e.key === 'Tab')       { close(); }
+      else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (typeAhead(e.key.toLowerCase(), e.timeStamp)) e.preventDefault();
+      }
+    }});
+    face.classList.toggle('is-down', !!plate);
+    if (!plate) return;
+    /* THE WHOLE LIST IS ON SCREEN AND THERE IS NO SCROLLER, which is a claim
+       about the SIZE this part is for: five to a dozen names. Past that it is
+       the wrong control and a scrollbar would be the thing hiding that fact —
+       a list you have to travel through to see is a list you cannot compare,
+       and comparing is the only reason to open it rather than arrow the face.
+       `preventScroll` because focusing a row must never move the PAGE under
+       a plate that is positioned against it. */
+    rows[i].focus({ preventScroll: true });
+  };
+
+  face.addEventListener('click', open);
+  /* THE CLOSED FACE STEPS WITHOUT OPENING, which is what keeps this a
+     one-handed control: a value you are nudging by one is not a value you want
+     a list for. Alt opens instead, the platform convention, and Home/End go to
+     the ends without a round trip through the plate. */
+  face.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (e.altKey) open(); else set(i + (e.key === 'ArrowDown' ? 1 : -1));
+    } else if (e.key === 'Home')  { e.preventDefault(); set(0); }
+    else if (e.key === 'End')     { e.preventDefault(); set(options.length - 1); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+  });
+
+  paint();
+  if (label) wrap.append(el('div', 'klab', label));
+  wrap.append(face);
+  wrap.set = n => set(n, true);          // a host drives this control SILENTLY
+  wrap.value = () => options[i];
+  return wrap;
+}
+
+/* ── THE GATED LEVER ───────────────────────────────────────────────────────
+   NOTHING OPENS, AND THAT IS THE WHOLE POINT. A dropdown was tried twice here
+   and the second attempt is what settled it: a plate that flies out over the
+   panel reads as a web control no matter what it is made of, because flying
+   out over things is not something a panel DOES. A faceplate is a solid, and
+   every real control on one is cut INTO it.
+
+   SO THE LIST IS PART OF THE PLATE. A slot milled down the face with a detent
+   notch at each position, a lever standing in it, and the names engraved
+   beside the notches. Everything is legible at rest, there is no reveal to
+   design, and the only thing that moves is the lever — which is what a
+   transmission gate, an aircraft flap lever and a desk's routing selector all
+   are.
+
+   IT IS VERTICAL, AND THAT IS WHAT MAKES IT SURVIVE PAST FIVE. Laid on its
+   side the names have to fit BETWEEN the notches and you run out of room at
+   about five; standing up, each name has a whole row to itself and the gate
+   just gets taller — twelve notches is 288px, which is a column on a panel
+   rather than a problem. The pitch is the row height and nothing else has to
+   change.
+
+   THE LEVER SNAPS AS IT CROSSES, not when you let go. A gate that only decides
+   at the end of the gesture is a slider with names on it: the notch is the
+   whole mechanism, so it has to be felt on the way past, which is the same
+   argument the rotary's detents already made and it gets the same clack.
+
+   AND THE NAMES ARE TARGETS. The lever is 22px wide and the legend beside it
+   is the width of the control — aiming at the small part when the big part
+   means the same thing is a tax nobody should pay. Click a name, the lever
+   goes there. */
+const GATE_PITCH = 24, GATE_PAD = 7;
+function gate({ label, options, index = 0, width = 150, onChange }) {
+  const wrap = el('div', 'gatewrap');
+  if (label) wrap.append(el('div', 'klab', label));
+
+  const body = el('div', 'gate');
+  body.style.setProperty('--gw', width + 'px');
+  body.style.setProperty('--gp', GATE_PITCH + 'px');
+  body.style.height = (options.length * GATE_PITCH + GATE_PAD * 2) + 'px';
+
+  const slot = el('div', 'gate-slot');
+  const lever = el('i', 'gate-lever');
+  /* THE NOTCHES ARE ELEMENTS AND NOT A REPEATING GRADIENT. A gradient at this
+     pitch is exact only while the pitch divides the height, and the moment a
+     caller changes the count by one every notch drifts half a pixel off the
+     legend it belongs to. Placed, they cannot disagree with the rows. */
+  options.forEach((_, n) => {
+    const k = el('i', 'gate-notch');
+    k.style.top = (GATE_PAD + n * GATE_PITCH + GATE_PITCH / 2) + 'px';
+    slot.append(k);
+  });
+  slot.append(lever);
+
+  const legs = el('div', 'gate-legs');
+  legs.setAttribute('role', 'listbox');
+  if (label) legs.setAttribute('aria-label', label);
+  legs.tabIndex = 0;
+
+  let i = Math.max(0, Math.min(options.length - 1, index));
+  const rows = options.map((o, n) => {
+    const b = el('button', 'gate-leg');
+    b.type = 'button';
+    b.tabIndex = -1;
+    b.setAttribute('role', 'option');
+    b.append(el('span', 'gate-nm', o));
+    b.addEventListener('click', () => set(n));
+    legs.append(b);
+    return b;
+  });
+
+  const paint = () => {
+    lever.style.top = (GATE_PAD + i * GATE_PITCH + GATE_PITCH / 2) + 'px';
+    rows.forEach((r, n) => {
+      r.classList.toggle('on', n === i);
+      r.setAttribute('aria-selected', String(n === i));
+    });
+    legs.setAttribute('aria-activedescendant', '');
+  };
+
+  const set = (n, quiet) => {
+    const to = Math.max(0, Math.min(options.length - 1, n));
+    if (to === i) return;
+    i = to;
+    paint();
+    if (!quiet) SFX.clack();
+    onChange && onChange(i, options[i]);
+  };
+
+  /* DRAG ANYWHERE IN THE SLOT, and the notch is picked from where the pointer
+     IS rather than from how far it has moved. A lever in a gate has an
+     absolute position — it is standing in a numbered slot, not accumulating an
+     offset — so grabbing it halfway and letting go must not leave it half a
+     notch out. */
+  const fromY = cy => {
+    const b = slot.getBoundingClientRect();
+    set(Math.round((cy - b.top - GATE_PAD - GATE_PITCH / 2) / GATE_PITCH));
+  };
+  let dragging = false;
+  slot.addEventListener('pointerdown', e => {
+    dragging = true; slot.setPointerCapture(e.pointerId);
+    body.classList.add('dragging'); e.preventDefault();
+    fromY(e.clientY);
+  });
+  slot.addEventListener('pointermove', e => { if (dragging) fromY(e.clientY); });
+  const end = () => { dragging = false; body.classList.remove('dragging'); };
+  slot.addEventListener('pointerup', end);
+  slot.addEventListener('pointercancel', end);
+
+  legs.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); set(i + 1); }
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); set(i - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); set(0); }
+    else if (e.key === 'End')  { e.preventDefault(); set(options.length - 1); }
+  });
+
+  body.append(slot, legs);
+  wrap.append(body);
+  paint();
+  wrap.set = n => set(n, true);          // a host drives this control SILENTLY
+  wrap.value = () => options[i];
+  return wrap;
+}
+
+/* ── THE INTERLOCKED BANK ──────────────────────────────────────────────────
+   THE CONTROL IS THE LIST, and after three attempts at hiding the names that
+   is the only version of this that has been worth using. Everything else in
+   this group asks you to accept a trade: the selector hides the list behind a
+   plate, the wheel hid it behind a window and showed one name at a time, and
+   both of those are answers to a question about SPACE rather than about
+   choosing. When there are nine names and each one is a word, the cheapest
+   thing a panel can do is put nine keys on it.
+
+   IT IS MECHANICALLY INTERLOCKED, which is the part that makes it a selector
+   and not nine switches: pressing one RELEASES the others, and the one that is
+   down cannot be pressed up. That second half is not a nicety — a value has to
+   be something, so a bank you can click into having no selection is a bank
+   with a state the app it drives cannot represent.
+
+   AND IT IS A GRID, NOT A ROW, which is the whole reason it survives past
+   five. Nine keys in a line is 700px and a panel does not have that; nine keys
+   three across is a block the size of a knob bay, and a block of latching keys
+   is what a console actually puts there. `cols` is the only thing a caller
+   tunes, and it defaults to three above six names and to one row below — the
+   count at which a line still fits.
+
+   IT IS `keyBank` AND NOT `bank`, WHICH COST A CRASH TO FIND OUT. `bank` is
+   what anybody calls a local variable holding a row of things — the specimen
+   page had one four lines below the call — and a top-level name that shadows a
+   common local is the exact trap this file's own build notes describe for
+   `key` beside p5's global. It threw here, which was lucky; in an app that
+   assigns to its own `bank` first it would simply have read the wrong one.
+
+   IT ADDS NO MATERIAL. The well is `.piano`, the caps are `.pkey`, the lit one
+   is `.is-down` — the same three parts the page switcher is made of, doing the
+   same job for the same reason. A part that needs no new surface is a part
+   this language already had and had not noticed. */
+function keyBank({ label, options, index = 0, cols, onChange }) {
+  const wrap = el('div', 'bankwrap');
+  if (label) wrap.append(el('div', 'klab', label));
+  const box = el('div', 'piano sm bank');
+  box.setAttribute('role', 'listbox');
+  if (label) box.setAttribute('aria-label', label);
+  const C = cols || (options.length > 6 ? 3 : options.length);
+  box.style.setProperty('--bcols', C);
+
+  let i = Math.max(0, Math.min(options.length - 1, index));
+  const keys = options.map((o, n) => {
+    const b = el('button', 'pkey bank-key', o);
+    b.type = 'button';
+    b.setAttribute('role', 'option');
+    /* ROVING TABINDEX: the bank is ONE stop on the tab ring, not nine. A
+       radio group that costs nine tabs to walk past is why people stop using
+       the keyboard. */
+    b.tabIndex = n === i ? 0 : -1;
+    b.addEventListener('click', () => set(n));
+    box.append(b);
+    return b;
+  });
+
+  const paint = () => keys.forEach((k, n) => {
+    const on = n === i;
+    k.classList.toggle('is-down', on);
+    k.setAttribute('aria-selected', String(on));
+    k.tabIndex = on ? 0 : -1;
+  });
+
+  const set = (n, quiet) => {
+    const to = Math.max(0, Math.min(options.length - 1, n));
+    /* PRESSING THE ONE THAT IS DOWN DOES NOTHING, and it does nothing
+       SILENTLY: a latching key that clacks without moving is a key reporting
+       an event that did not happen. */
+    if (to === i) return;
+    i = to; paint();
+    if (!quiet) SFX.clack();
+    onChange && onChange(i, options[i]);
+  };
+
+  /* THE ARROWS WALK THE GRID AS A GRID. Left and right step by one, up and
+     down step by a ROW — reading the keys as a flat list under a vertical
+     arrow puts the focus somewhere the eye did not go, which is worse than no
+     vertical arrows at all. */
+  box.addEventListener('keydown', e => {
+    const at = keys.indexOf(document.activeElement);
+    if (at < 0) return;
+    let to = null;
+    if (e.key === 'ArrowRight') to = at + 1;
+    else if (e.key === 'ArrowLeft') to = at - 1;
+    else if (e.key === 'ArrowDown') to = at + C;
+    else if (e.key === 'ArrowUp') to = at - C;
+    else if (e.key === 'Home') to = 0;
+    else if (e.key === 'End') to = keys.length - 1;
+    if (to == null) return;
+    e.preventDefault();
+    if (to < 0 || to >= keys.length) return;
+    set(to);
+    keys[to].focus();
+  });
+
+  paint();
+  wrap.append(box);
+  wrap.set = n => set(n, true);          // a host drives this control SILENTLY
+  wrap.value = () => options[i];
+  return wrap;
+}
+
 
 window.SkewKit = {
-  el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, key, pkey, swBtn, toggle, chevBtn, openPicker, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, SFX, clicky,
-  VERSION: '1.49.3',
+  el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, SFX, clicky,
+  VERSION: '1.67.1',
 };
 })();

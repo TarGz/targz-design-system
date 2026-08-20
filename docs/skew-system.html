@@ -28,20 +28,30 @@
       <tr><td>fader(…)</td><td>A <b>length</b>, which is a straight thing, so it keeps a track. <code>mode:'center'</code> for a trim, because a trim is not "how much" but "how far off"</td></tr>
       <tr><td>rangeFader(…)</td><td>A <b>span</b>, the one thing a knob cannot say. Two caps in one slot with the band lit between them</td></tr>
       <tr><td>drum(…)</td><td>A <b>long list</b>. Past about six names a rotary stops being aimable, so the names go on a real cylinder</td></tr>
+      <tr><td>keyBank(…)</td><td>The same names as <b>keys</b>, mechanically interlocked — pressing one releases the others and the one that is down cannot be pressed up. A grid rather than a row, so nine of them is a block the size of a knob bay instead of 700px of bar. The control IS the list</td></tr>
+      <tr><td>gate(…)</td><td>The same five-to-a-dozen <b>names</b>, with <b>nothing that opens</b>. A slot milled down the plate with a detent notch per position, a lever standing in it, the names engraved beside the notches. Everything legible at rest, and the only thing that moves is the lever</td></tr>
+      <tr><td>selector(…)</td><td>Five to a dozen <b>names</b> — the gap between the two above: too many to aim at, too few to earn a cylinder. A window with the current name in it, opening to a list you can arrow through and <em>type at</em>. The current row is pressed IN and the pointed-at row lights: two marks, because a value list has a row that is already true before you touch it</td></tr>
+      <tr><td>lightDir(…)</td><td>A <b>direction</b>, which is two angles and therefore not two controls. A flattened hemisphere: the angle round the disc is the azimuth, the distance from the middle is the elevation — centre is straight down, rim is the horizon. The numbers stay, under it, still typeable</td></tr>
       <tr><td>rotary(…)</td><td>A <b>short list</b> where every position must be visible at once. Hard ceiling of six: the fan is a fixed 80°, so detents fall from 27° to 9°</td></tr>
+      <tr><td>gizmo(…)</td><td>A <b>direction to look from</b>. Six axes, so the picture is the control: you click the red node on the right rather than reading the word. Discrete where <code>lightDir</code> is continuous, and posed beside it anyway — both answer <i>aim this</i>. Renameable, never reorderable; hollow is the far side of the ball, and the hub is the axis coming at you</td></tr>
       <tr><td>key(…) · pkey(…)</td><td>Momentary <b>did</b> something, latching <b>is</b> something. <code>pkey</code> adds the mechanical interlock: pressing one pops the others out</td></tr>
+      <tr><td><code>.actrow</code> + <code>key(…, {cls:'act …'})</code></td><td>A <b>row of commands at the foot of a panel</b>. Not a factory — two classes on the key you already have, and <code>.act</code> is the one that is easy to forget: <code>.key</code> is the surface, <code>.act</code> is the SIZE, and a cap without it is <code>padding:0</code> at no height, so it shrinks to the width of its word and reads as text. One <code>fire</code>/<code>go</code>/<code>halt</code> verb at most, the rest <code>aux</code>, and an icon-only cap opts out of <code>flex:1</code>. §04</td></tr>
       <tr><td>toggle(…)</td><td>One <b>boolean</b>, with its name engraved beside the switch. The whole line is the button, and it carries <code>.set(v)</code> like every other value control. §06</td></tr>
       <tr><td>swBtn(…) · chevBtn(…)</td><td>The bare cap, for a row that already carries the name — and its <b>mixed</b> state, which is a master over a column. A knurled chevron for a thing you flick rather than press</td></tr>
       <tr><td>typeable(el, read, write)</td><td>Makes any lit window take a typed value on <b>double</b> click. A knob is for looking for a value; a keyboard is for knowing one</td></tr>
       <tr><td>openPicker(…)</td><td>Replaces <code>input[type=color]</code>, whose popup is browser chrome no CSS reaches</td></tr>
+      <tr><td>assetRow(…)</td><td><b>Load a file, and say what is loaded</b> — thumb, name, source line, and a stack of small keys. The hidden <code>input[type=file]</code> is the reason it is a part: it cannot be styled, so it is owned and hidden here the way <code>openPicker</code> owns the colour input, and it resets after every pick so the same file twice fires twice. Empty is a real state — a well, a name that says so, and SAVE/CLEAR disabled. Three keys make the thumb 82px; two leave it at 56. §04</td></tr>
       <tr><td>windowise(box, …)</td><td>Makes a panel draggable and closeable. <b>Close or reduce, never both</b></td></tr>
       <tr><td>navBar({current, dock})</td><td>The bar at the top of this page. §08</td></tr>
+      <tr><td>appDock({…})</td><td>The other bar — the one an app runs on. All verbs, a fixed slot list and one readout. §09</td></tr>
+      <tr><td>menu(anchor, items)</td><td>A <code>.plate</code> that opens off a key and knows how to close. §09</td></tr>
       <tr class="trap">
         <td>Two copies exist</td>
         <td><code>skew-kit.js</code> and the inline copy inside
-            <code>skew-panels.html</code> are identical today and will not stay identical.
-            One of them has to become the other's import. Written down in both files rather than
-            quietly carried.</td>
+            <code>skew-panels.html</code> have now diverged — <code>gizmo()</code> is in the kit
+            and the exploration still builds its axis ball inline, unlit and with the choice shown
+            only on the keys beside it. One of them has to become the other's import. Written down
+            in both files rather than quietly carried.</td>
       </tr>
     </tbody>
   </table>
@@ -412,7 +422,148 @@
     </tbody>
   </table>
 
-  <h2>09 <span>/</span> The settings panel</h2>
+  <h2>09 <span>/</span> The app dock</h2>
+  <div class="stage">
+    <div class="stage-note">live · the menus open, nothing is saved or exported</div>
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center">
+      <div id="dockspec"></div>
+      <div class="lcd" id="dockspec-out">READY</div>
+    </div>
+  </div>
+  <table class="spec">
+    <thead><tr><th>Field</th><th>Contract</th></tr></thead>
+    <tbody>
+      <tr class="trap">
+        <td>Not the nav bar</td>
+        <td>§08 carries <b>destinations</b> and refuses verbs — <i>"a bar carrying both makes you
+            read it to work out which is which"</i>. This is the other half of that sentence: a bar
+            that is <b>all verbs</b>, plus one readout. An app has both, and they are different
+            objects. <b>Destinations in one bar, verbs in the other, never both in one.</b></td>
+      </tr>
+      <tr>
+        <td>Adding it</td>
+        <td><code>document.body.append(appDock({…}))</code>. Every argument is a handler; there is
+            no argument for which keys exist. <code>fixed:false</code> takes it out of
+            <code>position:fixed</code> and leaves it in the flow, which is what the specimen above
+            is doing.</td>
+      </tr>
+      <tr>
+        <td>The slots, and all of them</td>
+        <td><b>FILE ▸</b> Load All · Save All · New &nbsp;·&nbsp; <b>EXPORT ▸</b> PNG · SVG · debug
+            SVG &nbsp;·&nbsp; <b>IMAGE</b> &nbsp;·&nbsp; <b>LIGHT</b> &nbsp;<code>.chan</code>&nbsp;
+            <b>SOUND</b> · <b>RESET WINDOWS</b> · <b>CONSOLE</b> &nbsp;·&nbsp; <b>READOUT</b>.
+            In that order, in every app. An app that ships a subset ships a different bar, and then
+            the one piece of chrome carried between nine apps stops being the same object. What
+            varies between apps is what the handlers <b>do</b>.</td>
+      </tr>
+      <tr>
+        <td>Export carries three rows</td>
+        <td>PNG is what it looks like, SVG is what the pen will cut, and the third is what the app
+            <b>thought</b> — the same drawing with the working geometry left in. On a generative
+            tool that is the only file that answers <i>why did it do that</i>. It takes no shortcut
+            and it is not optional: an app that reaches its debug output by editing a constant and
+            reloading has a debug output nobody looks at.</td>
+      </tr>
+      <tr>
+        <td>The channel</td>
+        <td>Left of it is everything that touches the <b>drawing</b> — load it, export it, the
+            reference under it, the light on it. Right of it is the <b>workspace</b>: the sound,
+            the windows, the console. It is not a split between momentary and latching, which is
+            why a verb sits between two states without reading as a mistake.</td>
+      </tr>
+      <tr>
+        <td>Momentary against latching</td>
+        <td>Read per key, off the lamp: a key lit while nothing is touching it is <b>holding
+            something open or on</b>; a key that flashes and springs back <b>did</b> something.
+            FILE, EXPORT, IMAGE, LIGHT and RESET WINDOWS are verbs. <b>SOUND is the only state on
+            the bar</b> — FILE, EXPORT and CONSOLE are doors, and they carry
+            <code>aria-expanded</code> where SOUND carries <code>aria-pressed</code>.</td>
+      </tr>
+      <tr class="trap">
+        <td>The console key shows the console</td>
+        <td>It does not turn one on. Press it and the log is up, press it again and it is gone,
+            and no state is left behind either way — it is the same object as the two menus with
+            a different plate on it. <b>Wiring it as a latch is the easy mistake</b>, because a
+            door and a state look identical for as long as the plate happens to be open.</td>
+      </tr>
+      <tr>
+        <td>The console</td>
+        <td>The readout with a history, so it is the same green monospace behind the same glass:
+            the <code>.lcd</code> says how many strokes are on the sheet <b>now</b>, the log says
+            what the app has been doing about it. <code>dock.log(text, lit)</code> — <code>lit</code>
+            for a line that is a <b>result</b> (what got made, how many, how long), plain for a
+            note. The app pushes whether the plate is up or not: a log that only records while
+            you are watching is not a log.</td>
+      </tr>
+      <tr>
+        <td>RESET WINDOWS is the way back</td>
+        <td>Mandatory for the reason <code>windowise</code> gives: a window dragged mostly off
+            screen has no handle left to grab, and folding does not help because the head goes
+            with it. An app that lets a panel be moved and carries no way to put it back has a
+            state a user cannot get out of. The mark is <b>four panes, not a grid</b> — what you
+            press it for is that picture.</td>
+      </tr>
+      <tr>
+        <td>One lamp, one icon</td>
+        <td>A latched key says its state with the lamp, not with a second glyph — §06's rule for
+            switch caps. <code>ICON.soundOff</code> exists for a switch that has no lamp; a key
+            has one.</td>
+      </tr>
+      <tr>
+        <td>The menu</td>
+        <td><code>openPlate(anchor, body)</code> is the mechanism the plate never had — one open
+            at a time, Escape, click-outside, and a flip rather than a clip at a window edge.
+            <code>menu(anchor, items)</code> is that plus rows and an arrow walk; the console is
+            that plus a log. It opens <b>upward</b>, because this bar is on the floor.</td>
+      </tr>
+      <tr class="trap">
+        <td>The key stays lit</td>
+        <td>For as long as its plate is open. On a bar of seven icons that lamp is the only thing
+            saying which one you are in — the plate carries no title and needs none, because it is
+            anchored to the key and <b>the key is the label</b>. That is also why no plate here has
+            a tail: two channels already say where it came from, and a pointer on the edge only
+            tells the truth while the plate is directly over its key — a wide one never is, since
+            it slides to fit the window.
+            <b>And the key that opened it closes it:</b> without that, clicking the lit key tears
+            the plate down and builds an identical one in the same place, which reads as a control
+            that does nothing, so you try it twice.</td>
+      </tr>
+      <tr class="trap">
+        <td>A chip is bound or it is a lie</td>
+        <td>The factory binds <code>⌘/Ctrl</code>+<b>O S P E</b> itself, because a row printing
+            <code>⌘S</code> that does not answer to it is worse than a row with no chip. A row with
+            no shortcut leaves the column <b>empty</b> — New has none, and giving it one to square
+            off the right edge is inventing a key binding for the sake of a straight line.
+            <code>shortcuts:false</code> is for a page showing a dock rather than running one; this
+            page passes it, or ⌘S here would stop being the browser's.</td>
+      </tr>
+      <tr>
+        <td>The readout</td>
+        <td>An <code>.lcd</code>, never a button. It is a fact about the drawing and the app pushes
+            it: <code>dock.count(16844)</code>. Nothing inside the dock counts anything.</td>
+      </tr>
+      <tr class="trap">
+        <td>The dock eats clicks</td>
+        <td>Same trap as §08 and it costs more here: the dock spans the viewport and the bar does
+            not, so without <code>pointer-events:none</code> on the wrapper you have an invisible
+            full-width lid across the bottom of the canvas — which on a drawing app is the strip of
+            paper nearest the hand.</td>
+      </tr>
+      <tr>
+        <td>It is chassis</td>
+        <td>Like the strip in PANELS 09 it cannot be closed, reduced or dragged. A canvas whose
+            only route to Save can be put in a corner is a canvas you can lose.</td>
+      </tr>
+      <tr>
+        <td>Parts</td>
+        <td><code>.strip</code> chassis, <code>.key</code> caps, <code>.chan</code> between the two
+            groups, <code>.lcd</code> readout, <code>.plate</code> menu. Every one already existed.
+            What is new is the placement and the mechanism.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>10 <span>/</span> The settings panel</h2>
   <div class="setrow">
   <div class="api">
       <div class="api-rule">
@@ -460,7 +611,7 @@
     </div>
   </div>
 
-  <h2>10 <span>/</span> The room and the sheet</h2>
+  <h2>11 <span>/</span> The room and the sheet</h2>
   <div class="stage">
     <div class="stage-note">a square unit, and the panel that is not the work</div>
     <div class="deskdemo">
@@ -473,7 +624,7 @@
         <span class="loupe-mark" id="loupe-mark">6&times;</span>
       </div>
     </div>
-      <div class="box gridbox" id="gridbox"></div>
+      <p class="stage-note gridmoved">the rules for this sheet are in the settings drawer</p>
     </div>
   </div>
 
@@ -548,7 +699,7 @@
     </tbody>
   </table>
 
-  <h2>11 <span>/</span> Traps</h2>
+  <h2>12 <span>/</span> Traps</h2>
   <table class="spec">
     <tbody>
       <tr class="trap">
@@ -624,7 +775,7 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* the roots `engage` walks up to when it re-finds a rebuilt button */
-window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal, #setpanel';
+window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal, #setpanel, .appdock';
 
 /* ── 02 · the same lamp on four surfaces ────────────────────────────────── */
 /* ── 02 · SURFACES ────────────────────────────────────────────────────────
@@ -696,8 +847,18 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      '<span style="display:flex;gap:12px;height:56px"><span class="pipe" style="--lyr:#FF6A00"></span><span class="pipe" style="--lyr:#E4123F"></span><span class="pipe" style="--lyr:#4CE04C"></span></span>'],
     ['Readout',
      '<span class="lcd">3 RUNNING</span><span class="lcd dim">0 SHOWN</span>'],
-    ['Rotary knob',
+    ['Knob',
      '<span id="mat-knob"></span>'],
+    ['Light direction',
+     '<span id="mat-light"></span>'],
+    ['Selector',
+     '<span id="mat-sel"></span>'],
+    ['Interlocked bank',
+     '<span id="mat-bank"></span>',
+     'wide'],
+    ['Gated lever',
+     '<span id="mat-gate"></span>',
+     'tall'],
     ['Fader · one cap',
      '<span id="mat-fader1"></span>',
      'wide'],
@@ -710,9 +871,16 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
     ['Range fader',
      '<span id="mat-fader"></span>',
      'wide'],
+    ['Rotary selector',
+     '<span id="mat-rot"></span>'],
+    ['Axis ball',
+     '<span id="mat-gizmo"></span>'],
     ['Drum selector',
      '<span id="mat-drum"></span>',
      'wide'],
+    ['Rotary selector · seated in the case',
+     '<span id="mat-rotseat"></span>',
+     'wide tall matbulge'],
     ['Colour picker',
      '<span id="mat-pick"></span>',
      'wide'],
@@ -722,6 +890,12 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      '<span id="mat-micro"></span>'],
     ['Knurled chevron',
      '<span id="mat-chev"></span>'],
+    ['Action row · three commands',
+     '<span id="mat-acts"></span>',
+     'wide'],
+    ['Asset row · loaded and empty',
+     '<span id="mat-asset"></span>',
+     'wide tall'],
     ['Illuminated key',
      `<span class="key skirt act go" style="height:32px;padding:0 13px;gap:8px;font-family:var(--font);font-size:10.5px;font-weight:700"><span class="lens"></span>${ICON.play}<span>LAUNCH</span></span>`],
   ];
@@ -737,13 +911,48 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      rule rather than a taste: the row wraps left to right, so a 300px fader
      between two 60px parts leaves the tail of its line empty. Small ones fill
      a line, the long ones take the next. */
+  /* AND A CHOICE IS NOT A VALUE, which is why there are four groups and not
+     three. A value is a point on a continuum: near-right is a thing, nudging is
+     a thing, and a fader is a way of being somewhere along a line. A CHOICE is
+     discrete — there is nothing between Parallel and Crossed — and the drum had
+     been filed under values on the strength of being a thing you drag, which is
+     a fact about the gesture and not about what it sets.
+
+     THE AXIS BALL IS THE EXCEPTION AND IT IS DELIBERATE. On the discrete/
+     continuous line it belongs with the selectors: six positions, nothing in
+     between. It is grouped with `lightDir` anyway, because these headings are
+     the QUESTION YOU ARRIVE WITH, not a taxonomy — and "how do I let someone
+     aim a thing in space" is one question with two answers. Split them and a
+     reader who has found the light picker has no reason to believe the other
+     one exists; a group that is correct and unsearchable has lost the argument
+     with a group that is approximate and found.
+
+     So the two round parts sit together, and the DRUM is what draws the line
+     instead: a list of names is nobody's idea of a quantity, and it was the one
+     genuinely miscategorised tile. */
   const GROUPS = [
     ['Light',         ['Jewel LED', 'Light pipe', 'Readout']],
-    ['Setting a value', ['Rotary knob', 'Colour picker', 'Fader · vertical bank',
-                         'Fader · one cap', 'Fader · centre detent', 'Range fader',
-                         'Drum selector']],
+    ['Setting a value', ['Knob', 'Light direction', 'Axis ball', 'Colour picker',
+                         'Fader · vertical bank', 'Fader · one cap',
+                         'Fader · centre detent', 'Range fader']],
+    /* THE ORDER IS THE ARGUMENT, and it is a count: a rotary is aimable to
+       about six, the selector carries five to a dozen, the drum takes a list
+       too long to show. Read left to right the group says WHEN each one stops
+       working, which is the only question you arrive at this row with. It also
+       satisfies the grid's own packing rule — the drum is the one wide tile
+       here, so it was going last anyway. */
+    ['Choosing one',  ['Rotary selector', 'Rotary selector · seated in the case',
+                       'Selector', 'Interlocked bank', 'Gated lever', 'Drum selector']],
     ['Pressing',      ['Backlit key', 'Slide switch', 'Momentary vs latching', 'Micro key',
-                       'Knurled chevron', 'Illuminated key']],
+                       'Knurled chevron', 'Illuminated key', 'Action row · three commands']],
+    /* ONE TILE IS A THIN STAGE AND IT IS STILL THE RIGHT PLACE. These headings
+       are the question you arrive with, and "how do I let someone put a file
+       in" is not answered anywhere else on this page — filing it under Pressing
+       because it happens to contain keys would be filing it by what it is made
+       of rather than by what it is for, which is the one thing this grid does
+       not do. The group has siblings coming: the render overlay and the ruler
+       strip are both in the request list. */
+    ['Loading a file', ['Asset row · loaded and empty']],
   ];
 
   const byName = new Map(tiles.map(t => [t[0], t]));
@@ -776,6 +985,34 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
   box.querySelectorAll('[data-rk]').forEach(n => n.insertAdjacentHTML('beforeend', ROCKER()));
 
   // the knob tile gets a live one
+  /* THE LIGHT PICKER IS LIVE, at the numbers the app it came from was sitting
+     on when it was screenshotted. A specimen of a direction control posed at
+     the default would be a specimen of the default. */
+  /* NINE NAMES, WHICH IS THE COUNT THIS PART IS FOR. A specimen of a selector
+     showing three would be a specimen of a rotary that had lost its dial.
+
+     THE NAMES ARE SHARED WITH THE OTHER TWO PARTS IN THIS GROUP, deliberately:
+     three controls answering one question have to be compared on the same list
+     or the comparison is about the words. */
+  const SELNAMES = ['Scanlines', 'Serpentine', 'Streamlines', 'Squiggle',
+                    'Space fill', 'Labyrinth', 'Cross hatch', 'Random', 'Hand'];
+  /* THE SAME NINE NAMES THE SELECTOR IS POSED WITH, deliberately: two parts
+     answering one question have to be compared on the same list or the
+     comparison is about the words. */
+  document.getElementById('mat-bank').replaceWith(keyBank({
+    label: '', index: 3, options: SELNAMES,
+  }));
+
+  document.getElementById('mat-gate').replaceWith(gate({
+    label: '', width: 158, index: 3, options: SELNAMES,
+  }));
+
+  document.getElementById('mat-sel').replaceWith(
+    selector({ label: '', width: 152, index: 3, options: SELNAMES }));
+
+  document.getElementById('mat-light')
+          .replaceWith(lightDir({ label: '', az: 325, el: 59, size: 118 }));
+
   document.getElementById('mat-knob')
           .replaceWith(knob({ label: '', min: 0, max: 100, value: 62, size: 58 }));
 
@@ -831,6 +1068,75 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
   dr.querySelector('.drum').style.width = '190px';
   document.getElementById('mat-drum').replaceWith(dr);
 
+  /* ── THE THREE SELECTORS, AND EACH ONE POSED AT ITS OWN ARGUMENT ──────────
+     The drum above is posed at ten names because ten is where the rotary has
+     given up. These three are posed the same way: the bay switch at SIX, which
+     is the ceiling; the ball at Top rather than at its default Front; and the
+     seated one in the case it exists for. A specimen at a comfortable four
+     would be a specimen of nothing. */
+
+  /* THE BAY POSE — the switch as one of five on a 318px panel. 54px cap,
+     --rcx:30 so the whole dial is inside its cell, and the group centred by
+     auto margins rather than the dial nudged along until it looks middled.
+
+     THE CELL IS MEASURED OFF THE LONGEST NAME, the same arithmetic .hb-turret
+     is built on: the dial's centre sits at --rcx:30, `rotary` prints its column
+     at LAB_X=48 from there, and "Hand random" is about 85px of 9.5px monospace
+     — so the names end at 163 and the cell is 168. The 124 the stylesheet
+     defaults to fits four short names and clips this list, which is a width to
+     compute rather than a default to widen. */
+  const selCell = (cap, ctl, w) => {
+    const c = el('div', 'set-sel');
+    c.append(el('div', 'set-cap', cap), ctl);
+    if (w) ctl.style.width = w;
+    return c;
+  };
+  document.getElementById('mat-rot').replaceWith(selCell('Type', rotary({
+    compact: true, index: 0,
+    options: ['Parallel', 'Crossed', 'Serpentine', 'Hand', 'Hand cross', 'Hand random'],
+  }), '168px'));
+
+  document.getElementById('mat-gizmo').replaceWith(gizmo({ index: 2 }));
+
+  /* ── AND THE SAME SWITCH SEATED IN THE CASE ───────────────────────────────
+     Not a second control: the same `rotary`, in the pose the part was designed
+     for. One switch that is what a panel is ABOUT gets a moulded boss, and the
+     boss is not a disc laid over the case — the panel is ONE element with a
+     clip-path of the rounded rectangle unioned with a lobe, joined by a tangent
+     fillet at each end, so there is no seam to keep two greys agreeing across.
+
+     THE LOBE'S HEIGHT IS MEASURED, NEVER GUESSED. It is wherever the dial ended
+     up, which only layout knows — and `panelShape` falls back to a plain
+     rectangle when there is no room for the lobe, so a panel that is too short
+     loses its bump silently rather than drawing a broken one. The shadow goes
+     on `.bulge-wrap` because filters are applied before clipping and a shadow
+     cast by the unclipped box would be clipped away with it.
+
+     AND THE DIAL SITS DIRECTLY IN `.box-body` — no bay. --rcx is -23 because
+     the lobe's centre is at 44 and the content box is two paddings deep, 55 of
+     case plus 12 of body. Wrap it in a `.bay` and its own 9px of margin puts
+     the knob 9px off the middle of its own bump, which is the one flaw no
+     amount of moving the bump fixes. */
+  const seat = el('div', 'bulge-wrap');
+  const sbox = el('div', 'box bulge');
+  const shead = el('div', 'box-head');
+  shead.append(el('span', 'nm', 'RIBBONS'));
+  const sbody = el('div', 'box-body');
+  sbody.append(el('div', 'bay-cap', '<span>Place from</span>'));
+  const sbay = el('div', 'placebay');
+  const sdial = rotary({ options: ['Reference', 'Tone', 'Density', 'Size'], index: 1 });
+  sbay.append(sdial);
+  sbody.append(sbay);
+  sbox.append(shead, sbody);
+  seat.append(sbox);
+  document.getElementById('mat-rotseat').replaceWith(seat);
+  requestAnimationFrame(() => {
+    const d = sdial.getBoundingClientRect(), b = sbox.getBoundingClientRect();
+    const y = d.top + d.height / 2 - b.top;
+    sbox.style.setProperty('--boss-y', `${y.toFixed(1)}px`);
+    sbox.style.setProperty('--panel-shape', panelShape(b.width, b.height, y));
+  });
+
   /* THE PICKER TILE IS A LIVE PEN CAP, because a picker that cannot be opened
      is a screenshot of one — and the thing being demonstrated is a surface
      that OPENS. Same cap object the ink rail uses, same openPicker() the
@@ -881,6 +1187,77 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
   chev.title = 'Open';
   chevRow.append(el('span', 'sep'), chev);
   document.getElementById('mat-chev').replaceWith(chevRow);
+
+  /* ── THE ACTION ROW, WHICH THIS PAGE HAS BEEN USING AND NEVER SHOWING ─────
+     `.actrow` + `key(…, {cls:'act aux'})` has been in the language since the
+     panels exploration and it had no tile, so every caller rediscovered it by
+     reading somebody else's panel — which is how Portrait-Ribbons ended up
+     with three bare `.key`s in a row. `.key` carries the SURFACE and `.act`
+     carries the SIZE: without the second class the cap is `padding:0` with no
+     height and shrinks to the width of the word, which does not throw and does
+     not look like a bug, it looks like text.
+
+     THE SPECIMEN IS §02'S OWN RUN ROW, lifted rather than written — same three
+     calls, same classes, same icons as the layer editor's footer. A row of
+     commands invented for a tile is a row nobody has had to make fit.
+
+     AND THE THREE CAPS ARE THREE DIFFERENT JOBS, which is the whole reason
+     this is a part and not a flex rule:
+
+       THE VERB stretches and is LIT. `.act.fire` with a `.lens` inside it —
+       one panel, one thing it is for, and it is the only coloured cap on the
+       case. Two lit keys in a row is two panels arguing.
+       THE SECOND ALSO STRETCHES and is plain metal. `.act.aux` is the same cap
+       with the colour taken out; `.actrow .act{flex:1}` is what shares the
+       width between them, so nobody sets a width.
+       THE THIRD DOES NOT STRETCH. It opts out with `flex:0 0 auto` because it
+       is an ICON and an icon has no length to justify — a bare glyph stretched
+       to a third of the panel is a button that looks broken. It is also the
+       one that LATCHES here: a setting parked at the end of a row of commands,
+       which is why it is a bin or a direction rather than a fourth verb.
+
+     THE ROW IS 288px BECAUSE THAT IS WHAT A PANEL GIVES IT — 318 of case less
+     3 of shell and 12 of body, twice. Posed at any other width the sample
+     would show a proportion no panel in this system produces. */
+  const acts = el('div', 'actrow');
+  acts.style.width = '288px';
+  acts.append(key(`<span class="lens"></span>${ICON.run}<span>COMPUTE</span>`,
+    { cls: 'act fire', title: 'Compute this layer' }));
+  acts.append(key(`${ICON.settle}<span>SETTLE</span>`,
+    { cls: 'act aux', title: 'Re-apply gravity' }));
+  let fall = true;
+  const pad = key(ICON.drop, { cls: 'act aux', title: 'Which way this layer falls',
+    latch: true, down: fall, onClick: () => { fall = !fall; } });
+  pad.style.flex = '0 0 auto';
+  pad.style.padding = '0 11px';
+  acts.append(pad);
+  document.getElementById('mat-acts').replaceWith(acts);
+
+  /* ── THE ASSET ROW, IN BOTH ITS STATES ────────────────────────────────────
+     TWO ROWS, BECAUSE EMPTY IS HALF THE PART. Every one of these starts with
+     nothing in it, and the state a control spends its first minute in is not a
+     footnote: the well instead of a picture, the name saying so in words, and
+     SAVE and CLEAR dead because there is nothing to write out and nothing to
+     throw away. A specimen of the loaded row alone would document the easy
+     half and leave the app to invent the other.
+
+     AND THE THUMB IS 82px HERE, not §02's 56. Three keys stack to 82 and the
+     picture comes up to meet them — the row is one block or it is a picture
+     with something taller floating beside it. The two-key row on the layer
+     editor is unchanged and still 56; the class comes off the key count. */
+  const shot = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='2'/%3E%3C/filter%3E%3CradialGradient id='g' cx='40%25' cy='28%25'%3E%3Cstop offset='0' stop-color='%23f4f1eb'/%3E%3Cstop offset='.5' stop-color='%23b0a89d'/%3E%3Cstop offset='1' stop-color='%23524d47'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='%231b1a18'/%3E%3Cg filter='url(%23b)'%3E%3Cpath d='M50 63c19 0 31 15 34 40H16c3-25 15-40 34-40z' fill='%237d766d'/%3E%3Cellipse cx='50' cy='39' rx='21' ry='26' fill='url(%23g)'/%3E%3Cellipse cx='42' cy='37' rx='3.4' ry='2.2' fill='%233d3833' opacity='.75'/%3E%3Cellipse cx='58' cy='37' rx='3.4' ry='2.2' fill='%233d3833' opacity='.75'/%3E%3Cpath d='M44 51c4 3 9 3 13 0' stroke='%23433e39' stroke-width='2.4' fill='none' opacity='.65'/%3E%3C/g%3E%3C/svg%3E\") center/cover";
+
+  const assets = el('div', null);
+  assets.style.cssText = 'display:flex; flex-direction:column; gap:16px; width:288px';
+  const full = assetRow({
+    name: 'portrait-04.png', source: 'THIS SLOT ONLY', thumb: shot,
+    onLoad: () => {}, onSave: () => {}, onClear: () => full.set({}),
+  });
+  const bare = assetRow({
+    label: 'No image', onLoad: () => {}, onSave: () => {}, onClear: () => {},
+  });
+  assets.append(full, bare);
+  document.getElementById('mat-asset').replaceWith(assets);
 
   /* THE COUNT WRITES ITSELF. The lede said "nine primitives" while the grid
      held ten, then thirteen — a claim about completeness that nobody thinks to
@@ -1000,139 +1377,32 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
        and the most common.
    ══════════════════════════════════════════════════════════════════════════ */
 (function settingsPanel() {
-  const box = document.getElementById('setpanel');
-  const st = {
-    depth: 400, count: 153,
-    speed: 1, gravity: 0, viewFrom: 0, plotFrom: 0,
-    font: 3, adv: false,
-    seed: 42, collide: 0.040, friction: 0.80, bounce: 0.050,
-  };
+  /* THE SECOND PANE IS THE GRID, AND IT IS BUILT BY §09 RATHER THAN HERE.
+     A settings drawer that carries a COPY of a panel is two panels to keep
+     agreeing, and the copy is the one that goes stale. §09's grid rig renders
+     itself straight into this pane — one rig, one state, in the place settings
+     live, still driving the sheet and the loupe up the page. Which is also the
+     most honest demonstration this section can make: a drawer is not a place
+     to put controls, it is where the controls for the thing on screen ARE.
 
-  const head = el('div', 'box-head');
-  const lamp = el('span', 'jewel');
-  lamp.style.setProperty('--lyr', '#FF6A00');
-  /* THE DRAWER IS SETTINGS. This is a group inside it, so it cannot be called
-     SETTINGS too, and it cannot be called LETTERS either because one of its
-     own bays is. It is the letter drop: how deep the box, how many at once,
-     which way up, which font. DROP. */
-  head.append(lamp, el('span', 'nm', 'DROP'));
-  const body = el('div', 'box-body set-body');
+     WHAT WAS HERE BEFORE was a stroke-and-substroke panel invented to show the
+     hierarchy. It showed a hierarchy nothing on this page has. The grid has a
+     real one — Lines and Width are the rule, Sublines and Sub mm are the rule
+     inside it — and a demonstration built out of a part that exists beats one
+     built out of a part that would be nice to have. */
 
-  /* a bay is a folder, and it says so with a cap and a hairline rather than
-     with a header bar you can collapse — five collapsed folders is a panel
-     that has hidden itself */
+  /* A BAY IS A FOLDER, and it says so with a cap and a hairline rather than a
+     header bar you can collapse — five collapsed folders is a panel that has
+     hidden itself. It lived with the pane that was deleted and is used by this
+     one too, which is the ordinary cost of taking a block out of a function:
+     the helper goes with it and the survivor finds out at runtime. */
   const bay = (cap, engIcon) => {
     const b = el('div', 'bay set-bay');
     b.append(el('div', 'bay-cap', `${engIcon || ''}<span>${cap}</span>`));
     return b;
   };
 
-  // ── BOX ──────────────────────────────────────────────────────────────────
-  const box1 = bay('BOX', ENG.spacing);
-  const kr = el('div', 'knobrow');
-  kr.append(
-    knob({ label: 'Depth', min: 50, max: 900, step: 10, value: st.depth, size: 44,
-           fmt: v => v + ' mm', onChange: v => { st.depth = v; } }),
-    knob({ label: 'At once', min: 1, max: 400, step: 1, value: st.count, size: 44,
-           onChange: v => { st.count = v; } }),
-  );
-  box1.append(kr);
-  /* DROP SPEED AND GRAVITY ARE FOUR NAMED THINGS EACH, so they are switches.
-     A dropdown here would hide three of four options to save a control's worth
-     of height, on a panel that has plenty. */
-  const twoUp = el('div', 'set-two');
-  twoUp.append(
-    wrapSel('DROP SPEED', rotary({ compact: true, options: ['Slow', 'Fast', 'Faster', 'Instant'],
-      index: st.speed, onChange: (_, i) => { st.speed = i; } })),
-    wrapSel('GRAVITY', rotary({ compact: true, options: ['Stack', 'Scatter', 'Fall', 'Float'],
-      index: st.gravity, onChange: (_, i) => { st.gravity = i; } })),
-  );
-  box1.append(twoUp);
-
-  // ── VIEW ─────────────────────────────────────────────────────────────────
-  const box2 = bay('VIEW', ENG.angle);
-  /* THESE TWO DO NOT PAIR. A half-width bay leaves about 60px for a name once
-     the dial and its leaders have taken theirs, and "Same as view" wants 75 —
-     so the label ran out of the panel entirely. Two switches sit side by side
-     when their names are SHORT and stack when they are not; the alternative is
-     abbreviating a name to fit a layout, which is the layout winning an
-     argument it should not have been in. */
-  /* SIDE BY SIDE, AND THE COPY GAVE WAY. "Same as view" and "Last drop" are
-     the only two names on this panel that could not share a row, and a whole
-     column of empty floor is a steep price for four extra letters. "As view"
-     and "Last" say the same thing in a bay half the height — the words are
-     serving the panel here, not the other way round.
-
-     What did NOT give way is which primitive it is. Shortening a name is a
-     copy edit; turning a switch into a dropdown to save the same space would
-     have been the panel losing the argument. */
-  const twoDn = el('div', 'set-two');
-  twoDn.append(
-    wrapSel('VIEW FROM', rotary({ compact: true, options: ['Front', 'Right', 'Top', 'Last'],
-      index: st.viewFrom, onChange: (_, i) => { st.viewFrom = i; } })),
-    wrapSel('PLOT FROM', rotary({ compact: true, options: ['As view', 'Front', 'Top'],
-      index: st.plotFrom, onChange: (_, i) => { st.plotFrom = i; } })),
-  );
-  box2.append(twoDn);
-  /* THE ONE DESTRUCTIVE THING GETS THE ONE LIT KEY. Everything else on this
-     panel changes a number you can change back; this throws a camera away. */
-
-  // ── LETTERS ──────────────────────────────────────────────────────────────
-  const box3 = bay('LETTERS', ENG.nib);
-  const fonts = ['Archivo', 'Bodoni Moda', 'Bowlby One', 'Cormorant', 'DM Serif',
-                 'Fraunces', 'Inter Tight', 'Playfair', 'Space Grotesk', 'Syne'];
-  box3.append(wrapSel('FONT', drum({ options: fonts, index: st.font,
-    label: 'Font', onChange: (_, i) => { st.font = i; } }), true));
-
-  /* ADVANCED IS A DRAWER, and the chevron is the one already on the layer
-     rows: a folder that hides is fine when what it hides is genuinely rare. */
-  const adv = el('div', 'set-adv');
-  const advHead = el('div', 'bay-cap set-advcap', '<span>ADVANCED</span>');
-  const chev = chevBtn(st.adv, 'the advanced settings', () => {
-    st.adv = !st.adv; adv.classList.toggle('open', st.adv);
-  });
-  advHead.append(chev);
-
-  /* WHAT IS ALLOWED BEHIND A CHEVRON. Not "the settings we ran out of room
-     for" — these four are the ones you set when the simulation is misbehaving
-     and then never touch again, which is the only honest reason to hide
-     anything. Everything above the drawer is something you change while
-     looking at the drawing. */
-  const advBody = el('div', 'set-advbody');
-
-  /* A SEED IS NOT A QUANTITY, so it does not get a knob. You do not sweep a
-     seed looking for a value — there is no "warmer" or "more"; 41 and 43 are
-     no more alike than 41 and 9000. It is an IDENTITY: a lit window you can
-     type an exact one into when you want to go back to a drawing you liked,
-     and a key that throws a new one when you do not care. A slider here is
-     the classic mistake, and it is the one control on a panel where dragging
-     is genuinely meaningless. */
-  const seedOut = el('div', 'lcd', String(st.seed));
-  typeable(seedOut, () => st.seed, v => { st.seed = Math.round(v); seedOut.textContent = st.seed; });
-  const roll = key('ROLL', { cls: 'act aux set-roll', title: 'Throw a new seed',
-    onClick: () => { st.seed = 1 + Math.floor(Math.random() * 99999); seedOut.textContent = st.seed; } });
-  const seedRow = el('div', 'set-seed');
-  seedRow.append(el('span', 'hb-optlab', 'SEED'), seedOut, roll);
-  advBody.append(seedRow);
-
-  /* THE THREE THAT ARE QUANTITIES GET KNOBS, and they share one row because
-     they are one subject: how the pieces behave when they hit each other. */
-  const phys = el('div', 'knobrow');
-  phys.append(
-    knob({ label: 'Collider', min: .005, max: .2, step: .005, value: st.collide, size: 40,
-           fmt: v => v.toFixed(3), onChange: v => { st.collide = v; } }),
-    knob({ label: 'Friction', min: 0, max: 1, step: .01, value: st.friction, size: 40,
-           fmt: v => v.toFixed(2), onChange: v => { st.friction = v; } }),
-    knob({ label: 'Bounce', min: 0, max: 1, step: .005, value: st.bounce, size: 40,
-           fmt: v => v.toFixed(3), onChange: v => { st.bounce = v; } }),
-  );
-  advBody.append(phys);
-  adv.append(advHead, advBody);
-
-  body.append(box1, box2, box3, adv);
-  box.append(head, body);
-
-  /* ── THE SECOND PANE ─────────────────────────────────────────────────── */
+  /* ── THE CANVAS PANE ─────────────────────────────────────────────────── */
   const gbox = document.getElementById('setglobal');
   const PAPER = { A5: [14.8, 21.0], A4: [21.0, 29.7], A3: [29.7, 42.0],
                   A2: [42.0, 59.4], A1: [59.4, 84.1], A0: [84.1, 118.9],
@@ -1318,7 +1588,49 @@ document.getElementById('navspec').replaceWith(navBar({
   onSelect: (i, v) => { document.getElementById('navspec-out').textContent = v.nav; },
 }));
 
-/* ── 10 · THE GRID BAY ────────────────────────────────────────────────────
+/* ── 09 · THE APP DOCK SPECIMEN ───────────────────────────────────────────
+   THE REAL FACTORY, WITH THE HANDLERS REPLACED AND NOTHING ELSE. Every key,
+   both menus, all three export rows and the readout are the ones an app gets —
+   a specimen written for the page is a specimen that can be upright here and
+   broken in the app.
+
+   TWO ARGUMENTS ARE THE PAGE'S: `fixed:false`, so the bar sits in the stage
+   instead of pinning itself to the bottom of a document you are scrolling; and
+   `shortcuts:false`, because a documentation page that swallowed ⌘S would be
+   the loudest possible demonstration of a bar that thinks it is an app. The
+   chips are still printed — what they say is true of the dock, not of this
+   page, and the row above says so. ─────────────────────────────────────────── */
+(function dockSpec() {
+  const out = document.getElementById('dockspec-out');
+  const say = w => { out.textContent = w; };
+  const state = w => v => say(w + ' ' + (v ? 'ON' : 'OFF'));
+  document.getElementById('dockspec').replaceWith(appDock({
+    fixed: false, shortcuts: false, strokes: 16844,
+    onLoad:  () => say('LOAD ALL'),
+    onSave:  () => say('SAVE ALL'),
+    onNew:   () => say('NEW'),
+    onPNG:   () => say('EXPORT PNG'),
+    onSVG:   () => say('EXPORT SVG'),
+    onDebug: () => say('EXPORT DEBUG SVG'),
+    onImage: () => say('IMAGE'),
+    onLight: () => say('LIGHT'),
+    onWindows: () => say('RESET WINDOWS'),
+    onSound: state('SOUND'),
+    /* THE LOG IS A REAL ONE, lifted out of a Ribbons session rather than
+       written for the page — which is the same rule every other specimen here
+       follows, and the reason the wrapping and the mix of notes and results
+       look like a log instead of a list of sentences. */
+    log: [
+      { t: '16:12:22', text: 'direction map generated (723×1024, seed 1, heading 45° ±60°) — press Space to render', lit: true },
+      { t: '16:12:22', text: 'photo: default-portrait.png (1684×2381) — press Space to render', lit: true },
+      { t: '16:13:40', text: 'maps: photo ON, direction ON (rg-vector, blend 0.7), height ON' },
+      { t: '16:13:42', text: '196 ribbons, 20632 paths — 1.4s', lit: true },
+      { t: '16:13:42', text: 'shading: 20492 runs chained into 13182 strokes (1.6× fewer pen lifts)', lit: true },
+    ],
+  }));
+})();
+
+/* ── 11 · THE GRID BAY ────────────────────────────────────────────────────
    THE PANEL OWNS THE ARITHMETIC AND CSS ONLY DRAWS. It writes a major pitch in
    whole pixels and a minor that divides it exactly, because a repeating
    gradient at a fractional repeat rounds each pass on its own and the error
@@ -1329,7 +1641,7 @@ document.getElementById('navspec').replaceWith(navBar({
    sheet go from useful to unreadable in about two stops. ─────────────────── */
 (function gridBay() {
   const paper = document.getElementById('sheet-grid');
-  const box   = document.getElementById('gridbox');
+  const box   = document.getElementById('setpanel');
   const zoom  = document.getElementById('sheet-zoom');
   const mark  = document.getElementById('loupe-mark');
   if (!paper || !box) return;
@@ -1393,6 +1705,15 @@ document.getElementById('navspec').replaceWith(navBar({
     if (out) out.textContent = pitch + ' · ' + (subOn ? minor : '-');
   }
 
+  /* IT IS A PANE IN THE DRAWER NOW, so it takes the drawer's own chrome: a
+     head with a lamp and a name, like CANVAS above it. The bay cap inside it
+     stays, because the bay is still a folder within the pane — the head says
+     which panel, the cap says which group. */
+  const head = el('div', 'box-head');
+  const glamp = el('span', 'jewel');
+  glamp.style.setProperty('--lyr', '#7FB2E5');
+  head.append(glamp, el('span', 'nm', 'GRID'));
+
   const body = el('div', 'box-body set-body gridbody');
   body.append(el('div', 'bay-cap', '<span>Grid</span>'));
 
@@ -1454,7 +1775,7 @@ document.getElementById('navspec').replaceWith(navBar({
   const out = el('span', 'lcd dim gridout');
   body.append(wrap('Pitch', out));
 
-  box.append(body);
+  box.append(head, body);
   setInk(st.ink);
 })();
 
@@ -1765,7 +2086,7 @@ function ROCKER() {
   })();
 })();
 
-/* ── 10 · THE RULER TICKS ──────────────────────────────────────────────────
+/* ── 11 · THE RULER TICKS ──────────────────────────────────────────────────
    Drawn rather than written out, because the point of the specimen is that a
    tick is legible on this ground at all, and twenty hand-written spans would
    be a picture of a ruler rather than one. Every fifth is long, which is the

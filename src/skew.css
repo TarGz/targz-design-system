@@ -304,6 +304,10 @@ body::after{
   text-shadow:0 1px 0 rgba(255,255,255,.10);
 }
 
+/* THE CONTROLS MOVED AND THE SHEET SAYS SO. A stage that used to carry its
+   own panel and now carries nothing reads as unfinished; one line of engraving
+   is what a real case does when the knob is on the other side. */
+.gridmoved{ margin:10px 0 0; }
 .gridbody{ padding:9px 10px 11px; gap:9px; }
 .gridrow{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px 8px; }
 /* THE VALUE SITS BESIDE THE DIAL. `bare` was the first choice and it showed
@@ -666,6 +670,13 @@ h2 span{ color:#3d4149; }
     0 0 0 1px rgba(0,0,0,.45);
   transition:color .12s, box-shadow .1s, background .12s, transform .1s;
 }
+/* NO HIT PAD ON A SWITCH CAP, and that is a decision rather than an omission.
+   `::before` is this grain and `::after` is the chamfer, so a pad would have to
+   share one of them — and the only way to share this one is to clip the grain
+   to a content box, which changes what the corner of a 24px cap looks like.
+   A switch travels 1px. Trading the grain on every cap in the kit against 1px
+   of edge on the one control that is usually pressed in the middle of a `.tog`
+   row is not a trade. If it ever is, it needs a third pseudo, not this one. */
 .sw::before{
   content:''; position:absolute; inset:0; pointer-events:none; border-radius:7px;
   background-image:var(--grain); background-size:90px; opacity:.09; mix-blend-mode:overlay;
@@ -2097,6 +2108,262 @@ input:focus-visible{ outline-offset:3px; }
 .pkey.is-down{ color:var(--led); text-shadow:0 0 6px rgba(255,130,30,.5); }
 /* the lamp bar under the engraved label — the key is lit from inside */
 .pkey{ position:relative; }
+/* ── THE GUTTER BELONGS TO THE KEYS ──────────────────────────────────────
+   A GROUP WITH `gap` AND `padding` HAS PIXELS INSIDE IT THAT BELONG TO NO
+   BUTTON, and every one of them is a small lie: the thing looks like one
+   continuous control, the pointer is over it, and the click goes nowhere.
+   Worse on this part than most, because the keys carry 4px of travel and a
+   chamfer that reaches 2px OUTSIDE them — so the lit edge of a key is
+   already standing in the gutter, and the gutter is exactly where a click
+   does nothing.
+
+   THE HIT AREA IS A PSEUDO-ELEMENT AND THE PAINTED KEY IS NOT TOUCHED. A
+   pseudo is not its own event target — a hit on it is a hit on the element
+   that owns it — so `::before` stretched past the cap gives the key the
+   gutter without moving, resizing or restyling anything you can see. Doing
+   it with padding or a negative margin would have shifted the layout; doing
+   it by removing the gap would have welded the keys into one slab.
+
+   THE REACH IS HALF THE GAP, DECLARED PER GROUP, and it has to be: a flat
+   3px would close the nav's 6px gutter exactly and OVERLAP the hatch tabs'
+   4px row gap by two pixels each way, so the key below would claim the
+   bottom of the key above and you would press the wrong tab by aiming at the
+   right one. Half a gap always meets its neighbour at the midline and never
+   crosses it. Every group that overrides `gap` owes this variable a value;
+   the defaults are `.piano`'s own 5px gap and a vertical reach that fits
+   inside its 6px padding.
+
+   THE OUTER FRAME STAYS INERT ON PURPOSE. The group's padding is the case
+   the keys are set into, not a gutter between two of them, and the edge of a
+   case is not a button.
+
+   IT MUST STAY TRANSPARENT AND MUST NOT SET `pointer-events:none`. Those
+   are the two ways to write this rule and have it do nothing at all.
+
+   AND IT IS A RECTANGLE. `border-radius:inherit` was the third way, and the
+   one that survived two rounds of looking straight at it: browsers hit-test
+   the ROUNDED box, so a pad that copies the cap's 8px corner is dead in the
+   crescent outside every one of its four curves. At the top of a seam the
+   crescents of two neighbouring pads meet and make a notch about 8px wide —
+   which is the exact spot a pointer arrives at when it aims between two keys,
+   and the exact spot this was reported from, twice.
+
+   A PAD IS NOT DRAWN, SO IT HAS NO SHAPE TO KEEP. Rounding it inherits the
+   look of the cap and none of the reason for it, and hands back at the corners
+   the area the reach was added to claim. Square, and the seam is straight all
+   the way to the top of the strip. */
+.pkey::before,
+.key::before,
+.chip::before{
+  content:''; position:absolute; border-radius:0;
+  inset:calc(var(--pkey-reach-y, 4px) * -1) calc(var(--pkey-reach-x, 2.5px) * -1);
+}
+.nav-pages{ --pkey-reach-x:3px; }                            /* gap 6 */
+.piano.sm{ --pkey-reach-x:3.5px; }                           /* gap 7 */
+.piano.sm.hb-tabs{ --pkey-reach-x:2.5px; --pkey-reach-y:2px; } /* 5 / row 4 */
+.keypad{ --pkey-reach-y:5.5px; }                             /* row gap 11 */
+.strip{ --pkey-reach-x:3.5px; --pkey-reach-y:9px; }          /* gap 7, padding 9 13 */
+
+/* ── AND THE PRESS MUST NOT TAKE THE HIT AREA WITH IT ─────────────────────
+   A CAP THAT TRAVELS MOVES OUT FROM UNDER THE POINTER THAT PRESSED IT, and
+   that is a whole class of click that animates and then does nothing. `:active`
+   lands on pointerDOWN and drops the cap 2px; if the press landed in the top
+   2px, the pointer is now above the element, pointerUP goes to the chassis, and
+   `click` fires on the nearest common ancestor of the two — the group. You get
+   the full press and release, and no handler. It is worst where it is least
+   visible: the dead band is exactly the travel, so it is 2px on every big cap
+   and it hugs the top edge, which is the edge a pointer arrives at.
+
+   THE PAD MOVES THE OTHER WAY BY THE SAME AMOUNT, so it stays where it was in
+   screen space while the cap falls through it. Nothing visible moves — the pad
+   was never drawn — and the pointer never leaves the element it pressed. This
+   is the whole fix, and it has to be stated for the LATCHED states too: a key
+   sitting `.is-down` is a key holding 2px of travel permanently, and its top
+   2px would be dead at rest.
+
+   THE NUMBER IS COPIED, NOT DERIVED, and that is deliberate. It must equal the
+   travel in the rule above it or it makes a second dead band pointing the other
+   way, so it is written next to nothing else and changed with that rule. */
+.key:active::before,        .key.is-down::before,
+.key.skirt:active::before,  .key.skirt.is-down::before,
+.pkey:active::before,       .pkey.is-down::before,
+.chip:active::before,       .chip.is-down::before{
+  transform:translateY(-2px);
+}
+/* `.sw` is absent here on purpose — see the note on its grain pseudo above. */
+/* THE SMALL STRIPS DO NOT TRAVEL, so their pads must not compensate for travel
+   that never happens — that would open the same dead band along the BOTTOM. */
+.piano.sm .pkey:active::before,
+.piano.sm .pkey.is-down::before{ transform:none; }
+
+/* ── THE OUTER FRAME BELONGS TO THE END KEYS ──────────────────────────────
+   THE CASE IS NOT A BUTTON WAS THE WRONG CALL, and it was made about a part
+   nobody had pressed yet. In use the frame reads as dead, not as the edge of
+   the object: the strip looks like one continuous control, the pointer is over
+   it, and the click goes nowhere. That is the same sentence the gutter rule
+   above opens with, and the gutter and the rim are the same complaint.
+
+   HALF A GAP INWARD, THE WHOLE PADDING OUTWARD. A key meets its neighbour at
+   the midline and never crosses it; toward the case there is no neighbour to
+   meet, so it takes the lot. A single-row strip has no neighbour above or below
+   either, which is why the vertical reach here is the padding rather than the
+   4px default — in a one-row group every key touches the top and bottom frame.
+
+   THE CORNER NEEDS NO RADIUS AT ALL, and giving it one was the mistake that
+   cost a round: the pad is square everywhere now, so an end pad reaching the
+   case fills the chassis corner completely rather than leaving the crescent
+   the chassis's own 12px would have cut out of it. */
+/* EACH GROUP NAMES ITSELF AND EXCLUDES THE OTHERS. `.nav-pages` and
+   `.piano.sm` both carry `.piano`, so an unscoped `.piano` rule reaches into
+   them at equal specificity and the winner is whichever was written last —
+   a padding value decided by source order. */
+.piano:not(.sm):not(.nav-pages) > .pkey::before{ top:-6px; bottom:-6px; }
+.piano:not(.sm):not(.nav-pages) > .pkey:first-child::before{
+  left:-6px;
+}
+.piano:not(.sm):not(.nav-pages) > .pkey:last-child::before{
+  right:-6px;
+}
+/* the two single-row 5px strips */
+.piano.sm:not(.hb-tabs) > .pkey::before,
+.nav-pages > .pkey::before{ top:-5px; bottom:-5px; }
+.piano.sm:not(.hb-tabs) > .pkey:first-child::before,
+.nav-pages > .pkey:first-child::before{
+  left:-5px;
+}
+.piano.sm:not(.hb-tabs) > .pkey:last-child::before,
+.nav-pages > .pkey:last-child::before{
+  right:-5px;
+}
+
+/* THE TAB STRIP IS A GRID AND `:first-child` IS NOT ITS LEFT EDGE. Six keys
+   auto-flow into three columns across two rows, then `.chan` and ALL are placed
+   in columns 4 and 5 — so the LAST DOM CHILD IS NOT THE LAST KEY, and the key
+   at the left of row two is child four. What the rim depends on is column and
+   row position, so that is what this asks for. `nth-child` is safe here for the
+   same reason the grid is: the count is fixed at six by the same rule that
+   fixes the template at three columns.
+
+   IT ALSO MUST NOT TAKE THE SINGLE-ROW RULE ABOVE, which is why that one is
+   scoped away from `.hb-tabs`: a -5px reach off the top AND the bottom of a
+   grid whose row gap is 4px would put row one's pad 6px inside row two, and
+   the row you pressed would depend on which pad painted last.
+
+   COLUMN 3 HAS THE MILLED CHANNEL TO ITS RIGHT, not the case — so it keeps the
+   half-gap default and owes nothing here. */
+.hb-tabs > .pkey:nth-child(-n+3)::before{ top:-5px; }        /* row 1 → the frame */
+.hb-tabs > .pkey:nth-child(n+4)::before{ bottom:-5px; }      /* row 2 → the frame */
+.hb-tabs > .pkey:nth-child(3n+1)::before{ left:-5px; }       /* column 1 → the frame */
+
+/* THE DOCK STRIP IS THE SAME OBJECT WITH A WIDER FRAME — 13px of padding
+   either end against a piano's 6, and a 15px corner. The `.chan` is a child of
+   it, so `:first-child`/`:last-child` are the end keys only while it stays
+   between them, which is what §09's slot list fixes. */
+.strip > .key:first-child::before{
+  left:-13px;
+}
+.strip > .key:last-child::before{
+  right:-13px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE LIGHT DIRECTION SETTER — a hemisphere, flattened, with the lamp on it
+   ═══════════════════════════════════════════════════════════════════════════
+   IT IS A WELL, NOT A DIAL, and the difference decides every value below. A
+   dial is a part you turn and it has a cap, a collar and a pointer; this is a
+   HOLE cut in the plate with the sky drawn on its floor and one lit thing
+   sitting in it. So it takes the slot's language — the same near-black floor,
+   the same overhanging top wall, the same bounce off the bottom — rather than
+   the knob's, even though the two sit side by side in the same group.
+
+   THE FLOOR IS DARKER AT ITS RIM THAN AT ITS MIDDLE, which is doing two jobs
+   at once and is the only reason a flat disc reads as a bowl: it is what a
+   round well does under a lamp, and it is also what the CONTENT means, since
+   the rim is the horizon and the middle is the zenith. The one gradient says
+   both. */
+.lwrap{ display:flex; flex-direction:column; gap:9px; align-items:center; }
+.lwrap .lcap{ align-self:flex-start; }
+.ldisc{
+  position:relative; width:var(--ld,132px); height:var(--ld,132px);
+  border-radius:50%; flex:0 0 auto; cursor:crosshair; touch-action:none;
+  box-shadow:
+    inset 0 3px 7px rgba(0,0,0,.9),
+    inset 0 -1px 1px rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.06);
+}
+.ldisc:focus{ outline:none; }
+.ldisc:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:3px; }
+.ld-well{
+  position:absolute; inset:0; border-radius:50%; display:block;
+  background:
+    radial-gradient(circle at 50% 42%, #1b1e23 0%, #131519 46%, #0a0c0e 82%, #06080a 100%);
+}
+/* ── THE MARKS ────────────────────────────────────────────────────────────
+   THE 45° RING IS DRAWN AND THE OTHERS ARE NOT, and that is the whole of the
+   scale. A dial with a ring every fifteen degrees is a protractor, and nobody
+   aims a lamp by counting rings — but 45° is a place people ASK for by name,
+   so it gets a line and the rest of the hemisphere gets none. The rim is the
+   second ring and it is the horizon, which needs no naming.
+
+   THE LEGENDS SIT AT THE FOUR QUARTERS, INSIDE the rim, because a number
+   outside the cut is printed on the plate and would have to move when the
+   control is resized. Everything here scales with the viewBox. */
+.ld-face{
+  position:absolute; inset:0; width:100%; height:100%;
+  overflow:visible; pointer-events:none;
+}
+.ld-ring{ fill:none; stroke:rgba(255,255,255,.075); stroke-width:.7; }
+.ld-45{ stroke:rgba(255,255,255,.05); stroke-dasharray:1.6 2.4; }
+.ld-cross{ stroke:rgba(255,255,255,.045); stroke-width:.6; }
+.ld-deg{
+  fill:#5a606a; font-family:var(--font);
+  font-size:5.4px; letter-spacing:.04em;
+}
+/* ── THE LAMP ─────────────────────────────────────────────────────────────
+   THE ONE LIT THING, and it is §04's jewel at the numbers §04 uses. A light
+   picker whose light is a different light from the panel's other lights is
+   two lamps, and this document has spent long enough learning that. What it
+   adds is a hairline of dark UNDER it — the puck is standing on the floor of
+   the well and something has to say so, or a glowing dot at the middle of a
+   dark disc is a hole rather than an object.
+
+   IT WAS A SHADED 3D ARROW FOR ONE VERSION, and the note is worth keeping
+   because the arrow is the obvious idea and somebody will have it again. On
+   paper it wins: a vector says WHICH WAY and a dot only says WHERE. On a
+   118px disc it loses, and for a reason that is not a matter of taste — the
+   head has to scale with the length or it eats the shaft, so above about 60°
+   of elevation the arrow is a stub, and the one shape that has to stay
+   recognisable is changing shape across exactly the range you care about. A
+   dot is the same mark at every elevation, and the rings already carry the
+   reading the arrow was there to give. */
+.ld-puck{
+  position:absolute; width:13px; height:13px; margin:-6.5px 0 0 -6.5px;
+  border-radius:50%; display:block; pointer-events:none;
+  background:radial-gradient(circle at 34% 28%, #fff 0%,
+    color-mix(in srgb, var(--lyr, var(--led)) 60%, #fff) 16%,
+    var(--lyr, var(--led)) 52%,
+    color-mix(in srgb, var(--lyr, var(--led)) 55%, #000) 100%);
+  box-shadow:
+    0 0 6px color-mix(in srgb, var(--lyr, var(--led)) 70%, transparent),
+    0 0 15px color-mix(in srgb, var(--lyr, var(--led)) 36%, transparent),
+    inset 0 -1px 2px rgba(0,0,0,.55),
+    0 1px 2px rgba(0,0,0,.85),
+    0 0 0 1px rgba(0,0,0,.55);
+  /* IT FOLLOWS THE FINGER AND EASES EVERYWHERE ELSE. A transition on a puck
+     being dragged is lag; the same transition when a host calls `set` or an
+     arrow key fires is the lamp swinging rather than teleporting. */
+  transition:left .12s ease-out, top .12s ease-out;
+}
+.ldisc.dragging .ld-puck{ transition:none; }
+
+/* ── THE TWO NUMBERS ──────────────────────────────────────────────────────
+   STILL THERE, AND STILL TYPEABLE. The picker replaces the arithmetic, not
+   the value: 325 is a thing you copy out of one panel into another, and a
+   control that can only be dragged cannot be handed a number somebody read
+   to you over the phone. */
+.lrow{ display:flex; gap:7px; width:100%; }
+.lfield{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.lfield .kval{ width:100%; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LAUNCHPAD — one rack module per project
@@ -2118,6 +2385,12 @@ input:focus-visible{ outline-offset:3px; }
 /* folder chips are latching radio keys, same interlock as the page switcher */
 .chip{
   height:28px; padding:0 12px; display:inline-flex; align-items:center; gap:7px;
+  /* POSITIONED, OR THE HIT PAD AND THE CHAMFER BOTH GO SOMEWHERE ELSE. This
+     was missing and only worked by accident: `:active` puts a `transform` on
+     the chip, and a transform makes a containing block — so the chamfer, which
+     exists only while pressed, always found one. The hit pad has to be there at
+     REST, where there is no transform, so it needs the real thing. */
+  position:relative;
   border:0; border-radius:7px; cursor:pointer;
   font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.08em;
   color:#8d929b;
@@ -2859,8 +3132,27 @@ input:focus-visible{ outline-offset:3px; }
     var(--grain);
   background-size:auto,140px; opacity:.5; mix-blend-mode:overlay;
 }
+/* ── THE HEAD IS A LABEL, NOT A ROOM ──────────────────────────────────────
+   IT WAS 46px TALL: 13 above and 11 below a 22px button. That is fine for one
+   box standing on a documentation page and wrong the moment six of them are
+   stacked on a desk, which is what the adopters actually do — 46px each is a
+   quarter of a small screen's height spent saying which panel you are in, six
+   times, in a system whose whole argument is that a faceplate is mostly the
+   controls on it.
+
+   28px, AND THE BUTTON HAD TO COME DOWN WITH IT. Padding alone bottoms out at
+   36 because a 22px cap is the floor, and 36 was still a title bar with room in
+   it. So the cap is 18px and the padding is 5 and 5. Eighteen is small for a
+   target and it is the right kind of small: it is a title-bar control, the same
+   class of thing as a window's own corner buttons, which every system draws at
+   about this size and nobody misses — and the whole head is draggable, so the
+   only pixels that have to be hit precisely are the ones that reduce it.
+
+   THE NAME KEEPS ITS 12px. A title small enough to be overlooked is a title
+   that has stopped working, and the height came out of the air round it rather
+   than out of the type. */
 .box-head{
-  display:flex; align-items:center; gap:9px; padding:13px 12px 11px 16px; position:relative; z-index:2;
+  display:flex; align-items:center; gap:9px; padding:5px 12px 5px 16px; position:relative; z-index:2;
   border-bottom:1px solid rgba(0,0,0,.7); box-shadow:0 1px 0 rgba(255,255,255,.05);
 }
 .box-head .nm{ flex:1; font-family:var(--font); font-size:12px; font-weight:700; color:#e3e6eb;
@@ -2922,6 +3214,23 @@ input:focus-visible{ outline-offset:3px; }
 .filmrow .fs{ font-family:var(--font); font-size:9px; letter-spacing:.08em; color:#61666f; margin-top:3px; }
 .filmrow .stack{ display:flex; flex-direction:column; gap:5px; }
 .filmrow .stack .key{ height:24px; padding:0 10px; font-family:var(--font); font-size:9px; letter-spacing:.1em; }
+/* THREE KEYS ARE TALLER THAN THE PICTURE, so the picture grows. 3 x 24 + 2 x 5
+   is 82 against the thumb's 56, and at that point either the stack overhangs a
+   small image or the image comes up to meet it. It comes up: an 82px preview of
+   a map is a better preview anyway, and the row stays ONE block rather than a
+   picture with something taller floating beside it. Set from the key COUNT in
+   `assetRow`, never by the caller — a row that is tall because somebody passed
+   a flag is a row that will be tall with two keys in it. */
+.filmrow.three .thumb{ width:82px; height:82px; flex:0 0 82px; }
+
+/* EMPTY IS A WELL, NOT A GAP. Every one of these rows starts with nothing in
+   it, so the state gets a part rather than a hole: the same recess a slot is
+   cut with, and no border to suggest a frame around a picture that is not
+   there. */
+.filmrow .thumb.empty{
+  background:linear-gradient(180deg,#0c0d0f,#141619);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.9), inset 0 0 0 1px rgba(255,255,255,.05);
+}
 
 .knobrow{ display:flex; align-items:flex-start; justify-content:space-around; gap:8px; padding:2px 0; }
 /* a settings bay is not a viewport — the knobs sit tight and share the row */
@@ -2975,6 +3284,25 @@ input:focus-visible{ outline-offset:3px; }
 .gz-node:hover{ transform:scale(1.22); }
 .gz-node.hollow{ background:radial-gradient(circle at 50% 50%, #14161a 52%, color-mix(in srgb,var(--ax) 70%,#000) 53%);
   box-shadow:inset 0 0 4px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.6); }
+/* THE ONE THAT IS THE VIEW, AND IT IS LIT IN ITS OWN COLOUR. Everything else
+   that latches on this panel goes amber; these six are already colour-coded by
+   axis, and an orange ring round the red node would be a third colour arguing
+   with the two that mean something. So it is the axis turned up — a white
+   keyline, a wider halo, and the bead sitting proud of the ball.
+
+   HOLLOW STAYS HOLLOW WHEN IT IS SELECTED. Filled and ringed is which side of
+   the ball a node is on; lit is which one you picked. Two facts, two channels
+   — fill the ring in on selection and the ball starts claiming that choosing
+   Back moved it to the front. */
+.gz-node.on{
+  transform:scale(1.18);
+  box-shadow:
+    0 0 0 1.5px rgba(255,255,255,.9),
+    0 0 13px color-mix(in srgb,var(--ax) 85%,transparent),
+    inset 0 -1px 2px rgba(0,0,0,.6);
+}
+.gz-node.on:hover{ transform:scale(1.28); }
+.gz-node:focus-visible{ outline:2px solid var(--led); outline-offset:3px; }
 .gz-hub{
   position:absolute; left:50%; top:50%; width:11px; height:11px; margin:-5.5px 0 0 -5.5px;
   border-radius:50%;
@@ -3169,6 +3497,427 @@ input:focus-visible{ outline-offset:3px; }
 /* pinned: both selectors weigh the same and the rail's rules come later, so
    without this the selected recent takes the rail's size */
 .pk-well .pencap.on{ transform:none; width:17px; height:17px; flex:0 0 17px; border-radius:6px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE APP DOCK AND ITS MENUS — the other bar
+
+   The nav bar above is a bar of DESTINATIONS and its spec refuses verbs in as
+   many words. This is the other half of that sentence: a bar that is ALL verbs
+   plus one readout, floating over the canvas at the bottom of the window, and
+   it is the bar every Portrait app actually drives from.
+
+   IT IS MADE OF PARTS THAT ALREADY EXISTED — `.strip` for the chassis, `.key`
+   for the caps, `.chan` for the channel between the two groups, `.lcd` for the
+   readout. What is new here is the placement, and the plate that opens off it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.appdock{
+  position:fixed; left:0; right:0; bottom:20px; z-index:40;
+  display:flex; justify-content:center;
+  /* THE DOCK EATS CLICKS, and this is the same trap the nav dock carries: the
+     dock spans the viewport and the bar does not, so without this you have an
+     invisible full-width lid over the bottom of the canvas — which on a
+     drawing app is the strip of paper nearest the hand. */
+  pointer-events:none;
+}
+.appdock > *{ pointer-events:auto; }
+/* `fixed:false` — a dock being SHOWN rather than run, on a documentation page
+   or inside a settings preview. Same object, sitting in the flow. */
+.appdock.inline{ position:static; }
+
+.dock-bar .chan{ margin:0 8px; }
+.dock-count{ min-width:104px; justify-content:center; }
+
+/* ── the menu ─────────────────────────────────────────────────────────────
+   A `.plate` with rows in it. The plate already brings the metal, the grain,
+   the hard cast shadow and the 1px black line round a lifted edge; none of
+   that is restated here. */
+.menu{ min-width:212px; }
+.menu .plate-body{ padding:5px; gap:1px; }
+
+.menu-row{
+  display:flex; align-items:center; gap:11px; width:100%;
+  height:34px; padding:0 10px; border:0; border-radius:8px;
+  background:none; color:#c2c7cf; cursor:pointer;
+  font-family:var(--font-ui); font-size:12.5px; letter-spacing:.01em;
+  text-align:left;
+}
+/* THE ROW LIGHTS, IT DOES NOT MOVE. A menu row is not a key — it has no cap,
+   no skirt and no travel, and giving it 2px of push makes a list of them
+   jitter as the pointer runs down it. What says "this one" is the same thing
+   that says it on a faceplate: light. */
+.menu-row:hover,
+.menu-row:focus-visible{
+  background:linear-gradient(180deg,#34383f,#26292e);
+  color:#eef1f5;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.7);
+  outline:none;
+}
+.menu-row:active{ background:linear-gradient(180deg,#202226,#1a1c1f); }
+.menu-row:disabled{ opacity:.34; cursor:not-allowed; }
+.menu-row:disabled:hover{ background:none; box-shadow:none; color:#c2c7cf; }
+
+.menu-ico{ display:flex; flex:0 0 16px; color:#868d97; }
+.menu-row:hover .menu-ico,
+.menu-row:focus-visible .menu-ico{ color:var(--led); }
+.menu-ico svg{ width:16px; height:16px; stroke:currentColor; fill:none;
+               stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.menu-nm{ flex:1; white-space:nowrap; }
+
+/* THE SHORTCUT IS ENGRAVED, NOT PRINTED — a legend cut into the plate beside
+   the row, the same recess the `.lcd` window sits in one size down. It is a
+   HINT and never a target, so it takes no hover and no pointer. */
+.menu-kbd{
+  flex:0 0 auto; pointer-events:none;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.08em;
+  color:#6b727c; background:#121417; padding:2.5px 6px; border-radius:4px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.05);
+}
+.menu-row:hover .menu-kbd,
+.menu-row:focus-visible .menu-kbd{ color:#98a0ab; }
+
+/* ── THE SELECTOR ─────────────────────────────────────────────────────────
+   THE FACE IS A WINDOW, NOT A KEY. It is showing you a value, so it is the
+   `.lcd`'s relative and not the `.pkey`'s: a recess with the name lit in it,
+   the same engraved slot every readout on this panel sits in. What makes it
+   a CONTROL rather than a readout is the chevron at its end and the fact that
+   the whole window is the target — a 12px arrow is not something to aim at
+   when the plate beside it is 168px wide and means the same thing.
+
+   IT GOES DOWN WHEN IT IS OPEN, which is `.pkey.is-down`'s language, because
+   what is open is a lid and the thing you pushed to lift it stays pushed. */
+.selwrap{ display:flex; flex-direction:column; gap:5px; }
+.sel{
+  display:flex; align-items:center; gap:8px;
+  width:var(--selw,168px); height:28px; padding:0 8px 0 11px;
+  border:0; border-radius:6px; cursor:pointer; text-align:left;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.1em;
+  color:#c2c7cf;
+  background:linear-gradient(180deg,#0a0c0e,#12151a 55%,#0d1013);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.95),
+    inset 0 -1px 1px rgba(255,255,255,.06),
+    0 1px 0 rgba(255,255,255,.06);
+  transition:color .12s, box-shadow .14s;
+}
+.sel:hover{ color:#eef1f5; }
+.sel:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:2px; }
+.sel-nm{ flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* THE CHEVRON LIES DOWN AND STAYS DOWN. It points at where the plate will
+   appear, which is under the face — and it does NOT flip when the list opens:
+   a chevron that turns is saying "this closes", and what closes a plate here
+   is Escape, the face, or anywhere else on the page. It is a signpost, not a
+   toggle. */
+.sel-chev{ display:flex; flex:0 0 12px; color:#5f6670; transform:rotate(90deg); }
+.sel-chev svg{ width:12px; height:12px; stroke:currentColor; fill:none;
+               stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.sel:hover .sel-chev{ color:#8d949e; }
+.sel.is-down{ box-shadow:inset 0 3px 6px rgba(0,0,0,.95), inset 0 0 0 1px rgba(255,106,0,.28); }
+.sel.is-down .sel-chev{ color:var(--led); }
+
+/* ── THE LIST: TWO MARKS, FOR TWO DIFFERENT THINGS ────────────────────────
+   A MENU HAS ONE MARK BECAUSE IT ONLY HAS ONE THING TO SAY. Its rows are
+   commands, so the only state a row can be in is "the pointer is on it". A
+   VALUE list has a row that is already true before you touch anything, and if
+   that row and the hovered row look the same you cannot tell what you HAVE
+   from what you are ABOUT TO GET — which is the one question you opened the
+   list to answer.
+
+   SO THE CURRENT ROW IS PRESSED IN and the pointed-at row LIGHTS. Down and up
+   are opposite directions, they cannot be confused at a glance, and the pair
+   is not invented here: it is exactly what a bank of `.pkey`s already does,
+   where the key that is down is the page you are on and the key under your
+   finger is merely warm. A selector row makes the same claim a lit key makes,
+   so it is made the same way. */
+.sellist .plate-body{ gap:1px; }
+/* ── THE LIST IS SET LIKE THE ROTARY'S LEGENDS, and it had been set like a
+   MENU: 12.5px of UI sans at #c2c7cf, which is the right size for a list of
+   commands and a full size too big for a list of VALUES. The two controls
+   answer the same question — §05's rotary spells its options out around the
+   dial and this spells them down a plate — so a name has to look the same in
+   both or they are two vocabularies for one idea.
+
+   THE NUMBERS ARE .rot-lab's own, taken whole: 9.5px of the mono at .1em, dim at
+   #6b7079, waking to #c2c7cf under the pointer, and the live one at #FFD9BC
+   with the same warm bloom behind it. Nothing here is chosen; it is copied,
+   which is the only way two parts stay agreeing after one of them is touched.
+   The row comes down to 26px with the type — 34 was leading for 12.5px text
+   and at 9.5 it is a gap with a word in it. */
+.sel-row{
+  gap:9px; height:26px;
+  font-family:var(--font); font-size:9.5px; letter-spacing:.1em;
+  color:#6b7079;
+}
+.sel-row:hover,
+.sel-row:focus-visible{ color:#c2c7cf; }
+.sel-row.is-cur{ color:#FFD9BC; text-shadow:0 0 8px rgba(255,140,60,.6); }
+.sel-row.is-cur:hover,
+.sel-row.is-cur:focus-visible{ color:#FFE7D4; }
+/* THE PLATE HUGS THE NAMES. 212px is the menu's minimum because a command
+   list has a shortcut column to keep clear of; a value list has nothing on its
+   right and a plate wider than its longest name is a plate with a margin
+   nobody asked for. */
+.sellist{ min-width:0; }
+.sellist .menu-nm{ white-space:nowrap; }
+.sel-tick{
+  flex:0 0 4.5px; height:4.5px; border-radius:50%; display:block;
+  background:#2b3037; box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+  transition:background .12s, box-shadow .12s;
+}
+/* CURRENT: the row has gone down into the plate. Same recess the panel uses
+   for a latched key, and the tick is the lamp that comes on with it. */
+.sel-row.is-cur{
+  background:linear-gradient(180deg,#0c0e11,#15181c);
+  color:#eef1f5;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.9),
+    inset 0 -1px 0 rgba(255,255,255,.05);
+}
+.sel-row.is-cur .sel-tick{
+  background:var(--led);
+  box-shadow:0 0 5px color-mix(in srgb, var(--led) 70%, transparent),
+             0 0 0 1px rgba(0,0,0,.5);
+}
+/* AND HOVER STILL LIGHTS THE CURRENT ROW, it does not replace its recess. The
+   row you have can be the row under your hand, and neither mark is allowed to
+   swallow the other — the tick stays lit, the cut stays cut, and what changes
+   is only that the name comes up. */
+.sel-row.is-cur:hover,
+.sel-row.is-cur:focus-visible{
+  background:linear-gradient(180deg,#101317,#191d22);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.9),
+    inset 0 -1px 0 rgba(255,255,255,.07),
+    inset 0 0 0 1px rgba(255,106,0,.22);
+}
+
+/* ── THE INTERLOCKED BANK ─────────────────────────────────────────────────
+   NINE KEYS, THREE ACROSS, IN THE WELL THE PAGE SWITCHER ALREADY USES. There
+   is almost nothing here, and that is the finding rather than an omission: a
+   `.piano` laid out as a grid instead of a row IS this control. Three parts
+   were built before it — a plate that opened, a card on a hinge, a barrel with
+   a window — and each one was an answer to a question about SPACE that had
+   quietly replaced the question about choosing.
+
+   THE ONE THING THE ROW DID NOT NEED: keys that are all the same width. In a
+   line they size to their labels and that is correct, because a bar of five
+   tabs is read left to right and the widths are information. In a block they
+   are a GRID and a ragged column edge is just a ragged column edge, so
+   `1fr` each and the longest name sets the pitch. */
+.bankwrap{ display:flex; flex-direction:column; gap:6px; }
+.piano.sm.bank{
+  display:grid; grid-template-columns:repeat(var(--bcols,3), 1fr);
+  gap:5px; width:auto;
+  /* the gutter belongs to the keys — see the note on `.pkey::before` */
+  --pkey-reach-x:2.5px; --pkey-reach-y:2.5px;
+}
+/* A NAME IS NOT A TAB LABEL. The page switcher's keys carry one word at 9px
+   with wide tracking, which is right for four of them across a bar and wrong
+   for nine in a block: at that count the tracking is what makes the grid read
+   as a wall of letters rather than as nine things. It comes in, the case stays
+   upper — engraved legends on this panel are upper everywhere — and the key
+   grows 4px so a two-word name has somewhere to sit. */
+.bank-key{
+  height:30px; min-width:0; padding:0 9px;
+  font-size:9px; letter-spacing:.055em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE GATED LEVER — the list is cut into the plate, and nothing opens
+   ═══════════════════════════════════════════════════════════════════════════
+   TWO DROPDOWNS WERE BUILT BEFORE THIS AND THE SECOND ONE SETTLED IT. A plate
+   that flies out over the panel reads as a web control however it is painted,
+   because flying out over things is not something a panel DOES — and the
+   lighter and softer it gets the worse it reads, because now it is a sheet of
+   paper on a machined face. The failure was never the styling. It was the
+   CATEGORY.
+
+   A faceplate is a solid, and every real control on one is cut INTO it. So the
+   list is milled into the plate: a slot with a detent notch at each position,
+   a lever standing in it, the names engraved beside the notches. Everything is
+   legible at rest, there is no reveal to design, and the only thing that moves
+   is the lever.
+
+   IT IS DARK, IT IS PLASTIC AND IT IS ALL ONE MATERIAL, which the hinged
+   legend card that was tried here and deleted was not. The slot is the slide switch's own cut, the lever's grip is the slide
+   switch's own knurl at the slide switch's own numbers, and the legends are
+   the engraved captions §06 already puts under its switches. Nothing here is a
+   new surface. */
+.gatewrap{ display:flex; flex-direction:column; gap:6px; }
+.gate{
+  position:relative; display:flex; gap:10px; align-items:stretch;
+  width:var(--gw,150px);
+}
+
+/* ── THE SLOT: the cut, and the detents in its walls ─────────────────────
+   THE NOTCHES ARE ON BOTH WALLS because that is where a detent plate has
+   them — the ball rides between two, and a slot notched down one side only is
+   a comb. They are the one part of this that has to be believed: without them
+   the lever is a fader cap and the whole argument for a GATE goes with it. */
+.gate-slot{
+  position:relative; flex:0 0 26px; width:26px; border-radius:7px;
+  cursor:pointer; touch-action:none;
+  background:linear-gradient(180deg,#06080a 0%,#0c0f13 46%,#080a0c 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.95),
+    inset 1px 0 2px rgba(0,0,0,.75),
+    inset 0 -1px 1px rgba(255,255,255,.07),
+    0 1px 0 rgba(255,255,255,.06);
+}
+.gate-notch{
+  position:absolute; left:0; right:0; height:3px; margin-top:-1.5px;
+  display:block; pointer-events:none;
+  /* A NOTCH IS A STEP IN A WALL, so it is drawn from the walls inward and
+     dies before the middle: the lever runs down the centre and a line all the
+     way across would be a rung it has to climb through. */
+  background:
+    linear-gradient(90deg,
+      rgba(0,0,0,.85) 0 4px, transparent 7px,
+      transparent calc(100% - 7px), rgba(0,0,0,.85) calc(100% - 4px)),
+    linear-gradient(90deg,
+      rgba(255,255,255,.10) 0 4px, transparent 7px,
+      transparent calc(100% - 7px), rgba(255,255,255,.10) calc(100% - 4px));
+  background-position:0 0, 0 1.5px;
+  background-size:100% 1.5px, 100% 1.5px;
+  background-repeat:no-repeat, no-repeat;
+}
+
+/* ── THE LEVER ───────────────────────────────────────────────────────────
+   IT SITS IN THE SLOT AND STANDS PROUD OF IT, which is the difference between
+   a lever and a marker: 2px of clearance at the sides so the cut shows all the
+   way round, and a three-tier shadow under it so it is standing on the floor
+   rather than printed on it. The same seating the slide switch cap got, for
+   the same reason.
+
+   THE KNURL RUNS ACROSS IT because you push this one up and down, and a grip
+   is ribbed ACROSS the direction of travel — ribs running the same way as your
+   thumb are ribs your thumb slides along. */
+.gate-lever{
+  position:absolute; left:2px; right:2px; height:17px; margin-top:-8.5px;
+  display:block; border-radius:4px; pointer-events:none;
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,.15) 0 1px, transparent 1px),
+    repeating-linear-gradient(180deg,
+      rgba(255,255,255,.10) 0px, rgba(255,255,255,.02) 1.5px,
+      rgba(0,0,0,.14) 2.3px, rgba(0,0,0,.38) 3.3px,
+      rgba(0,0,0,.14) 4.1px, rgba(255,255,255,.10) 5.2px),
+    linear-gradient(180deg,#34383f 0%,#2e3239 30%,#26292f 68%,#1f2227 100%);
+  box-shadow:
+    inset 0 -2px 4px rgba(0,0,0,.7),
+    0 1px 2px rgba(0,0,0,.85),
+    0 3px 5px rgba(0,0,0,.7),
+    0 6px 10px rgba(0,0,0,.42);
+  /* IT DROPS INTO THE NEXT NOTCH, IT DOES NOT GLIDE TO IT. Short, and with
+     just enough overshoot to be a ball falling into a detent — the same curve
+     the slide switch throws on, because it is the same event. */
+  transition:top .13s cubic-bezier(.34,1.25,.5,1);
+}
+.gate.dragging .gate-lever{ transition:none; }
+/* THE LAMP IS ON THE LEVER, not beside the name. A gate tells you where you
+   are by WHERE THE LEVER IS; the lamp is only there to find it in the dark,
+   which is why it is a hairline down the grip and not a jewel. */
+.gate-lever::after{
+  content:''; position:absolute; left:50%; top:3px; bottom:3px; width:2px;
+  margin-left:-1px; border-radius:1px;
+  background:var(--lyr, var(--led));
+  box-shadow:0 0 5px color-mix(in srgb, var(--lyr, var(--led)) 70%, transparent);
+}
+
+/* ── THE LEGENDS ─────────────────────────────────────────────────────────
+   ENGRAVED ON THE PLATE, one per notch, at the same pitch — cut into the
+   metal, not printed on it, which is the dark fill with a lit lower wall that
+   every caption on this page already uses.
+
+   THE WHOLE ROW IS THE TARGET. The lever is 22px wide and the name beside it
+   is the width of the control; making you aim at the small part when the big
+   part means the same thing is a tax nobody should pay. What says the row is
+   live before you press it is the metal warming under the pointer, which is
+   what a faceplate does and what a highlight bar cannot do without becoming a
+   menu. */
+.gate-legs{
+  flex:1 1 auto; min-width:0; padding:7px 0;
+  display:flex; flex-direction:column;
+}
+.gate-legs:focus{ outline:none; }
+.gate-legs:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:3px; border-radius:4px; }
+.gate-leg{
+  height:var(--gp,24px); padding:0 8px; border:0; border-radius:4px;
+  display:flex; align-items:center; width:100%;
+  background:transparent; cursor:pointer; text-align:left;
+  font-family:var(--font); font-size:10px; letter-spacing:.11em;
+  text-transform:uppercase; color:#5d636c;
+  text-shadow:0 1px 0 rgba(255,255,255,.05);
+  transition:background .12s, color .14s, text-shadow .14s;
+}
+.gate-leg:hover{ background:rgba(255,255,255,.035); color:#7d848e; }
+.gate-leg:active{ background:rgba(0,0,0,.20); }
+/* THE ONE THE LEVER IS STANDING IN. It does not get a bar behind it and it
+   does not move — it is lit, which is the same thing the rest of this panel
+   means by "this one" and the only mark that does not turn an engraved plate
+   into a list of rows. */
+.gate-leg.on{
+  color:#f0f3f7;
+  text-shadow:0 0 7px color-mix(in srgb, var(--lyr, var(--led)) 45%, transparent),
+              0 1px 0 rgba(0,0,0,.6);
+}
+.gate-nm{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* a milled cut between groups of rows — the `.chan` lying down */
+.menu-cut{
+  height:2px; margin:4px 8px; border-radius:1px; background:#08090a;
+  box-shadow:0 1px 0 rgba(255,255,255,.07), inset 0 0 2px rgba(0,0,0,.9);
+}
+
+/* ── the console ──────────────────────────────────────────────────────────
+   THE READOUT WITH A HISTORY. The `.lcd` in the bar says how many strokes are
+   on the sheet now; this says what the app has been doing about it — so it is
+   the same green monospace behind the same glass, grown into a window. It is
+   NOT a panel with a title bar: a console is a display, and the key that
+   opened it is its label.
+
+   NO TAIL AND NO POINTER ON ANY PLATE. The plate is anchored to the key and
+   the key is lit — two channels already saying where it came from. A pointer
+   stuck to the edge only tells the truth while the plate is directly over its
+   key, and a wide one is never over its key: it slides to fit the window, and
+   the tail ends up somewhere along the bar aiming at whatever is under it. */
+.console{ width:530px; max-width:calc(100vw - 24px); }
+.con{ position:relative; z-index:2; display:flex; flex-direction:column; }
+.con-log{
+  max-height:242px; overflow-y:auto; padding:13px 15px 11px;
+  display:flex; flex-direction:column; gap:9px;
+}
+.con-row{ display:flex; gap:15px; align-items:flex-start; }
+/* THE TIME IS A LEFT MARGIN, not a column of data. Dim, tabular, and it does
+   not move when a line above it wraps. */
+.con-t{
+  flex:0 0 auto; font-family:var(--font); font-size:11px; color:#5c636c;
+  font-variant-numeric:tabular-nums; line-height:1.55;
+}
+.con-m{ font-family:var(--font); font-size:11px; line-height:1.55; color:#98a0aa; }
+/* a RESULT — what got made, how many, how long. The lamp colour of the readout,
+   because it is the same kind of fact. */
+.con-m.lit{ color:#7CFFB0; text-shadow:0 0 6px rgba(124,255,176,.30); }
+
+.con-foot{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 15px 8px; border-top:1px solid #08090a;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055);
+}
+.con-n, .con-clear{
+  font-family:var(--font); font-size:10px; letter-spacing:.07em; color:#5c636c;
+}
+.con-clear{ background:none; border:0; padding:0; cursor:pointer; }
+.con-clear:hover{ color:var(--led); }
+
+/* a thin dark scrollbar — the only one in the language, because this is the
+   only part that can outgrow its own window */
+.con-log::-webkit-scrollbar{ width:10px; }
+.con-log::-webkit-scrollbar-track{ background:transparent; }
+.con-log::-webkit-scrollbar-thumb{
+  background:#33373d; border-radius:6px;
+  border:3px solid transparent; background-clip:content-box;
+}
+.con-log::-webkit-scrollbar-thumb:hover{ background:#454a52; background-clip:content-box; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE HATCH BAY — the first COMPOUND control in the language.
@@ -3902,15 +4651,17 @@ input:focus-visible{ outline-offset:3px; }
 }
 /* ONE BUTTON, and it is a micro key: recessed, because it removes something.
    The raised caps on this panel invite the thumb; this one should not. */
+/* 18px, DOWN FROM 22 — the head is 28px tall and the cap is what sets that
+   floor. See the note on `.box-head`. */
 .win-btn{
-  width:22px; height:22px; flex:0 0 22px; margin-left:auto;
+  width:18px; height:18px; flex:0 0 18px; margin-left:auto;
   display:flex; align-items:center; justify-content:center;
   border:0; padding:0; cursor:pointer; color:#575c65; border-radius:5px;
   background:linear-gradient(180deg,#151719,#1e2024);
   box-shadow:inset 0 1px 2px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.06);
   transition:color .12s, box-shadow .12s;
 }
-.win-btn svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2;
+.win-btn svg{ width:11px; height:11px; stroke:currentColor; fill:none; stroke-width:2;
               stroke-linecap:round; }
 .win-btn:hover{ color:#d7dae0; box-shadow:inset 0 1px 2px rgba(0,0,0,.8),
                 0 0 0 1px rgba(255,255,255,.09); }
@@ -3923,6 +4674,58 @@ input:focus-visible{ outline-offset:3px; }
 .win.reduced .hb-body{ display:none; }
 .win.reduced{ width:auto; min-width:190px; }
 .win.reduced .win-head{ border-bottom:0; box-shadow:none; }
+
+/* ── OPENED OUT: THE PANEL TAKES THE SCREEN ───────────────────────────────
+   `maximise: true` on `windowise` puts a second cap in the head and toggles
+   this class. What it does is the whole part: the window leaves the flow, pins
+   to the viewport with a 22px margin all round, and its body becomes the thing
+   that scrolls.
+
+   `transform: none` IS NOT TIDINESS. `windowise` drags by
+   `transform: translate(dx, dy)` and that offset lives in the style attribute,
+   so a panel opened out after being dragged would open out somewhere else —
+   however far you last moved it, off centre, with the far edge past the screen.
+   A host that pins with INLINE styles has to park them itself; see `onMax`.
+
+   THE MARGIN IS 22px AND IT IS A MARGIN, NOT A GAP. Edge to edge would make the
+   panel a page and lose the one thing that says it is still a panel: the case,
+   its shadow, and the desk visible round it.
+
+   z-index 400 puts it over every surface a document stacks under it, and the
+   way out is the restore cap in its own title bar — which is why the chrome may
+   go. Anything a host means to keep reachable from here (a colour picker, a
+   modal) sits above 400 by its own number. */
+.win.maxed{
+  position:fixed; inset:22px; width:auto; height:auto;
+  transform:none; z-index:400;
+  display:flex; flex-direction:column;
+}
+/* THE BODY IS WHAT GROWS AND WHAT SCROLLS. The head keeps its height — it is
+   the way out — and `min-height:0` is what lets a flex child actually shrink
+   inside its parent instead of pushing it open. */
+.win.maxed > .box-body{ flex:1 1 auto; min-height:0; max-height:none; overflow:auto; }
+
+/* ── TWO BUTTONS IN A HEAD THAT WAS BUILT FOR ONE ─────────────────────────
+   `.win-btn` is `margin-left: auto`, which is how ONE button reaches the
+   right-hand end of a flex head. Two of them is two auto margins, and flexbox
+   splits the free space BETWEEN them — so the maximise cap would sit marooned
+   in the middle of the title bar with the reduce cap at the end. The second
+   gives its auto up; the first keeps it and carries the pair right. */
+.win-head .win-max{ margin-right:4px; }
+.win-head .win-max ~ .win-btn{ margin-left:0; }
+
+/* ── AND THE FURNITURE STANDS DOWN ────────────────────────────────────────
+   Raising the panel above the bars is only half of it: they stay behind it and
+   go on showing round the 22px margin — chrome you cannot reach, framing a view
+   it does not belong to. The kit's own bar and drawer go; a document hides its
+   own the same way, off `body.maxed-open`.
+
+   `visibility` RATHER THAN `display`, because the drawer animates its own
+   transform and a `display:none` in the middle of that leaves it half open when
+   it comes back. Visibility keeps the box and takes the pixels. */
+body.maxed-open .dock-bar,
+body.maxed-open .drawer,
+body.maxed-open .drawer-tab{ visibility:hidden; pointer-events:none; }
 /* CLOSED IS GONE, not hidden-but-taking-space. Something else has to bring it
    back, which is the price of being closeable and the reason a panel the app
    needs does not get an ×. */
@@ -4298,6 +5101,10 @@ body.drawer-open .sliders i:nth-child(3),
 .set-orient .pkey{ flex:1 1 0; min-width:0; height:26px; font-size:8.5px; letter-spacing:.06em; padding:0 4px; }
 /* a square has no orientation and a custom size already is one — the bar goes
    quiet rather than offering a choice with one outcome */
+/* DEAD, NOT GONE. A control a substroke has no use for dims where it is
+   rather than vanishing: hiding it makes the bay change height as you move
+   along the strip, which reads as the panel being unstable. */
+.set-bay .inert{ opacity:.34; pointer-events:none; }
 .set-orient.inert{ opacity:.3; pointer-events:none; }
 /* both live in the same slot; exactly one of them is ever in it */
 
@@ -4404,6 +5211,14 @@ body.drawer-open .sliders i:nth-child(3),
 .mats .mat.wide .fader{ width:300px; }
 .mats .mat.wide .frange{ width:300px; }
 .mats .mat.tall .mat-stage{ min-height:200px; }
+/* THE SEATED SWITCH IS A WHOLE PANEL, so its tile asks for a panel's width:
+   370 of case-plus-lobe and 22 of air. `wide` alone is 300, and a wrapping row
+   would squeeze the one specimen on this page whose entire subject is a
+   silhouette. It does not grow either — a bulge stretched to fill a line is a
+   lobe in the wrong place, because the lobe's centre is a measured constant
+   and the clip-path is computed from the box it was measured in. */
+.mats .mat.matbulge{ flex-basis:392px; flex-grow:0; }
+.mats .mat.matbulge .mat-stage{ min-height:212px; }
 /* The small controls are sampled at the size the row uses them — same 5px gap,
    no scaling. The chevron's knurl is tuned against an 11px glyph; blow it up
    and the tile shows a material that is nowhere in the document. */
@@ -4810,6 +5625,20 @@ a.nav-mark:focus-visible{ outline:1px solid rgba(255,106,0,.9); outline-offset:3
    travel and the lamp, and loses the cursor and the href. */
 span.nav-link{ cursor:default; }
 .nav-ver{ margin-left:2px; }
+
+/* THE SECTIONS KEY — a door into the current document, not a destination.
+   Sized to the nav's own scale rather than the strip's default 34px cap, so it
+   stands exactly as tall as the keys it sits beside and the bar's height does
+   not move. Everything else about it is `.key.skirt`, unchanged. */
+.strip .nav-sections{ width:28px; height:28px; border-radius:7px; }
+.strip .nav-sections svg{ width:15px; height:15px; }
+/* THE ROWS HAVE NO ICON COLUMN. A menu of twelve headings is a list of NAMES —
+   a mark beside each one would have to be invented per section, and §02 has
+   the rule for that: an arbitrary glyph is worse than none. The number keeps
+   the chip slot on the right, where a shortcut goes, because on a page you
+   know it is the number you aim at. */
+.nav-sections-menu{ min-width:248px; max-height:min(70vh, 640px); overflow-y:auto; }
+.nav-sections-menu .menu-row{ gap:14px; }
 
 @media (prefers-reduced-motion: reduce){
   .navdock > .strip{ transition:none; }

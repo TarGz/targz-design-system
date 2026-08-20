@@ -11,6 +11,14 @@ This file tracks known bugs in the repo. Keep it up to date so any agent working
 
 ## Open
 
+### Clicking the OUTER FRAME of a `.piano` still does nothing
+
+The gutters BETWEEN keys are fixed — each key reaches half the gap through `.pkey::before`. The
+group's own padding, the 5-6px frame around the whole strip, is still inert by design: the case a
+key is set into is not a key. If that reads as the same bug rather than as the edge of the part,
+the first and last key can be given the outer reach too; it needs `:first-child`/`:last-child`
+and `.hb-tabs` is a grid with non-key children, so it is not a one-liner.
+
 ### The HATCH page's two specimens render empty
 
 **What happens.** `docs/skew-hatch.html` §03 and §04 build their boxes but no sheets appear.

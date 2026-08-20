@@ -77,10 +77,10 @@ const DOC_ONLY = new Set([
   'doc', 'doc-body', 'doc-file', 'doc-foot', 'doc-grid', 'doc-kick', 'doc-line',
   'doc-list', 'doc-open',
   'paper', 'paper-lab', 'papers', 'archive', 'arch-link',
-  'klayouts', 'deskdemo', 'matstage', 'setrow', 'gridout',
+  'klayouts', 'deskdemo', 'matstage', 'matbulge', 'setrow', 'gridout',
   'intrig', 'intcell', 'intcell-cap', 'intcell-wrap',
   'togrig', 'togcell',
-  'gridbox', 'gridbody', 'gridrow', 'gridcol', 'gridswatch',
+  'gridbody', 'gridrow', 'gridcol', 'gridswatch', 'gridmoved',
   'loupe', 'loupe-glass', 'loupe-mark',
   'detail', 'detail-tab', 'detail-nm', 'detail-n',
 ]);
@@ -153,9 +153,10 @@ function strip(css) {
    app reaching for it is reaching past the boundary. */
 const API = [
   'el', 'svg', 'eng', 'ICON', 'ENG',
-  'knob', 'fader', 'rangeFader', 'rotary', 'drum',
-  'key', 'pkey', 'swBtn', 'toggle', 'chevBtn',
-  'openPicker', 'typeable', 'engage', 'windowise', 'WIN_ICON',
+  'knob', 'fader', 'rangeFader', 'rotary', 'drum', 'gizmo', 'lightDir', 'selector', 'gate', 'keyBank',
+  'key', 'pkey', 'swBtn', 'toggle', 'chevBtn', 'assetRow',
+  'openPicker', 'openPlate', 'menu', 'plateKey', 'appDock', 'MODKEY',
+  'typeable', 'engage', 'windowise', 'WIN_ICON',
   'hex2rgb', 'rgb2hex', 'rgb2hsv', 'hsv2rgb',
   'RING_R', 'RING_C', 'CAP_W', 'panelShape',
   'SFX', 'clicky',

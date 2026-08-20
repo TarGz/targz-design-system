@@ -27,6 +27,42 @@ future adoption pays for them again.
 
 ## Open
 
+### `[design system]` `lightDir` cannot put the light BELOW the horizon
+
+The disc clamps elevation to 0…90 and says why: past the rim the elevation pins at 0 and the
+azimuth keeps tracking, "a lamp swung round at the horizon", because letting the radius run past
+1 would put the light under the ground "and there is no such direction on this control".
+
+That is right for a lamp on a rig and wrong for a renderer. **Portrait-Ribbons** drives its
+ribbon shading AND its drop shadow from one vector, and its engine takes elevation −90…+90 on
+purpose: below the horizon the drop shadow drops out on its own (`L.z > 1e-3`) while the shading
+carries on, which is a BACKLIT piece — a real setting, not an edge case to clamp away. Its own
+3D overlay has always allowed it.
+
+Adopting `lightDir` therefore costs that half of the range, and the app cannot get it back: the
+kit is vendored and a patch on the copy disappears at the next extraction. Worse, the clamp is
+silent on the way IN — `wrap.set()` calls `onChange` even when driven quietly, so a config
+carrying −30 is repainted as 0 and written back as 0 unless the adopter guards it, which
+Portrait-Ribbons now does by hand.
+
+Wanted: a way to say the hemisphere is a SPHERE. Either an option (`below: true`) that lets the
+radius run to 2 with the outer half reading as negative elevation, or a second ring outside the
+rim that is the underside. The face already has the vocabulary — the 45° ring shows a reading is
+expected off the geometry — so this is a change to `fromPoint`, the clamp in `set` and one more
+circle in the SVG, not a new part.
+
+Secondary, and cheap: make `quiet` mean quiet. Every other value control in the kit skips
+`onChange` when the host drives it, and the one that does not is the one an adopter finds out
+about by losing a value.
+
+### `[design system]` A selector for 8-30 named values — `select(…)`
+
+The gap between `rotary` (aimable to about six) and `drum` (a cylinder, and not friendly to
+read or aim). Wanted: a closed face showing the current value, opening to a list you can arrow
+through and TYPE AT. Built on `openPlate`, not on a second overlay mechanism, and as an OVERLAY
+rather than an inline expander — a faceplate is rigid and nothing on a console pushes its
+neighbours down.
+
 ### `[design system]` The ink swatch as a glass capsule, filled or empty
 The rail's swatches are modelled squircle caps today — a coloured face that goes down and lights
 when it is the one in use. The request is to make them **little glass capsules** instead, at the
@@ -349,6 +385,10 @@ screen glass.
 and dress the wrapper* or *rebuild it in DOM*. The screen glass, the gizmo and the two pads all
 hang on that one answer, and right now each was solved separately.
 
+**Half of this landed in 1.53.0:** the DOM ball is a factory now — `gizmo()` in the kit, six axes,
+lit on the ball, `.set()` — so the part exists and the entry is down to the adoption question
+above. Nothing in Portrait-Typo has been switched over.
+
 ---
 
 <!-- ── FROM THE PORTRAIT-RIBBONS ADOPTION, 2026-08-17 ────────────────
@@ -422,7 +462,7 @@ controls and the word-carrying one does not exist.
 
 ---
 
-### `[design system]` THE MENU — `.plate` is the surface and there is no mechanism
+### `[design system]` THE MENU — built in 1.50.0; the adoption is what is left
 Eight of the nine Portrait apps have an icon-only top bar with hover dropdowns, `<kbd>`
 shortcut hints and separators. `.plate`'s own documentation says "menus, tooltips and any
 popup inherit it" — the SURFACE is there and nothing else is: no open/close, no Escape,
@@ -431,20 +471,14 @@ which is a different object.
 
 Ribbons' nav bar is therefore a **reskin, not an adoption** — its own markup, its own
 open/close, wearing the kit's tokens. That is stated plainly in `assets/skew.css` under a
-`§ CHROME` heading precisely so it can be deleted when this exists. It is the single
-biggest piece of the language that a Portrait app cannot use.
+`§ CHROME` heading precisely so it can be deleted when this exists.
 
----
-
-### `[design system]` THE ASSET ROW — load a file and say what is loaded
-Load button, hidden `<input type=file>`, a name readout, a source readout, a disable
-toggle. Ribbons has this **three times over**, one per map slot, and eight of the nine
-apps have at least one. Grep the system for `type=file` and it returns nothing.
-
-**Why it is a part and not a molecule the app should compose.** The disable toggle is the
-`select ≠ active` pattern the language already argues for in prose (§3, "Two facts need
-two channels"): a slot you have loaded an image into but switched off is a real and useful
-state, and every app currently gets it slightly wrong in its own way.
+**Built, 1.50.0, generalised in 1.51.0.** `openPlate(anchor, body)` is the mechanism —
+one open at a time, the key that opened it closes it and stays lit while it is up, Escape,
+click-outside, and a flip rather than a clip at a window edge. `menu(anchor, items)` is that
+plus rows and an arrow walk, `plateKey(...)` is the key that owns one, and the dock's console
+is the same mechanism with a log in it. Specified in SYSTEM 09. No plate has a tail. **The entry stays open until an app has replaced its own copy
+with it** — this file's rule — and Ribbons' `§ CHROME` block is the one to delete first.
 
 ---
 
@@ -543,6 +577,28 @@ code. The rule is the valuable half and it is one line:
 left to grab, and folding does not help — the head goes with it. Ribbons added a tidy key to
 its bottom bar; Typo resets on a double-click of the header. Whichever it is, `windowise`
 producing a state a user cannot get out of is the part that should not be left to adopters.
+
+**Half of this landed in 1.50.1:** Ribbons' tidy key is now a mandatory slot on the app dock
+(SYSTEM 09, RESET WINDOWS), so the way back has a fixed place to live. What is still open is
+the other half — `windowise` remembering where a window was, which is the entry above.
+
+---
+
+### `[design system]` THE APP DOCK — built in 1.50.0; one decision left
+SYSTEM 09. The bar that is all verbs, its two menus, the mandatory slot list and the
+`Export debug SVG` row. `appDock({...})` in the kit, live specimen on the SYSTEM page.
+
+**What is not settled: what goes in the debug SVG.** Construction geometry, per-layer colour,
+seed and params in the file's metadata — some or all. One line, and it decides whether two
+runs of the same seed produce a diffable file.
+
+Also unconfirmed: the shortcut on **Load All** is bound and printed as `⌘/Ctrl O` (Open).
+The screenshot it was read off could be a zero.
+
+**Settled, 1.50.1.** The four-square key is **RESET WINDOWS**, not a grid — the same tidy key
+the `windowise` entry below says a way back requires. It is momentary, it sits between two
+latched states, and that is correct: the channel splits the sheet from the room, not verbs
+from states.
 
 ---
 

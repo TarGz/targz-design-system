@@ -9,6 +9,11 @@
 </head>
 <body>
 <script src="skew-nav.js"></script>
+<!-- THE HATCH CARD DRAWS A REAL FILL, so the engine that draws it on HATCH is
+     the engine that draws it here. It declares one global (`HANDS`) and shares
+     nothing with this page's own helpers, which is why it can load beside them
+     where skew-kit.js cannot. -->
+<script src="../src/skew-hatch.js"></script>
 
 <div class="wrap" id="main">
 
@@ -99,6 +104,121 @@ const PAPERS = [
   ['../FEATURES-REQUEST.md', 'Requests',  'what is asked for and not built'],
 ];
 
+/* ── THE PREVIEWS ─────────────────────────────────────────────────────────
+   ONE PER DOCUMENT, AND EACH ONE IS THAT DOCUMENT'S OWN FURNITURE — not an
+   illustration of it and not a screenshot of it. These are the same class
+   names the pages themselves write, so a card cannot drift from the page it
+   opens: restyle a cap and every preview here restyles with it.
+
+   NO KIT, WHICH IS WHY THEY ARE MARKUP. skew-kit.js declares `el` at the top
+   level and so does this page, so the two cannot both load — and they do not
+   have to. The factories build DOM and wire behaviour; the LOOK is entirely in
+   skew.css, and a picture needs no behaviour. Written by hand, they are also
+   honest about what they are: nothing here is operable, so nothing here has to
+   pretend it is a working panel.
+
+   WHAT EACH ONE SHOWS is the answer to "what would I be looking at" — the caps
+   for the language, an app's tab strip and switch, a plotter's readout, and a
+   real fill off the real engine. ─────────────────────────────────────────── */
+const SW_ICON = svg('<polygon points="12 2 21 7 21 17 12 22 3 17 3 7 12 2"/><circle cx="12" cy="12" r="2.5"/>');
+const KEY_ICON = svg('<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>');
+
+function preview(file) {
+  /* EVERY PREVIEW STANDS ON A STAGE, and it is the same stage every specimen
+     on this site stands on — a dark floor with the room's light falling across
+     the top left, a hairline border, a rounded corner. The hatch swatch had
+     one from the start because ink needs paper under it, and having built it
+     there it was obvious the other three were floating: parts with nothing
+     beneath them read as clip art, not as hardware on a bench.
+
+     SO THE PREVIEW REPRODUCES THE PAGE'S OWN COMPOSITION — room, stage,
+     specimen — one size down, inside a well cut in the card. Three frames
+     sounds like two too many until you notice it is exactly what you see when
+     you open the document. The stage is what makes it a photograph of a bench
+     rather than an icon. */
+  const wrap = el('div', 'prev prev-win');
+
+  if (file === 'skew-system.html') {
+    /* THE LANGUAGE IS ITS CAPS. A strip holding one of each state the kit can
+       be in — a key up, a switch lit, a chip, and a window with a number in
+       it — which is §01 through §04 in four objects. */
+    const strip = el('div', 'strip prev-strip');
+    strip.append(
+      el('button', 'key skirt', KEY_ICON),
+      el('button', 'sw on', SW_ICON),
+      el('span', 'chan'),
+      el('button', 'chip', 'EXPORT'),
+      el('div', 'lcd', '16844'),
+    );
+    wrap.append(strip);
+    return wrap;
+  }
+
+  if (file === 'skew-panels.html') {
+    /* AN APP IS A PANEL, and a panel is a tab strip over a row with a lamp on
+       it. Both are on PANELS §01 and §04, at the size they are used. */
+    const bar = el('div', 'piano sm');
+    ['LAYER', 'HATCH', 'PAPER'].forEach((t, i) =>
+      bar.append(el('button', 'pkey' + (i === 1 ? ' is-down' : ''), t)));
+    const row = el('div', 'prev-row');
+    row.append(el('button', 'sw on', SW_ICON), el('span', 'prev-nm', 'Contours'),
+               el('div', 'lcd', '0.35'));
+    wrap.append(bar, row);
+    return wrap;
+  }
+
+  if (file === 'skew-machine.html') {
+    /* A PLOTTER IS A READOUT. The DRO is the first thing on MACHINE and the
+       one part of it that is true whatever the machine is doing. */
+    const dro = el('div', 'prev-dro');
+    [['X', '148.20'], ['Y', '96.55']].forEach(([ax, v]) => {
+      const cell = el('div', 'prev-ax');
+      cell.append(el('span', 'prev-axn', ax), el('div', 'lcd', v));
+      dro.append(cell);
+    });
+    wrap.append(dro);
+    return wrap;
+  }
+
+  if (file === 'skew-hatch.html') {
+    /* AND THE FILL IS DRAWN, not drawn FOR. Same engine, same seed, same
+       millimetres as HATCH §03 — the one card on this page whose subject is
+       geometry, so the one card that would be lying if it showed furniture.
+       Guarded: a card with no picture is a smaller card, and a card that
+       throws takes the grid with it. */
+    try {
+      /* DRAWN AT THE STAGE'S OWN PROPORTION, in real millimetres — 150 × 55 is
+         a strip of paper the shape of the window, so the fill fills it instead
+         of being letterboxed into it or cropped to a third of itself. */
+      const W = 150, H = 55;
+      const out = HANDS.drawShape('hand', W, H, 7, { nib: 0.35 });
+      const ns  = 'http://www.w3.org/2000/svg';
+      const s   = document.createElementNS(ns, 'svg');
+      s.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      /* SLICE, NOT FIT, for the reason the metal previews crop rather than
+         scale: a card narrower than the stock shows less paper, it does not
+         show the same drawing smaller. */
+      s.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+      s.setAttribute('class', 'prev-hatch');
+      /* THE ONE STAGE THAT IS NOT METAL. Same frame, same corner, same inset —
+         toned stock instead of a floor, because the specimen standing on it is
+         a pen line and everything else here is a cap. */
+      wrap.classList.add('paper');
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', out.paths.join(' '));
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', 'currentColor');
+      path.setAttribute('stroke-width', String(out.nib));
+      path.setAttribute('stroke-linecap', 'round');
+      s.append(path);
+      wrap.append(s);
+      return wrap;
+    } catch { return null; }
+  }
+
+  return null;
+}
+
 /* ── the cards ──────────────────────────────────────────────────────────── */
 (function buildDocs() {
   const grid = document.getElementById('docs');
@@ -110,12 +230,35 @@ const PAPERS = [
     head.append(el('span', 'nm', p.name), el('div', 'lcd', p.no));
     box.append(head);
 
-    const body = el('div', 'doc-body');
-    body.append(el('p', 'doc-kick', p.kick), el('p', 'doc-line', p.line));
+    /* THE CARD SHOWS THE THING, AND THEN SAYS ONE SENTENCE ABOUT IT.
 
-    const parts = el('ul', 'doc-list');
-    p.parts.forEach(t => parts.append(el('li', null, t)));
-    body.append(parts);
+       IT USED TO BE FOUR BLOCKS OF WRITING — a kick line, a description, and a
+       wrapped list of up to twelve part names — and all three were the same
+       claim in three registers. A list reading `factories · surfaces · tokens ·
+       primitives` tells you nothing a person could act on: it is the table of
+       contents rendered as confetti, and it is the part of a card that gets
+       skimmed hardest because it never repays the reading.
+
+       WHAT A CARD IS FOR IS DECIDING WHETHER TO OPEN IT, and the fastest way to
+       decide that is to see what is inside. So the list is gone, the kick is
+       gone, and what stands in their place is a piece of the document itself,
+       at its real size, in the real metal. Every other page on this site argues
+       that the case for a part is the part; the door was the one place still
+       arguing it in prose.
+
+       IT IS A PICTURE AND NOT A CONTROL. `pointer-events:none` and
+       `aria-hidden`, both mandatory: a live switch on a card is a switch that
+       does nothing, sitting next to the one button that does something, and a
+       keyboard would tab through four of them before reaching OPEN. */
+    const body = el('div', 'doc-body');
+    const shot = preview(p.file);
+    if (shot) {
+      const win = el('div', 'doc-shot');
+      win.setAttribute('aria-hidden', 'true');
+      win.append(shot);
+      body.append(win);
+    }
+    body.append(el('p', 'doc-line', p.line));
 
     const foot = el('div', 'doc-foot');
     const open = el('a', 'key act go doc-open', `<span class="lens"></span>OPEN${ICON.open}`);

@@ -24,16 +24,92 @@
 .doc{ width:auto; flex:0 0 auto; user-select:auto; }
 .doc-body{ padding:14px 16px 15px; position:relative; z-index:2;
            display:flex; flex-direction:column; gap:11px; }
-.doc-kick{ font-family:var(--font); font-size:9px; letter-spacing:.16em;
-           text-transform:uppercase; color:var(--led); margin:0; }
 .doc-line{ font-size:13px; line-height:1.6; color:#8b909a; margin:0; }
 .doc-line b{ color:#c6cad1; font-weight:600; }
-.doc-list{ margin:0; padding:0; list-style:none;
-           display:flex; flex-wrap:wrap; gap:5px; }
-.doc-list li{ font-family:var(--font); font-size:9px; letter-spacing:.08em;
-              color:#797e88; padding:3px 7px; border-radius:4px;
-              background:linear-gradient(180deg,#171a1c,#1e2124);
-              box-shadow:inset 0 1px 3px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.06); }
+
+/* ── THE PREVIEW WINDOW ────────────────────────────────────────────────────
+   A WELL CUT IN THE CARD, and the same well the piano and the papers sit in —
+   dark floor, hard inset shadow, one hairline of light along the bottom edge.
+   That is what makes the parts inside read as SET INTO the card rather than
+   printed on it, and it is the only reason this does not look like a
+   screenshot pasted onto a panel.
+
+   IT BLEEDS TO BOTH SIDE EDGES. `.doc-body` has 16px of padding and this takes
+   it back with a negative margin, because a picture inside a margin inside a
+   card is three frames deep and reads as a thumbnail. The card's own edge is
+   the frame it needs.
+
+   NOTHING IN IT IS OPERABLE, and that is enforced twice: `pointer-events:none`
+   here, `aria-hidden` on the element. A live switch on a card is a switch that
+   does nothing sitting beside the one button that does something — and without
+   the second half a keyboard tabs through four dead controls before it reaches
+   OPEN. Belt and braces, because the two failures are different failures.
+
+   IT IS DIMMED, ONE STOP. A preview at full strength competes with the OPEN
+   key for the eye, and OPEN is the only thing on this card you can actually
+   do. It comes up on hover — the card is the hover target, so the picture
+   brightens when you are considering it, which is exactly when you want it. */
+.doc-shot{
+  margin:0 -16px; padding:15px 16px 16px; overflow:hidden;
+  pointer-events:none; user-select:none;
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,#121416,#191c1f);
+  box-shadow:inset 0 4px 10px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05);
+  opacity:.82; transition:opacity .18s ease;
+}
+.doc:hover .doc-shot{ opacity:1; }
+/* THE STAGE — the floor a specimen stands on, one size down from `.stage` and
+   made of the same two things: the room's light falling from the top left, and
+   a hairline border where the floor meets the air. Without it the parts float,
+   and a cap with nothing under it reads as clip art rather than as hardware.
+
+   THE PARTS INSIDE ARE AT THEIR REAL SIZE and the stage crops rather than
+   scales: a strip wider than the card is cut off by the card's edge, which is
+   what a panel photographed at its own scale looks like. Shrinking to fit would
+   make every preview a different scale from the page it opens, which is the one
+   thing a preview must not be. */
+.prev-win{
+  width:100%; box-sizing:border-box; overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  /* ONE HEIGHT FOR ALL FOUR, not a minimum. The grid sizes a row to its
+     tallest card, so a preview that grows to its content makes every card in
+     that row grow with it — and the hatch swatch, being an image with an aspect
+     ratio, would have set the height of the whole page. 112px clears the
+     tallest specimen here (a tab strip over a lamp row, 97px with its padding)
+     with room to spare. */
+  gap:9px; height:112px; padding:14px 12px;
+  border-radius:9px; border:1px solid #1e2024;
+  background:
+    radial-gradient(70% 60% at 28% 0%, rgba(255,255,255,.055), transparent 60%),
+    linear-gradient(180deg,#141518,#0c0d0f);
+}
+/* THE ONE STAGE THAT IS NOT METAL. Same frame and same corner; toned stock
+   instead of a floor, because what stands on it is a pen line. */
+.prev-win.paper{
+  background:#BEB5A3; color:#2b2b2b;
+  border-color:rgba(0,0,0,.55); padding:0;
+}
+.prev-strip{ flex:0 0 auto; }
+
+/* an app's row: the lamp, the name, the value — PANELS §01 at its own size */
+.prev-row{ display:flex; align-items:center; gap:10px; width:100%; }
+.prev-nm{ font-size:12px; color:#9aa0aa; }
+.prev-row .lcd{ margin-left:auto; }
+
+/* the DRO: an axis letter engraved beside its window */
+.prev-dro{ display:flex; gap:10px; justify-content:center; }
+.prev-ax{ display:flex; align-items:center; gap:7px; }
+.prev-axn{ font-family:var(--font); font-size:10px; letter-spacing:.16em; color:#5f656e; }
+.prev-ax .lcd{ min-width:82px; justify-content:flex-end; }
+
+/* THE FILL IS INK ON PAPER, so the swatch is paper — the one preview that is
+   not metal, because the one document it stands for is not about panels. */
+/* THE SWATCH IS NOW JUST THE DRAWING. The stock, the corner and the frame moved
+   up to `.prev-win.paper`, so the stage is one object with two materials rather
+   than two objects that happen to line up. `--paper` in skew.css is declared ON
+   `.hb-field` — a token scoped to the part that owns it, correct there and
+   resolving to nothing here — so the stock is named, not inherited. */
+.prev-hatch{ width:100%; height:100%; display:block; }
 .doc-foot{ display:flex; align-items:center; gap:9px; margin-top:2px; }
 /* .act already sets the height, padding, gap and legend. An anchor only needs
    its underline taken off. */

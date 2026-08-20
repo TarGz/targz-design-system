@@ -2887,9 +2887,42 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 const WIN_ICON = {
   close:  svg('<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>'),
   reduce: svg('<line x1="6" y1="12" x2="18" y2="12"/>'),
+  max:    svg('<path d="M4 9V4h5"/><path d="M20 15v5h-5"/><path d="M15 4h5v5"/><path d="M9 20H4v-5"/>'),
+  min:    svg('<path d="M9 4v5H4"/><path d="M15 20v-5h5"/><path d="M20 9h-5V4"/><path d="M4 15h5v5"/>'),
 };
 
-function windowise(box, { title, mode = 'reduce', onClose } = {}) {
+/* ── AND A WINDOW MAY OPEN OUT — `maximise: true` ──────────────────────────
+   A PANEL WITH A PICTURE IN IT OUTGROWS ITS DESK, and that is the whole case
+   for this. A map editor, a preview, a specimen sheet: the controls beside it
+   have an honest width and the picture has none — it takes whatever it is
+   given, and on a desk it is given a thumbnail. Reducing solves the opposite
+   problem. There was no part for this one, so the first app that needed it
+   built the button, the class and the chrome-hiding for itself; this is that,
+   taken back, because a second adopter composing it a second way is how a
+   language stops being one.
+
+   IT IS A SECOND BUTTON AND NOT A MODE. Reduce and open-out are not two ends of
+   one control — a panel can be neither, and the two gestures live at opposite
+   ends of the same axis — so they are two caps in the head, the maximise one
+   FIRST so the pair reads outward-then-down.
+
+   MAXIMISED AND REDUCED CANNOT BOTH BE TRUE, and the interlock runs both ways:
+   opening out clears the fold, and reducing an opened-out panel stands it down
+   first. A full-screen panel collapsed to its title bar is a title bar across
+   the whole screen.
+
+   `maxed-open` GOES ON THE BODY so a document can stand its own chrome down —
+   opened out, the panel IS the screen, and a bar lying across the top of it is
+   the furniture of a view you have left. The flag is read back off the DOM
+   rather than from the argument, so it stays true while ANY window is open: the
+   answer to "is anything maximised" is a query, not a counter.
+
+   WHAT THE HOST STILL OWNS is where the panel was. This part writes `position`
+   and `transform` from a stylesheet, and a host that pins its windows with
+   INLINE styles — as a desk that remembers where you dragged them must — beats
+   any selector with them. `onMax(on)` fires synchronously on every change and is
+   where such a host parks and restores its own inline properties. */
+function windowise(box, { title, mode = 'reduce', onClose, maximise = false, onMax } = {}) {
   const head = box.querySelector('.box-head');
   if (!head) return box;
   box.classList.add('win');
@@ -2902,17 +2935,49 @@ function windowise(box, { title, mode = 'reduce', onClose } = {}) {
   btn.title = mode === 'close' ? `Close ${title || 'this panel'}`
                                : `Reduce ${title || 'this panel'} to its title`;
   btn.setAttribute('aria-label', btn.title);
+  let setMax = null;
   btn.addEventListener('pointerdown', e => e.stopPropagation());   // not a drag
   btn.addEventListener('click', () => {
     if (mode === 'close') { SFX?.clack?.(); box.classList.add('gone'); onClose && onClose(box); }
     else {
       const to = !box.classList.contains('reduced');
+      /* REDUCING AN OPENED-OUT PANEL STANDS IT DOWN FIRST — see the interlock
+         note above. Folding one leaves a title bar the width of the screen. */
+      if (to && setMax && box.classList.contains('maxed')) setMax(false);
       box.classList.toggle('reduced', to);
       btn.setAttribute('aria-expanded', String(!to));
       SFX?.flip?.();
     }
   });
   head.append(btn);
+
+  if (maximise) {
+    const mb = el('button', 'win-btn win-max', WIN_ICON.max);
+    mb.type = 'button';
+    /* THE CAP CARRIES THE STATE IN ITS GLYPH, ITS TITLE AND ITS `aria-pressed`,
+       all three repainted together — a mark saying "open out" over a panel that
+       is already out is the same lie a switch tells when only its lamp moves. */
+    const paintMax = () => {
+      const on = box.classList.contains('maxed');
+      mb.innerHTML = on ? WIN_ICON.min : WIN_ICON.max;
+      mb.title = on ? `Restore ${title || 'this panel'}` : `Open ${title || 'this panel'} out`;
+      mb.setAttribute('aria-label', mb.title);
+      mb.setAttribute('aria-pressed', String(on));
+    };
+    setMax = (on) => {
+      box.classList.toggle('maxed', on);
+      document.body.classList.toggle('maxed-open', !!document.querySelector('.win.maxed'));
+      if (on) { box.classList.remove('reduced'); btn.setAttribute('aria-expanded', 'true'); }
+      paintMax();
+      onMax && onMax(on);
+    };
+    mb.addEventListener('pointerdown', e => e.stopPropagation());   // not a drag
+    mb.addEventListener('click', () => { SFX?.flip?.(); setMax(!box.classList.contains('maxed')); });
+    paintMax();
+    /* FIRST OF THE PAIR — outward, then down. */
+    head.insertBefore(mb, btn);
+    box.setMax = setMax;
+  }
 
   /* DRAG FROM THE HEAD, AND THE PANEL STAYS WHERE YOU PUT IT. Transform rather
      than left/top: it does not reflow anything, it composites, and a panel
@@ -2940,7 +3005,14 @@ function windowise(box, { title, mode = 'reduce', onClose } = {}) {
   head.addEventListener('pointerup', stop);
   head.addEventListener('pointercancel', stop);
 
-  box.reset = () => { dx = dy = 0; place(); box.classList.remove('gone', 'reduced'); };
+  box.reset = () => {
+    /* STOOD DOWN THROUGH `setMax`, NOT BY DROPPING THE CLASS. The body flag and
+       the cap's glyph are part of the state; clearing `maxed` on its own leaves
+       a document with its chrome hidden and a button offering to restore a
+       panel that is already restored. */
+    if (setMax && box.classList.contains('maxed')) setMax(false);
+    dx = dy = 0; place(); box.classList.remove('gone', 'reduced');
+  };
   /* SET THE RESTING STATE WITHOUT FAKING A CLICK. A demo that dispatches its
      own clicks to arrange itself makes a noise, animates on load, and lies to
      anything listening for a real one. */
@@ -2970,7 +3042,20 @@ windowise.top = 10;
   const dock = document.getElementById('windock');
   dock.append(el('span', 'lab', 'CLOSED'));
 
-  const mk = (title, lampCol, at, mode, fill) => {
+  /* ── AND `onMax` IS WHY THIS DEMO HAS ONE ─────────────────────────────────
+     These panels are placed with INLINE `left`, `top`, `width` and `flex`,
+     because a floor of draggable specimens has to put each one somewhere. An
+     inline declaration beats any selector, so `.win.maxed`'s own
+     `position: fixed; inset: 22px; width: auto` would be overruled by all four
+     and the opened-out panel would be a 250px box pinned at its old corner —
+     laid out, present, and not maximised at all.
+
+     THAT IS NOT A FLAW IN THE PART, IT IS THE CONTRACT. A stylesheet cannot
+     out-rank a style attribute, so the part hands the host a callback and the
+     host parks what it owns. Every adopter that positions its windows has to do
+     this, which is why the demo does it in full rather than dodging it by
+     placing the specimens some other way. */
+  const mk = (title, lampCol, at, mode, fill, maximise = false) => {
     const b = el('div', 'box win-demo');
     b.style.left = at[0] + 'px'; b.style.top = at[1] + 'px';
     b.style.width = '250px'; b.style.flex = '0 0 250px';
@@ -2981,7 +3066,17 @@ windowise.top = 10;
     fill(bd);
     b.append(h, bd);
     floor.append(b);
-    return windowise(b, { title, mode, onClose: () => chipFor(b, title).classList.remove('away') });
+    const park = (on) => {
+      for (const k of ['left', 'top', 'width', 'flex', 'transform']) {
+        if (on) b.style.removeProperty(k);
+        else if (k === 'left')  b.style.left = at[0] + 'px';
+        else if (k === 'top')   b.style.top = at[1] + 'px';
+        else if (k === 'width') b.style.width = '250px';
+        else if (k === 'flex')  b.style.flex = '0 0 250px';
+      }
+    };
+    return windowise(b, { title, mode, maximise, onMax: park,
+      onClose: () => chipFor(b, title).classList.remove('away') });
   };
 
   const chips = new Map();
@@ -3075,7 +3170,14 @@ windowise.top = 10;
   });
 
   /* REDUCES — the transport. There is no version of this app with no
-     transport, so there is no × on it: the most it can do is get small. */
+     transport, so there is no × on it: the most it can do is get small.
+
+     AND IT IS THE ONE THAT OPENS OUT, so both caps are on one head and the
+     interlock can be seen rather than described: open it out and the fold
+     clears; press — while it is out and it stands down first, because a
+     full-screen panel collapsed to its title bar is a title bar across the
+     whole screen. It ships reduced, which is the third state and the reason
+     the demo is on this panel and not on one of the two that close. */
   mk('TRANSPORT', '#2C6BFF', [96, 178], 'reduce', bd => {
     const bar = el('div', 'strip');
     bar.append(key(ICON.play, { title: 'Plot' }), el('span', 'chan'),
@@ -3085,7 +3187,7 @@ windowise.top = 10;
     k.append(knob({ label: 'Speed', min: 1, max: 100, step: 1, value: 62, size: 44,
                     fmt: v => v + '%' }));
     bd.append(bar, k);
-  }).rest();                        // reduced — it is a title bar
+  }, true).rest();                  // reduced — it is a title bar
 })();
 </script>
 </body>

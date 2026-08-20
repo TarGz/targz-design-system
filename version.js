@@ -1,6 +1,30 @@
-export const version = '1.68.2';
+export const version = '1.69.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.69.1',
+    date: '2026-08-19',
+    changes: [
+      'EVERY PREVIEW STANDS ON A STAGE NOW, not just the hatch swatch. The swatch had one from the start because ink needs paper under it, and having built that it was obvious the other three were floating — a cap with nothing beneath it reads as clip art, not as hardware on a bench. `.prev-win` is `.stage` one size down and made of the same two things: the room\'s light falling across the top left, and a hairline border where the floor meets the air.',
+      'SO A CARD REPRODUCES THE PAGE\'S OWN COMPOSITION — room, stage, specimen. Three frames sounds like two too many until you notice it is exactly what you see when you open the document.',
+      'ONE HEIGHT FOR ALL FOUR, AND IT IS FIXED RATHER THAN A MINIMUM. The grid sizes a row to its tallest card, so a preview that grows to fit its content makes every card beside it grow too — and the hatch swatch, being an image with an aspect ratio, was about to set the height of the whole page. 112px clears the tallest specimen here, a tab strip over a lamp row, with room left.',
+      'AND THE FILL IS DRAWN AT THE STAGE\'S OWN PROPORTION — 150 × 55 real millimetres, a strip of paper the shape of the window, 63 paths. It fills the frame instead of being letterboxed into it. `preserveAspectRatio="slice"` for the same reason the metal previews crop rather than scale: a narrower card shows less paper, it does not show the same drawing smaller.',
+      'THE STOCK, THE CORNER AND THE FRAME MOVED UP to `.prev-win.paper`, so the stage is one object with two materials rather than two objects that happen to line up. The swatch is now only the drawing.',
+    ],
+  },
+  {
+    version: '1.69.0',
+    date: '2026-08-19',
+    changes: [
+      'THE HOME CARDS SHOW THE DOCUMENT INSTEAD OF DESCRIBING IT. Each one carried four blocks of writing — a kick line, a description, and a wrapped list of up to twelve part names — and all three were the same claim in three registers. `factories · surfaces · tokens · primitives` is the table of contents rendered as confetti: it tells you nothing you can act on, and it is the part of a card that gets skimmed hardest because it never repays the reading.',
+      'WHAT A CARD IS FOR IS DECIDING WHETHER TO OPEN IT, and the fastest way to decide that is to see what is inside. The kick and the list are gone; one sentence stays, and above it sits a piece of the document itself at its real size in the real metal. Every other page here argues that the case for a part is the part — the door was the one place still arguing it in prose.',
+      'EACH PREVIEW IS THAT PAGE\'S OWN FURNITURE, written in the same class names the page writes, so a card cannot drift from what it opens: restyle a cap and every preview restyles with it. SYSTEM shows the caps — a key, a lit switch, a chip, a window with a number in it. PANELS shows a tab strip over a row with a lamp on it. MACHINE shows the DRO, the one part of a plotter that is true whatever it is doing.',
+      'AND HATCH DRAWS A REAL FILL, off the real engine, at the real millimetres — same `HANDS.drawShape` call, same seed, 105 paths in 19ms. It is the one document whose subject is geometry rather than furniture, so it is the one card that would have been lying if it showed a panel. `skew-hatch.js` declares a single global and shares nothing with the home\'s own helpers, which is why it can load beside them where skew-kit.js cannot.',
+      'IT IS A PICTURE AND NOT A CONTROL, enforced twice and both halves needed: `pointer-events:none` on the window, `aria-hidden` on the element. A live switch on a card is a switch that does nothing sitting beside the one button that does something — and without the second half a keyboard tabs through four dead controls before it reaches OPEN.',
+      'THE WINDOW IS A WELL CUT IN THE CARD, the same one the piano and the papers sit in, and it bleeds to both side edges by taking back the body\'s padding. A picture inside a margin inside a card is three frames deep and reads as a thumbnail; the card\'s own edge is the only frame it needs. Dimmed one stop and brought up on hover, because OPEN is the only thing on the card you can actually do and it should not have to compete.',
+      '`kick` AND `parts` STAY IN THE REGISTRY, read by nobody. They are accurate, they cost nothing, and the day a card wants a subtitle again the words are already written.',
+    ],
+  },
   {
     version: '1.68.2',
     date: '2026-08-20',

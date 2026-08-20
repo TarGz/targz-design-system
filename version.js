@@ -1,6 +1,18 @@
-export const version = '1.89.0';
+export const version = '1.90.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.90.0',
+    date: '2026-08-20',
+    changes: [
+      'THE RIM CASTS INTO THE WELL, WHICH IS THE ONE THING IN THERE THAT ANSWERS TO WHICH WAY THE BALL IS POINTING. Everything else about the hole is fixed to the hole: the contact shadow is a function of position, the bore is a material, the disc\'s edge is geometry. All three are right and none of them move when you turn it, which left a recess saying nothing about its own attitude — and a real one announces that constantly, because its own lip is in the way of the lamp and the shape of what it blocks sweeps as the thing rotates.',
+      'IT IS AN EXACT QUESTION AND IT COSTS ONE SQUARE ROOT. The rim is a circle of known angular radius and the point is a known depth below it, so reach the rim along the light\'s own bearing — the ray-circle chord — and compare `D·sin(elev)` against `depth·cos(elev)`. No trig, no marching, no second pass.',
+      'THE FIRST VERSION WAS CORRECT AND INVISIBLE, WHICH IS ITS OWN KIND OF BUG. The well is wide for its depth — 0.41 — so a lamp only has to clear about thirty degrees to see the whole floor, and the one lighting this ball sits at fifty-three above a well that faces the camera. So the shadow existed only below thirty degrees, where the floor\'s Lambert term has already gone dark on its own, and it varied most across the disc\'s outer part, where the contact shadow is already at full. Right term, no room to live.',
+      'SO THE RIM IS BUDGETED 2.4× ITS GEOMETRIC HEIGHT, and a knife edge was the wrong model anyway: the lip has the fillet\'s thickness, the whole body of the ball behind it, and a horizon that keeps rising as you look along it — and the single direction being tested stands in for a hemisphere of room light that a rim blocks a great deal more of than one ray suggests. The transition now lands at forty-odd degrees, which is where the rotation actually goes.',
+      'THE LAMP LOSES ALL OF IT AND THE ROOM LOSES HALF. A cast shadow takes the direct light entirely, because that is what blocked means; but a rim also stands between the floor and most of the sky, and that part is what keeps it readable at angles where the diffuse term has already fallen to nothing. Doing the ambient TWICE is how this went black the first time it existed, so the contact term keeps the isotropic half and this one takes a share of what is left.',
+      'AND THE PENUMBRA WAS WIDER THAN THE QUANTITY IT MEASURED. It ran from a clearance ratio of .5 to 1.7 — the geometric edge is at exactly 1 — so it never arrived anywhere, it just tinted the well. That width was defensive: every hard edge this part has produced turned out to be a stroke, so it got blurred on principle. But a cast shadow\'s edge is not a seam between two surfaces, it is a real feature with a real position, and softening it to hide the other problem was hiding this one too. Centred on 1 with a tight band either side, the whole transition now happens across about four degrees of rotation.',
+    ],
+  },
   {
     version: '1.89.0',
     date: '2026-08-20',

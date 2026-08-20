@@ -2701,6 +2701,21 @@ const CAP_AAMAX = (CAP_ANG / CAP_RHO - 1) * .25;
    a question about the material — from "the shadow is eating the bore", which
    is a question about this curve. Those two looked identical for four rounds. */
 const CAP_SHADOW = 1;
+/* ── HOW TALL THE RIM IS BUDGETED, AND IT IS NOT ITS GEOMETRIC HEIGHT ────────
+   THE WELL IS WIDE FOR ITS DEPTH — 0.41 — so a lamp only has to clear about
+   thirty degrees to see the whole floor, and the one lighting this ball sits at
+   fifty-three above a well that faces the camera. The cast shadow was being
+   computed correctly and was simply never in shadow: it existed below thirty
+   degrees, where the floor's own Lambert term has already gone dark, and it
+   varied most across the disc's outer part, where the contact shadow is
+   already at full. Right term, no room to live.
+
+   AND A KNIFE-EDGE RIM IS THE WRONG MODEL ANYWAY. The lip has the fillet's
+   thickness, the whole body of the ball behind it, and a horizon that keeps
+   rising as you look along it — and the single direction being tested stands
+   in for a hemisphere of room light that the rim blocks a great deal more of
+   than one ray suggests. One constant carries all of it. */
+const CAP_CAST = 2.4;
 
 /* THE PROFILE, AND THE ONLY DESCRIPTION OF IT THE GEOMETRY USES.
 
@@ -3464,8 +3479,74 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
       }
 
       const d = nx * lx + ny * ly + nz * lz;
-      const dif = d > 0 ? d : 0;
-      let f = (AMB + DIF * dif) * lit;
+      let dif = d > 0 ? d : 0;
+
+      /* ══════════════════════════════════════════════════════════════════
+         AND THE RIM CASTS INTO THE WELL — THE ONE TERM IN HERE THAT ANSWERS
+         TO WHICH WAY THE BALL IS POINTING.
+
+         EVERYTHING ELSE ABOUT THIS HOLE IS FIXED TO THE HOLE. The contact
+         shadow is a function of position, the bore's colour is a material,
+         the disc's edge is geometry — turn the ball and none of them move,
+         which is correct for all three and leaves the well saying nothing
+         about the attitude it is being viewed at. A real recess announces
+         that constantly, because its own rim is in the way of the lamp and
+         the shape of what it blocks sweeps as the thing turns.
+
+         IT IS AN EXACT QUESTION AND IT COSTS ONE SQUARE ROOT. The rim is a
+         circle of known angular radius, the point is a known depth below it:
+         reach the rim along the light's own bearing — the ray-circle chord —
+         and compare how far that is against how far the light has to travel
+         horizontally to fall that depth. `D·sin(elev)` against
+         `depth·cos(elev)`, no trig, no marching.
+
+         IT TAKES THE DIFFUSE AND LEAVES THE AMBIENT, which is what a cast
+         shadow is: the lamp is blocked, the room is not. The room's own
+         occlusion is already handled, by the contact term, and doing it twice
+         is how the well went black the first time this existed.
+
+         AND THE PENUMBRA IS ENORMOUS ON PURPOSE — the ratio runs from half to
+         one and a bit before it is fully lit. A rim shadow with a crisp edge
+         is a dark shape with a boundary inside a hole, which is the same
+         stroke this part has produced under four other names. */
+      let sun = 1;
+      if (sink > 0) {
+        const lu = lx * ox + ly * oy + lz * oz;
+        if (lu <= 0) sun = 0;
+        else {
+          const h2 = 1 - lu * lu;
+          const hm = h2 > 0 ? Math.sqrt(h2) : 0;
+          let c = 1;                       /* how much of the bearing runs outward */
+          if (hm > 1e-6 && rho > 1e-6) {
+            const sg = up ? -1 : 1;        /* ê_out = -sign(oy)·ê_lat */
+            c = ((lx - lu * ox) * -sla * clo
+               + (ly - lu * oy) * cla
+               + (lz - lu * oz) * -sla * slo) * sg / hm;
+          }
+          const disc = CAP_ANG * CAP_ANG - rho * rho * (1 - c * c);
+          const D = -rho * c + Math.sqrt(disc > 0 ? disc : 0);
+          const need = sink * hm * CAP_CAST;
+          /* ── AND THE PENUMBRA IS TIGHT, CENTRED ON THE REAL BOUNDARY ──────
+             IT RAN FROM HALF TO ONE AND SEVEN TENTHS, which is a transition
+             wider than the whole quantity it was measuring — the geometric
+             edge is at exactly 1, and a ramp that starts at .5 and finishes at
+             1.7 never actually arrives anywhere, it just tints the well. That
+             width was defensive: every hard edge this part has produced turned
+             out to be a stroke. But a cast shadow's edge is not a seam between
+             two surfaces, it is a real feature with a real position, and
+             blurring it to hide the other problem was hiding this one too. */
+          let tt = need <= 1e-9 ? 1 : (D * lu / need - .88) / .24;
+          sun = tt <= 0 ? 0 : tt >= 1 ? 1 : tt * tt * (3 - 2 * tt);
+        }
+      }
+
+      /* THE LAMP LOSES ALL OF IT AND THE ROOM LOSES SOME. A cast shadow takes
+         the direct light entirely — that is what being blocked means — but a
+         rim also stands between the floor and most of the sky, and that part
+         is what keeps the shadow readable at the angles where the diffuse term
+         has already fallen to nothing on its own. Four tenths of the ambient,
+         which is enough to see and not enough to put the well back to black. */
+      let f = (AMB * (.46 + .54 * sun) + DIF * dif * sun) * lit;
       const hs = nx * hx + ny * hy + nz * hz;
       let sp = hs > 0 ? SPEC * lit * Math.pow(hs, SHINE) * 255 : 0;
       f *= VIG[i];

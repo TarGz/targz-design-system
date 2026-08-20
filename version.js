@@ -1,6 +1,15 @@
-export const version = '1.68.1';
+export const version = '1.68.2';
 
 export const CHANGELOG = [
+  {
+    version: '1.68.2',
+    date: '2026-08-20',
+    changes: [
+      'THE FOUR SHOTS ARE JPEG — 8.6MB of PNG down to 3.2MB, and the page they sit on is a door whose whole job is to open fast.',
+      'QUALITY 90 AND NOT 82, which cost 0.5MB and bought the one thing that could have gone wrong. These are screenshots of light engraved text on dark plastic at 8 to 9 pixels, which is exactly the JPEG failure mode — ringing round thin high-contrast strokes. Checked the worst case before deleting the originals: GND SHDW, Serpentine, 1:1 mm · what plots and the stroke count all still read. A 6% saving is not worth finding out later that a legend went mushy.',
+      'AND THE PNGs ARE GONE FROM THE TREE, not left beside them. Two copies of an 8.6MB asset is a folder where the wrong one gets referenced eventually — and the history keeps the blobs either way, so leaving them buys nothing and costs every future clone.',
+    ],
+  },
   {
     version: '1.68.1',
     date: '2026-08-20',

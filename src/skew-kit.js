@@ -3361,7 +3361,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
      DECAY IS PER MILLISECOND, NOT PER FRAME. Tying it to frames means the ball
      slows down faster on a slow machine, which is the opposite of what a
      dropped frame should cost you. */
-  let spAxis = null, spRate = 0, spRAF = 0, spPrev = null, spT = 0;
+  let spAxis = null, spRate = 0, spRAF = 0, spPrev = null, spT = 0, rzRAF = 0;
   const spBuf = [];              // recent turns: rotation vectors and their spans
   const SPIN_MIN  = 1.6e-4;      // rad/ms below which it has stopped
   const SPIN_MAX  = 0.02;        // and a ceiling, so a 2px flick is not a blur
@@ -3425,7 +3425,8 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
      there. Catching it has to be a full stop. */
   const spinStop = () => {
     if (spRAF) cancelAnimationFrame(spRAF);
-    spRAF = 0; spRate = 0; spAxis = null;
+    if (rzRAF) cancelAnimationFrame(rzRAF);
+    spRAF = 0; rzRAF = 0; spRate = 0; spAxis = null;
     spBuf.length = 0; spPrev = null;
   };
 
@@ -4433,6 +4434,66 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   };
 
   let from = null, axis = null, base = null;   // `held` is declared with the raster
+
+  /* ══════════════════════════════════════════════════════════════════════
+     DOUBLE-CLICK RETURNS IT TO ZERO, ALONG THE WAY IT WOULD ACTUALLY TURN.
+
+     A SNAP TELLS YOU NOTHING. Set the three angles to zero in one frame and
+     the ball is simply somewhere else — you cannot see WHICH way it went, so
+     you cannot tell afterwards whether the thing that moved was the ball or
+     the picture of it. Turning it back is the same argument the arcball makes
+     for dragging: the object has to be seen to move.
+
+     AND THERE IS ONE PATH, NOT THREE. Interpolating yaw, pitch and roll
+     separately is three unrelated numbers arriving at zero together, which
+     traces a wobble — the ball rolls one way and then another on its way to
+     rest, because Euler angles are a coordinate system rather than a route.
+     Every rotation is a single turn about a single axis, so the CURRENT
+     attitude already IS an axis and an angle: take them out of the matrix and
+     walk that one angle down to zero. Shortest possible path, and the axis
+     never moves while it runs.
+
+     EASED OUT, because it is arriving rather than departing — and the ball
+     stays at drag resolution while it moves, like every other time it moves. */
+  const RESET_MS = 460;
+  const resetGo = () => {
+    spinStop();
+    const M = orbitMat(val.yaw, val.pitch, val.roll);
+    const co = Math.max(-1, Math.min(1, (M[0] + M[4] + M[8] - 1) / 2));
+    const ang = Math.acos(co);
+    const land = () => {
+      val.yaw = val.pitch = val.roll = 0;
+      paint(); onChange && onChange({ ...val }, null);
+    };
+    if (ang < 2e-3) { land(); return; }
+    let ax = norm([M[7] - M[5], M[2] - M[6], M[3] - M[1]]);
+    if (!ax) {
+      /* HALF A TURN, WHERE THE ANTISYMMETRIC PART VANISHES. R = 2nnᵀ − I
+         there, so the axis is in the DIAGONAL — take the largest component,
+         which is the numerically safe one, and let its row fix the other two
+         signs. Rare, and the one attitude a naive extraction sends nowhere. */
+      const d = [(M[0] + 1) / 2, (M[4] + 1) / 2, (M[8] + 1) / 2];
+      const k = d[0] >= d[1] && d[0] >= d[2] ? 0 : d[1] >= d[2] ? 1 : 2;
+      const v = Math.sqrt(Math.max(0, d[k])) || 1;
+      ax = k === 0 ? [v, M[1] / (2 * v), M[2] / (2 * v)]
+         : k === 1 ? [M[1] / (2 * v), v, M[5] / (2 * v)]
+                   : [M[2] / (2 * v), M[5] / (2 * v), v];
+      ax = norm(ax);
+      if (!ax) { land(); return; }
+    }
+    quality(DPR_LO);
+    const t0 = Date.now();
+    const step = () => {
+      const u = Math.min(1, (Date.now() - t0) / RESET_MS);
+      const e = 1 - Math.pow(1 - u, 3);
+      Object.assign(val, orbitEuler(orbitAxisMat(ax, ang * (1 - e))));
+      paint(); onChange && onChange({ ...val }, null);
+      if (u < 1) { rzRAF = requestAnimationFrame(step); return; }
+      rzRAF = 0; land(); quality(DPR_HI);
+    };
+    rzRAF = requestAnimationFrame(step);
+  };
+  cv.addEventListener('dblclick', resetGo);
 
   /* A REPAINT ONLY WHEN IT CHANGES. `pick` is a walk over a few hundred
      projected samples and a repaint is every pixel of the ball; doing either

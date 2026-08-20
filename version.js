@@ -1,6 +1,16 @@
-export const version = '1.92.1';
+export const version = '1.93.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.93.0',
+    date: '2026-08-20',
+    changes: [
+      'DOUBLE-CLICK RETURNS THE BALL TO ZERO, TURNING RATHER THAN SNAPPING. Setting the three angles to zero in one frame leaves the ball simply somewhere else — you cannot see which way it went, so you cannot tell afterwards whether the thing that moved was the object or the picture of it. It is the same argument the arcball makes for dragging: the ball has to be SEEN to move.',
+      'AND THERE IS ONE PATH, NOT THREE. Interpolating yaw, pitch and roll separately is three unrelated numbers arriving at zero together, which traces a WOBBLE — the ball rolls one way and then another on its way to rest, because Euler angles are a coordinate system rather than a route. Every rotation is a single turn about a single axis, so the current attitude already IS an axis and an angle: take both out of the matrix and walk that one angle down to zero. Shortest possible path, and the axis never moves while it runs.',
+      'THE HALF-TURN CASE IS HANDLED, AND IT IS THE ONE A NAIVE EXTRACTION LOSES. At exactly 180° the antisymmetric part of the matrix vanishes and the usual axis formula returns nothing at all — so a double-click from an upside-down ball would jump rather than turn. R = 2nnᵀ − I there, which puts the axis in the DIAGONAL: take its largest component, which is the numerically safe one, and let that row fix the other two signs. Checked from eight attitudes including all three 180° poles; every one lands on zero exactly.',
+      'EASED OUT OVER 460ms, because it is arriving rather than departing, and at drag resolution while it moves — the same trade every other moving state on this ball makes. Grabbing the ball cancels it, and `spinStop` now clears the reset animation as well as the throw, so one press stops everything the ball might be doing.',
+    ],
+  },
   {
     version: '1.92.1',
     date: '2026-08-20',

@@ -1816,6 +1816,12 @@ document.getElementById('navspec').replaceWith(navBar({
   const col = document.getElementById('orbitspec-knobs');
   [['yaw', 'Yaw'], ['pitch', 'Pitch'], ['roll', 'Roll']].forEach(([k, label]) => {
     knobs[k] = knob({
+      /* EACH KNOB WEARS ITS OWN AXIS. Three identical orange dials for three
+         different rotations is the panel making you read a label to find out
+         which one you are on, next to a ball that has already answered in
+         colour. Taken from `ORBIT_AX` rather than retyped, so the dial and the
+         arc it drives cannot drift apart. */
+      arc: ORBIT_AX.find(a => a.key === k).col,
       label, min: -180, max: 180, step: 1, bipolar: true, value: st[k],
       fmt: v => `${Math.round(v)}°`,
       onChange: v => {

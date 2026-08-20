@@ -2841,6 +2841,45 @@ const RING_LIP = RNG_FL + RNG_U3;                       // and the mouth is wide
 const RNG_AAMAX = (RING_LIP / RNG_FL - 1) * .25;
 const GLOW_FAR  = RING_LIP * 1.7;      // where the spill has fallen to nothing
 
+/* ══════════════════════════════════════════════════════════════════════════
+   TWO PARTS, AND THE SEAM IS THE EQUATOR GROOVE.
+
+   A COLOUR EDGE ACROSS BARE PLASTIC IS A DECAL. Nothing physical holds it, so
+   the eye files it as printing — and a gradient instead of an edge is worse,
+   because a vertical gradient on a sphere has exactly one reading and that
+   reading is LIGHT. Neither says "assembly".
+
+   WHAT SAYS ASSEMBLY IS A PARTING LINE, and there is already one: the yaw
+   ring is cut along the equator, which is where a moulded ball splits anyway.
+   So the two colours meet INSIDE that groove, across its floor, where the
+   darkest part of the cut hides the transition — the way the join between two
+   mouldings hides in the channel between them. Above the groove is one part,
+   below it is the other, and the seam is a feature rather than a boundary.
+
+   AND IT IS ONE FUNCTION FOR BOTH PAINT PATHS, WHICH IS THE WHOLE POINT. The
+   body comes from the texture and the inside of every cut is painted in closed
+   form; those are two places, and left to themselves a blue north half gets
+   grey plastic inside its grooves. Everything asks here instead, so a cut
+   through the north half is cut into north-coloured material. */
+const BODY_N = [26, 36, 58];   // north of the seam — dark blue, for gloss
+/* DARKER, AND STILL FAINTLY COOL. A neutral grey beside a saturated blue does
+   not look neutral — the eye subtracts the blue it is comparing against and
+   what is left reads WARM, which is why the south half came out orange without
+   a drop of orange in it. Answering that with actual blue would make it a
+   second blue part; the fix is to take it toward black and leave a hair of
+   cool in it, so there is nothing warm for the contrast to find. */
+const BODY_S = [24, 27, 32];   // south — darker still, a hair cool
+const BODY_RGB = [0, 0, 0];    // scratch: this is called once per pixel
+function bodyAt(oy) {
+  const t = oy >= RNG_FL ? 1 : oy <= -RNG_FL ? 0 : (oy + RNG_FL) / (2 * RNG_FL);
+  const e = t * t * (3 - 2 * t);
+  BODY_RGB[0] = BODY_S[0] + (BODY_N[0] - BODY_S[0]) * e;
+  BODY_RGB[1] = BODY_S[1] + (BODY_N[1] - BODY_S[1]) * e;
+  BODY_RGB[2] = BODY_S[2] + (BODY_N[2] - BODY_S[2]) * e;
+  return BODY_RGB;
+}
+const hexOf = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+
 /* AND THEY RUN INTO THE WELLS RATHER THAN STOPPING AT THEM. Clipping them at
    the lip left a little wall across the mouth of every groove where it met a
    well — a piece of un-cut material standing between two cuts, which is not
@@ -2874,7 +2913,23 @@ function ringSlope(a) {                  // d(sink)/d(a) — negative inside the
   }
   return -CAP_TW;
 }
-const RING_RGB = [[255, 74, 74], [74, 222, 128], [90, 169, 255]];
+/* ── MUTED, NOW THE BALL IS ─────────────────────────────────────────────────
+   THREE FULLY SATURATED MARKS ON A GREY MOULDING WERE THE ONLY SATURATED
+   THINGS IN THE PICTURE, which made them read as lit signal rather than as
+   coloured material — and the ball has just gone the other way, from a blue
+   part to a grey-blue one. Pigment, not indicator: the value comes down as
+   well as the saturation, because a colour that is merely less pure but still
+   the brightest thing on the object has not stopped shouting.
+
+   THE HOVER IS WHERE THE BRIGHTNESS WENT. An arc that is quiet at rest and
+   lifts when you reach for it needs somewhere to lift FROM. */
+/* THE HUE IS THE ORIGINAL, SCALED — not re-mixed. Muting them meant raising
+   the two weak channels toward the strong one, which is desaturation, and it
+   shifted each colour as well as calming it. Putting the hue back is not a
+   fresh guess at three colours: it is the ORIGINAL triple multiplied by one
+   number, so every ratio between the channels is exactly what it was and only
+   the brightness differs. Same three pigments, less light on them. */
+const RING_RGB = [[214, 62, 62], [64, 192, 111], [77, 145, 218]];
 /* how far the hovered arc throws light past its own edges, and how hard */
 const GLOW_STR = 0.28;
 
@@ -3071,7 +3126,12 @@ function orbitMaterial() {
      and it is made of whatever the thing it is cut into is made of. Painting
      the inside of it a second colour is the same mistake as drawing a line
      round the top of it: a mark saying what the shape already says. */
-  g.fillStyle = '#20252b'; g.fillRect(0, 0, TEX_W, TEX_H);
+  /* THE SHEET TAKES THE SAME TWO COLOURS, split at the equator. The hard edge
+     between them sits at latitude 0, which is the middle of the yaw groove's
+     floor — seventeen texels inside its mouth, so nothing ever samples it on
+     open surface. */
+  g.fillStyle = hexOf(BODY_S); g.fillRect(0, 0, TEX_W, TEX_H);
+  g.fillStyle = hexOf(BODY_N); g.fillRect(0, 0, TEX_W, TY(0));
   /* THE FLOOR OF EACH WELL IS THE SAME PLASTIC IN RED. Not a light and not a
      coating — a moulding, which is why it is a fill on this sheet like every
      other material and takes the lamp, the rim's cast shadow and the well's
@@ -3095,10 +3155,19 @@ function orbitMaterial() {
 
   g.save(); bandClip(g);
   g.strokeStyle = 'rgba(198,214,236,.13)'; g.lineWidth = 4;
-  for (let lon = -180; lon < 180; lon += 22.5) {
+  /* A COUNT, NOT A STEP, FOR THE MERIDIANS. They close on themselves, so the
+     spacing has to divide 360 exactly or the seam gets a double line — say how
+     many there are and let the arithmetic find the angle. */
+  const MERID = 28;
+  for (let i = 0; i < MERID; i++) {
+    const lon = -180 + i * 360 / MERID;
     g.beginPath(); g.moveTo(TX(lon), 0); g.lineTo(TX(lon), TEX_H); g.stroke();
   }
-  for (let lat = -60; lat <= 60; lat += 15) {
+  /* THE PARALLELS KEEP THEIR SPACING AND LOSE THEIR OUTERMOST PAIR. Dropping
+     two by widening the gap would have spread the whole set; dropping the two
+     nearest the poles takes them from where they were already crowding into
+     the wells, and leaves the rest where they were. */
+  for (let lat = -52.5; lat <= 52.5; lat += 7.5) {
     g.beginPath(); g.moveTo(0, TY(lat)); g.lineTo(TEX_W, TY(lat)); g.stroke();
   }
   g.restore();
@@ -3246,13 +3315,21 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   const quality = dpr => { if (dpr !== DPR) { buildGrid(dpr); paint(); } };
 
   /* the lamp, and the one every other part on this site is lit by */
-  const LAMP = [-0.32, 0.50, 0.805];
-  /* LESS SHINE AND MORE FLOOR. The specular was at .30 with a tight exponent,
-     which is a wet look — a moulded plastic has a broad soft sheen rather than
-     a glint, and at this size a glint reads as a bright dot stuck to the
-     glass. Ambient comes up to match: the dark side of a solid in a room is
-     lit by the room. */
-  const AMB = 0.34, DIF = 0.66, SPEC = 0.11, SHINE = 12;
+  const LAMP = [-0.46, 0.50, 0.734];
+  /* ── GLOSS, AND IT IS THE DARK THAT PAYS FOR IT ─────────────────────────
+     THIS WENT THE OTHER WAY ONCE, on the argument that a tight bright specular
+     is a WET look and that a moulded plastic has a broad soft sheen. True of
+     the plastic that was here then — a mid grey, where a highlight has only a
+     little headroom above the surface and arrives as a smear. A dark body is
+     the opposite case: there is a long way between the material and white, so
+     the highlight has somewhere to be and reads as a polished surface rather
+     than a pale patch. Gloss and darkness are the same decision.
+
+     THE CUTS STAY MATTE, which is unchanged and matters more now: the sheen is
+     three times what it was, and a machined face catching that would look
+     lacquered. `sp` is damped to a fifth inside a groove. */
+  const AMB = 0.30, DIF = 0.64, SPEC = 0.62, SHINE = 90;
+
   /* how far a step in the height sheet bends the normal — the bevel's ANGLE,
      where the blur that made it was its width */
   const BUMP = 3.4;
@@ -3264,6 +3341,122 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
      you arrive on it — which is the information a gizmo actually owes you, at
      the moment you actually want it. */
   let hover = -1;
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MOMENTUM — A BALL YOU CAN THROW.
+
+     A THING WITH THIS MUCH WEIGHT DRAWN INTO IT SHOULD HAVE SOME. It is a
+     machined sphere sitting in a socket; letting go of it mid-turn and having
+     it stop dead is the one moment the whole illusion is available to be
+     broken for free.
+
+     THE SPIN IS MEASURED, NOT GUESSED. Every move already produces a rotation
+     matrix, so the last two give a DELTA — `M · Mprev'`, orthonormal, whose
+     axis and angle come straight out of its trace and its antisymmetric part.
+     Divide by the milliseconds between them and that is an angular velocity in
+     the frame the drag was in, which is exactly the frame the spin has to
+     continue in. No re-deriving it from screen coordinates, and it works
+     identically for a ring drag and a free roll because both end in a matrix.
+
+     DECAY IS PER MILLISECOND, NOT PER FRAME. Tying it to frames means the ball
+     slows down faster on a slow machine, which is the opposite of what a
+     dropped frame should cost you. */
+  let spAxis = null, spRate = 0, spRAF = 0, spPrev = null, spT = 0;
+  const spBuf = [];              // recent turns: rotation vectors and their spans
+  const SPIN_MIN  = 1.6e-4;      // rad/ms below which it has stopped
+  const SPIN_MAX  = 0.02;        // and a ceiling, so a 2px flick is not a blur
+  /* ── THE THROW IS SCALED DOWN, AND IT IS NOT THE SAME KNOB AS THE DECAY ────
+     1:1 WITH THE HAND IS RIGHT WHILE YOU ARE HOLDING IT and wrong the moment
+     you let go. During a drag the ball has to track the finger exactly — that
+     is what an arcball promises. A throw is a different question: the hand's
+     last speed is how fast you MOVED, not how fast you meant the thing to go,
+     and on a part this small a hand moves very fast indeed. A third of it
+     reads as the same gesture carried by something with weight. */
+  const SPIN_GAIN = 1 / 3;
+  /* 450ms TO HALVE, AND THE FLOOR DOES HALF THE WORK. Sustain and abruptness
+     pull opposite ways on a half-life alone: 320 stopped it dead, 800 gave it
+     a tail that crawls for seconds at a speed too low to read as motion but
+     too high to be finished. The tail is where "spins too long" actually
+     lives, and it is the FLOOR that cuts it — stop the ball while it still
+     looks like it is turning, and the drop from throw to stop stays short
+     enough not to feel like a brake. */
+  const SPIN_HALF = 450;
+  /* ── THE THROW IS THE LAST 90ms, NOT THE LAST EVENT ────────────────────────
+     ONE SAMPLE IS WHATEVER THE HAND DID IN THE FINAL SIXTEEN MILLISECONDS, and
+     the final sixteen milliseconds of a drag are usually the worst of it: the
+     fingers are already lifting, the pointer twitches a pixel, and that twitch
+     becomes the whole launch. A tiny angle about an arbitrary axis, divided by
+     a tiny dt, is a large rate pointing nowhere in particular — which is
+     exactly what "spinning but I cannot control it" looks like.
+
+     SO THE TURNS ARE SUMMED AS VECTORS OVER A WINDOW. Rotation vectors add
+     properly for small angles, so the sum over the window divided by its total
+     time is the average angular velocity — and a single twitch is one short
+     contribution among five or six rather than the entire answer. Its
+     DIRECTION averages too, which is the half that matters here: the axis
+     stops jumping and the ball goes where the hand was going.
+
+     AND A HAND THAT STOPPED HAS THROWN NOTHING. If nothing was sampled inside
+     the window, the ball was set down rather than released, and it stays. */
+  const SPIN_WIN = 90;
+
+  const spinSample = () => {
+    const now = Date.now(), M = orbitMat(val.yaw, val.pitch, val.roll);
+    const dt = now - spT;
+    if (spPrev && dt > 0 && dt < 200) {
+      /* D = M · Mprev', the turn made since the last sample */
+      const P = spPrev, D = new Array(9);
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++)
+        D[r * 3 + c] = M[r * 3] * P[c * 3] + M[r * 3 + 1] * P[c * 3 + 1] + M[r * 3 + 2] * P[c * 3 + 2];
+      const co = Math.max(-1, Math.min(1, (D[0] + D[4] + D[8] - 1) / 2));
+      const ang = Math.acos(co), si = Math.sin(ang);
+      const ax = si > 1e-6 ? norm([D[7] - D[5], D[2] - D[6], D[3] - D[1]]) : null;
+      spBuf.push(ax
+        ? { x: ax[0] * ang, y: ax[1] * ang, z: ax[2] * ang, t: now, dt }
+        : { x: 0, y: 0, z: 0, t: now, dt });
+      while (spBuf.length && now - spBuf[0].t > SPIN_WIN) spBuf.shift();
+    }
+    spPrev = M; spT = now;
+  };
+
+  /* EVERYTHING, NOT JUST THE FRAME. A cancelled animation with its axis and
+     rate still standing is a ball that remembers how it was thrown — and the
+     next release, if it produced no samples of its own, would find them lying
+     there. Catching it has to be a full stop. */
+  const spinStop = () => {
+    if (spRAF) cancelAnimationFrame(spRAF);
+    spRAF = 0; spRate = 0; spAxis = null;
+    spBuf.length = 0; spPrev = null;
+  };
+
+  const spinGo = () => {
+    const now = Date.now();
+    let x = 0, y = 0, z = 0, span = 0;
+    for (const e of spBuf) if (now - e.t <= SPIN_WIN) { x += e.x; y += e.y; z += e.z; span += e.dt; }
+    spBuf.length = 0;
+    const mag = Math.hypot(x, y, z);
+    spAxis = span > 0 && mag > 1e-9 ? [x / mag, y / mag, z / mag] : null;
+    spRate = span > 0 ? Math.min(SPIN_MAX, mag / span) * SPIN_GAIN : 0;
+    if (!spAxis || spRate < SPIN_MIN) { quality(DPR_HI); return; }
+    let t0 = now;
+    const step = () => {
+      /* A HAND ON THE BALL OUTRANKS A QUEUED FRAME. `spinStop` cancels the
+         animation, but a frame already scheduled when the press lands would
+         still turn the ball once under the finger. `base` is set for the whole
+         of a drag and is the cheapest thing to ask. */
+      if (base) { spRAF = 0; return; }
+      const t = Date.now(), dt = Math.min(64, t - t0);
+      t0 = t;
+      spRate *= Math.pow(.5, dt / SPIN_HALF);
+      if (spRate < SPIN_MIN) { spRAF = 0; quality(DPR_HI); return; }
+      Object.assign(val, orbitEuler(orbitMul(
+        orbitAxisMat(spAxis, spRate * dt), orbitMat(val.yaw, val.pitch, val.roll))));
+      paint();
+      onChange && onChange({ ...val }, null);
+      spRAF = requestAnimationFrame(step);
+    };
+    spRAF = requestAnimationFrame(step);
+  };
   let proj = [];        // ring samples in screen space, for the pick
 
   function paint() {
@@ -3861,7 +4054,8 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
            less light gets into it, which the shading already says. */
         const wd = sink / deep;
         const lf = which === 0 ? 60 : 8;
-        const br = 32 + lf * wd, bg = 37 + lf * 1.05 * wd, bb = 43 + lf * 1.12 * wd;
+        const B = bodyAt(oy);
+        const br = B[0] + lf * wd, bg = B[1] + lf * 1.05 * wd, bb = B[2] + lf * 1.12 * wd;
         /* ── AND THE FLOOR OF THE CUT, WHICH IS THE ONLY COLOUR ON THIS BALL ─
            A WELL IS ALWAYS ITS COLOUR; A GROOVE IS ONLY ITS COLOUR WHEN YOU
            ARE ON IT. Unlit and cut, the three arcs are structure — you can see
@@ -3888,9 +4082,9 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
            hover it" requires the floor to be a void; it requires it to be the
            same plastic as everything else. A shade under the wall, so the
            section still models, and the ring's colour when you are on it. */
-        const fr = which === 0 ? (up ? 224 : 213) : RG ? RG[0] : 36;
-        const fg = which === 0 ? (up ? 123 : 217) : RG ? RG[1] : 41;
-        const fb = which === 0 ? (up ?  28 : 223) : RG ? RG[2] : 48;
+        const fr = which === 0 ? (up ? 224 : 213) : RG ? RG[0] : B[0] + 4;
+        const fg = which === 0 ? (up ? 123 : 217) : RG ? RG[1] : B[1] + 4;
+        const fb = which === 0 ? (up ?  28 : 223) : RG ? RG[2] : B[2] + 5;
         cr = br + (fr - br) * mx;
         cg = bg + (fg - bg) * mx;
         cb = bb + (fb - bb) * mx;
@@ -4256,7 +4450,9 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     const r = cv.getBoundingClientRect();
     const k = pick((e.clientX - r.left) * size / r.width,
                    (e.clientY - r.top) * size / r.height);
+    spinStop();                 /* catching it stops it, like catching a ball */
     quality(DPR_LO);
+    spPrev = null; spT = Date.now(); spBuf.length = 0;
     base = orbitMat(val.yaw, val.pitch, val.roll);
     if (k < 0) {
       /* ── NOT ON A RING: ROLL THE BALL ────────────────────────────────────
@@ -4317,6 +4513,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
       const th = Math.atan2(m, dot(from, to));
       Object.assign(val, orbitEuler(orbitMul(
         orbitAxisMat([c[0] / m, c[1] / m, c[2] / m], th), base)));
+      spinSample();
       paint();
       onChange && onChange({ ...val }, null);
       return;
@@ -4337,6 +4534,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
        A rotation has no ends; only a knob does, and the knob is showing the
        same angle written the other way round. */
     Object.assign(val, orbitEuler(orbitMul(orbitAxisMat(axis, th), base)));
+    spinSample();
     paint();
     onChange && onChange({ ...val }, ORBIT_AX[held].key);
   });
@@ -4346,7 +4544,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     held = -1; from = axis = base = null;
     wrap.classList.remove('turning');
     delete wrap.dataset.ax;
-    quality(DPR_HI);            /* and the sharp pass runs once, on release */
+    spinGo();                   /* let go and it keeps going, then settles */
   };
   cv.addEventListener('pointerup', drop);
   cv.addEventListener('pointercancel', drop);

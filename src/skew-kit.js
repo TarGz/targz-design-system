@@ -2596,8 +2596,8 @@ const TEX_W = 2048, TEX_H = 1024;
    above the lip, the sphere is the surface there and there is nothing to
    march.
    ══════════════════════════════════════════════════════════════════════════ */
-const CAP_LAT  = 75;         // the lip — where the body stops
-const CAP_DEEP  = 0.064;     // how far the floor sits below the rim, in radii
+const CAP_LAT  = 78;         // the lip — where the body stops
+const CAP_DEEP  = 0.085;     // how far the floor sits below the rim, in radii
 /* 86°, AND THE FLOOR'S WIDTH IS WHY. A hole on the pole of a sphere, written
    as r(lat), CANNOT have parallel sides — its floor's radius is `r·cos(lat)`
    and both factors shrink on the way down, so it always converges somewhat.
@@ -2619,33 +2619,88 @@ const CAP_STAND = 86;        // degrees the wall stands off the surface
    one: a radius. At `lg` this is one pixel of it, and the arc's horizontal
    extent falls out at about a fifth of that, because a rounding on a wall that
    steep is mostly a VERTICAL feature. Both corners get the same radius — the
-   lip at the top and where the wall meets the floor. */
-const CAP_ROUND = 0.0082;    // in ball radii — one pixel at `lg`
+   lip at the top and where the wall meets the floor.
+
+   THE FLOOR NARROWS AS THE RADIUS GROWS, which is the trade this number is
+   really making: every degree of latitude a corner spends is a degree the
+   floor does not get. At two pixels the bore becomes a countersink and the
+   bottom drops to about 78% of the mouth's width; under one, the wall is a
+   wall with its edges broken and the floor is back near 86%.
+
+   AND IT IS CLAMPED, BECAUSE THE PROFILE HAS A ROUNDEST. Two corners turning
+   through the same angle need `2·R·(1 − cos STAND)` of depth between them, and
+   there are only CAP_DEEP to spend — ask for more and the straight run goes
+   NEGATIVE, which is not a gentler curve, it is `capSink` returning nonsense
+   between two branches that no longer meet. The clamp turns that cliff into a
+   limit: at the maximum the straight run vanishes, the two arcs meet at mid
+   depth, and the well is a smooth dimple with no flat in it anywhere. Any
+   value above that is the same well. */
+const CAP_ROUND  = 0.017;    // the LIP's corner, in ball radii — about 2.1px at `lg`
+/* AND THE FLOOR'S CORNER IS ITS OWN NUMBER, AT ZERO — DEAD SQUARE.
+
+   ONE RADIUS FOR BOTH CORNERS WAS AN ASSUMPTION, NOT A DESIGN. They are not
+   the same joint: the lip is an outside edge, the one your eye runs along and
+   the one that would alias into a jagged line if it were sharp, so it wants a
+   couple of pixels of roll. The floor's is an INSIDE corner, where a wall
+   meets a bottom, and rounding an inside corner is exactly what stops it
+   reading as a corner — it becomes a dish, and the transition the shadow needs
+   to sit against goes soft. Two joints, two answers.
+
+   AT ZERO THE SLOPE JUMPS from the wall's to the floor's in one step, which is
+   a crease rather than an artefact: the normal is discontinuous there because
+   the SURFACE is. That is what square means. It also hands back the latitude
+   the second fillet was spending, so the disc comes out wider. */
+const CAP_RFLOOR = 0;        // where the wall meets the floor
 
 const CAP_ANG = (90 - CAP_LAT) * Math.PI / 180;   // the rim, as a half-angle
 const S_LIP   = Math.sin(CAP_LAT * Math.PI / 180);
 
-/* ── THE SECTION: ARC, DROP, ARC ─────────────────────────────────────────────
-   THE BAND IS NOT CHOSEN ANY MORE, IT IS SOLVED FOR. It used to be the input —
-   "the wall takes N degrees of latitude" — which is the one number nobody has
-   an opinion about. What you have an opinion about is how deep the hole is,
-   how square the wall stands and how sharp the corner is; how wide the band
-   ends up is arithmetic. Three inputs that mean something, and the fourth
-   derived, rather than four that have to be kept consistent by hand.
+const CAP_K   = Math.cos(CAP_LAT * Math.PI / 180);
+const CAP_SIN = Math.sin(CAP_STAND * Math.PI / 180);
+const CAP_COS = Math.cos(CAP_STAND * Math.PI / 180);
+const CAP_TW  = CAP_SIN / CAP_COS;
+/* THE TWO CORNERS SHARE ONE DEPTH BUDGET, so they are clamped TOGETHER and in
+   proportion. Each one spends `R·(1 − cos STAND)` of the drop turning through;
+   ask for more between them than the well is deep and the straight run goes
+   negative, which is not a rounder profile, it is `capSink` returning nonsense
+   between two branches that no longer meet. Scaling both keeps whatever ratio
+   was asked for instead of picking a winner. */
+const CAP_BUD = (CAP_ROUND + CAP_RFLOOR) * (1 - CAP_COS);
+const CAP_FIT = CAP_BUD > CAP_DEEP ? CAP_DEEP / CAP_BUD : 1;
+const CAP_RL  = CAP_ROUND  * CAP_FIT;      // the lip's radius, as fitted
+const CAP_RF  = CAP_RFLOOR * CAP_FIT;      // the floor's
 
-   IT IS SPECIFIED IN ARC AND SAMPLED IN SIN(LAT). Arc is what a radius means
-   and what a pixel measures; sin(lat) is what a normalised point hands over
-   for free, and an `asin` in the march would be the most expensive thing in
-   the loop. `CAP_K` converts. The band is 1.6° wide and cos(lat) moves 10%
-   across it — a twentieth of a pixel on the corner — so one constant does it.
-   ─────────────────────────────────────────────────────────────────────────── */
-const CAP_K  = Math.cos(CAP_LAT * Math.PI / 180);
-const CAP_TW = Math.tan(CAP_STAND * Math.PI / 180);
-const CAP_U1 = CAP_ROUND * Math.sin(CAP_STAND * Math.PI / 180) * CAP_K;  // arc spent on the lip corner
-const CAP_Y1 = CAP_ROUND * (1 - Math.cos(CAP_STAND * Math.PI / 180));    // depth  spent on it
-const CAP_U2 = CAP_U1 + (CAP_DEEP - 2 * CAP_Y1) / CAP_TW * CAP_K;        // where the straight run ends
-const CAP_U3 = CAP_U2 + CAP_U1;                                          // and the floor begins
+const CAP_U1 = CAP_RL * CAP_SIN * CAP_K;             // arc spent on the lip corner
+const CAP_Y1 = CAP_RL * (1 - CAP_COS);               // depth spent on it
+const CAP_Y3 = CAP_RF * (1 - CAP_COS);               // and on the floor's
+const CAP_U2 = CAP_U1 + (CAP_DEEP - CAP_Y1 - CAP_Y3) / CAP_TW * CAP_K;
+const CAP_U3 = CAP_U2 + CAP_RF * CAP_SIN * CAP_K;
 const S_FLOOR = S_LIP + CAP_U3;
+/* THE FLOOR'S ANGULAR RADIUS, and the gradient across it has to be measured in
+   THIS rather than in the rim's. Normalising by the mouth meant the falloff
+   only ever reached a third of its travel before the floor ran out, so the
+   part of the curve that actually darkens was spent on the wall, where a dark
+   plastic surface was already dark. */
+const CAP_RHO = Math.PI / 2 - Math.asin(S_FLOOR);
+/* ── HOW WIDE THE DISC'S EDGE MAY BLEND, AND IT IS THE WALL THAT DECIDES ─────
+   THE CEILING ON THAT BAND USED TO BE A NUMBER I PICKED, .22, AND IT WAS
+   NEARLY TWICE THE WIDTH OF THE WALL. So at any tilt — where the band opens up
+   to cover the grazing case — the disc's colour was blended clean across the
+   bore and out to the lip, and the black plastic wall came out orange. Two
+   changes drove it there without either being wrong on its own: the grazing
+   term, which widens the band up to sevenfold, and moving the lip to 78°,
+   which shrank the disc so the same pixel is a bigger fraction of it.
+
+   A LIMIT HAS TO BE MADE OF THE THING IT PROTECTS. The wall is `CAP_ANG/CAP_RHO
+   − 1` wide in these units, and the blend gets a quarter of it — enough to soften
+   an edge, never enough to reach the lip. The grazing case it was opening up for
+   is covered properly now anyway, by the four samples at the rim. */
+const CAP_AAMAX = (CAP_ANG / CAP_RHO - 1) * .25;
+/* HOW HARD THE DISC'S RIM SHADOW BITES. 0 turns it off entirely, which is
+   worth keeping: it is the one switch that separates "the bore is too dark" —
+   a question about the material — from "the shadow is eating the bore", which
+   is a question about this curve. Those two looked identical for four rounds. */
+const CAP_SHADOW = 1;
 
 /* THE PROFILE, AND THE ONLY DESCRIPTION OF IT THE GEOMETRY USES.
 
@@ -2658,11 +2713,11 @@ function capSink(s) {
   if (u >= CAP_U3) return CAP_DEEP;
   if (u <= CAP_U1) {                                   /* the lip's corner */
     const x = u / CAP_K;
-    return CAP_ROUND - Math.sqrt(CAP_ROUND * CAP_ROUND - x * x);
+    return CAP_RL - Math.sqrt(CAP_RL * CAP_RL - x * x);
   }
-  if (u >= CAP_U2) {                                   /* the floor's corner */
+  if (u >= CAP_U2) {                                   /* the floor's, if it has one */
     const x = (CAP_U3 - u) / CAP_K;
-    return CAP_DEEP - CAP_ROUND + Math.sqrt(CAP_ROUND * CAP_ROUND - x * x);
+    return CAP_DEEP - CAP_RF + Math.sqrt(CAP_RF * CAP_RF - x * x);
   }
   return CAP_Y1 + (u - CAP_U1) * CAP_TW / CAP_K;       /* the wall itself */
 }
@@ -2687,8 +2742,9 @@ function capSlope(s) {              // d(sink)/d(sin lat), signed by hemisphere
   if (u <= 0 || u >= CAP_U3) return 0;
   let d;
   if (u <= CAP_U1 || u >= CAP_U2) {
+    const R = u <= CAP_U1 ? CAP_RL : CAP_RF;
     const x = (u <= CAP_U1 ? u : CAP_U3 - u) / CAP_K;
-    const w = CAP_ROUND * CAP_ROUND - x * x;
+    const w = R * R - x * x;
     d = x / CAP_K / Math.sqrt(w > 1e-14 ? w : 1e-14);
   } else d = CAP_TW / CAP_K;
   return s < 0 ? -d : d;
@@ -2766,9 +2822,12 @@ function orbitMaterial() {
      THAT TELLS TOP FROM BOTTOM. Everything else is symmetric — the body, the
      graticule, all three rings — so a ball turned upside down is a ball you
      cannot tell is upside down. Red up, white down, and the pole you are
-     looking at is a fact rather than an inference. */
+     looking at is a fact rather than an inference. Orange up, white down. */
+  /* AND ONLY THE FLOOR. The wall is the ball's own black plastic all the way
+     down, so what you see is a dark bore with a coloured bottom and how much
+     of that bottom you get is the angle you are looking from. */
   const FLOOR_LAT = Math.asin(S_FLOOR) * 180 / Math.PI;
-  g.fillStyle = '#c8301f'; g.fillRect(0, 0, TEX_W, TY(FLOOR_LAT));
+  g.fillStyle = '#e07b1c'; g.fillRect(0, 0, TEX_W, TY(FLOOR_LAT));
   g.fillStyle = '#d5d9df'; g.fillRect(0, TY(-FLOOR_LAT), TEX_W, TEX_H - TY(-FLOOR_LAT));
 
   g.save(); bandClip(g);
@@ -3002,6 +3061,47 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     const hm = Math.hypot(hx, hy, hz) || 1;
     hx /= hm; hy /= hm; hz /= hm;
 
+    /* HOW FAR `oy` MOVES ACROSS ONE DEVICE PIXEL, which is what lets the well's
+       edge antialias in PIXELS rather than in degrees. A band fixed in angle is
+       a band whose width in pixels collapses as the disc foreshortens — 1.45px
+       pole-on and 0.73px at a 60° tilt, which is not a soft edge, it is a hard
+       one with a rounding error. The pixel grid moves `vx` and `vy` by 1/(R·DPR)
+       per step and `oy` is a fixed combination of them, so this is exact for the
+       in-plane part and the out-of-plane part only matters at the silhouette,
+       where the clamp below covers it. */
+    const GXY = Math.hypot(m[1], m[4]);
+    const rr = R * DPR;
+    let MX = 0, MY = 0, MZ = 0;        /* where the march landed */
+    /* THE SUB-SAMPLE PATTERN — a triad round the pixel centre, in pixels. */
+    const SSX = [.42, -.21, -.21], SSY = [0, .36, -.36];
+
+    /* ── THE MARCH, LIFTED OUT SO THE EDGE CAN BE SAMPLED MORE THAN ONCE ───
+       Same arithmetic it always was; it writes to three outer slots rather
+       than returning, because this is called up to four times per pixel on a
+       few thousand pixels and an object per call is an object per call. */
+    const march = (vx, vy, vz) => {
+      MX = vx; MY = vy; MZ = vz;
+      const oyA = m[1] * vx + m[4] * vy, oyB = m[7];
+      if ((oyA + oyB * vz) * (oyA + oyB * vz) <= S_LIP * S_LIP) return;
+      const rho = vx * vx + vy * vy;
+      let above = vz, hit = null;
+      for (let st = 1; st <= 16; st++) {
+        const t = vz - CAP_DEEP * 4 * st / 16;
+        const q = Math.sqrt(rho + t * t);
+        if (q > 1) break;                      /* out through the far rim */
+        if (q <= 1 - capSink((oyA + oyB * t) / q)) { hit = t; break; }
+        above = t;
+      }
+      if (hit === null) return;
+      for (let st = 0; st < 10; st++) {
+        const t = (above + hit) * .5;
+        const q = Math.sqrt(rho + t * t);
+        if (q <= 1 - capSink((oyA + oyB * t) / q)) hit = t; else above = t;
+      }
+      const q = Math.sqrt(rho + hit * hit) || 1;
+      MX = vx / q; MY = vy / q; MZ = hit / q;
+    };
+
     const out = img.data;
     const wrapC = c => c < 0 ? c + TEX_W : c >= TEX_W ? c - TEX_W : c;
     const clampR = r => r < 0 ? 0 : r >= TEX_H ? TEX_H - 1 : r;
@@ -3024,27 +3124,8 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          of arc, and a bracket landing anywhere in it has to be squeezed well
          under that or the sharp edge comes back as a stair. This lands at
          2.7e-4, a twentieth of the wall. */
-      const oyA = m[1] * vx + m[4] * vy, oyB = m[7];
-      if ((oyA + oyB * vz) * (oyA + oyB * vz) > S_LIP * S_LIP) {
-        const rho = vx * vx + vy * vy;
-        let above = vz, hit = null;
-        for (let st = 1; st <= 16; st++) {
-          const t = vz - CAP_DEEP * 4 * st / 16;
-          const q = Math.sqrt(rho + t * t);
-          if (q > 1) break;                    /* out through the far rim */
-          if (q <= 1 - capSink((oyA + oyB * t) / q)) { hit = t; break; }
-          above = t;
-        }
-        if (hit !== null) {
-          for (let st = 0; st < 6; st++) {
-            const t = (above + hit) * .5;
-            const q = Math.sqrt(rho + t * t);
-            if (q <= 1 - capSink((oyA + oyB * t) / q)) hit = t; else above = t;
-          }
-          const q = Math.sqrt(rho + hit * hit) || 1;
-          vx /= q; vy /= q; vz = hit / q;
-        }
-      }
+      march(vx, vy, vz);
+      vx = MX; vy = MY; vz = MZ;
 
       const ox = m[0] * vx + m[3] * vy + m[6] * vz;
       const oy = m[1] * vx + m[4] * vy + m[7] * vz;
@@ -3112,7 +3193,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          approximately — and the two never meet on the ball anyway: the rings
          stop at the lip and the wall starts there. Zero everywhere except the
          0.8° the wall occupies, so the body and the floor cost nothing. */
-      const sink = capSink(oy);
+      let sink = capSink(oy);
       const kw = capSlope(oy) * cla / (1 - sink);
 
       /* THE LOCAL FRAME COSTS NOTHING, because the point already holds it:
@@ -3140,54 +3221,253 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          The DIFFUSE term is not touched: one lamp in one direction either
          reaches the floor or it does not, and the wall's own normal is what
          decides that. Darkening both would be painting the shadow twice. */
-      const ao = 1 - .62 * (sink / CAP_DEEP);
+      /* ── AN INNER SHADOW ON THE DISC, AND WIDE IS THE WHOLE POINT ────────
+         EVERY NARROW VERSION OF THIS READ AS A STROKE, and that is not a
+         failure of the shading, it is what a narrow dark band between two
+         lighter things IS. A shadow is recognised by its GRADIENT — the eye
+         reads the falloff, not the darkness — so one that resolves inside two
+         or three pixels has nothing to read and gets filed as a drawn line.
 
-      /* ── AND THE RIM CASTS INTO ITS OWN HOLE ─────────────────────────────
-         AMBIENT OCCLUSION CANNOT SAY WHERE THE LAMP IS, which is the whole of
-         what it was missing: it darkens a pit by a fixed amount and leaves it
-         at that value however the ball is turned, so the one feature that
-         should have been ANNOUNCING the orientation was the one feature not
-         responding to it. What the eye reads on a real recess is the rim's
-         shadow sweeping across the floor as the thing rotates.
+         SO IT STARTS AT 45% OF THE DISC'S RADIUS. More than half the red is
+         inside a soft ramp, which is enormous by the standards of a shading
+         term and exactly the proportion an inset shadow uses. Smoothstepped,
+         so it leaves the middle flat and arrives at the rim with zero slope —
+         no edge at either end of it.
 
-         AND IT IS AN EXACT QUESTION HERE. The rim is a circle of known radius,
-         the floor sits CAP_DEEP below it, and the lamp either clears the edge
-         or it does not: reach the rim along the light's own bearing — the
-         ray-circle chord, one square root — and compare `D·sin(elev)` against
-         `depth·cos(elev)`. Weighted by how deep the point actually is, so the
-         body never darkens and the wall blends into the floor's verdict rather
-         than stepping to it. */
-      const d = nx * lx + ny * ly + nz * lz;
-      let dif = d > 0 ? d : 0;
-      if (sink > 0 && dif > 0) {
-        const lu = lx * ox + ly * oy + lz * oz;     /* the lamp's elevation */
-        let sh = 0;
-        if (lu > 0) {
-          const h2 = 1 - lu * lu;
-          const hmag = h2 > 0 ? Math.sqrt(h2) : 0;
-          const rho = Math.PI / 2 - (lat < 0 ? -lat : lat);
-          /* how much of the light's bearing runs OUTWARD, toward the rim */
-          let cdir = 1;
-          if (hmag > 1e-6 && rho > 1e-6) {
-            const sg = oy < 0 ? 1 : -1;             /* ê_out = -sign(oy)·ê_lat */
-            cdir = ((lx - lu * ox) * -sla * clo
-                  + (ly - lu * oy) * cla
-                  + (lz - lu * oz) * -sla * slo) * sg / hmag;
-          }
-          const disc = CAP_ANG * CAP_ANG - rho * rho * (1 - cdir * cdir);
-          const D = -rho * cdir + Math.sqrt(disc > 0 ? disc : 0);
-          const need = sink * hmag;
-          if (need <= 1e-9) sh = 1;
-          else {
-            const t = (D * lu - need * .55) / (need * .70);
-            sh = t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
-          }
+         AND IT CARRIES ON PAST THE RIM ONTO THE WALL, because `rad` runs over
+         1 out there and clamps. The wall arrives already at full darkness, so
+         the disc does not END, it fades into the bore. That is the join that
+         was drawing a line. */
+      const rho = Math.PI / 2 - (lat < 0 ? -lat : lat);
+      let rad = rho / CAP_RHO;                /* 0 at the middle, 1 at the disc's rim */
+
+      /* ══════════════════════════════════════════════════════════════════
+         AND THE RIM IS SUPERSAMPLED, WHICH IS THE ONLY GENERAL ANSWER.
+
+         THREE DIFFERENT THINGS ALIAS AT THAT EDGE and hand-antialiasing them
+         one at a time is a losing game — I have now done it three times and
+         each fix left the other two. They are: the COLOUR boundary between
+         red and bore; the SHADOW, which reaches full exactly there; and the
+         corner's own OCCLUSION, where the square lip hides a strip of floor
+         from a grazing ray and the marched depth genuinely jumps between
+         neighbouring pixels. The third one has no analytic width to widen. It
+         is a visibility discontinuity, and a renderer that takes one sample
+         per pixel cannot resolve one — that is not a tuning problem, it is
+         the sampling theorem.
+
+         SO THE EDGE GETS FOUR SAMPLES AND THE REST OF THE BALL GETS ONE.
+         `rad` and `sink` are the two numbers every one of those three
+         features is computed from, so averaging THEM antialiases all three at
+         once and in the right proportion, without touching the normal — which
+         wants to stay creased, because that corner is square on purpose.
+
+         IT COSTS ALMOST NOTHING BECAUSE IT IS ADAPTIVE. Only pixels within a
+         tenth of the disc's radius of the rim take the extra three marches:
+         an annulus of a few hundred pixels at `lg`, against a ball of forty
+         seven thousand. */
+      if (sink > 0 && (rad > .90 && rad < 1.10)) {
+        let aS = sink, aR = rad, n = 1;
+        for (let k = 0; k < 3; k++) {
+          const bx = NX[i] + SSX[k] / rr, by = NY[i] + SSY[k] / rr;
+          const q2 = bx * bx + by * by;
+          if (q2 >= 1) continue;
+          march(bx, by, Math.sqrt(1 - q2));
+          const y2 = m[1] * MX + m[4] * MY + m[7] * MZ;
+          const l2 = y2 > 1 ? 1 : y2 < -1 ? -1 : y2;
+          aS += capSink(l2);
+          aR += (Math.PI / 2 - Math.abs(Math.asin(l2))) / CAP_RHO;
+          n++;
         }
-        dif *= 1 - (1 - sh) * (sink / CAP_DEEP);
+        sink = aS / n; rad = aR / n;
       }
-      let f = AMB * ao + DIF * dif;
+      /* ── THE RIM SHADOW IS THE DISC'S, AND ONLY THE DISC'S ───────────────
+         GATED ON `sink >= CAP_DEEP`, WHICH IS THE FLOOR EXACTLY. `rad` keeps
+         climbing past 1 out onto the wall, and every version of this that let
+         it do so spent its darkness there: clamped at full it multiplied the
+         whole bore to zero and the hole had no inside, and released gradually
+         it still laid a gradient over a surface whose own shading is the only
+         thing saying how deep the well is. The wall is not a place to put a
+         shadow. It is already the dark part, it is doing that job with a
+         normal that points sideways, and anything painted on top of it is
+         covering the answer with a picture of the answer. */
+      const up = oy > 0;
+      let shade = 0, bnc = 0;
+      if (sink >= CAP_DEEP) {
+        /* ── A PLATEAU, NOT A PEAK, AND THAT IS THE WHOLE OF THE EDGE BUG ────
+           THE DARKEST THING ON THE BALL WAS A RING OF ZERO WIDTH. Both sides
+           of the corner ramped UP to full and reached it only exactly AT the
+           corner, so the shadow's own maximum was a knife edge — and a thin
+           dark feature is the one thing antialiasing cannot rescue. Four
+           samples a pixel just draws a smoother thin dark line. It is the same
+           stroke that has been in every screenshot of this joint.
+
+           SO FULL DARK STARTS EARLY AND STAYS. The ramp finishes at .90 and
+           the last tenth of the disc is flat black, the wall is flat black for
+           its bottom quarter, and the geometry's edge sits in the MIDDLE of
+           that band with the same value either side of it. There is nothing
+           left at the junction for a pixel to be wrong about — which is what
+           "hide the edge with a shadow" actually requires: not a darker
+           shadow, a shadow with no feature in it where the edge is. */
+        /* ── CUBIC, NOT SMOOTHSTEP, AND THAT IS WHY IT LOOKED LIKE A RIM ────
+           SMOOTHSTEP HAS A VISIBLE START. Its slope is zero at both ends, so
+           over a short range it reads as a band with two edges — you can see
+           where the shadow BEGINS, and a shadow you can find the beginning of
+           is a ring. Widening it only moves the ring inward.
+
+           A CUBIC HAS NO ONSET. It leaves the middle of the disc alone by
+           being almost nothing for the first half of its travel — an eighth of
+           the way down at the midpoint — and then falls away hard near the
+           rim. Same darkness at the edge, same plateau behind it, but there is
+           no radius at which it starts: it just progressively is not there any
+           more as you go in. Which is what an inset shadow does.
+
+           THE PLATEAU IS UNCHANGED AND HAS TO BE. The last tenth of the radius
+           is flat black, about two pixels at this size, and that is what the
+           geometry's edge is buried in. */
+        const v = rad <= .55 ? 0 : rad >= .90 ? 1 : (rad - .55) / .35;
+        shade = v * v * v;
+      } else if (sink > 0) {
+        /* ── AND THE WALL IS SHADED BY ITS OWN DEPTH ────────────────────────
+           DARK AT ITS FOOT, CLEAR AT THE LIP, which is what a well does and
+           what its own Lambert term cannot say: the wall's normal points
+           sideways all the way up, so the lamp treats the bottom of it exactly
+           like the top and the surface comes out one flat value. Depth is the
+           missing variable. Squared, so it stays open across most of the wall
+           and closes in the last part near the floor.
+
+           IT MEETS THE DISC'S SHADOW EXACTLY. Both reach 1 at the corner —
+           one coming in across the red, one coming down the wall — so the
+           contact shadow is continuous through the joint even though the
+           SURFACE is not, which is the point of making that corner square. */
+        const w = sink / CAP_DEEP;
+        /* QUARTIC, AND THE PLATEAU IS A SLIVER. Full black over the bottom
+           fifth of the wall was most of the wall — it is a steep surface and
+           does not occupy many pixels — so the whole bore went dark whatever
+           colour it was. The flat part is the bottom twentieth now, which is
+           still the couple of pixels the corner's seam has to hide in, and the
+           fourth power keeps the rest of the climb open. */
+        const v = w >= .95 ? 1 : w / .95;
+        shade = v * v * v * v;
+        /* ── THE BOUNCE PEAKS IN THE MIDDLE OF THE WALL, NOT AT ITS FOOT ────
+           IT WAS BRIGHTEST EXACTLY WHERE THE SHADOW WAS DARKEST, so the one
+           band was doing both jobs at once and came out as a dark RED ring —
+           and then the wall brightened above it, which is the second ring, and
+           the lip turned away above that, which is the third. Three bands from
+           two terms fighting over one place.
+
+           A HUMP FIXES THE SHAPE AND THE PHYSICS TOGETHER. The very foot of
+           the wall is the most enclosed point in the well and sees least of
+           anything; the middle of the wall has the floor open in front of it
+           and sees most. Zero at both ends, so it is continuous with the disc
+           across the corner without needing a term on the disc at all — the
+           shadow band goes back to being neutral, and the red sits above it
+           where there is light to tint. */
+        const hw = 4 * w * (1 - w);
+        bnc = hw * hw;
+      }
+      /* ── FULL RANGE, AND IT MULTIPLIES EVERYTHING ────────────────────────
+         BLACK AT THE WALL, NOTHING AT THE MIDDLE. It was .80 of the AMBIENT
+         only, which is two compromises in one number: the rim could never get
+         past 80% and the DIFFUSE went straight through it, so a lamp shining
+         into the well lit the very pixels the shadow was trying to close. An
+         inset shadow is not a reduction in the room's light, it is the surface
+         not being reachable — so it scales the whole term, lamp included, and
+         it reaches zero. The specular goes with it: a highlight surviving in a
+         part that is fully shadowed is the giveaway that the shadow is paint.
+
+         AND THE COLOUR LIFT RIDES THE SAME CURVE, so the disc's rim arrives at
+         exactly the black the wall is at, with nothing lifting it back up. */
+      /* ── THE SHAPE AND THE STRENGTH ARE TWO NUMBERS, AND HAVE TO BE ──────
+         `shade` is WHERE the shadow is, 0 to 1, and CAP_SHADOW is how hard it
+         bites. They were one term, and that quietly tied a second thing to the
+         strength: the disc's colour lift is weighted by the shadow so that it
+         reaches zero at the corner and meets the wall, which gets no lift at
+         all. At full strength that worked by accident — the weight hit zero
+         because the shadow hit one. Turn the shadow down and the weight stops
+         reaching zero, the disc's rim keeps a lift the wall never had, and a
+         bright seam appears on the exact edge the shadow is there to bury.
+         So the lift rides `shade`, which is always 0..1, and the strength is
+         free to be anything without moving the seam. */
+      const dark = shade * CAP_SHADOW;
+      const lit = 1 - dark;
+
+      /* ══════════════════════════════════════════════════════════════════
+         NOTHING INSIDE THE WELL IS SAMPLED — THE POLE IS IN THERE.
+
+         THIS WAS THE PIXELATION, AND IT WAS NEVER THE SHADING. The material
+         is an equirectangular sheet and the disc is centred on its POLE,
+         which is the one place that projection falls apart: the longitude
+         lines all converge, so a few screen pixels across the middle of the
+         hole cover hundreds of texels and the filter is averaging two dozen
+         samples to survive it. That filter was running along the boundary
+         between black wall and red floor — so the wall's colour got dragged
+         onto the disc a texel at a time, unevenly, because how many samples
+         land on which side depends on where the pole happens to be. Black on
+         the circle, ragged, exactly as reported.
+
+         SO THE WELL IS PAINTED IN CLOSED FORM. Its colour is two flats and an
+         edge, and the edge is `rad` — the same coordinate the inner shadow is
+         built on, so the two cannot disagree by a texel or by anything else.
+         Antialiased over 4% of the radius, which is where the dark stops:
+         JUST on the edge, because that IS the edge rather than a filter's
+         opinion of where it fell.
+         ══════════════════════════════════════════════════════════════════ */
+      if (sink > 0) {
+        /* ONE AND A THIRD DEVICE PIXELS, WHEREVER THE EDGE HAPPENS TO BE.
+           `rho` and `oy` differ by a factor of cos(lat), so a pixel of screen
+           is `GOY/cos(lat)` of latitude is that over CAP_RHO of `rad`. Floored
+           so a face-on disc still gets a soft edge, ceilinged so a grazing one
+           does not dissolve into a gradient. NOT called `m` — the rotation
+           matrix is called that, and shadowing it inside this block is a bug
+           waiting for the next person to add a line here. */
+        /* BOTH TERMS OF THE GRADIENT, AND ONLY ONE WAS HERE. `oy` moves with
+           the pixel through the in-plane part AND through `vz`, and near the
+           silhouette the second dominates: measured against the first alone
+           the bound is 2.2× short at vz = .6 and 6.9× short at vz = .15. So
+           the band was under a pixel wide exactly where the edge is most
+           compressed, which is why it looked worst turned away. */
+        const gz = Math.sqrt(vx * vx + vy * vy) / (vz > .05 ? vz : .05);
+        const goy = (GXY + (m[7] < 0 ? -m[7] : m[7]) * gz) / rr;
+        const aa = Math.min(CAP_AAMAX, Math.max(.020,
+                   goy / (cla > .05 ? cla : .05) / CAP_RHO * 1.3));
+        /* ── THE BLEND IS ONE-SIDED: NOTHING OF THE DISC LEAVES THE DISC ────
+           IT WAS CENTRED ON THE EDGE, half the band inside and half out, which
+           is the textbook way to antialias a boundary and the wrong way here.
+           Outside is the WALL, and any fraction of the disc's colour landing
+           there is orange on black plastic — a glow, at whatever width the
+           band happens to be. Narrowing the ceiling made it thinner; only
+           moving the band can make it absent.
+
+           SO IT FADES INWARD AND ARRIVES AT ZERO EXACTLY AT `rad` = 1. The
+           softening all happens on the disc's own last pixel, the wall gets
+           nothing by construction rather than by a constant being small
+           enough, and the sharp side is covered by the four samples at the rim
+           that are already being taken there. */
+        const e = rad >= 1 ? 0 : rad <= 1 - 2 * aa ? 1 : (1 - rad) / (2 * aa);
+        const mx = e * e * (3 - 2 * e);
+        /* ── THE BORE IS DARK GREY, AND IT IS A MATERIAL RATHER THAN A LEVEL ─
+           IT WAS THE BODY'S OWN COLOUR IN SHADOW, which is a way of being
+           black rather than a way of being grey: #20252b is nearly black to
+           start with and the well's own shading takes most of what is left, so
+           the wall had nothing to show but its silhouette. A bore machined
+           into a moulding is LIGHTER than the skin around it — cut plastic is
+           matte where the moulded face is not — so it gets its own value.
+
+           GRADED IN FROM THE LIP so there is no step where the well begins.
+           At the mouth it is exactly the body, or the lip would wear a ring
+           the same way the floor's edge used to. */
+        const wd = sink / CAP_DEEP;
+        const br = 32 + 60 * wd, bg = 37 + 63 * wd, bb = 43 + 67 * wd;
+        cr = br + ((up ? 224 : 213) - br) * mx;
+        cg = bg + ((up ? 123 : 217) - bg) * mx;
+        cb = bb + ((up ?  28 : 223) - bb) * mx;
+      }
+
+      const d = nx * lx + ny * ly + nz * lz;
+      const dif = d > 0 ? d : 0;
+      let f = (AMB + DIF * dif) * lit;
       const hs = nx * hx + ny * hy + nz * hz;
-      const sp = hs > 0 ? SPEC * ao * Math.pow(hs, SHINE) * 255 : 0;
+      let sp = hs > 0 ? SPEC * lit * Math.pow(hs, SHINE) * 255 : 0;
       f *= VIG[i];
 
       /* ── AND THE RINGS DO NOT GO OUT ─────────────────────────────────────
@@ -3195,28 +3475,85 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          height sheet gives a ring survives — it is still a moulded thing with
          a lit edge — while the colour stops being something the back of the
          ball and the socket's rim shadow are allowed to take away. */
+      /* ══════════════════════════════════════════════════════════════════
+         A MARK'S LIGHT IS COMPRESSED, NOT LIFTED — AND THAT IS THE WHOLE FIX.
+
+         THE ARCS WERE NOT DIM, THEY WERE MILKY, and two versions of "lift the
+         rings so the lamp cannot eat them" made it worse each time, because a
+         lift is the one operation that CANNOT leave a saturated colour alone.
+         Brightening is additive and clipping is per-channel: at f = 1.16 a
+         (255, 74, 74) red is already pinned at 255 on the channel that makes
+         it red, so the only thing still able to move is the two channels that
+         make it grey. Every step of "brighter" was a step of "less red". And
+         `sp` was added equally to all three on top of that, which is what
+         white means. Two desaturators, both introduced by the attempt to stop
+         the colour being lost.
+
+         SO NOTHING GOES ABOVE THE SWATCH. A mark's response is squeezed into
+         [LOW, 1] instead of stretched past it — the brightest a ring is ever
+         drawn is EXACTLY the colour it was specified as, and the darkest is
+         LOW of it. Scaling all three channels by the same s ≤ 1 cannot clip
+         and cannot change a ratio, so hue and saturation are now identical at
+         every point on every arc, by construction rather than by tuning. Only
+         brightness moves, it moves over a 1.5× range, and the bevel still
+         reads inside it.
+
+         THE SPECULAR COMES OFF THE RINGS FOR THE SAME REASON. A moulded inlay
+         does have a sheen, and at this size a white one costs more saturation
+         than the sheen is worth. The plastic keeps it; the marks do not.
+
+         AND THE WELL FLOORS ARE MARKS TOO. Same squeeze, a lower floor — they
+         want the rim's shadow sweeping across them, which is a three-fold
+         range rather than the rings' one and a half — and the same guarantee:
+         a red floor in shadow is a dark red floor, never a black one and never
+         a pink one.
+         ══════════════════════════════════════════════════════════════════ */
+      const RING_LOW = .68, FLOOR_LOW = .34;
+      const t = f > 1 ? 1 : f;
       const em = ink[rc * TEX_W + cc];
-      if (em > 0) f += em * (.74 + .42 * f - f);
+      if (em > 0) {
+        f += em * (RING_LOW + (1 - RING_LOW) * t - f);
+        sp *= 1 - em;
+      } else if (sink >= CAP_DEEP) {
+        /* THE LIFT FADES OUT ON THE SHADOW'S OWN CURVE. Applied flat across
+           the disc it put a 2.4× step at the rim — the red squeezed into
+           [LOW, 1] against a wall pixel that got none of it, two brightnesses
+           meeting on one texel, a stroke. Weighted by `1 − dark` it is zero
+           exactly where the wall begins and full in the middle, so the disc
+           and the bore arrive at the same value and the seam has nothing to
+           show. The saturation guarantee is unaffected: this only ever scales,
+           so the red is the same red at every radius. */
+        f += (1 - shade) * (FLOOR_LOW + (1 - FLOOR_LOW) * t - f);
+      }
 
-      /* ── AND NEITHER DOES THE FLOOR ──────────────────────────────────────
-         THE RED WAS GETTING IT FROM BOTH SIDES. It sits at the bottom of a
-         well, so the ambient occlusion took it to 38%, and then the rim's cast
-         shadow took most of what was left — a floor at f = 0.13, which on a
-         #c8301f moulding is (21, 5, 3). Black with a hint. Everything that
-         made the hole read as a hole was landing on the one surface that had
-         something to say.
+      /* ── THE FLOOR THROWS ITS COLOUR BACK UP THE WALL ────────────────────
+         A LIT ORANGE DISC AT THE BOTTOM OF A BLACK SHAFT PUTS ORANGE ON IT,
+         and leaving that out is what made the wall read as a cut-out rather
+         than as the inside of something. It is ADDED, because bounced light is
+         a source arriving at the surface rather than a property of it — a
+         multiply would only tint what the lamp already delivered, which at the
+         foot of the wall is nothing, and nothing times red is nothing.
 
-         SAME LIFT THE RINGS GET, AND FOR THE SAME REASON. Toward a floor and
-         proportional, so the shadow still sweeps across it — there is a 1.8×
-         range left for the rim to work in — but the colour cannot be turned
-         off. It is gated on the exact depth the sheet paints red at, so the
-         lift and the colour begin on the same pixel. */
-      if (sink >= CAP_DEEP) f += .40 + .68 * f - f;
+         STRONGEST AT THE FOOT AND CUBED, since the wall's view of the floor
+         closes fast as it climbs. And it answers to the lamp: `ly` in object
+         space is how squarely the light is coming down the well's own axis, so
+         a floor turned away from the lamp has less to give back. The floor is
+         at its darkest exactly where this is at its brightest, which is why
+         the foot of the wall reads as a deep warm tone rather than as black.
+
+         AND IT IS CONTINUOUS THROUGH THE CORNER, which it was not: the wall's
+         foot took the whole term and the disc's rim took none, so the two
+         sides of the joint differed by 74 in the red channel across one texel.
+         That is a bright line drawn along an edge that the shadow above it was
+         busy trying to bury. Both sides reach 1 at the corner now — and the
+         floor's rim genuinely does see more bounced light than its middle
+         does, so the shape of it was wrong as well as the discontinuity. */
+      const bl = bnc * (.35 + .65 * Math.max(0, up ? ly : -ly));
 
       const o = IDX[i];
-      out[o]     = cr * f + sp;
-      out[o + 1] = cg * f + sp;
-      out[o + 2] = cb * f + sp;
+      out[o]     = cr * f + sp + (up ? 0 : 27) * bl;
+      out[o + 1] = cg * f + sp + (up ? 0 : 28) * bl;
+      out[o + 2] = cb * f + sp + (up ? 0 : 29) * bl;
       out[o + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);

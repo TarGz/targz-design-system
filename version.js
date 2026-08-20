@@ -1,6 +1,16 @@
-export const version = '1.90.0';
+export const version = '1.90.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.90.1',
+    date: '2026-08-20',
+    changes: [
+      'THE RED RING PINCHED BECAUSE IT WAS NEVER A RING, IT WAS A STRIPE OF LONGITUDE. The ball\'s three arcs are painted into an equirectangular sheet, and a stripe of constant longitude covers an arc of dl\u00b7cos(lat) — so the same twenty-six texels that read as a ring across the middle of the ball read as a fifth of one where it runs into the well. It looked like a stroke that tapered for no reason, because it was a stroke that tapered for no reason.',
+      'SO A MERIDIAN IS SOLVED RATHER THAN ASSUMED: dl(phi) = asin(sin w / cos phi), exact, closed form, one arcsine. What that draws on the sheet is a bowtie flaring toward the caps, which is the shape a constant-width band HAS in this projection. Red and blue now hold one width all the way round, at every attitude. Green is untouched — the equator is a stripe of constant LATITUDE and has always been the width it claims to be, which is the whole of why one of the three looked right.',
+      'AND THE SOFT EDGE HAD THE SAME DISEASE, QUIETLY. The bevel and the glow came from blurring the sheet, and a blur is a blur in TEXTURE space — so both collapsed by cos(lat) along with the body, and a bevel carrying its full height over a shorter arc is a STEEPER one. The tails of a ring took the lamp harder than its middle. The meridians\' chamfer is drawn now, as a stack of bands stepped outward by a constant ARC amount and maxed together, with only enough blur left behind to take the stair off and keep the ends soft where the lip cuts them.',
+      'MAXED, NOT STACKED, and that is the load-bearing word. Opaque bands painted in order would let a ring\'s faint outer skirt punch a notch through the core of the ring it crosses — three crossings, three notches. The lighten operator keeps whichever band reaches furthest in, so a crossing stays a plateau.',
+    ],
+  },
   {
     version: '1.90.0',
     date: '2026-08-20',

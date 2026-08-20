@@ -2768,26 +2768,124 @@ function capSlope(s) {              // d(sink)/d(sin lat), signed by hemisphere
 const TY = lat => (90 - lat) / 180 * TEX_H;
 const TX = lon => (lon + 180) / 360 * TEX_W;
 
-const RING_PX = 26;
-/* THREE MERIDIAN LONGITUDES, NOT TWO, AND THE THIRD IS THE SEAM. A meridian
+const RING_PX = 26;                 // the ring's width ON THE EQUATOR, in texels
+const DEG = Math.PI / 180;
+const T2D = 360 / TEX_W;            // degrees of arc per texel, on the equator
+const RING_HW = RING_PX / 2 * T2D;  // and the ring's HALF-WIDTH IN DEGREES OF ARC
+
+/* THE EQUATOR IS A STRAIGHT LINE HERE, AND IT IS THE ONLY ONE THAT IS. The
+   three rings are the coordinate great circles: the one perpendicular to Y is
+   the equator, and the ones perpendicular to X and Z are meridian pairs a
+   quarter turn apart. A stripe of constant LATITUDE covers the same arc at
+   every longitude, so this one has always been the width it claims to be. It
+   is drawn exactly as it was — everything below is about the other two. */
+const tEquat = c => { c.beginPath(); c.moveTo(0, TY(0)); c.lineTo(TEX_W, TY(0)); c.stroke(); };
+
+/* ── A MERIDIAN IS A BAND ROUND A GREAT CIRCLE, WHICH IS NOT A LINE ──────────
+   IT WAS A LINE, AND THAT IS WHY THE RED ONE PINCHED. Drawn as a stripe of
+   constant LONGITUDE it covers an arc of Δλ·cos(lat) — so the stripe that is
+   twenty-six texels wide across the middle of the ball is nearly five times
+   thinner where it runs into the well, and it read as an arc that tapered at
+   both ends for no reason the eye could name. Green never showed it, because
+   latitude does not do this. That is the whole of why one of the three looked
+   right and two did not.
+
+   SO THE HALF-WIDTH IS SOLVED RATHER THAN ASSUMED. The band of angular
+   half-width w round the meridian at longitude a reaches, at latitude φ,
+   dλ(φ) = asin(sin w / cos φ) — exact, closed form, one arcsine. What it
+   draws on the sheet is a bowtie that flares toward the caps, because that IS
+   the shape of a constant-width band in this projection. The two halves of a
+   meridian pair would only meet past 87.7°, which is above the lip, so
+   nothing inside the band degenerates.
+
+   THREE MERIDIAN LONGITUDES, NOT TWO, AND THE THIRD IS THE SEAM. A meridian
    pair at 0° draws at x = TEX_W/2 and x = 0 — and the one at 0 is half a
-   stroke, because the other half belongs to x = TEX_W, which is off the sheet.
+   band, because the other half belongs to x = TEX_W, which is off the sheet.
    Everything downstream wraps its lookups, so that meridian sampled a ring
    half the width of the other two, on one side only. */
-const tMerid = (c, a) => {
-  c.beginPath();
-  for (const lon of [a, a - 180, a + 180]) { c.moveTo(TX(lon), 0); c.lineTo(TX(lon), TEX_H); }
-  c.stroke();
+const merHalf = (w, lat) => {       // the band's longitude half-width at this latitude
+  const q = Math.sin(w * DEG) / Math.cos(lat * DEG);
+  return q >= 1 ? 90 : Math.asin(q) / DEG;
 };
-const tEquat = c => { c.beginPath(); c.moveTo(0, TY(0)); c.lineTo(TEX_W, TY(0)); c.stroke(); };
-/* THE THREE RINGS ARE STRAIGHT LINES HERE, because they are the coordinate
-   great circles: the ring perpendicular to Y is the equator, and the ones
-   perpendicular to X and Z are meridian pairs a quarter turn apart. */
-const RING_DRAW = [
-  c => tMerid(c, 90),   // X · pitch
-  tEquat,               // Y · yaw
-  c => tMerid(c, 0),    // Z · roll
+const RING_LIM = CAP_LAT + 3, RING_N = 96;   // past the lip; the clip takes the rest
+const bMerid = (c, a, w) => {
+  c.beginPath();
+  for (const lon of [a, a - 180, a + 180]) {
+    for (let i = 0; i <= RING_N; i++) {
+      const lat = RING_LIM - 2 * RING_LIM * i / RING_N;
+      const x = TX(lon + merHalf(w, lat)), y = TY(lat);
+      i ? c.lineTo(x, y) : c.moveTo(x, y);
+    }
+    for (let i = RING_N; i >= 0; i--) {
+      const lat = RING_LIM - 2 * RING_LIM * i / RING_N;
+      c.lineTo(TX(lon - merHalf(w, lat)), TY(lat));
+    }
+    c.closePath();
+  }
+  c.fill();
+};
+const MER_BAND = [
+  { i: 0, band: (c, w) => bMerid(c, 90, w) },   // X · pitch
+  { i: 2, band: (c, w) => bMerid(c, 0, w) },    // Z · roll
 ];
+
+/* ── AND A MERIDIAN'S SOFT EDGE IS A STACK OF BANDS, NOT A BLURRED SHEET ─────
+   FOR EXACTLY THE SAME REASON. A blur is a blur in TEXTURE space, so the
+   bevel and the glow collapse by cos(lat) just as the body did — and a bevel
+   carrying its full height over a shorter arc is a STEEPER bevel, so a
+   meridian's tails took the lamp harder than its middle. Fixing the body
+   alone trades one width gradient for a subtler one.
+
+   SO THE EDGE IS DRAWN: bands whose half-widths step outward by a constant
+   ARC amount, at the values along the profile a blur would have produced.
+   Painted with the lighten operator, so a texel ends up holding the innermost
+   band that reaches it — and so a ring's faint outer skirt cannot punch a
+   notch through the core of the ring it crosses, which is what a stack of
+   opaque bands does without it.
+
+   A LITTLE BLUR IS STILL LEFT, doing a different job: taking the stair off
+   twenty-four steps, and keeping the ring's ENDS soft where the clip cuts
+   them at the lip. The drawn spread is reduced to leave room for it — two
+   gaussians in a row are one gaussian of sqrt(a²+b²) — so the bevel ends up
+   the five texels wide it always was, and the equator's is untouched. */
+const RING_STEPS = 24;
+const BEV_PX = 5, BEV_BLUR = 2.5;   // the bevel's total spread, and the blur's share of it
+const GLO_PX = 3, GLO_BLUR = 1.5;   // the glow's
+const drawnSig = (tot, bl) => Math.sqrt(tot * tot - bl * bl);
+const grey = v => { const q = Math.round(v); return 'rgb(' + q + ',' + q + ',' + q + ')'; };
+const bandStack = (c, band, sig, tint) => {   // tint(u) is the fill at profile height u
+  const S = sig * T2D;
+  for (let j = 0; j <= RING_STEPS; j++) {
+    const hw = RING_HW + S * (3 - 6 * j / RING_STEPS);   // +3σ outermost, −3σ innermost
+    if (hw <= 0) break;
+    const t = j / RING_STEPS;
+    c.fillStyle = tint(t * t * (3 - 2 * t));
+    band(c, hw);
+  }
+};
+
+/* ── ONE GREY SHEET, BUILT IN TWO LAYERS AND MAXED TOGETHER ──────────────────
+   THE EQUATOR AND THE MERIDIANS WANT DIFFERENT BLURS NOW, and a canvas filter
+   applies to a whole drawImage — so they are blurred apart and combined with
+   the lighten operator, which is the same max the band stacks already rely
+   on. Both layers carry the base, so where there is no ring the max is the
+   base and nothing has moved. */
+const twoLayer = (base, eq, mer) => {
+  const layer = (draw, blur) => {
+    const [cv, x] = texSheet();
+    x.fillStyle = base; x.fillRect(0, 0, TEX_W, TEX_H);
+    x.save(); bandClip(x); x.globalCompositeOperation = 'lighten'; draw(x); x.restore();
+    const [, b] = texSheet();
+    if ('filter' in b) b.filter = 'blur(' + blur + 'px)';
+    b.drawImage(cv, 0, 0);
+    if ('filter' in b) b.filter = 'none';
+    return b;
+  };
+  const out = layer(eq.draw, eq.blur);
+  out.globalCompositeOperation = 'lighten';
+  out.drawImage(layer(mer.draw, mer.blur).canvas, 0, 0);
+  return out.getImageData(0, 0, TEX_W, TEX_H).data;
+};
 
 const texSheet = () => {
   const cv = document.createElement('canvas');
@@ -2853,8 +2951,9 @@ function orbitMaterial() {
   for (let lat = -60; lat <= 60; lat += 15) {
     g.beginPath(); g.moveTo(0, TY(lat)); g.lineTo(TEX_W, TY(lat)); g.stroke();
   }
-  g.lineWidth = RING_PX; g.lineCap = 'butt';
-  RING_DRAW.forEach((draw, k) => { g.strokeStyle = ORBIT_AX[k].col; draw(g); });
+  g.fillStyle = ORBIT_AX[0].col; bMerid(g, 90, RING_HW);
+  g.strokeStyle = ORBIT_AX[1].col; g.lineWidth = RING_PX; g.lineCap = 'butt'; tEquat(g);
+  g.fillStyle = ORBIT_AX[2].col; bMerid(g, 0, RING_HW);
   g.restore();
   const col = g.getImageData(0, 0, TEX_W, TEX_H).data;
 
@@ -2872,21 +2971,19 @@ function orbitMaterial() {
      closed form instead (`capSlope`), and this sheet is left doing the one job
      it is actually good at: the rings, which really are a shallow relief.
 
-     AND IT IS BLURRED AFTERWARDS RATHER THAN WHILE DRAWING, because a canvas
-     filter applies per call, and a bevel is the blur: a step edge
+     THE EQUATOR IS BLURRED AFTERWARDS RATHER THAN WHILE DRAWING, because a
+     canvas filter applies per call, and a bevel is the blur: a step edge
      differentiates to one infinitely-steep texel and reads as a hard line,
-     where a few texels of spread is a chamfer with a width. */
-  const [hc, h] = texSheet();
-  h.fillStyle = '#808080'; h.fillRect(0, 0, TEX_W, TEX_H);
-  h.save(); bandClip(h);
-  h.strokeStyle = '#9c9c9c'; h.lineWidth = RING_PX; h.lineCap = 'butt';
-  RING_DRAW.forEach(draw => draw(h));
-  h.restore();
+     where a few texels of spread is a chamfer with a width.
 
-  const [, hb] = texSheet();
-  if ('filter' in hb) hb.filter = 'blur(5px)';
-  hb.drawImage(hc, 0, 0);
-  const hraw = hb.getImageData(0, 0, TEX_W, TEX_H).data;
+     THE MERIDIANS CANNOT TAKE THEIR CHAMFER FROM A BLUR, for the reason
+     bandStack exists: a blur lives in texture space and their arc does not.
+     Their ramp is drawn and only finished with a blur, which is why this is
+     two layers maxed together rather than one sheet. */
+  const hraw = twoLayer('#808080',
+    { blur: BEV_PX, draw: x => { x.strokeStyle = '#9c9c9c'; x.lineWidth = RING_PX; x.lineCap = 'butt'; tEquat(x); } },
+    { blur: BEV_BLUR, draw: x => MER_BAND.forEach(({ band }) =>
+        bandStack(x, band, drawnSig(BEV_PX, BEV_BLUR), u => grey(128 + 28 * u))) });
   const hgt = new Float32Array(TEX_W * TEX_H);
   for (let i = 0, j = 0; i < hgt.length; i++, j += 4) hgt[i] = hraw[j] / 255;
 
@@ -2921,20 +3018,11 @@ const orbitInkCache = new Map();
 function orbitInk(held) {
   const key = String(held);
   if (orbitInkCache.has(key)) return orbitInkCache.get(key);
-  const [kc, k] = texSheet();
-  k.fillStyle = '#000'; k.fillRect(0, 0, TEX_W, TEX_H);
-  k.save(); bandClip(k);
-  k.lineWidth = RING_PX; k.lineCap = 'butt';
-  RING_DRAW.forEach((draw, i) => {
-    const v = held < 0 ? 200 : i === held ? 255 : 175;
-    k.strokeStyle = `rgb(${v},${v},${v})`;
-    draw(k);
-  });
-  k.restore();
-  const [, kb] = texSheet();
-  if ('filter' in kb) kb.filter = 'blur(3px)';
-  kb.drawImage(kc, 0, 0);
-  const kraw = kb.getImageData(0, 0, TEX_W, TEX_H).data;
+  const lit = i => held < 0 ? 200 : i === held ? 255 : 175;
+  const kraw = twoLayer('#000',
+    { blur: GLO_PX, draw: x => { x.strokeStyle = grey(lit(1)); x.lineWidth = RING_PX; x.lineCap = 'butt'; tEquat(x); } },
+    { blur: GLO_BLUR, draw: x => MER_BAND.forEach(({ i, band }) =>
+        bandStack(x, band, drawnSig(GLO_PX, GLO_BLUR), u => grey(lit(i) * u))) });
   const ink = new Float32Array(TEX_W * TEX_H);
   for (let i = 0, j = 0; i < ink.length; i++, j += 4) ink[i] = kraw[j] / 255;
   orbitInkCache.set(key, ink);

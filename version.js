@@ -1,6 +1,15 @@
-export const version = '1.99.0';
+export const version = '1.99.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.99.1',
+    date: '2026-08-21',
+    changes: [
+      'THE GLASS IS OFF BY DEFAULT, BECAUSE A DOME IS A DECISION. It shipped on at 1.99.0, which meant every panel already carrying an orbit ball would have been glazed by upgrading the kit — and glazing is not a finish, it changes how the socket lights, what the plate does while an axis is driven, and how much of the ball you can read through the marks on the glass. None of that should arrive without being asked for. `orbit({ glass: true })` asks.',
+      'AND `orbitBay` FORWARDS IT, which it could not before. The bay builds its own ball and passed size and attitude through but not the material, so a glazed bay was unreachable — the one composition most likely to want it.',
+      'SYSTEM 12 STATES ITS OWN CONFIGURATION rather than inheriting it. The page documents the dome, so it asks for the dome: all three specimens and the bay pass `glass: true`. A specimen that looks the way it does because of a default is a specimen that changes when the default does.',
+    ],
+  },
   {
     version: '1.99.0',
     date: '2026-08-21',

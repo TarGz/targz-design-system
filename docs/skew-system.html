@@ -724,14 +724,17 @@
     <thead><tr><th>Field</th><th>Contract</th></tr></thead>
     <tbody>
       <tr>
-        <td><code>orbit({ glass:false })</code> — the ball</td>
+        <td><code>orbit()</code> — the ball, <b>and the default</b></td>
         <td>An open bore: socket, ball, collar. Three cut arcs, each the great circle
             perpendicular to one axis. Grab one and the object turns about that axis —
             <b>the ring stays put and the surface travels round under your hand</b>. Roll the
-            body for a free turn, throw it and it carries, double-click to come back to zero.</td>
+            body for a free turn, throw it and it carries, double-click to come back to zero.
+            This is what a panel gets unless it says otherwise, because glazing changes how the
+            socket lights and how much of the ball you can read — not something that should
+            arrive because somebody upgraded the kit.</td>
       </tr>
       <tr>
-        <td><code>orbit({ glass:true })</code> — the dome</td>
+        <td><code>orbit({ glass:true })</code> — the dome, <b>asked for</b></td>
         <td>The same ball under a glass cover <b>cut to the plate's hole</b>, with clearance so
             nothing touches the collar. Spherical to <code>brk</code>, then a flat flange; the two
             bright rings are its two corners, and the shell's second surface a wall-thickness in.
@@ -1731,7 +1734,10 @@ document.getElementById('navspec').replaceWith(navBar({
   let syncing = false;
 
   const bay = orbitBay({
-    size: 'sm',
+    /* THE DOC ASKS FOR THE DOME. The kit ships the bare ball by default, so a
+       page showing the glazed one has to say so — which is the right way round:
+       the specimen states its own configuration instead of inheriting it. */
+    size: 'sm', glass: true,
     onChange: v => {
       if (syncing) return;
       syncing = true;
@@ -1743,7 +1749,7 @@ document.getElementById('navspec').replaceWith(navBar({
 
   [['lg', 'LARGE · 264'], ['md', 'MEDIUM · 198']].forEach(([key, name]) => {
     balls[key] = orbit({
-      size: key,
+      size: key, glass: true,
       onChange: v => {
         if (syncing) return;
         syncing = true;

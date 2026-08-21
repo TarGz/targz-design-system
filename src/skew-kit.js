@@ -3394,13 +3394,14 @@ const BAY_AT = { yaw: -34, pitch: 0, roll: 34 };   // degrees off straight down
 const BAY_DROP = 10;                               // straight run into the dial
 const SVGNS = 'http://www.w3.org/2000/svg';
 
-function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
+function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
+                    onChange } = {}) {
   const wrap = el('div', 'orbay');
   const st = { yaw, pitch, roll };
   let syncing = false;
 
   const ball = orbit({
-    size, yaw, pitch, roll,
+    size, yaw, pitch, roll, glass,
     onChange: (v, ax) => { live(ax, false, true); push(v); },
     onHover: ax => live(ax, true),
   });
@@ -3523,8 +3524,15 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) 
    glazed is the same kind of fact as how big it is — the host decides once and
    the ball is that object from then on. It gets a setter because a page that
    wants to SHOW the difference needs one, and that page owns the switch: a
-   sphere that also owns a button is a sphere you cannot use without it. */
-function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = true,
+   sphere that also owns a button is a sphere you cannot use without it.
+
+   AND IT IS OFF BY DEFAULT, BECAUSE A DOME IS A DECISION. The bare ball is
+   what this part has always been and what every panel already carrying one
+   expects; glazing changes how the socket lights, what the plate does while an
+   axis is driven, and how much of the ball you can read through the marks on
+   the glass. None of that should arrive because somebody upgraded the kit. Ask
+   for it — `orbit({ glass: true })` — and SYSTEM 12 does. */
+function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
                  onChange, onHover } = {}) {
   size = ORBIT_SIZE[size] || +size || ORBIT_SIZE.sm;
   const C    = size / 2;
@@ -3586,7 +3594,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = true,
   const turnBy = (ax, th) => { MAT = orbitMul(orbitAxisMat(ax, th), MAT); sync(); };
 
   const wrap = el('div', 'orbit');
-  if (glass !== false) wrap.classList.add('glazed');
+  if (glass) wrap.classList.add('glazed');
   wrap.style.width = wrap.style.height = size + 'px';
   wrap.style.setProperty('--ow', W.toFixed(2) + 'px');
   wrap.style.setProperty('--osc', (size / 216).toFixed(4));
@@ -3697,7 +3705,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = true,
      still is 1.25, so a constant in dome radii would feather twice as wide on
      one as the other. */
   let   AAW   = .02;
-  let GLAZED = glass !== false;
+  let GLAZED = !!glass;
 
   /* ── AND IT IS PRECOMPUTED, BECAUSE THE GLASS DOES NOT TURN ──────────────
      THE BALL ROTATES UNDER IT AND THE DOME DOES NOT MOVE, so every value here

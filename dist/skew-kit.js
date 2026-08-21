@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.97.0
+     at       Skew v1.99.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -2636,6 +2636,35 @@ const wrapDeg = a => { a %= 360; return a > 180 ? a - 360 : a <= -180 ? a + 360 
    default because a control that has to be asked for is a control that gets
    forgotten at the size it was prototyped at. */
 const ORBIT_SIZE = { sm: 132, md: 198, lg: 264 };
+/* ══════════════════════════════════════════════════════════════════════════
+   THE GLASS'S MATERIAL, IN ONE PLACE — see `glassAt` for what each one does.
+
+   IT IS AN OBJECT AND NOT NINE CONSTANTS because it is being TUNED, and a
+   number you have to find in the middle of a shading routine is a number that
+   gets tuned by guessing. Every ball reads it at `buildGrid` time, so changing
+   one and calling `reglaze()` is the whole loop.
+   ══════════════════════════════════════════════════════════════════════════ */
+const ORBIT_GLASS = {
+  size:    1.000,  // the dome, as a fraction of the plate's hole
+  brk:      .970,  // where it turns over into the flange, in dome radii
+  corner:   .030,  // and how wide that corner reads
+  edge:    201,    // the corner's own light
+  wall:     .118,  // the shell's thickness — the second surface, in from the first
+  wallLit:  96,    // and how much of it comes back through the glass
+  flange:   35,    // the flat ring
+  flangeAz: 40,    // how much it varies round the room
+  /* A FLAT FACET CANNOT HAVE A SOFT GRADIENT ACROSS IT. Its normal is the same
+     at every point, so it reflects the same direction at every point — there is
+     no cosine falloff to have. What it really shows is an area light with its
+     EDGES on, so this clips the cosine into a patch: at 1 it is the old smooth
+     ramp, at 3.6 the ring is evenly lit across an arc and dark for the rest. */
+  flangeHard: 3.6,
+  key:     132,    // the two lamps the dome reflects
+  fill:     85,
+  aa:      1.500,  // the feather on the glass's outer edge, in device pixels
+};
+
+
 
 /* ══════════════════════════════════════════════════════════════════════════
    THE MAP — the ball's material, drawn once, flat.
@@ -3496,12 +3525,20 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) 
     return wrap;
   };
   wrap.turn = (v = {}) => { ball.turn(v); return wrap; };
+  wrap.glass = on => { ball.glass(on); return wrap; };
+  wrap.reglaze = () => { ball.reglaze(); return wrap; };
   wrap.value = () => ({ ...st });
   wrap.relayout = layout;
   return wrap;
 }
 
-function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } = {}) {
+/* `glass` IS A PROPERTY OF THE PART, NOT A CONTROL ON IT. Whether this one is
+   glazed is the same kind of fact as how big it is — the host decides once and
+   the ball is that object from then on. It gets a setter because a page that
+   wants to SHOW the difference needs one, and that page owns the switch: a
+   sphere that also owns a button is a sphere you cannot use without it. */
+function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = true,
+                 onChange, onHover } = {}) {
   size = ORBIT_SIZE[size] || +size || ORBIT_SIZE.sm;
   const C    = size / 2;
   /* THE BOX IS THE HOLE. This part used to draw its own round faceplate with
@@ -3514,11 +3551,25 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
   const STEP = 72;                    // ring samples, for the pick only
   const W    = size * 0.0241;
   const GRAB = Math.max(13, size * 0.05);
-  /* RADIANS PER BALL-RADIUS OF TANGENTIAL PUSH, and it is a constant on purpose
-     — see the drag. A shade under the free roll's, because a ring is a fine
-     adjustment: you reach for one when the whole ball turning at once is more
-     than you wanted. */
-  const RING_GAIN = 0.6;
+  /* ── RADIANS PER BALL-RADIUS OF TANGENTIAL PUSH ───────────────────────────
+     ONE, AND IT IS ARITHMETIC RATHER THAN TASTE. A ring's radius is one ball
+     radius and arc = rθ, so a radius of hand travel ALONG the ring's tangent
+     is exactly one radian of ring. That is the same claim the arcball makes a
+     few hundred lines down — 1:1 on the surface is what a ball is — and it is
+     what keeps the arrow painted on the ring under the pointer instead of
+     lagging it by whatever fraction somebody liked.
+
+     IT WAS 0.6 AND NOTHING READ IT. The number arrived with the drag it was
+     written for; that drag did not ship, so the constant sat here for two
+     versions describing itself as "a shade under the free roll's" — which is
+     π/2, and 0.6 is not a shade under anything. */
+  const RING_GAIN = 1;
+  /* BELOW THIS THERE IS NO DIRECTION TO PUSH IN. With the hand clamped to the
+     silhouette this is reached in exactly one place — the HUB of a ring seen
+     face on, where the tangent's direction whips round through every bearing
+     in a couple of pixels. It is a disc 0.3 radii across and a drag crosses it
+     in a few frames. Hold there rather than amplify noise. */
+  const TAN_MIN = 0.15;
 
   const val = { yaw, pitch, roll };
 
@@ -3548,6 +3599,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
   const turnBy = (ax, th) => { MAT = orbitMul(orbitAxisMat(ax, th), MAT); sync(); };
 
   const wrap = el('div', 'orbit');
+  if (glass !== false) wrap.classList.add('glazed');
   wrap.style.width = wrap.style.height = size + 'px';
   wrap.style.setProperty('--ow', W.toFixed(2) + 'px');
   wrap.style.setProperty('--osc', (size / 216).toFixed(4));
@@ -3555,7 +3607,15 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
   /* THE SOCKET, AND IT IS THE STICK'S SOCKET WITH THE STICK TAKEN OUT. Seat
      under, mouth and collar over — the collar sits at the CUT IN THE PLATE and
      not at the ball's rim, because a machined edge is a plate that stops and a
-     sphere never stops. Everything inboard of it is tone only. */
+     sphere never stops. Everything inboard of it is tone only.
+
+     THERE IS NO `orbit-glass` DIV, AND THERE WAS ONE FOR AN HOUR. A dome
+     built out of CSS gradients is the same mistake the arcs were: a picture of
+     a surface laid over a surface. Glass is not a sheen — it is a WALL with a
+     thickness, whose rim goes bright because you are looking along it and
+     whose streaks are the reflection of something in the room, curved by the
+     shape. None of those are things a stylesheet can know, because all three
+     are functions of the normal. It is in the raster with everything else. */
   wrap.append(el('div', 'orbit-seat'));
   const cv = el('canvas', 'orbit-cv');
   wrap.append(cv, el('div', 'orbit-mouth'), el('div', 'orbit-collar'));
@@ -3603,8 +3663,224 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
   const ctx = cv.getContext && cv.getContext('2d');
   cv.style.width = cv.style.height = size + 'px';
 
+  /* ══════════════════════════════════════════════════════════════════════
+     THE GLASS IS THE HOLE'S SIZE, AND THAT MAKES IT A DIFFERENT SPHERE.
+
+     IT WAS THE BALL'S SIZE AND THAT WAS THE WHOLE PROBLEM. A dome seated
+     inside the bore is a dome that is smaller than the hole it sits in, which
+     is not a thing anybody glazes: the glass goes in the PLATE, its edge is
+     the plate's edge, and the two share one contour because they are cut to
+     each other. So the dome's rim is the collar's rim, and the collar is the
+     bezel that holds it — which is the loupe's rule arrived at from the other
+     side.
+
+     WHICH PUTS MOST OF THE GLASS OUTSIDE THE BALL. The ball's disc is 93% of
+     the box and the hole is 100% of it, so there is an annulus of glass with
+     no ball under it at all — socket wall, seen through glass. The raster
+     stopped at the ball because until now there was nothing further out to
+     draw. It goes to the hole now, and everything between the two silhouettes
+     is glass over whatever the stylesheet has put underneath. */
+  /* ── THE HOLE IS THE CLIP, THE DOME IS THE SPHERE, AND THEY ARE NOT ONE
+     NUMBER ANY MORE. They were, and it made the glass read SMALL: everything
+     on a dome lands at some fraction of its radius, so with the dome cut to
+     the hole exactly, the edge lift came out at 0.93 of the BALL — inside the
+     silhouette, which is the one place it cannot look like the glass over the
+     whole bore.
+
+     AND IT STOPS SHORT OF THE PLATE ON PURPOSE. At exactly the hole's size the
+     flange ran out UNDER the collar and the two edges touched, which is the
+     one thing that must not happen here: a glass lying in a hole is a separate
+     object from the hole, and it says so by having a rim of its own with dark
+     between. Six percent of the radius is enough to read as clearance and not
+     enough to read as a gap — about 4px at `sm`, 8 at `lg`. */
+  const HOLE  = (size / 2) / R;        // the plate hole, in ball radii — the clip
+  const HOLE2 = HOLE * HOLE;
+  let   DOME  = HOLE * ORBIT_GLASS.size;   // and the glass stops inside it
+  let   IDOME = 1 / DOME;
+  /* ── HOW WIDE ONE DEVICE PIXEL IS, IN DOME RADII ─────────────────────────
+     THE GLASS HAS AN EDGE AND AN EDGE ON A GRID HAS TO BE FEATHERED. Every
+     other silhouette on this part is hidden by something — the ball's rim goes
+     under the socket's shadow, the cuts are supersampled — so nothing here had
+     ever had to draw a hard boundary in the open. The glass does: at the fold
+     it is still worth most of its value and a pixel later it is worth nothing,
+     which on a circle is a staircase all the way round.
+
+     ONE AND A HALF PIXELS, AND IT IS RECOMPUTED WITH THE GRID because the
+     answer depends on the device ratio — the drag resolution is 0.75 and the
+     still is 1.25, so a constant in dome radii would feather twice as wide on
+     one as the other. */
+  let   AAW   = .02;
+  let GLAZED = glass !== false;
+
+  /* ── AND IT IS PRECOMPUTED, BECAUSE THE GLASS DOES NOT TURN ──────────────
+     THE BALL ROTATES UNDER IT AND THE DOME DOES NOT MOVE, so every value here
+     is a property of the BOX exactly like the normals are — the same argument
+     that put the geometry in `buildGrid` in the first place. It was in the
+     paint loop and cost 0.8ms of every full pass at `lg` for an answer that
+     was identical every time. Now a drag reads one number per pixel. */
+  /* ── THE BREAK, AND EVERYTHING BEYOND IT IS FLAT ────────────────────────
+     THE GLASS IS NOT A SPHERE AND THAT IS WHY NO BAND EVER LOOKED RIGHT. It
+     is a dome with a FLANGE: spherical in the middle, and near the plate it
+     turns over into a flat ring that lies down on the face. The two surfaces
+     meet at a sharp ANGLE, and the bright line you see at that radius is the
+     crease — a discontinuity in the normal, not a gradient across one.
+
+     WHICH IS THE WHOLE DIFFERENCE. Three soft bands were tried at three radii
+     and every one read as a halo, because a smooth ramp on a smooth sphere is
+     what a halo IS. A crease has no width to soften: the surface genuinely
+     stops being one thing and starts being another, so the mark it makes has
+     an edge on it. */
+  const glassAt = (ux, uy) => {
+    const G = ORBIT_GLASS, BREAK = G.brk, CREASE = G.corner;
+    const u2 = ux * ux + uy * uy;
+    if (u2 >= 1) return 0;
+    const u = Math.sqrt(u2);
+    let glo = 0;
+    /* ── THE CORNER ITSELF, AND IT IS A LINEAR RAMP ON PURPOSE ────────────
+       A SMOOTH SHOULDER HERE WOULD PUT THE HALO BACK. `(1-x²)²` — which every
+       other mark on this ball uses, correctly, because they are all soft
+       things — arrives at its edges with zero slope, and zero slope is what
+       the eye reads as blur. This one arrives at full slope and stops. It is
+       about a pixel and a half wide at `sm` and three at `lg`, which is the
+       same drawing at both rather than the same pixels. */
+    /* AND IT IS LIT ROUND ITS CIRCUMFERENCE, NOT PAINTED. A corner of one
+       brightness all the way round has no light source in it — the same
+       failure the old soft rim had, and dropping the modulation with the rim
+       was how it came back. The crease's normal sweeps through every direction
+       between the dome's and the flange's as it goes round, so it meets the
+       lamp on one side and turns away on the other. Brightest up-left, down to
+       a third of that at the far side, and never to nothing: a corner you can
+       only see half of is a broken circle, not a lit one. */
+    const dc = u - BREAK, ad = dc < 0 ? -dc : dc;
+    const gaz = ux * -.683 + uy * .730;              /* toward the lamp */
+    if (ad < CREASE) glo += G.edge * (1 - ad / CREASE) * (.65 + .40 * gaz);
+    /* ── AND THE CORNER READS DOUBLE, BECAUSE THE WALL HAS TWO SURFACES ────
+       THE GLASS IS A SHELL AND BOTH OF ITS FACES TURN THE CORNER. The outer
+       one breaks at `BREAK`; the inner one is a wall-thickness in from it and
+       you are looking at it THROUGH the glass, so it arrives dimmer and a
+       little softer. Two lines a hair apart is the thing that says thickness —
+       one line, however bright, is a drawn circle, and no amount of tuning the
+       first one was ever going to add a second.
+
+       SOFTER MEANS `(1-x²)`, NOT THE LINEAR RAMP. The outer corner is the
+       physical edge and gets the hard ramp; this one is refracted on its way
+       out and has no business being as sharp. */
+    const di = u - (BREAK - G.wall), ai = di < 0 ? -di : di;
+    if (ai < CREASE) {
+      const t = 1 - ai / CREASE;
+      glo += G.wallLit * t * t * (.60 + .45 * gaz);
+    }
+
+    if (u >= BREAK) {  /* the flange — see below, and it falls through now */
+      /* ── THE FLANGE — FLAT GLASS, LYING ON THE PLATE ────────────────────
+         ITS NORMAL IS STRAIGHT AT YOU, so it reflects whatever is BEHIND the
+         eye and neither of the two lamps can touch it. That is correct and it
+         is also why it needs a term of its own: a flat facet lit by nothing
+         is black, and this one is glass over a lit socket.
+
+         AND IT IS EVEN ACROSS ITS WIDTH. It brightened outward once, on the
+         argument that a flange thickens toward its edge — and what that
+         actually produced was a second soft band creeping up to the plate,
+         which is the halo again by another route. A flat facet lit by one
+         room is one value. It ends on its own contour, well inside the
+         collar's, and that rim is the glass saying where it stops. */
+      /* THE SAME ROUND ITS CIRCUMFERENCE, and much weaker. It is one flat
+         facet, so it takes one value radially — that part stays. But a flat
+         glass ring reflecting a room is not the same value at the top and the
+         bottom of that room, and without this it is a drawn annulus for
+         exactly the reason the corner was a drawn circle. */
+      /* CLIPPED, NOT RAMPED — see `flangeHard`. `gaz / u` is the cosine of
+         the angle from the lamp on the unit circle; multiplying before the
+         clamp is what turns a falloff into a patch with edges on it. */
+      const gh = gaz / u * G.flangeHard;
+      glo += G.flange + G.flangeAz * (gh < -1 ? -1 : gh > 1 ? 1 : gh);
+    } else {
+
+      /* ── AND ON THE DOME, TWO LIGHTS IN THE ROOM, REFLECTED ────────────────
+         A SPHERE IS A MIRROR BALL, AND THAT IS NOT A FIGURE OF SPEECH: the
+         reflected ray is 2(n·v)n − v, its azimuth is the pixel's own and its
+         elevation is exactly TWICE. The whole room maps onto the disc.
+
+         WHICH IS WHY A BAND OF SKY DREW A CLOSED OVAL. An early version put a
+         strip at a constant height and got a loop — correctly, because that is
+         what a horizon does on a mirror ball, and it is not what a lit dome
+         looks like. A LIGHT IS A LIGHT: a source with an angular size, wide
+         across and narrow down, and the mapping curves it round by itself.
+         Nothing here is drawn curved.
+
+         AND THE DOUBLING IS WHY THEY SIT SO HIGH. A lamp 76° off the view axis
+         reflects at 38°, which lands at 0.62 of the radius. A lamp in FRONT
+         would put its highlight in the middle of the face, which is where an
+         early pair crossed each other like a scratch.
+
+         THE TANGENT FRAMES ARE WRITTEN OUT because they are constants: T is the
+         light crossed into the view axis, B is what is left. */
+      const glnz = Math.sqrt(1 - u2);
+      const gl2 = 2 * glnz;
+      const grx = gl2 * ux, gry = gl2 * uy, grz = gl2 * glnz - 1;
+      if (grx * -.458 + gry * .856 + grz * .239 > .35) {      /* the key */
+        const ga = grx * .882 + gry * .472;                   /* along  */
+        const gb = grx * .113 - gry * .211 + grz * .971;      /* across */
+        const gk = ga * ga * 3.7 + gb * gb * 250;
+        if (gk < 1) { const gm = 1 - gk; glo += G.key * gm * gm; }
+      }
+      if (grx * .400 + gry * .879 + grz * .260 > .35) {       /* and the fill */
+        const ga = grx * .910 - gry * .414;
+        const gb = grx * -.107 - gry * .236 + grz * .966;
+        const gk = ga * ga * 11 + gb * gb * 430;
+        if (gk < 1) { const gm = 1 - gk; glo += G.fill * gm * gm; }
+      }
+    }
+    /* ── AND IT CANNOT BE NEGATIVE ───────────────────────────────────────
+       `flangeAz` is three times its base, so on the far side the flange came
+       out below zero — which on the BALL was subtracted from the colour and
+       darkened it, while in the socket wall the same value clamped to a
+       transparent alpha. One surface, two behaviours, and neither of them is
+       what a reflection does: light can fail to arrive, it cannot be removed.
+       The far side is unlit, not shaded. */
+    if (glo <= 0) return 0;
+    /* THE OUTER EDGE, FEATHERED OVER A PIXEL AND A HALF. Linear coverage —
+       the fraction of the pixel that is inside the disc — which is what
+       antialiasing IS, and not a soft shoulder pretending to be one. */
+    return u > 1 - AAW ? glo * (1 - u) / AAW : glo;
+  };
+
   let DPR = DPR_HI, PX = 0, rr = 1, img = null, N = 0;
-  let IDX = [], NX = [], NY = [], NZ = [], VIG = [];
+  let IDX = [], NX = [], NY = [], NZ = [], VIG = [], GLO = [];
+  /* THE SOCKET-WALL PIXELS THE GLASS CAN REACH, kept because they are
+     GEOMETRY — which pixels lie between the ball's silhouette and the plate is
+     a property of the box, and only what is painted on them moves when the
+     material does. Without this list a change to one knob had to rediscover
+     them by walking the whole raster again. */
+  let AIDX = [], AX = [], AY = [];
+
+  /* ── THE MATERIAL PASS, SEPARATE FROM THE GEOMETRY PASS ──────────────────
+     A KNOB TURN IS NOT A RESIZE. `buildGrid` allocates six arrays, walks every
+     pixel in the box, takes a square root per pixel for the normal and another
+     for the vignette — and none of that changes when the glass does. Splitting
+     it out is what makes the bench live: turning a knob now touches one number
+     per pixel and repaints, with no allocation and no geometry.
+
+     IT ALSO MAKES THE SWITCH FREE. `glass(on)` used to rebuild the grid to
+     turn a boolean off. */
+  function glaze() {
+    DOME = HOLE * ORBIT_GLASS.size; IDOME = 1 / DOME;
+    AAW = ORBIT_GLASS.aa / (DOME * rr);   /* rr is the ball's radius in DEVICE px */
+    GLO.length = N;
+    for (let i = 0; i < N; i++)
+      GLO[i] = GLAZED ? glassAt(NX[i] * IDOME, NY[i] * IDOME) : 0;
+    const gd = img && img.data;
+    if (!gd) return;
+    /* WRITTEN EVERY TIME, INCLUDING THE ZEROS. `img` is kept between paints, so
+       a glaze that only wrote where the glass IS would leave the last one
+       standing everywhere it no longer reaches. */
+    for (let i = 0, m = AIDX.length; i < m; i++) {
+      const o = AIDX[i];
+      const g = GLAZED ? glassAt(AX[i] * IDOME, AY[i] * IDOME) : 0;
+      gd[o] = gd[o + 1] = gd[o + 2] = 255;
+      gd[o + 3] = g > 255 ? 255 : g;
+    }
+  }
 
   function buildGrid(dpr) {
     DPR = dpr;
@@ -3612,13 +3888,44 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
     cv.width = cv.height = PX;
     img = ctx && ctx.createImageData(PX, PX);
     rr  = R * dpr;
-    IDX = []; NX = []; NY = []; NZ = []; VIG = [];
+    IDX = []; NX = []; NY = []; NZ = []; VIG = []; GLO = [];
+    AIDX = []; AX = []; AY = [];
     for (let py = 0; py < PX; py++) {
       const y = (PX / 2 - py - .5) / rr;
       for (let px = 0; px < PX; px++) {
         const x = (px + .5 - PX / 2) / rr;
         const d2 = x * x + y * y;
-        if (d2 >= 1) continue;
+        /* ── OUTSIDE THE BALL BUT INSIDE THE HOLE: GLASS OVER THE SOCKET ───
+           THIS PASS WAS DELETED ONCE AND HAD TO COME BACK. With the dome cut
+           to the hole exactly, nothing landed out here — measured, zero pixels
+           at every size — so it was dead code and went. At 10% larger the edge
+           lift lands at 1.02 of the ball, which is precisely out here, and
+           without this pass the ring would not be dimmed, it would not exist.
+
+           There is no ball at these pixels and nothing to shade, only the dome
+           with the stylesheet's own socket showing through it — so `glaze()`
+           writes them WHITE AT AN ALPHA rather than adding to a colour. They
+           are collected here and painted there, because which pixels these are
+           is geometry and what lands on them is material. */
+        if (d2 >= 1) {
+          /* NOTED, NOT PAINTED. Whether a pixel out here CAN take glass is
+             geometry; what lands on it is the material's business, and that is
+             `glaze()`. */
+          if (d2 < HOLE2) { AIDX.push((py * PX + px) * 4); AX.push(x); AY.push(y); }
+          continue;
+        }
+        /* ── FIVE ARRAYS, ONE INDEX, AND NOTHING MAY SKIP A PUSH ──────────
+           `IDX/NX/NY/NZ/VIG` are parallel, and `GLO` is a sixth of the same
+           length filled by `glaze()` — the paint loop walks one `i` through all
+           six, so a `continue` anywhere below the first push leaves the later
+           arrays short and every index after it reads the wrong pixel's value.
+           An early return here for the unglazed case did exactly that: it
+           skipped `VIG`, which then held NOTHING, so `VIG[i]` was `undefined`,
+           the shading went to NaN and the whole ball clamped to black. Turning
+           the glass off blanked the part.
+
+           A CONDITION ON THE VALUE, NEVER ON THE PUSH — and now not even that,
+           because the only conditional value moved out to `glaze()`. */
         IDX.push((py * PX + px) * 4);
         NX.push(x); NY.push(y); NZ.push(Math.sqrt(1 - d2));
         /* THE SOCKET STEALS LIGHT FROM EVERY SIDE AT ONCE — not directional
@@ -3630,6 +3937,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
       }
     }
     N = IDX.length;
+    glaze();
   }
   buildGrid(DPR_HI);
   const quality = dpr => { if (dpr !== DPR) { buildGrid(dpr); paint(); } };
@@ -4745,7 +5053,14 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
          property of the room — something under the panel is on. */
       /* the dot product is only worth taking when there is a light to take it
          for — at rest that is every pixel on the ball paying for nothing */
-      if (LC) {
+      /* ── AND NOT THROUGH GLASS ────────────────────────────────────────
+         THIS IS THE PLATE'S LIGHT, NOT THE BALL'S. It comes out of the
+         channels cut below and travels UP onto whatever faces down, which is
+         the whole reason it is keyed to the viewer's frame rather than the
+         ball's. A dome over the bore is in the way of it — the same rule that
+         takes the wash off the collar, applied to the one surface it could
+         still reach. A glazed ball has no pool of light under it. */
+      if (LC && !GLAZED) {
         const nyv = m[3] * nx + m[4] * ny + m[5] * nz;
         if (nyv < 0) {
           const dn = -nyv, cw = dn * dn * CAST_STR;
@@ -4753,10 +5068,35 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
         }
       }
 
+      /* ══════════════════════════════════════════════════════════════════
+         THE GLASS — A DOME OVER THE BALL, AND IT IS A SHELL AND NOT A SHEEN.
+
+         THE CSS VERSION LASTED ONE LOOK. Soft radial gradients over the disc
+         give you a polished disc, because the three things that actually say
+         "thick glass" are all functions of the NORMAL and a stylesheet has no
+         normals: the rim goes bright where you look ALONG the wall, the
+         streaks are something in the room reflected and bent by the curve, and
+         both move when the shape does. This is the same argument that took the
+         arcs off CSS and into the map, arrived at the same way — by drawing a
+         better gradient six times and getting six better gradients.
+
+         THE SHELL IS THE DISC. `NX/NY/NZ` are the outward normal of the sphere
+         the pixel sits on, in VIEW space, and that is exactly the dome's own
+         normal — the ball inside has turned, the glass over it has not. So the
+         whole thing costs one read of three arrays that are already in cache
+         and about a dozen flops, with no second geometry and nothing marched.
+
+         THE RIM IS CUBED, NOT SCHLICK'S FIFTH. Schlick is right for a surface
+         and this is a WALL: at ^5 the term is still 0.05 at four fifths of the
+         radius and only lifts in the last two percent of it — which is under
+         the socket's own shadow, so a physically correct Fresnel drew no rim
+         at all. ^3 spreads it into a band with a visible thickness, which is
+         what the glass has and what you recognise it by. */
+      const glo = GLO[i];
       const o = IDX[i];
-      out[o]     = cr * f + sr  + gr + wr  + (up ? 0 : 27) * bl;
-      out[o + 1] = cg * f + sg2 + gg + wg  + (up ? 0 : 28) * bl;
-      out[o + 2] = cb * f + sb  + gb + wb2 + (up ? 0 : 29) * bl;
+      out[o]     = cr * f + sr  + gr + wr  + glo + (up ? 0 : 27) * bl;
+      out[o + 1] = cg * f + sg2 + gg + wg  + glo + (up ? 0 : 28) * bl;
+      out[o + 2] = cb * f + sb  + gb + wb2 + glo + (up ? 0 : 29) * bl;
       out[o + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
@@ -4815,44 +5155,33 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
      join, so the surface never creases and the pointer can wander off the part
      and come back.
 
-     AND THE CONSTRAINT IS A PROJECTION, NOT A CLAMP. A ring means "about this
-     axis": both sphere points are projected onto the plane PERPENDICULAR to it
-     and the signed angle between them about that axis is the rotation. Well
-     conditioned face-on and edge-on alike — the two cases the old screen angle
-     got worst. */
+     ALL OF WHICH IS THE BODY DRAG, AND ONLY THE BODY DRAG. A ring used to be
+     the same arcball with one constraint added — both sphere points projected
+     onto the plane perpendicular to the ring's axis, the signed angle between
+     them the rotation — and this note used to claim that was "well conditioned
+     face-on and edge-on alike". It was not, and that sentence is why three
+     attempts to lift the rings' half-turn ceiling went looking in the wrong
+     place. See the ring drag: it is a push, not a position. */
   const project = (x, y) => {           // unit sphere, origin at the hub
     const d = x * x + y * y;
     return d <= 0.5 ? [x, y, Math.sqrt(1 - d)] : [x, y, 0.5 / Math.sqrt(d)];
   };
   /* the pointer in ball radii, which is the only unit any of this works in */
-  const ballPt = (e, r) => project(
+  const padPt = (e, r) => [
     (e.clientX - (r.left + r.width  / 2)) / (R * r.width  / size),
     ((r.top + r.height / 2) - e.clientY) / (R * r.height / size),
-  );
+  ];
+  const ballPt = (e, r) => project(...padPt(e, r));
   const norm = v => {
     const m = Math.hypot(v[0], v[1], v[2]);
     return m < 1e-6 ? null : [v[0] / m, v[1] / m, v[2] / m];
   };
-  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1],
-                           a[2] * b[0] - a[0] * b[2],
-                           a[0] * b[1] - a[1] * b[0]];
-  /* v with its component along n removed — v as seen by someone looking down n */
-  const flatten = (v, n) => {
-    const k = dot(v, n);
-    return norm([v[0] - k * n[0], v[1] - k * n[1], v[2] - k * n[2]]);
-  };
-  /* the signed angle from a to b about n, and the sign is the cross product's
-     agreement with n — `acos` alone loses it and the ball turns one way only */
-  const signedAngle = (a, b, n) => {
-    const cx = a[1] * b[2] - a[2] * b[1];
-    const cy = a[2] * b[0] - a[0] * b[2];
-    const cz = a[0] * b[1] - a[1] * b[0];
-    return Math.atan2(cx * n[0] + cy * n[1] + cz * n[2],
-                      Math.max(-1, Math.min(1, dot(a, b))));
-  };
-
-  let from = null, axis = null, base = null;   // `held` is declared with the raster
+  /* NEITHER DRAG PROJECTS ANY MORE, so `flatten`, `signedAngle` and the two
+     products they were built out of are gone with the position model. `from`
+     went the same way: both branches measure a DELTA, so where the grab was is
+     not a quantity either of them has a use for — and its last job, telling the
+     hover handler a drag was live, is what `held` says. */
+  let axis = null, base = null;   // `held` is declared with the raster
   /* where the hand was last frame, in client pixels — the roll is a DELTA and
      a delta needs somewhere to measure from */
   let lastX = 0, lastY = 0;
@@ -4971,7 +5300,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
     onHover && onHover(k >= 0 ? ORBIT_AX[k].key : null);
   };
   cv.addEventListener('pointermove', e => {
-    if (held >= 0 || from) return;              /* a drag owns the ball */
+    if (held !== -1) return;                    /* a drag owns the ball */
     const r = cv.getBoundingClientRect();
     setHover(pick((e.clientX - r.left) * size / r.width,
                   (e.clientY - r.top) * size / r.height));
@@ -5007,8 +5336,6 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
          answering out there. */
       const bp = ballPt(e, r);
       if (bp[0] * bp[0] + bp[1] * bp[1] > 1) { base = null; return; }
-      from = norm(bp);
-      if (!from) { base = null; return; }
       held = -2; axis = null; markLive();
       cv.setPointerCapture(e.pointerId);
       wrap.classList.add('turning');
@@ -5021,12 +5348,12 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
        move, and the ARROW PAINTED ON IT travels round under your hand, which
        is the thing you grabbed and the thing that should respond.
 
-       MEASURED FROM WHERE THE DRAG STARTED, not accumulated frame to frame:
-       incremental sums drift, and a drag that ends where it began has to end
-       where it began. */
+       AND IT IS THE ONLY THING READ ONCE. Everything else about the drag —
+       where the hand is, which way the ring runs under it, how far it has got
+       — is measured fresh on every move, because the turn is accumulated
+       rather than compared against the grab. */
     axis = norm(orbitApply(base, AXV[k]));
-    from = axis && flatten(ballPt(e, r), axis);
-    if (!axis || !from) { axis = from = base = null; return; }
+    if (!axis) { base = null; return; }
     held = k;
     cv.setPointerCapture(e.pointerId);
     wrap.classList.add('turning');
@@ -5082,55 +5409,94 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
       return;
     }
     /* ── A RING IS A WHEEL YOU PUSH, NOT AN AZIMUTH YOU POINT AT ──────────
-       BOTH OF THE PREVIOUS MODELS FAILED ON A RING SEEN EDGE ON, differently.
-       Reading the pointer's angle about the axis after projecting it onto the
-       BALL confines it to the visible hemisphere — which spans half a circle,
-       so the ring locked at 180° however far the hand went. Reading it FLAT
-       is worse: a screen point has no z at all, so for any axis lying in the
-       plane of the screen the flattened point collapses onto a line, the
-       azimuth degenerates to ±90°, and the signed angle between two nearly
-       opposite vectors is noise — which is a ring that is both stuck AND
-       turning about something other than itself.
+       BOTH POSITION MODELS FAILED ON A RING SEEN EDGE ON, differently, and
+       both failures were one fact wearing two hats. Reading the pointer's
+       angle about the axis after projecting it onto the BALL confines it to
+       the visible hemisphere — half a circle — so the ring locked at 180°
+       however far the hand went, and folded back well short of that edge on.
+       Reading it FLAT is worse: a screen point has no z at all, so for any
+       axis lying in the plane of the screen the flattened point collapses onto
+       a line, the azimuth degenerates to ±90°, and the signed angle between
+       two nearly opposite vectors is noise — a ring both stuck AND turning
+       about something other than itself.
+
+       AND NO GAIN OR CLAMP WAS EVER GOING TO HELP. `signedAngle` is an atan2
+       between two unit vectors: ±180° is not a limit imposed on the answer, it
+       is the entire range the quantity has. Past it the value wraps negative
+       and the ring reverses under a hand still travelling one way. There was
+       nothing to tune, which is why three attempts to tune it did not ship.
 
        SO IT IS MEASURED THE WAY YOU WOULD PUSH A WHEEL. Under a small turn
-       about `axis`, the point at `p` moves at `axis × p`; project that to the
-       screen and it is the direction the hand should travel to wind the ring
-       forward. How far the hand actually went ALONG that direction, over how
-       far a full radian would carry it, is the angle — a projection of the
-       real motion onto the only motion the ring can make.
+       about `axis` the point at `p` moves at `axis × p`; project that to the
+       screen and it is the direction the hand has to travel to wind the ring
+       forward. How far the hand actually went ALONG that direction is the
+       angle — the real motion projected onto the only motion the ring can
+       make. It is a RATE, so nothing is compared to where the drag started and
+       the turns simply keep adding: three revolutions in one drag is three
+       hundred small ones, which is exactly how the body roll above works.
 
-       IT IS UNBOUNDED, because it is a rate rather than a position: nothing is
-       being compared to where the drag started, so the turns simply keep
-       adding. It works edge on, where the ring's tangent is exactly the one
-       direction still visible. And the lever arm is the pointer's own distance
-       from the axis, so pushing near the hub turns further per pixel than
-       pushing at the rim, which is what a wheel does. */
-    /* ── THE LEVER COMES OFF THE BALL, THE PUSH COMES OFF THE SCREEN ──────
-       THE POINT BEING TURNED HAS A DEPTH AND THE HAND DOES NOT. Taking the
-       lever from the flat pointer looks equivalent and is not: a ring seen
-       edge on draws as a LINE THROUGH THE MIDDLE of the ball, so the pointer
-       sits near the centre, `p` is nearly zero, and the cross product with it
-       is nothing — the one ring that most needs pushing is the one that
-       reports no lever at all. Projected onto the ball the same pointer is
-       (0, 0, 1), out at the front, and its tangent is a full radius of screen
-       travel. The motion stays flat, because a hand moves in the plane of the
-       page whatever the ball is doing. */
-    const to = flatten(ballPt(e, r), axis);
-    /* THE POINTER IS ON THE AXIS ITSELF — no component in the plane, so no
-       angle to read. Hold, do not guess. */
-    if (!to) return;
-    /* TURNED ABOUT THE RING'S OWN AXIS AND THEN READ BACK. Measured from where
-       the drag started, which caps one drag at half a turn — the arc between
-       two points on a sphere cannot be more. That ceiling is REAL and known;
-       three attempts to lift it made the rings worse in three different ways
-       and none of them shipped. The ball itself rolls without limit, which was
-       the thing that mattered; a ring is a fine adjustment and half a turn of
-       one is not what anybody was short of.
+       AND THE THING THAT BOUNDED THE OLD READ IS WHAT MAKES THIS ONE GO.
+       Holroyd's sheet always answers with z > 0, so the screen tangent under
+       the hand cannot change sign during a drag. Monotone by construction:
+       there is no fold to run into because there is no far side to reach.
 
-       NO CLAMP, EVER: the decomposition returns (-180, 180] on its own, so the
-       ball turns forever in either direction and there is no edge to run into. */
-    const th = signedAngle(from, to, axis);
-    MAT = orbitMul(orbitAxisMat(axis, th), base); sync();
+       THE LEVER COMES OFF THE BALL, THE PUSH COMES OFF THE SCREEN. The point
+       being turned has a depth and the hand does not. Taking `p` from the flat
+       pointer looks equivalent and is not: a ring seen edge on draws as a LINE
+       THROUGH THE MIDDLE of the ball, so the pointer sits near the centre, `p`
+       is nearly zero, and the cross product with it is nothing — the one ring
+       that most needs pushing would report no lever at all. Projected onto the
+       ball the same pointer is (0, 0, 1), out at the front, and its tangent is
+       a full radius of screen travel. The motion stays flat, because a hand
+       moves in the plane of the page whatever the ball is doing.
+
+       THE TANGENT IS DIVIDED OUT ONCE, NOT TWICE. Dividing by |t|² is the
+       least-squares answer and it reads as the better one — the lever arm
+       becomes the pointer's own distance from the axis, so pushing near the
+       hub turns further per pixel, which is what a wheel does. It is also the
+       exact derivative of the position model, and it inherits the blow-up
+       whole: on an edge-on X ring it works out to dθ = -dy/√(1-y²), unbounded
+       sensitivity at the rim, and on a face-on one it is unbounded at the hub.
+       One division is a constant gain and has neither. */
+    const qx = e.clientX - lastX, qy = e.clientY - lastY;
+    /* BEFORE THE GUARD BELOW. A frame spent in the dead zone with its delta
+       left unbanked is a frame the next move inherits, and the ring jumps by
+       all of it the moment the tangent comes back. */
+    lastX = e.clientX; lastY = e.clientY;
+    /* ── AND THE HAND IS CLAMPED TO THE SILHOUETTE BEFORE IT IS PROJECTED ──
+       OUTSIDE THE BALL, HOLROYD'S SHEET FLATTENS, and everything far out maps
+       into a tiny neighbourhood of the ring's POLE — where the tangent points
+       almost straight into the page and the ring stops answering. Measured: a
+       vertical drag on an edge-on ring died at 382° and thirty ball radii of
+       hand bought no more than eight did. That is the same wall as before,
+       moved out one turn.
+
+       PAST THE RIM ONLY THE DIRECTION IS INFORMATION. How far off the part the
+       hand has wandered says nothing about which way it is winding the ring,
+       so the magnitude is dropped and the bearing kept: the tangent stays at
+       half a radius or better anywhere on the disc, and the same drag now runs
+       1719°, linear in how far you pushed. Push until you stop pushing.
+
+       WHICH MEANS A WIDE CIRCLE WINDS FASTER THAN A TIGHT ONE, and that is the
+       gain being honest rather than a leak. Constant gain is per unit of HAND
+       TRAVEL, and going round at two and a half radii is two and a half times
+       the distance for the same lap — measured, 900° a lap against the rim's
+       342°. Paying by the angle you subtend instead would be a position model,
+       which is the thing that could not be made to work. */
+    const q = padPt(e, r), qm = Math.hypot(q[0], q[1]);
+    const p = qm > 1 ? project(q[0] / qm, q[1] / qm) : project(q[0], q[1]);
+    const tx = axis[1] * p[2] - axis[2] * p[1];
+    const ty = axis[2] * p[0] - axis[0] * p[2];
+    const tm = Math.hypot(tx, ty);
+    if (tm < TAN_MIN) return;            /* into the page — hold, do not guess */
+    const dx =  qx / (R * r.width  / size);
+    const dy = -qy / (R * r.height / size);      /* view space is +y up */
+    const th = (dx * tx + dy * ty) / tm * RING_GAIN;
+    if (!th) return;
+    /* ONTO WHERE THE BALL HAS GOT TO, not onto the grab. Turning about `axis`
+       leaves `axis` alone, so the one thing read at pointerdown stays true for
+       the whole drag and the ring under the hand still does not move. */
+    turnBy(axis, th);
     spinSample();
     paint();
     onChange && onChange({ ...val }, ORBIT_AX[held].key);
@@ -5138,7 +5504,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
 
   const drop = () => {
     if (held === -1) return;
-    held = -1; from = axis = base = null;
+    held = -1; axis = base = null;
     wrap.classList.remove('turning');
     delete wrap.dataset.ax;
     markLive();
@@ -5216,6 +5582,32 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
     paint();
     return wrap;
   };
+  /* ── GLAZED OR NOT, AND IT REBUILDS RATHER THAN REDRAWS ──────────────────
+     THE GLASS IS GEOMETRY. It is worked out in `buildGrid` with the normals
+     because it never turns, so changing it is a change to the grid and not to
+     the lighting — `paint()` alone would repaint the ball underneath a glaze
+     that is already baked into `img`. The rebuild also CLEARS the annulus for
+     free: `createImageData` hands back zeros, and an unglazed ball simply
+     never writes there.
+
+     AND THE CLASS GOES ON THE BOX, because the socket's shadow has to move out
+     of the way. The dome's edge lift sits at 0.93 of the radius and the three
+     inset shadows on `.orbit-mouth` are about 90% opaque there — measured —
+     so with the shadow on top the ring is not dimmed, it is deleted. Over the
+     ball is right for an open bore and wrong for a glazed one. */
+  wrap.glass = on => {
+    const v = on !== false;
+    if (v === GLAZED) return wrap;
+    GLAZED = v;
+    wrap.classList.toggle('glazed', v);
+    glaze();
+    paint();
+    return wrap;
+  };
+  /* THE MATERIAL CHANGED, SO THE GEOMETRY HAS TO BE WORKED OUT AGAIN. The
+     glass is baked in `buildGrid` because it never turns; the price of that is
+     that editing `ORBIT_GLASS` does nothing until somebody says so. */
+  wrap.reglaze = () => { glaze(); paint(); return wrap; };
   wrap.get = () => ({ ...val });
   return wrap;
 }
@@ -5909,6 +6301,6 @@ function keyBank({ label, options, index = 0, cols, onChange }) {
 
 window.SkewKit = {
   el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, orbitBay, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
-  VERSION: '1.97.0',
+  VERSION: '1.99.0',
 };
 })();

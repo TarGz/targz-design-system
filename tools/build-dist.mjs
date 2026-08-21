@@ -71,6 +71,8 @@ const WRITE = process.argv.includes('--write');
    the nav bar with that app's registry in it, and an app wants a skip link as
    much as this page does. */
 const DOC_ONLY = new Set([
+  'orbench',          // the glass tuning bench on SYSTEM 12 — no app gets it
+
   'wrap', 'masthead', 'lede', 'sub', 'spec', 'tok', 'trap',
   'mats', 'mat', 'mat-body', 'mat-d', 'mat-keys', 'mat-row', 'mat-stage', 'mat-t',
   'tab-cap', 'tab-cell', 'tab-demo', 'tab-pair', 'tab-sub',

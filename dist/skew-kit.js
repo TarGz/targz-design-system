@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.94.0
+     at       Skew v1.95.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -768,7 +768,7 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
     `<svg class="knob-ring" viewBox="0 0 100 100" aria-hidden="true">
        <circle class="kr-track" cx="50" cy="50" r="${RING_R}"
                stroke-dasharray="${RING_C * ARCF} ${RING_C}"/>
-       <circle class="kr-val" cx="50" cy="50" r="${RING_R}"/>
+       ${endless ? '' : `<circle class="kr-val" cx="50" cy="50" r="${RING_R}"/>`}
        ${endless ? `<circle class="kr-dot" cx="${50 + RING_R}" cy="50" r="3.4"/>` : ''}
      </svg>`).firstElementChild;
   const valArc = ring.querySelector('.kr-val');
@@ -788,11 +788,23 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
       : -135 + t * 270) + 'deg');
     // Unipolar grows from the start of the sweep; bipolar grows from its middle
     // in whichever direction you turned. One dasharray + one dashoffset does both.
-    const from = bipolar ? 0.5 : 0;
-    const len = Math.abs(t - from) * ARCF * RING_C;
-    valArc.setAttribute('stroke-dasharray', `${len} ${RING_C}`);
-    valArc.setAttribute('stroke-dashoffset', `${-Math.min(t, from) * ARCF * RING_C}`);
-    valArc.style.opacity = len < 1.2 ? 0 : 1;   // no round-cap dot at the origin
+    /* ── A TRACE MEASURES; A LAMP LOCATES. AN ENDLESS KNOB WANTS THE SECOND ─
+       ON A POT THE ARC IS THE READOUT: it grows from a fixed end, so its
+       LENGTH is how far along the range you are and you can read the value
+       without looking at the pointer. Take the ends away and that stops being
+       true — the same arc is a segment floating on a ring, equally long at two
+       very different settings, and at −180 and +180 it is the identical
+       drawing. It is not a weaker readout, it is a misleading one.
+
+       So the endless knob does not draw one. The dot alone says where the
+       value is, which is the only thing left that is unambiguous. */
+    if (valArc) {
+      const from = bipolar ? 0.5 : 0;
+      const len = Math.abs(t - from) * ARCF * RING_C;
+      valArc.setAttribute('stroke-dasharray', `${len} ${RING_C}`);
+      valArc.setAttribute('stroke-dashoffset', `${-Math.min(t, from) * ARCF * RING_C}`);
+      valArc.style.opacity = len < 1.2 ? 0 : 1;   // no round-cap dot at the origin
+    }
     /* ── AND THE ENDLESS ONE CARRIES A LAMP AT THE HEAD OF THE TRACE ────────
        A KNOB WITH NO STOPS HAS NO ZERO YOU CAN SEE. On a pot the arc grows out
        of a fixed end, so its LENGTH tells you where you are; wrap the track
@@ -804,7 +816,13 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
        IT SITS AT THREE O'CLOCK IN THE MARKUP and the ring's own −90° rotation
        carries it to twelve, so it starts where zero is and turns with the
        value — one transform, no second coordinate system to keep in step. */
-    if (valDot) valDot.style.transform = `rotate(${t * 360}deg)`;
+    /* THE SAME ANGLE THE CAP TURNS TO, and it has to be said the same way or
+       it is not the same angle: written as `t * 360` the lamp sat half a turn
+       from the pointer on any BIPOLAR knob, because the cap measures from the
+       middle of the range and this was measuring from its start. Zero belongs
+       at twelve o'clock on both or on neither. */
+    if (valDot) valDot.style.transform =
+      `rotate(${(t - (bipolar ? .5 : 0)) * 360}deg)`;
     val.textContent = fmt ? fmt(v) : String(v);
     k.setAttribute('aria-valuenow', v);
     k.setAttribute('aria-valuetext', val.textContent);
@@ -897,6 +915,21 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
     e.preventDefault();
     set(v + Math.sign(e.deltaY) * step * (e.shiftKey ? 1 : 10));
   }, { passive: false });
+  /* ── DOUBLE-CLICK RETURNS A BIPOLAR KNOB TO ITS CENTRE ────────────────────
+     BIPOLAR ONLY, BECAUSE ONLY A BIPOLAR KNOB HAS A PLACE TO GO BACK TO. The
+     centre of its range is already a real position on this part: the collar
+     carries an etched mark for it and the trace grows out of it. Zero is where
+     the control says nothing, and getting back there by hand — past a detent,
+     one step at a time, or by dragging and overshooting — is the fiddliest
+     thing a knob asks of you.
+
+     A UNIPOLAR KNOB HAS NO SUCH PLACE. Its minimum is an end, not a home, and
+     snapping a gain to zero because a click landed twice is a good way to lose
+     an hour of somebody's mix. So it does nothing there. */
+  if (bipolar) k.addEventListener('dblclick', e => {
+    e.preventDefault();
+    set((min + max) / 2);
+  });
   k.addEventListener('keydown', e => {
     const big = (max - min) / 20;
     if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); set(v + (e.shiftKey ? step : big)); }
@@ -2989,8 +3022,28 @@ function ringSlope(a) {                  // d(sink)/d(a) — negative inside the
    number, so every ratio between the channels is exactly what it was and only
    the brightness differs. Same three pigments, less light on them. */
 const RING_RGB = [[214, 62, 62], [64, 192, 111], [77, 145, 218]];
+/* ── AND A COLOUR FOR "THE WHOLE BALL", WHICH IS NOT ONE OF THE THREE ────────
+   ROLLING THE BODY IS NOT AN AXIS. Borrowing red for it would say pitch when
+   nothing about the gesture is pitch, and the obvious alternative — white — is
+   worse: white is what the lamp and the specular are already made of, so light
+   from under the panel in white reads as MORE ROOM, which is the one thing
+   this effect exists not to be.
+
+   ORANGE IS THE LANGUAGE'S OWN. It is what `--led` means everywhere else on
+   this site, and it is already the north well's floor — established as the
+   ball's colour rather than any axis's. A gesture that moves the whole ball
+   gets the whole ball's colour. */
+const BALL_RGB = [224, 123, 28];
 /* how far the hovered arc throws light past its own edges, and how hard */
 const GLOW_STR = 0.28;
+/* how hard the plate's channels light the ball's underside while one turns */
+/* 0 — OFF. The wash a lit arc throws across the plastic around it: physically
+   the right idea, and at any strength that made it visible it also made the
+   whole hemisphere the arc is on read as tinted, which loses the one thing the
+   arc is there to say. The tight spill (`GLOW_FAR`) stays — that is light
+   escaping the slot, which is a fact about the cut rather than about the ball.
+   Set this above zero to bring the wash back; it is not deleted, it is off. */
+const CAST_STR = 0.18;
 
 /* ── HIDDEN. ONE FLAG, NOTHING DELETED ──────────────────────────────────────
    `false` makes the three grooves not exist: their profile returns zero depth,
@@ -3270,7 +3323,14 @@ function orbitMaterial() {
    compression every well floor already gets. One mechanism instead of two. */
 function orbitTexture() { return orbitMaterial(); }
 
-function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
+/* `onHover` REPORTS WHICH ARC THE HAND IS OVER, and it exists because the ball
+   is not always the whole control. Where it sits beside three dials, the pair
+   is one instrument with two handles — and a panel that lights the arc but not
+   the dial it drives has told you half of what it knows. The ball cannot reach
+   those dials itself, so it says which axis is under the pointer and lets the
+   host decide what else that means. Null when the hand is on the body or off
+   the part entirely: no single axis is being pointed at. */
+function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } = {}) {
   size = ORBIT_SIZE[size] || +size || ORBIT_SIZE.sm;
   const C    = size / 2;
   /* THE BOX IS THE HOLE. This part used to draw its own round faceplate with
@@ -3430,6 +3490,19 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
      you arrive on it — which is the information a gizmo actually owes you, at
      the moment you actually want it. */
   let hover = -1;
+  /* ── AN AXIS CAN BE POINTED AT, OR BEING TURNED, AND THEY ARE NOT THE SAME ─
+     POINTED AT is a question — which of these three am I about to move — and
+     the answer it deserves is the arc lighting up and the wire to its dial
+     lighting with it. BEING TURNED is a fact, and it can afford more: the well
+     takes a little of the colour too, so the ball itself shows that something
+     is happening rather than merely that something is under the hand.
+
+     AND BOTH CAN COME FROM OUTSIDE. Hovering a KNOB is a hand pointing at this
+     ball's yaw axis, and the ball has no way to know that — it cannot see its
+     own dials. So there is one door, `live(key, driving)`, and a host with
+     knobs pushes the same two states through it that the ball's own rings
+     produce. Held always wins: a hand on a ring outranks anything reported. */
+  let extAx = -1, extDrive = false;
 
   /* ══════════════════════════════════════════════════════════════════════
      MOMENTUM — A BALL YOU CAN THROW.
@@ -3586,6 +3659,14 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
        per step and `oy` is a fixed combination of them, so this is exact for the
        in-plane part and the out-of-plane part only matters at the silhouette,
        where the clamp below covers it. */
+    /* WHICH ARC IS LIVE, AND WHAT COLOUR IT IS — held beats hovered, because a
+       hand on a ring outranks a hand near one. */
+    /* ONLY A TURN TINTS THE WELL. Pointing at an axis lights its arc and its
+       wire; that is the whole answer to "which one", and adding the ball's
+       recesses to it says the same thing a third time, louder, for a question
+       nobody asked yet. */
+    const LIVE = held >= 0 ? held : extDrive ? extAx : -1;
+    const LC = LIVE >= 0 ? RING_RGB[LIVE] : held === -2 ? BALL_RGB : null;
     const GXY = Math.hypot(m[1], m[4]);
     /* and the same for each ring's own coordinate — a well's edge is measured
        in latitude, a groove's in `|o·A|`, and the pixel moves each at its own
@@ -4406,7 +4487,8 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
          past 255 and blooms toward white, which is exactly what a bright
          source does to a sensor and the only cheap way to say "brighter than
          this screen can print". */
-      const H = held >= 0 ? held : hover;
+      /* which arc is being pointed at — the ball's own hover, or a host's */
+  const H = held >= 0 ? held : hover >= 0 ? hover : extAx;
       if (H >= 0) {
         const hv = H === 0 ? ox : H === 1 ? oy : oz;
         const ah = hv < 0 ? -hv : hv;
@@ -4416,16 +4498,72 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
           const t = 1 - (ah - RNG_FL) / (GLOW_FAR - RNG_FL);
           gw = t * t;
         }
+        const C = RING_RGB[H];
         if (gw > 0) {
-          const C = RING_RGB[H], w = gw * GLOW_STR;
+          const w = gw * GLOW_STR;
           gr = C[0] * w; gg = C[1] * w; gb = C[2] * w;
         }
       }
 
+      /* ── AND THE LIP OF THE WELL CATCHES THE LIVE COLOUR ─────────────────
+         THE HOT SPOT ON A WELL'S RIM IS THE BRIGHTEST THING ON THE BALL, and
+         until now it was the only bright thing with nothing to say. It is a
+         REFLECTION — of the lamp, which is white — so tinting it is a lie, and
+         a small one worth telling: the rim is where the eye already is, and a
+         white glint next to a lit red arc is the one part of the picture still
+         insisting nothing has changed. Only the wells take it. The plastic's
+         own sheen stays white, so the ball still reads as lit by a room rather
+         than by whichever knob you touched last. */
+      let sr = sp, sg2 = sp, sb = sp;
+      if (LC && which === 0 && sp > 0) {
+        sr = sp * LC[0] / 210; sg2 = sp * LC[1] / 210; sb = sp * LC[2] / 210;
+      }
+      /* ── AND A LITTLE LIGHT FROM BEHIND THE WELL'S WALL ───────────────────
+         INSIDE THE CUT, NOT AROUND THE PART. The first version of this put a
+         glow on the socket, which lights the whole plate and reads as a
+         selection ring: it announces "this control" when what changed is one
+         arc of it. A recess is the one place on this ball where light could
+         plausibly be coming from somewhere you cannot see, so that is where it
+         goes — brightest in the corner where the floor meets the wall, dying
+         out toward the middle of the floor and up toward the lip.
+
+         AND IT IS SMALL. Twelve percent of the colour at its strongest, which
+         on a wall already at a fifth of full brightness is a tint rather than
+         a lamp. If you have to look for it, it is the right amount: the arc
+         itself is doing the saying. */
+      let wr = 0, wg = 0, wb2 = 0;
+      if (LC && which === 0 && sink > 0) {
+        const d1 = sink / deep, ed = rad < 1 ? rad * rad : 1;
+        const gw = ed * d1 * d1 * .12;
+        wr = LC[0] * gw; wg = LC[1] * gw; wb2 = LC[2] * gw;
+      }
+
+      /* ══════════════════════════════════════════════════════════════════
+         THE BALL IS LIT FROM UNDERNEATH WHILE AN AXIS IS TURNING.
+
+         THE FIRST VERSION WASHED OUTWARD FROM THE LIT ARC, which is what a
+         lamp lying on the surface would do — and it was wrong, because the
+         lamp is not on the surface. The channels are cut into the PLATE, the
+         plate is below the ball, and light coming out of them goes UP. So the
+         thing that should be catching colour is whatever faces down, and that
+         is a fact about the viewer's frame rather than the ball's: it stays on
+         the underside while the ball turns inside it, the way a real object
+         lit from below does.
+
+         WHICH ALSO FIXES WHAT WAS WRONG WITH THE OTHER ONE. Keyed to the arc
+         it tinted a whole hemisphere and the tint TURNED WITH THE BALL, so the
+         colour read as a property of the plastic. Keyed to down, it reads as a
+         property of the room — something under the panel is on. */
+      const nyv = m[3] * nx + m[4] * ny + m[5] * nz;
+      if (LC && nyv < 0) {
+        const dn = -nyv, cw = dn * dn * CAST_STR;
+        gr += LC[0] * cw; gg += LC[1] * cw; gb += LC[2] * cw;
+      }
+
       const o = IDX[i];
-      out[o]     = cr * f + sp + gr + (up ? 0 : 27) * bl;
-      out[o + 1] = cg * f + sp + gg + (up ? 0 : 28) * bl;
-      out[o + 2] = cb * f + sp + gb + (up ? 0 : 29) * bl;
+      out[o]     = cr * f + sr  + gr + wr  + (up ? 0 : 27) * bl;
+      out[o + 1] = cg * f + sg2 + gg + wg  + (up ? 0 : 28) * bl;
+      out[o + 2] = cb * f + sb  + gb + wb2 + (up ? 0 : 29) * bl;
       out[o + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
@@ -4607,7 +4745,38 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   /* A REPAINT ONLY WHEN IT CHANGES. `pick` is a walk over a few hundred
      projected samples and a repaint is every pixel of the ball; doing either
      on every `pointermove` of a hover would cost more than the drag does. */
-  const setHover = k => { if (k !== hover) { hover = k; paint(); } };
+  /* ── THE PART ADVERTISES WHICH AXIS IS LIVE ──────────────────────────────
+     The raster can tint its own pixels but it cannot reach the socket around
+     it, and the socket is where a glow belongs — light escaping a thing lands
+     on what the thing is sitting in. So the wrap carries the axis and its
+     colour, and the stylesheet does the part the canvas cannot. */
+  const markLive = () => {
+    /* TWO ATTRIBUTES, BECAUSE THERE ARE TWO STATES AND THE SOCKET ONLY CARES
+       ABOUT ONE. `data-live` is the axis being POINTED at — the arc and the
+       wire answer to that. `data-drive` is the axis being TURNED, and it is
+       what the collar's lit edge answers to: the rim of the socket is the
+       ball's brightest fixed feature, so putting a colour on it is a loud
+       thing to do, and it should mean something is happening rather than
+       something is under the hand. */
+    const point = held >= 0 ? held : hover >= 0 ? hover : extAx;
+    const drive = held >= 0 ? held : extDrive ? extAx : -1;
+    if (point >= 0) wrap.dataset.live = ORBIT_AX[point].key;
+    else delete wrap.dataset.live;
+    /* `body` is a drive state with no axis — the whole ball, rolling */
+    if (drive >= 0) wrap.dataset.drive = ORBIT_AX[drive].key;
+    else if (held === -2) wrap.dataset.drive = 'body';
+    else delete wrap.dataset.drive;
+    const c = drive >= 0 ? drive : point;
+    if (c >= 0) wrap.style.setProperty('--axc', ORBIT_AX[c].col);
+    else if (held === -2) wrap.style.setProperty('--axc', '#e07b1c');
+    else wrap.style.removeProperty('--axc');
+  };
+  const setHover = k => {
+    if (k === hover) return;
+    hover = k; paint();
+    markLive();
+    onHover && onHover(k >= 0 ? ORBIT_AX[k].key : null);
+  };
   cv.addEventListener('pointermove', e => {
     if (held >= 0 || from) return;              /* a drag owns the ball */
     const r = cv.getBoundingClientRect();
@@ -4647,7 +4816,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
       if (bp[0] * bp[0] + bp[1] * bp[1] > 1) { base = null; return; }
       from = norm(bp);
       if (!from) { base = null; return; }
-      held = -2; axis = null;
+      held = -2; axis = null; markLive();
       cv.setPointerCapture(e.pointerId);
       wrap.classList.add('turning');
       e.preventDefault();
@@ -4669,6 +4838,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     cv.setPointerCapture(e.pointerId);
     wrap.classList.add('turning');
     wrap.dataset.ax = ORBIT_AX[k].lab;
+    markLive();
     e.preventDefault();
   });
 
@@ -4778,6 +4948,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     held = -1; from = axis = base = null;
     wrap.classList.remove('turning');
     delete wrap.dataset.ax;
+    markLive();
     spinGo();                   /* let go and it keeps going, then settles */
   };
   cv.addEventListener('pointerup', drop);
@@ -4823,6 +4994,18 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
      through `onChange` all the way, so anything bound to the angles follows
      the animation rather than jumping at the end of it. */
   wrap.turn = (v = {}) => { turnTo(v); return wrap; };
+  /* `live('pitch')` — a hand is pointing at that axis, from wherever.
+     `live('pitch', true)` — it is being turned.
+     `live(null)` — neither. */
+  wrap.live = (key, driving) => {
+    const i = key == null ? -1 : ORBIT_AX.findIndex(a => a.key === key);
+    const d = !!driving;
+    if (i === extAx && d === extDrive) return wrap;
+    extAx = i; extDrive = d;
+    markLive();
+    paint();
+    return wrap;
+  };
   wrap.get = () => ({ ...val });
   return wrap;
 }
@@ -5516,6 +5699,6 @@ function keyBank({ label, options, index = 0, cols, onChange }) {
 
 window.SkewKit = {
   el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
-  VERSION: '1.94.0',
+  VERSION: '1.95.0',
 };
 })();

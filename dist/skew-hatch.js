@@ -2,7 +2,7 @@
    skew-hatch.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-hatch.js
-     at       Skew v1.94.0
+     at       Skew v1.95.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you

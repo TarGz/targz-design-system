@@ -1,6 +1,22 @@
-export const version = '1.94.0';
+export const version = '1.95.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.95.0',
+    date: '2026-08-20',
+    changes: [
+      'THE BALL AND ITS DIALS ARE WIRED TOGETHER, AND THE WIRE IS CUT INTO THE PLATE. Three dials under a sphere could be driving anything; what says otherwise is a groove running from each one up to the ball. Dark and unlit at rest, saying only that a connection exists — and the geometry is MEASURED rather than assumed, because knob widths depend on their labels and the row is centred, so the only way a trace lands on the knob it belongs to is to ask the browser where that knob ended up.',
+      'IT IS A CHANNEL WITH A FILAMENT IN IT, NOT A STROKE THAT CHANGES COLOUR. Two paths on one route: a wide dark cut that is always there, and a narrow bright line lying at the bottom of it that only exists when something is running. The filament is a third the width ON PURPOSE — equal widths would be one line changing colour again; at a third you are looking past two dark walls at something further away, which is the entire depth cue.',
+      'AND THE THREE OF THEM LEAVE THE BALL AT THREE PLACES. Sharing a take-off point means sharing the pixels above the first bend, and pixels hold one colour: the last path drawn owned that run whatever was live, so blue was always the one you could see. They land on the rim now, 34° apart, and stop five pixels CLEAR of it — two objects sharing a contour look welded, and this one arrives at a socket rather than being continuous with what sits in it.',
+      'POINTED AT AND BEING TURNED ARE DIFFERENT STATES AND GET DIFFERENT ANSWERS. Pointing lights the arc and its wire and its dial\'s name — that is the whole answer to "which of these three am I about to move". Turning adds the ball itself: the well\'s lip takes the colour, the socket\'s rim takes it, and the plate\'s shadow goes from black to very slightly tinted, because a shadow is not an absence of light but what is left of it and nothing genuinely lit casts a grey one.',
+      'AND BOTH COME THROUGH ONE DOOR, `live(key, driving)`. Hovering a KNOB is a hand pointing at this ball\'s yaw axis and the ball cannot see its own dials, so a host pushes the same two states in that the ball\'s own rings produce. Held always wins. `onHover` reports the other direction — which arc is under the pointer — so a panel can light the wire the ball cannot reach.',
+      'THE BALL IS LIT FROM UNDERNEATH WHILE AN AXIS TURNS, and the first version of this was wrong in an instructive way. It washed outward from the lit arc, which is what a lamp lying ON the surface would do — but the lamp is not on the surface: the channels are cut into the PLATE, the plate is below the ball, and light out of them goes UP. So what catches colour is whatever faces DOWN, which is a fact about the viewer\'s frame rather than the ball\'s. Keyed to the arc the tint turned with the ball and read as a property of the plastic; keyed to down it stays underneath while the ball rotates inside it, and reads as a property of the room.',
+      'ROLLING THE BODY IS NOT AN AXIS, so it does not borrow one of the three colours. White was the obvious alternative and the worse one — white is what the lamp and the specular are already made of, so light from under the panel in white reads as MORE ROOM, which is the one thing this is for not being. Orange is the language\'s own, it is what `--led` means everywhere else, and it is already the north well\'s floor: established as the ball\'s colour rather than any axis\'s.',
+      'THE KNOB\'S POINTER LIGHTS, NOT ITS NOTCH. The notch is at twelve o\'clock and stays there, so lighting it put the colour on the one mark that never moves — a lamp on the datum, which says the knob is live and not a word about where it is. The pointer is the knob\'s answer and already where the eye is.',
+      'A HAND THAT HAS STOPPED MOVING HAS NOT LET GO. The idle timer that clears the lit state cannot tell "finished" from "paused" — it exists because a drag ends with no event of its own — so holding still for half a second put the wire out under a hand still on the control. While a button is down, no timer is armed.',
+      'THE THREE ANGLE KNOBS ARE ENDLESS AND WEAR THEIR AXES, the small ball owns them, and the titles moved above. Three balls plus a floating column of dials reads as four things; the dials belong to a ball, and the one they belong to is the honest one — `sm` is what a knob row actually gives this part.',
+    ],
+  },
   {
     version: '1.94.0',
     date: '2026-08-20',

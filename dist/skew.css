@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.94.0
+     at       Skew v1.95.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -2478,6 +2478,20 @@ html{ -webkit-tap-highlight-color:transparent; }
   content:''; position:absolute; left:50%; top:-2px; width:2px; height:5px; margin-left:-1px;
   border-radius:1px; background:#767d88; box-shadow:0 1px 1px rgba(0,0,0,.85);
 }
+/* ── AND THE MARK ON THE COLLAR IS THE SAME CHANNEL, ARRIVING ───────────────
+   IT IS ALREADY IN LINE WITH THE WIRE — a tick at twelve o'clock directly
+   under where the trace comes down — so drawing it as a bright etched notch
+   while the trace is a dark groove makes two different things out of one. Cut
+   it the same way and the wire does not stop above the dial; it runs under the
+   name and comes out on the collar, which is what the eye was going to assume
+   anyway. Scoped to this panel: everywhere else the etched mark is right,
+   because everywhere else there is no wire arriving at it. */
+.orbsmall .knob.bi .knob-collar::after{
+  height:7px; top:-3px; border-radius:0;
+  background:#0d1013;
+  box-shadow:0 1px 0 rgba(255,255,255,.085), 0 -1px 0 rgba(0,0,0,.55);
+  transition:background .16s linear, box-shadow .16s linear;
+}
 .kr-track,.kr-val{ fill:none; stroke-linecap:round; stroke-width:7; }
 .kr-track{ stroke:rgba(255,255,255,.075); }
 .kr-val{ stroke:currentColor; filter:drop-shadow(0 0 3px currentColor); transition:stroke-dasharray .05s linear; }
@@ -3137,6 +3151,54 @@ html{ -webkit-tap-highlight-color:transparent; }
   cursor:grab; touch-action:none; user-select:none;
 }
 .orbit.turning{ cursor:grabbing; }
+
+/* ── THE SOCKET'S RIM TAKES THE COLOUR, BUT ONLY WHILE SOMETHING IS TURNING ──
+   THE COLLAR'S LOWER EDGE IS THE BRIGHTEST FIXED THING ON THIS PART — the one
+   machined line that does not move when the ball does, which is exactly why it
+   reads as the plate rather than as the object. Colouring it is loud, so it is
+   spent on the fact rather than the question: turning an axis, not pointing at
+   one. Hover lights the arc and the wire and leaves the metal alone. */
+.orbit[data-drive] .orbit-collar{
+  box-shadow:
+    inset 0 calc(2px * var(--osc,1)) calc(3px * var(--osc,1)) rgba(0,0,0,.9),
+    inset 0 calc(-3px * var(--osc,1)) calc(7px * var(--osc,1)) color-mix(in srgb, var(--axc) 43%, transparent),
+    0 0 0 1px rgba(0,0,0,.72),
+    0 1px 0 rgba(255,255,255,.07);
+}
+/* ── AND THE SOCKET'S SHADOW IS TINTED, NOT BLACK ───────────────────────────
+   A SHADOW IS NOT AN ABSENCE OF LIGHT, IT IS WHAT IS LEFT OF IT. The rim is
+   lit red; the dark inside the socket is that same red minus almost all of it,
+   which is a very dark red — not black. Leaving it neutral is the giveaway
+   that the rim's colour was painted on rather than shone, because nothing that
+   is actually lit casts a grey shadow.
+
+   A QUARTER OF THE COLOUR INTO BLACK, so it is still unmistakably shadow. The
+   difference is barely nameable in isolation and obvious in place, which is
+   what tinted shade is supposed to be. */
+.orbit[data-drive] .orbit-mouth{
+  --shade: color-mix(in srgb, var(--axc) 6%, #000);
+  box-shadow:
+    inset 0 0 calc(13px * var(--osc,1)) calc(7px * var(--osc,1)) color-mix(in srgb, var(--shade) 88%, transparent),
+    inset 0 calc(7px * var(--osc,1)) calc(16px * var(--osc,1)) calc(1px * var(--osc,1)) color-mix(in srgb, var(--shade) 72%, transparent),
+    inset 0 0 calc(28px * var(--osc,1)) calc(2px * var(--osc,1)) color-mix(in srgb, var(--shade) 45%, transparent),
+    inset 0 calc(-2px * var(--osc,1)) calc(8px * var(--osc,1)) color-mix(in srgb, var(--axc) 30%, transparent);
+}
+.orbit[data-drive] .orbit-seat{
+  --shade: color-mix(in srgb, var(--axc) 5%, #000);
+  box-shadow:
+    inset 0 calc(7px * var(--osc,1)) calc(14px * var(--osc,1)) color-mix(in srgb, var(--shade) 95%, transparent),
+    inset 0 calc(-2px * var(--osc,1)) calc(3px * var(--osc,1)) rgba(255,255,255,.10),
+    0 1px 0 rgba(255,255,255,.06);
+}
+.orbit-seat{ transition:box-shadow .16s linear; }
+.orbit-collar, .orbit-mouth{ transition:box-shadow .16s linear; }
+
+/* NO HALO ROUND THE SOCKET. A glow on the seat and the collar lit the whole
+   plate, which is a selection ring wearing a costume — it says "this control"
+   when the thing that changed is one arc of it, and at that size it is the
+   loudest object on the page. The light belongs INSIDE the cut, behind the
+   wall of the well, where it is a hint that something in there is on. That is
+   the raster's job, not the stylesheet's. */
 /* THE BALL IS A RASTER NOW, and the classes that were here — arc, grid, cap,
    seam — are gone with the strokes that wore them. Every one of them was a
    line pretending to be a surface. The material lives in a map, the map is
@@ -3193,11 +3255,147 @@ html{ -webkit-tap-highlight-color:transparent; }
    below is a ratio of it, so a ball at 450px is the same drawing as one at 132
    rather than the same drawing with wire for rings. */
 .orbcell{ display:flex; flex-direction:column; align-items:center; gap:13px; }
-.orbit.turning::after{
-  content:attr(data-ax); position:absolute; right:2px; bottom:0;
-  font-family:var(--font); font-size:11px; letter-spacing:.14em; color:var(--led);
-  text-shadow:0 0 6px rgba(255,130,30,.5);
+/* ── THE THREE BALLS, AND THE SMALL ONE STEPS OUT OF LINE ────────────────────
+   IT IS THE ONE BEING DRIVEN, so it is the one that should not sit in the row
+   like a third sample. Pushed right and dropped down, with its knobs beneath
+   it, it reads as the working control and the other two as what the same part
+   looks like at other sizes — which is what they are. */
+.orbrow{
+  display:flex; gap:44px; align-items:center;
+  flex-wrap:wrap; justify-content:center;
 }
+.orbsmall{
+  /* THE DIALS SIT AS CLOSE UNDER THE BALL AS THE WIRES WILL ALLOW. They are
+     its knobs; distance between them is distance between a thing and its own
+     controls, and the trace only needs enough height to make one bend. */
+  display:flex; flex-direction:column; align-items:center; gap:22px;
+  margin-left:40px; margin-top:38px;
+}
+/* THE THREE DIALS GO ACROSS, NOT DOWN. `.knobcol` is a column because that is
+   what a bay of them is elsewhere; under a ball they are one row of three
+   axes, and stacked they are taller than the ball they belong to — which puts
+   the last one so far from it that it stops looking like its knob. Overridden
+   here rather than changed at the source: every other user of `.knobcol` still
+   wants a column. */
+.orbsmall .knobcol{ flex-direction:row; gap:20px; }
+
+/* ── THE TRACES, AND THEY ARE GROOVES BEFORE THEY ARE SIGNALS ────────────────
+   CUT, NOT PRINTED. Same argument as the ball's own arcs: a line drawn on a
+   surface is a decal, and what makes this read as machined is that it is dark
+   with a lit edge under it — a channel in the panel with the light catching
+   its lower wall. At rest that is all it is, and all it says is that these
+   dials are wired to that ball.
+
+   LIT ONLY WHILE ITS AXIS IS THE ONE MOVING. Three permanently glowing traces
+   would be three claims competing at once, which is the state this panel is in
+   least often; the useful moment is the one where exactly one thing is being
+   turned, and then the panel can afford to say so loudly. */
+.orbsmall{ position:relative; }
+.orbtrace{
+  position:absolute; left:0; width:100%; pointer-events:none; overflow:visible;
+  /* OVER THE BALL, because the last few pixels of every channel are cut INTO
+     it — a wire that stops at the silhouette is touching the sphere, one that
+     crosses it is going in. The canvas cannot draw these: it knows nothing
+     about where the dials ended up. */
+  z-index:3;
+}
+.ot{
+  fill:none; stroke-linejoin:miter; stroke-linecap:butt;
+}
+/* THE CHANNEL — always there, and it is metal, so it never emits */
+.ot-cut{
+  stroke-width:5; stroke:#0d1013;
+  /* TWO WALLS, NOT ONE. A single light edge below reads as a line with a
+     highlight under it; a dark edge ABOVE as well is what says the channel has
+     a near side too, and depth is the pair — one wall catching the lamp, one
+     losing it. Same argument the ball's own cuts make. */
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.085))
+         drop-shadow(0 -1px 0 rgba(0,0,0,.55));
+}
+/* THE FILAMENT — a third the width, lying at the bottom of it, and nothing at
+   all until its axis is carrying. It is not a lit version of the groove: it is
+   a different object, further away, seen through the groove. */
+.ot-lit{
+  stroke-width:3.4; stroke:transparent;
+  transition:stroke .16s linear, filter .16s linear;
+}
+/* AND EACH ONE ANSWERS ONLY TO ITS OWN NAME — while it is being turned, and
+   also while the hand is merely OVER its dial. Hover is not a lesser version
+   of the drag state, it is the question the drag answers: "which of these
+   three am I about to move." Showing the wire then is the whole reason the
+   wire is drawn, and it means the connection is visible without committing to
+   a turn — which is also the only way to see it in a still picture.
+
+   `:has` rather than a JS hover handler: the trace sits BEFORE the dials in
+   the DOM and no amount of sibling selector reaches backwards, but the parent
+   knows about both. */
+.orbsmall:has(.knobcol > :nth-child(1):hover) .ot-lit.ot-yaw,
+.orbsmall:has(.knobcol > :nth-child(2):hover) .ot-lit.ot-pitch,
+.orbsmall:has(.knobcol > :nth-child(3):hover) .ot-lit.ot-roll,
+.orbsmall[data-live="yaw"]   .ot-lit.ot-yaw,
+.orbsmall[data-live="pitch"] .ot-lit.ot-pitch,
+.orbsmall[data-live="roll"]  .ot-lit.ot-roll{
+  stroke:var(--lit);
+  /* THE BLOOM HUGS THE LINE, BUT IT HAS TO BE THERE TO HUG IT. Two passes at
+     2 and 5 was so tight it was indistinguishable from the stroke itself —
+     technically correct restraint, visually nothing. Three passes now: the
+     core escaping the slot, what lands on the metal beside it, and a wide
+     faint one that is the only part reading as light in the air rather than on
+     a surface. Still short of a halo — the falloff is done inside fifteen
+     pixels, so the plate two centimetres away is untouched. */
+  /* FULL — dial back from here */
+  filter:drop-shadow(0 0 4px var(--lit))
+         drop-shadow(0 0 10px var(--lit))
+         drop-shadow(0 0 22px var(--lit))
+         drop-shadow(0 0 40px var(--lit));
+}
+.ot-yaw{   --lit:#4ADE80; }
+.ot-pitch{ --lit:#FF4A4A; }
+.ot-roll{  --lit:#5AA9FF; }
+
+/* THE LABEL GOES WITH IT. The knob already wears its axis on the arc; while it
+   is the one being turned, its NAME says so too — which is the half you can
+   read without looking at the dial. */
+.orbsmall .knobcol > :nth-child(1):hover .klab,
+.orbsmall .knobcol > :nth-child(2):hover .klab,
+.orbsmall .knobcol > :nth-child(3):hover .klab,
+.orbsmall[data-live="yaw"]   .knobcol > :nth-child(1) .klab,
+.orbsmall[data-live="pitch"] .knobcol > :nth-child(2) .klab,
+.orbsmall[data-live="roll"]  .knobcol > :nth-child(3) .klab{
+  color:var(--klit); text-shadow:0 0 7px var(--klit);
+}
+/* ── THE POINTER LIGHTS, NOT THE NOTCH ──────────────────────────────────────
+   THE NOTCH IS AT TWELVE O'CLOCK AND STAYS THERE. Lighting it put the colour
+   on the one mark that never moves — a lamp on the datum, which says the knob
+   is live but not a word about where it is. The POINTER is the knob's answer,
+   and it is already the thing your eye is on: light that and the lit part and
+   the informative part are the same part.
+
+   The notch keeps its cut, unlit, because it is still the last few pixels of
+   the wire arriving — a channel, not a signal. */
+.orbsmall .knobcol > :nth-child(1):hover .knob-cap::after,
+.orbsmall .knobcol > :nth-child(2):hover .knob-cap::after,
+.orbsmall .knobcol > :nth-child(3):hover .knob-cap::after,
+.orbsmall[data-live="yaw"]   .knobcol > :nth-child(1) .knob-cap::after,
+.orbsmall[data-live="pitch"] .knobcol > :nth-child(2) .knob-cap::after,
+.orbsmall[data-live="roll"]  .knobcol > :nth-child(3) .knob-cap::after{
+  background:var(--klit);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--klit) 45%, transparent),
+             0 0 6px var(--klit), 0 0 12px var(--klit);
+}
+.knob-cap::after{ transition:background .16s linear, box-shadow .16s linear; }
+/* THE COLOUR IS THE DIAL'S OWN, whichever way it came to be lit */
+.orbsmall .knobcol > :nth-child(1){ --klit:#4ADE80; }
+.orbsmall .knobcol > :nth-child(2){ --klit:#FF4A4A; }
+.orbsmall .knobcol > :nth-child(3){ --klit:#5AA9FF; }
+.klab{ transition:color .16s linear, text-shadow .16s linear; }
+/* NO AXIS BADGE. A small orange X/Y/Z appeared in the corner while a ring was
+   held — a label naming the thing you already have hold of, in a colour that
+   belongs to none of the three rings and means "fault" everywhere else on this
+   panel. The ring itself lights in its own colour, and where this part sits
+   beside dials the trace and the dial's name light too; that is three
+   statements of the same fact before the badge adds a fourth. `data-ax` stays
+   on the element as a hook for a host that wants one. */
 
 .gizmo{
   width:132px; height:132px; margin:0 auto; position:relative; border-radius:50%;

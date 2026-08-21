@@ -689,11 +689,17 @@
   <h2>12 <span>/</span> The orbit ball</h2>
   <div class="stage">
     <div class="stage-note">live · grab a ring, or roll the ball itself · three sizes, one state</div>
-    <div style="display:flex;gap:44px;align-items:center;flex-wrap:wrap;justify-content:center">
+    <div class="orbrow">
       <div id="orbitspec-lg" class="orbcell"></div>
       <div id="orbitspec-md" class="orbcell"></div>
-      <div id="orbitspec-sm" class="orbcell"></div>
-      <div id="orbitspec-knobs" class="knobcol"></div>
+      <!-- THE SMALL ONE OWNS THE KNOBS. Three balls and a floating column of
+           dials read as four things; the dials belong to a ball, and the one
+           they belong to is the honest one — `sm` is what a knob row actually
+           gives this part, so it is the size to judge and the size to drive. -->
+      <div class="orbsmall">
+        <div id="orbitspec-sm" class="orbcell"></div>
+        <div id="orbitspec-knobs" class="knobcol"></div>
+      </div>
     </div>
   </div>
   <table class="spec">
@@ -1822,14 +1828,177 @@ document.getElementById('navspec').replaceWith(navBar({
     .forEach(([key, name]) => {
       balls[key] = orbit({
         size: key, yaw: st.yaw, pitch: st.pitch, roll: st.roll,
-        onChange: v => push(v, key),
+        onChange: (v, ax) => { live(ax, false, true); push(v, key); },
+        /* the arc under the hand lights its own wire and its own dial */
+        onHover: ax => live(ax, true),
       });
       const cell = document.getElementById('orbitspec-' + key);
-      cell.append(balls[key], el('span', 'tagcut', name));
+      /* THE NAME GOES ABOVE. A caption under a control is a caption for
+         whatever is below it as often as not; over it, there is nothing else
+         it could belong to. */
+      cell.append(el('span', 'tagcut', name), balls[key]);
     });
 
   /* YAW, PITCH, ROLL — the order PANELS §03 prints them in, so the one part
      that exists on two pages does not list its own axes two ways. */
+  /* ══════════════════════════════════════════════════════════════════════
+     THE TRACES — THREE GROOVES CUT BETWEEN THE BALL AND ITS DIALS.
+
+     A KNOB BESIDE A BALL IS NOT OBVIOUSLY A KNOB *OF* THE BALL. Three dials
+     under a sphere could be driving anything; what says otherwise is a wire.
+     So each one gets a groove running up to the ball, cut and unlit like the
+     grooves on the ball itself — present at rest, saying only that a
+     connection exists.
+
+     AND IT LIGHTS WHEN THAT AXIS IS THE ONE MOVING, from either end: grab the
+     red arc and the pitch trace lights and its label goes red; turn the pitch
+     knob and exactly the same thing happens. That is the point of lighting it
+     rather than drawing it — the pair is one control with two handles, and the
+     lit path is the part of the panel currently carrying the signal.
+
+     THE GEOMETRY IS MEASURED, NOT ASSUMED. Knob widths depend on their labels
+     and their readouts, and the row is centred; the only way a trace lands on
+     the knob it belongs to is to ask the browser where that knob ended up.
+     Recomputed on resize for the same reason. */
+  const wrapEl = document.querySelector('.orbsmall');
+  const trace  = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  trace.setAttribute('class', 'orbtrace');
+  trace.setAttribute('preserveAspectRatio', 'none');
+  wrapEl.insertBefore(trace, wrapEl.lastElementChild);
+
+  /* ── WHERE EACH WIRE LEAVES THE BALL, AND HOW IT GETS DOWN ────────────────
+     THREE LANDING POINTS, NOT ONE. Sharing a take-off point means sharing the
+     pixels above the first bend, and pixels can only hold one colour: the last
+     path drawn owned that run whatever was live, which is why blue was always
+     the one you could see. Spread round the lower edge they never touch, and
+     each is legible on its own — which is the whole job of drawing three.
+
+     AND THEY LAND ON THE BALL, ON ITS EDGE. A wire that stops in the gap below
+     an object is pointing at it; one that reaches its rim is attached to it.
+
+     45° THEN STRAIGHT DOWN, which is how a trace is routed on a board and the
+     reason it looks like one. A diagonal covers the sideways distance and the
+     vertical finishes into the dial, so every bend is a right angle or half of
+     one and no segment is at an arbitrary slope. */
+  const AT = { yaw: -34, pitch: 0, roll: 34 };   // degrees off straight down
+
+  const layout = () => {
+    const kr = wrapEl.querySelector('.knobcol');
+    if (!kr) return;
+    const wb = wrapEl.getBoundingClientRect();
+    const bb = balls.sm.getBoundingClientRect();
+    if (!wb.width || !bb.width) return;
+    trace.style.top = '0px';
+    trace.style.height = wb.height + 'px';
+    trace.setAttribute('viewBox', `0 0 ${wb.width} ${wb.height}`);
+
+    const cx = (bb.left + bb.right) / 2 - wb.left;
+    const cy = (bb.top + bb.bottom) / 2 - wb.top;
+    /* ── IT STOPS SHORT OF THE BALL, NOT AT IT ────────────────────────────
+       CARRIED INSIDE, IT DREW OVER THE BALL — and the ball is a rendered
+       sphere, so a flat SVG line laid across it is the one thing on this panel
+       that cannot be part of it. Ending exactly on the rim is barely better:
+       two objects sharing a contour look welded, and this one is meant to
+       arrive at a socket rather than be continuous with what is in it.
+
+       Five pixels of plate between them is what says the channel is cut in the
+       PLATE and the ball is a separate part sitting in a hole in it. The eye
+       closes a gap that small; it cannot un-see a join. */
+    const rr = bb.width / 2 + 5;
+
+    trace.textContent = '';
+    ['yaw', 'pitch', 'roll'].forEach(k => {
+      const el2 = knobs[k];
+      if (!el2) return;
+      const r2 = el2.getBoundingClientRect();
+      const kx = (r2.left + r2.right) / 2 - wb.left;
+      /* ── IT STOPS SHORT OF THE NAME, WHICH IS HOW IT GETS UNDER IT ────────
+         RUN INTO THE DIAL'S BOX AND THE FIRST THING IN THAT BOX IS THE LABEL,
+         so the wire crosses PITCH and the text has a line through it. Ending a
+         few pixels above instead reads as the trace passing BEHIND the name
+         and coming out at the knob — the eye closes a gap that small on its
+         own, and closing it is what makes the label sit on top of something
+         rather than in the way of it. */
+      const ky = r2.top - wb.top - 2;             /* just short of the name */
+      const th = AT[k] * Math.PI / 180;
+      const ax = cx + rr * Math.sin(th);
+      const ay = cy + rr * Math.cos(th);
+
+      const dx = kx - ax, adx = Math.abs(dx);
+      /* ── THE STRAIGHT RUN INTO THE DIAL IS RESERVED FIRST ─────────────────
+         THE DIAGONAL WAS TAKING EVERYTHING AND LEAVING SIX PIXELS. A wire that
+         arrives still turning has not arrived — it points at the dial from an
+         angle and the eye has to finish the join itself. Eighteen pixels of
+         plain vertical is what makes it land ON the thing rather than near it,
+         so that is taken off the top and the diagonal gets what is left.
+
+         AND IT ENDS INSIDE THE DIAL'S BOX, not on its boundary. A line that
+         stops exactly where another element begins leaves a hairline of ground
+         between them at most zoom levels; three pixels of overlap is the
+         difference between touching and nearly touching. */
+      const DROP = 10;
+      const room = ky - ay;
+      const run  = Math.min(adx, Math.max(0, room - DROP));
+      const d = adx < 1.5
+        ? `M${ax} ${ay} V${ky}`
+        : `M${ax} ${ay} L${ax + Math.sign(dx) * run} ${ay + run} H${kx} V${ky}`;
+
+      /* ── TWO PATHS ON ONE ROUTE: THE CUT, AND WHAT IS IN IT ───────────────
+         A STROKE THAT CHANGES COLOUR IS A DRAWN LINE SWITCHING ON. What sells
+         light coming from UNDER the plate is that the light and the channel
+         are different objects — a wide dark groove that is always there, and a
+         narrow bright filament lying at the bottom of it that only exists when
+         something is running. The groove is machined into the metal whatever
+         happens; the light is below the metal and shows through it.
+
+         The filament is thinner than the groove ON PURPOSE. Equal widths would
+         be one line changing colour again; at a third the width you are
+         looking past two dark walls at something further away, which is the
+         entire depth cue. */
+      for (const cls of ['ot-cut', 'ot-lit']) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'ot ' + cls + ' ot-' + k);
+        path.setAttribute('vector-effect', 'non-scaling-stroke');
+        trace.append(path);
+      }
+    });
+  };
+
+  /* WHICH AXIS IS CARRYING THE SIGNAL, and it clears itself. A knob drag ends
+     with no event of its own, so a short idle timer is what puts the panel
+     back to rest — and a pointerup anywhere does it immediately, which covers
+     the common case without waiting. */
+  /* ── A HAND THAT HAS STOPPED MOVING HAS NOT LET GO ────────────────────────
+     THE IDLE TIMER CANNOT TELL "FINISHED" FROM "PAUSED". A drag ends with no
+     event of its own — the last `onChange` of a turn is identical to the
+     middle of one — which is why the timer exists at all. But hold the button
+     still for half a second and it fires, and the wire goes out under a hand
+     that is still on the control.
+
+     THE BUTTON IS THE ANSWER, and it is a fact rather than an inference: while
+     something is pressed nothing has been released, so no timer is armed. The
+     release itself puts the panel back, immediately and without waiting. */
+  let liveT = 0, downNow = false;
+  addEventListener('pointerdown', () => { downNow = true; clearTimeout(liveT); });
+  const live = (k, hold, driving) => {
+    wrapEl.dataset.live = k || '';
+    /* THE BALLS HEAR THE SAME THING THE PLATE DOES. A knob under one of them
+       is one of its handles; hovering it points at that axis and turning it
+       turns that axis, and neither fact is visible from inside the ball. */
+    for (const b in balls) balls[b].live(k, driving);
+    clearTimeout(liveT);
+    /* ── TWO WAYS TO BE LIT, AND ONLY ONE OF THEM NEEDS A TIMER ─────────────
+       A DRAG ENDS WITHOUT AN EVENT OF ITS OWN — the last `onChange` of a turn
+       looks exactly like the middle of one — so that state has to time out.
+       HOVER does not: it has a leave event, so it stays lit for as long as the
+       hand is there and goes out when it goes. Giving hover the timer too
+       would blink the wire out from under a stationary pointer. */
+    if (k && !hold && !downNow) liveT = setTimeout(() => { wrapEl.dataset.live = ''; }, 420);
+  };
+  addEventListener('pointerup', () => { downNow = false; live(null); });
+  addEventListener('pointercancel', () => { downNow = false; live(null); });
+
   const col = document.getElementById('orbitspec-knobs');
   [['yaw', 'Yaw'], ['pitch', 'Pitch'], ['roll', 'Roll']].forEach(([k, label]) => {
     knobs[k] = knob({
@@ -1848,13 +2017,26 @@ document.getElementById('navspec').replaceWith(navBar({
       onChange: v => {
         st[k] = v;
         if (syncing) return;
+        live(k, false, true);          /* a knob being turned is a turn */
         syncing = true;
         for (const b in balls) balls[b].set({ [k]: v });
         syncing = false;
       },
     });
+    /* POINTING AT A DIAL IS POINTING AT ITS AXIS, and the ball should say so
+       — it is the same question the arc answers when you hover the arc. */
+    knobs[k].addEventListener('pointerenter', () => live(k, true));
+    /* NOT WHILE A BUTTON IS DOWN. A knob drag captures the pointer, so the
+       hand routinely leaves the dial's box mid-turn — and leaving is not
+       stopping. Without the check the lit state drops out and is put back by
+       the next move, which is a flicker for the whole of any drag that strays. */
+    knobs[k].addEventListener('pointerleave', e => { if (!e.buttons) live(null); });
     col.append(knobs[k]);
   });
+
+  /* after the dials exist and the browser has laid them out */
+  requestAnimationFrame(layout);
+  addEventListener('resize', layout);
 })();
 
 /* ── 09 · THE APP DOCK SPECIMEN ───────────────────────────────────────────

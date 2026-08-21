@@ -29,7 +29,8 @@
       <tr><td>selector(…)</td><td>Five to a dozen <b>names</b> — the gap between the two above: too many to aim at, too few to earn a cylinder. A window with the current name in it, opening to a list you can arrow through and <em>type at</em>. The current row is pressed IN and the pointed-at row lights: two marks, because a value list has a row that is already true before you touch it</td></tr>
       <tr><td>lightDir(…)</td><td>A <b>direction</b>, which is two angles and therefore not two controls. A flattened hemisphere: the angle round the disc is the azimuth, the distance from the middle is the elevation — centre is straight down, rim is the horizon. The numbers stay, under it, still typeable</td></tr>
       <tr><td>rotary(…)</td><td>A <b>short list</b> where every position must be visible at once. Hard ceiling of six: the fan is a fixed 80°, so detents fall from 27° to 9°</td></tr>
-      <tr><td>gizmo(…)</td><td>A <b>direction to look from</b>. Six axes, so the picture is the control: you click the red node on the right rather than reading the word. Discrete where <code>lightDir</code> is continuous, and posed beside it anyway — both answer <i>aim this</i>. Renameable, never reorderable; hollow is the far side of the ball, and the hub is the axis coming at you</td></tr>
+      <tr><td>orbit(…)</td><td>An <b>orientation</b>, and the only part here that sets one. Three cut arcs, each the great circle perpendicular to an axis: grab one and the ball turns about that axis, and the ring you are holding does not move, because a circle rotated about its own axis is the same circle. Roll the body for a free turn, throw it and it carries, double-click to come back to zero. Continuous where <code>gizmo</code> was discrete — it answers the question the six-key pad cannot: what if the angle you want is not one of the six</td></tr>
+      <tr><td>gizmo(…)</td><td>A <b>direction to look from</b>. Six axes, so the picture is the control: you click the red node on the right rather than reading the word. <b>No longer posed on this page</b> — <code>orbit</code> took its tile, and the one panel that built an axis ball inline now builds an orbit ball instead. Still in the kit, still exported, and still the right part when the answer really is one of six named views rather than an angle</td></tr>
       <tr><td>key(…) · pkey(…)</td><td>Momentary <b>did</b> something, latching <b>is</b> something. <code>pkey</code> adds the mechanical interlock: pressing one pops the others out</td></tr>
       <tr><td><code>.actrow</code> + <code>key(…, {cls:'act …'})</code></td><td>A <b>row of commands at the foot of a panel</b>. Not a factory — two classes on the key you already have, and <code>.act</code> is the one that is easy to forget: <code>.key</code> is the surface, <code>.act</code> is the SIZE, and a cap without it is <code>padding:0</code> at no height, so it shrinks to the width of its word and reads as text. One <code>fire</code>/<code>go</code>/<code>halt</code> verb at most, the rest <code>aux</code>, and an icon-only cap opts out of <code>flex:1</code>. §04</td></tr>
       <tr><td>toggle(…)</td><td>One <b>boolean</b>, with its name engraved beside the switch. The whole line is the button, and it carries <code>.set(v)</code> like every other value control. §06</td></tr>
@@ -44,10 +45,14 @@
       <tr class="trap">
         <td>Two copies exist</td>
         <td><code>skew-kit.js</code> and the inline copy inside
-            <code>skew-panels.html</code> have now diverged — <code>gizmo()</code> is in the kit
-            and the exploration still builds its axis ball inline, unlit and with the choice shown
-            only on the keys beside it. One of them has to become the other's import. Written down
-            in both files rather than quietly carried.</td>
+            <code>skew-panels.html</code> have diverged, and the axis ball that used to be the
+            example is <b>settled</b>: that panel now builds <code>orbit()</code> out of the kit.
+            It loads <code>dist/</code> rather than <code>src/</code> to do it — the built file is
+            wrapped in an IIFE, so it can sit beside a page that already declares its own
+            <code>el</code> without a duplicate-<code>const</code> throw. Its three angle knobs
+            come from the kit for the same reason. <b>The rest of that page is still its own
+            copy</b>, and every part of it that the kit has since grown is a part it will not
+            get. One of them still has to become the other's import.</td>
       </tr>
     </tbody>
   </table>
@@ -793,11 +798,13 @@
             front is the one you were looking at.</td>
       </tr>
       <tr>
-        <td>Not the axis ball</td>
-        <td>PANELS §03 carries a flat ball whose six nodes each snap to a view. That is a
-            <b>destination</b> picker and this is a <b>rotation</b>, and the six-key pad beside it
-            already does the snapping. This one answers the question neither can: what if the angle
-            you want is not one of the six.</td>
+        <td>It replaced the axis ball</td>
+        <td>PANELS §03 used to carry a flat ball whose six nodes each snapped to a view. That is a
+            <b>destination</b> picker and this is a <b>rotation</b> — and the six-key pad beside it
+            already did the snapping, so the ball was the second half of a part that already
+            existed. It is this one now, and the keys <b>turn</b> it to their view rather than
+            setting it, on the same animation the double-click home uses: snapping would leave the
+            keys and the ball as two pictures of one state instead of one control with a shortcut.</td>
       </tr>
       <tr class="trap">
         <td>The drag is an arcball, and the first two versions were the wrong quantity</td>
@@ -1051,8 +1058,8 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      'wide'],
     ['Rotary selector',
      '<span id="mat-rot"></span>'],
-    ['Axis ball',
-     '<span id="mat-gizmo"></span>'],
+    ['Orbit ball',
+     '<span id="mat-orbit"></span>'],
     ['Drum selector',
      '<span id="mat-drum"></span>',
      'wide'],
@@ -1096,21 +1103,27 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      been filed under values on the strength of being a thing you drag, which is
      a fact about the gesture and not about what it sets.
 
-     THE AXIS BALL IS THE EXCEPTION AND IT IS DELIBERATE. On the discrete/
-     continuous line it belongs with the selectors: six positions, nothing in
-     between. It is grouped with `lightDir` anyway, because these headings are
-     the QUESTION YOU ARRIVE WITH, not a taxonomy — and "how do I let someone
-     aim a thing in space" is one question with two answers. Split them and a
-     reader who has found the light picker has no reason to believe the other
-     one exists; a group that is correct and unsearchable has lost the argument
-     with a group that is approximate and found.
+     THE AXIS BALL USED TO BE THE EXCEPTION HERE, and the exception has gone
+     away rather than been resolved. On the discrete/continuous line that part
+     belonged with the selectors — six positions, nothing in between — and it
+     sat under this heading anyway, because these headings are the QUESTION YOU
+     ARRIVE WITH rather than a taxonomy, and "how do I let someone aim a thing
+     in space" is one question with more than one answer.
+
+     THE ORBIT BALL IN ITS PLACE NEEDS NO EXCEPTION. It sets an orientation and
+     it sets it continuously, so it belongs under this heading on the plain
+     reading as well as the useful one. Which is worth noticing rather than
+     quietly enjoying: the argument for keeping the old part here was a good
+     one, and it turned out to be an argument for a part that should have been
+     a different part. A heading that has to be defended twice is sometimes
+     telling you about the thing filed under it.
 
      So the two round parts sit together, and the DRUM is what draws the line
      instead: a list of names is nobody's idea of a quantity, and it was the one
      genuinely miscategorised tile. */
   const GROUPS = [
     ['Light',         ['Jewel LED', 'Light pipe', 'Readout']],
-    ['Setting a value', ['Knob', 'Knob · endless', 'Light direction', 'Axis ball', 'Colour picker',
+    ['Setting a value', ['Knob', 'Knob · endless', 'Light direction', 'Orbit ball', 'Colour picker',
                          'Fader · vertical bank', 'Fader · one cap',
                          'Fader · centre detent', 'Range fader']],
     /* THE ORDER IS THE ARGUMENT, and it is a count: a rotary is aimable to
@@ -1196,16 +1209,20 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
 
   /* ── AND THE SAME KNOB WITH ITS STOPS TAKEN OFF ─────────────────────────
      POSED BESIDE THE POT ON PURPOSE. The two are one part and one flag, and
-     the whole of the difference is visible in the track: 270° with a dead
-     zone at the bottom, against a full circle with none. A reader who has
-     found one has found the other, which is the argument this whole row is
-     built on.
+     every difference between them is visible in the pair: 270° of track with a
+     dead zone at the bottom against a full circle with none; an arc that grows
+     from an end against a pointer that carries the value on its own.
 
      IT READS AN ANGLE, because that is the case that needs it — a heading has
      no least and no most, so −180 and +180 are the same place and a stop
-     between them is a wall across open ground. */
+     between them is a wall across open ground.
+
+     AND IT IS SET OFF ZERO, at a value the pot beside it could not even
+     express. A sample sitting at its own centre is a photograph of a part; at
+     147° the wrap is doing something you can see, and the pointer is the only
+     thing saying so, which is the whole of what changed. */
   document.getElementById('mat-knob360').replaceWith(knob({
-    label: '', min: -180, max: 180, value: 48, size: 58,
+    label: '', min: -180, max: 180, value: 147, size: 58,
     bipolar: true, endless: true, fmt: v => `${Math.round(v)}°`,
   }));
 
@@ -1289,7 +1306,20 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
     options: ['Parallel', 'Crossed', 'Serpentine', 'Hand', 'Hand cross', 'Hand random'],
   }), '168px'));
 
-  document.getElementById('mat-gizmo').replaceWith(gizmo({ index: 2 }));
+  /* ── THE ORBIT BALL, WHERE THE AXIS BALL USED TO BE ─────────────────────
+     THE FLAT BALL WITH SIX NODES WAS A PICTURE WITH BUTTONS ON IT. Each node
+     snapped the camera to a view — a useful control, and the exact job the
+     six-key pad beside it already did. Two parts for one question, and the one
+     that went is the one that could not answer the OTHER question: what if the
+     angle you want is not one of the six.
+
+     POSED AT AN ANGLE, because a sample at rest shows a symmetric ball and
+     says nothing about what it does. Turned, the three cuts are three
+     different ellipses and the two wells are visibly at different depths,
+     which is the part. */
+  document.getElementById('mat-orbit').replaceWith(orbit({
+    size: 'sm', yaw: 34, pitch: -22, roll: 12,
+  }));
 
   /* ── AND THE SAME SWITCH SEATED IN THE CASE ───────────────────────────────
      Not a second control: the same `rotary`, in the pose the part was designed

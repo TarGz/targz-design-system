@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.95.0
+     at       Skew v1.96.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -750,6 +750,8 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   const wrap = el('div', 'kwrap' + (row ? ' inline' : tile ? ' tile'
                                   : compact ? ' compact' : bare ? ' bare' : ''));
   const SPAN = max - min;
+  /* the cap's running rotation, which is not the value and must not wrap */
+  let capDeg = ((value - min) / SPAN - (bipolar ? .5 : 0)) * 360;
   /* how much of the circle the track uses — all of it when there are no ends.
      DECLARED HERE, above the ring markup that interpolates it: a `const` read
      before its line is a TDZ throw, and the ring is built in a template
@@ -769,10 +771,8 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
        <circle class="kr-track" cx="50" cy="50" r="${RING_R}"
                stroke-dasharray="${RING_C * ARCF} ${RING_C}"/>
        ${endless ? '' : `<circle class="kr-val" cx="50" cy="50" r="${RING_R}"/>`}
-       ${endless ? `<circle class="kr-dot" cx="${50 + RING_R}" cy="50" r="3.4"/>` : ''}
      </svg>`).firstElementChild;
   const valArc = ring.querySelector('.kr-val');
-  const valDot = ring.querySelector('.kr-dot');
   const cap = el('div', 'knob-cap');
   k.append(el('div', 'knob-collar'), ring, cap);
   const val = el('div', 'kval');
@@ -783,9 +783,25 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
     /* THE POT SWEEPS 270° FROM ITS LOWER STOP; THE ENCODER MAPS THE VALUE
        STRAIGHT ONTO THE CIRCLE, with zero at twelve o'clock so a bipolar
        angle reads as itself. */
-    cap.style.setProperty('--deg', (endless
-      ? (t - (bipolar ? .5 : 0)) * 360
-      : -135 + t * 270) + 'deg');
+    const deg = endless ? (t - (bipolar ? .5 : 0)) * 360 : -135 + t * 270;
+    if (!endless) cap.style.setProperty('--deg', deg + 'deg');
+    else {
+      /* ── THE CAP ACCUMULATES; IT DOES NOT WRAP ────────────────────────────
+         179° TO −179° IS TWO DEGREES OF VALUE AND 358 OF TRANSFORM, and the
+         cap has a transition on it, so crossing the seam sent the pointer all
+         the way round the other way — a full spin for a nudge. Clamping the
+         transform to (−180, 180] is what caused it: the VALUE is cyclic and
+         the rotation of a physical pointer is not.
+
+         So the transform keeps its own running total and only ever moves by
+         the SHORT way to the new angle. Past a full turn it simply keeps
+         counting, which is what an encoder's shaft does — and it means a value
+         wrapping ten times leaves a cap that has honestly turned ten times. */
+      let d = (deg - capDeg) % 360;
+      if (d > 180) d -= 360; else if (d < -180) d += 360;
+      capDeg += d;
+      cap.style.setProperty('--deg', capDeg + 'deg');
+    }
     // Unipolar grows from the start of the sweep; bipolar grows from its middle
     // in whichever direction you turned. One dasharray + one dashoffset does both.
     /* ── A TRACE MEASURES; A LAMP LOCATES. AN ENDLESS KNOB WANTS THE SECOND ─
@@ -805,24 +821,11 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
       valArc.setAttribute('stroke-dashoffset', `${-Math.min(t, from) * ARCF * RING_C}`);
       valArc.style.opacity = len < 1.2 ? 0 : 1;   // no round-cap dot at the origin
     }
-    /* ── AND THE ENDLESS ONE CARRIES A LAMP AT THE HEAD OF THE TRACE ────────
-       A KNOB WITH NO STOPS HAS NO ZERO YOU CAN SEE. On a pot the arc grows out
-       of a fixed end, so its LENGTH tells you where you are; wrap the track
-       into a full circle and the same arc is a segment floating on a ring —
-       equally long at two very different settings, and at −180 and +180 it is
-       the same drawing. What is unambiguous is the position of its head, so
-       the head gets a light: a dot riding the ring at the value itself.
-
-       IT SITS AT THREE O'CLOCK IN THE MARKUP and the ring's own −90° rotation
-       carries it to twelve, so it starts where zero is and turns with the
-       value — one transform, no second coordinate system to keep in step. */
-    /* THE SAME ANGLE THE CAP TURNS TO, and it has to be said the same way or
-       it is not the same angle: written as `t * 360` the lamp sat half a turn
-       from the pointer on any BIPOLAR knob, because the cap measures from the
-       middle of the range and this was measuring from its start. Zero belongs
-       at twelve o'clock on both or on neither. */
-    if (valDot) valDot.style.transform =
-      `rotate(${(t - (bipolar ? .5 : 0)) * 360}deg)`;
+    /* NO LAMP ON THE RING. It was here because an endless knob draws no arc
+       and something has to say where the value is — but the CAP already does,
+       and always did: the pointer turns with the value whether the knob has
+       ends or not. Two marks for one number is one mark too many, and the one
+       that went is the one that is not also the thing you grab. */
     val.textContent = fmt ? fmt(v) : String(v);
     k.setAttribute('aria-valuenow', v);
     k.setAttribute('aria-valuetext', val.textContent);
@@ -3029,11 +3032,17 @@ const RING_RGB = [[214, 62, 62], [64, 192, 111], [77, 145, 218]];
    from under the panel in white reads as MORE ROOM, which is the one thing
    this effect exists not to be.
 
-   ORANGE IS THE LANGUAGE'S OWN. It is what `--led` means everywhere else on
-   this site, and it is already the north well's floor — established as the
-   ball's colour rather than any axis's. A gesture that moves the whole ball
-   gets the whole ball's colour. */
-const BALL_RGB = [224, 123, 28];
+   WHITE, IN THE END, AND THE ARGUMENT AGAINST IT IS WORTH KEEPING. Orange is
+   the language's accent and already the north well's floor, so it reads as the
+   ball's own colour rather than any axis's — the case for it. Against: white
+   is what the lamp and the specular are made of, so light from under the panel
+   in white can read as more room rather than as something switching on.
+
+   What settles it is that the three axes are the coloured things here, and a
+   fourth hue competing with them says the body roll is a fourth axis. White
+   says "all of it" — no hue, therefore no axis — and the effect still reads
+   because the ball at rest has no light under it at all. */
+const BALL_RGB = [255, 255, 255];
 /* how far the hovered arc throws light past its own edges, and how hard */
 const GLOW_STR = 0.28;
 /* how hard the plate's channels light the ball's underside while one turns */
@@ -4768,7 +4777,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
     else delete wrap.dataset.drive;
     const c = drive >= 0 ? drive : point;
     if (c >= 0) wrap.style.setProperty('--axc', ORBIT_AX[c].col);
-    else if (held === -2) wrap.style.setProperty('--axc', '#e07b1c');
+    else if (held === -2) wrap.style.setProperty('--axc', '#ffffff');
     else wrap.style.removeProperty('--axc');
   };
   const setHover = k => {
@@ -5699,6 +5708,6 @@ function keyBank({ label, options, index = 0, cols, onChange }) {
 
 window.SkewKit = {
   el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
-  VERSION: '1.95.0',
+  VERSION: '1.96.0',
 };
 })();

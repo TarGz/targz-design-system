@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.95.0
+     at       Skew v1.96.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -2461,14 +2461,23 @@ html{ -webkit-tap-highlight-color:transparent; }
    at three o'clock, so the ring turns back to −90° to start the trace at
    twelve — which is where zero is on a knob that reads an angle. */
 .knob.endless .knob-ring{ transform:rotate(-90deg); }
-/* THE LAMP AT THE HEAD OF THE TRACE. Filled rather than stroked, so it reads
-   as a light sitting ON the ring rather than as a thicker piece of the ring —
-   and it takes the arc's own colour and glow, because it is the same signal. */
-.kr-dot{
-  fill:currentColor; stroke:none;
-  transform-origin:50% 50%;
-  filter:drop-shadow(0 0 3px currentColor);
+/* ── AN ENDLESS KNOB'S POINTER IS ITS TRACE ─────────────────────────────────
+   A POT PAINTS `--arc` ROUND THE RING because the arc is its readout. An
+   endless knob draws no arc — the length of one on a closed ring is
+   meaningless — so the same colour goes on the pointer, which is what carries
+   the value here. One option, `arc`, used where each kind of knob actually
+   says its number.
+
+   AND IT IS ALWAYS ON, because it is not a state: it is what the knob IS.
+   Colouring it only while something is being turned makes the dial go dark the
+   moment you let go, and a dial that is only readable while you are touching
+   it is not a readout. */
+.knob.endless .knob-cap::after{
+  background:var(--arc);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--arc) 40%, transparent),
+             0 0 5px color-mix(in srgb, var(--arc) 70%, transparent);
 }
+
 /* A BIPOLAR knob reads from the CENTRE, not from the minimum — Yaw at 0° with
    a half-full arc says "half way up the range", which is true and useless;
    what you want to see is how far off centre you are, and which side. So the
@@ -3373,15 +3382,18 @@ html{ -webkit-tap-highlight-color:transparent; }
 
    The notch keeps its cut, unlit, because it is still the last few pixels of
    the wire arriving — a channel, not a signal. */
+/* THE ALWAYS-ON COLOUR IS THE KIT'S NOW — `.knob.endless` above paints the
+   pointer with the knob's own `arc`, and these three already pass their axis
+   colour as `arc`, so the panel does not have to say it twice. What is left
+   here is only the BRIGHTENING, which is a state and belongs to the panel. */
 .orbsmall .knobcol > :nth-child(1):hover .knob-cap::after,
 .orbsmall .knobcol > :nth-child(2):hover .knob-cap::after,
 .orbsmall .knobcol > :nth-child(3):hover .knob-cap::after,
 .orbsmall[data-live="yaw"]   .knobcol > :nth-child(1) .knob-cap::after,
 .orbsmall[data-live="pitch"] .knobcol > :nth-child(2) .knob-cap::after,
 .orbsmall[data-live="roll"]  .knobcol > :nth-child(3) .knob-cap::after{
-  background:var(--klit);
-  box-shadow:0 0 0 1px color-mix(in srgb, var(--klit) 45%, transparent),
-             0 0 6px var(--klit), 0 0 12px var(--klit);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--klit) 55%, transparent),
+             0 0 7px var(--klit), 0 0 15px var(--klit);
 }
 .knob-cap::after{ transition:background .16s linear, box-shadow .16s linear; }
 /* THE COLOUR IS THE DIAL'S OWN, whichever way it came to be lit */

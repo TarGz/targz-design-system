@@ -1,6 +1,18 @@
-export const version = '1.95.0';
+export const version = '1.96.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.96.0',
+    date: '2026-08-20',
+    changes: [
+      'THE ORBIT BALL TAKES THE AXIS BALL\'S TILE, and the page stops arguing with itself. Four passages defended the two as deliberately different controls — a parts-table row, a trap about two diverged copies, a "not the axis ball" note and a paragraph explaining why a discrete part sat under a continuous heading. All four are rewritten rather than deleted. The taxonomy one is the interesting one: that exception has gone AWAY rather than been resolved, and the argument for keeping the old part there was a good argument for a part that should have been a different part. A heading you have to defend twice is sometimes telling you about the thing filed under it.',
+      '`gizmo` IS STILL IN THE KIT AND STILL EXPORTED. It is no longer posed anywhere, which is worth saying out loud rather than leaving a reader to notice — it remains the right part when the answer really is one of six named views rather than an angle.',
+      'AN ENDLESS KNOB\'S CAP ACCUMULATES; IT DOES NOT WRAP. 179° to −179° is two degrees of value and 358 of transform, and the cap has a transition on it, so crossing the seam sent the pointer all the way round the other way — a full spin for a nudge, every time the ball drove a knob past its own zero. Clamping the transform to (−180, 180] is what caused it: the VALUE is cyclic and the rotation of a physical pointer is not. It keeps a running total now and only ever moves the SHORT way, so a value that wraps ten times leaves a cap that has honestly turned ten times.',
+      'AND THE POINTER IS THE ENDLESS KNOB\'S READOUT, WHICH MAKES THE RING\'S LAMP REDUNDANT. A pot paints `arc` round its ring because the arc is its readout; a knob with no ends draws no arc, so the same colour goes on the pointer — one option, used where each kind of knob actually says its number. The lamp that used to ride the ring is gone: the cap already turned with the value whether the knob had ends or not, so it was a second mark for one number.',
+      'IT IS LIT ALWAYS, NOT ONLY WHILE LIVE. Colouring it on hover and going dark on release makes a dial that is only readable while you are touching it, which is not a readout. The brightening on hover and drag stays — that is a state, and it belongs to the panel rather than to the part.',
+      'ROLLING THE BODY LIGHTS WHITE RATHER THAN ORANGE. Orange is the language\'s accent and already the north well\'s floor, so it reads as the ball\'s own colour — a good case, and beaten by a simpler one: the three axes are the coloured things here, and a fourth hue competing with them implies the body roll is a fourth axis. White has no hue and cannot be mistaken for one. Both arguments are kept beside the constant.',
+    ],
+  },
   {
     version: '1.95.0',
     date: '2026-08-20',

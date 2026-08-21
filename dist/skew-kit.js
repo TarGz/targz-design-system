@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.96.0
+     at       Skew v1.97.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -3339,6 +3339,168 @@ function orbitTexture() { return orbitMaterial(); }
    those dials itself, so it says which axis is under the pointer and lets the
    host decide what else that means. Null when the hand is on the body or off
    the part entirely: no single axis is being pointed at. */
+/* ══════════════════════════════════════════════════════════════════════════
+   THE ORBIT BAY — A BALL, ITS THREE DIALS, AND THE WIRING BETWEEN THEM.
+
+   THIS COMPOSITION EXISTED TWICE BEFORE IT EXISTED ONCE. The system page built
+   it to demonstrate the ball; the viewport panel needed the same thing and got
+   an older, plainer version of it; and the difference between them was not a
+   decision anybody made, it was the second one being written first. Every part
+   of it — the routed channels, the measured geometry, the lit states, the
+   two-way sync — is the same in both places or it is a bug in one of them.
+
+   IT IS A COMPOSITION, NOT A CONTROL, and that is why it lives beside the kit
+   rather than inside `orbit`. The ball is a part: it knows about arcs and
+   attitudes and nothing else, and it must stay that way — a sphere that also
+   owns three knobs is a sphere you cannot use without them. What this adds is
+   the ARRANGEMENT: which dial belongs to which axis, where the wire runs, and
+   what lights when. Those are panel decisions, and they are the ones that were
+   being made twice.
+
+   THE WIRE IS THE POINT OF IT. Three dials under a sphere could be driving
+   anything; a groove running from each to the ball is what says otherwise. Cut
+   and unlit at rest, it is a statement about connection; lit, it is the path
+   the signal is on. And the geometry is MEASURED — knob widths depend on their
+   labels and the row is centred, so the only honest way to land a wire on the
+   dial it belongs to is to ask the browser where that dial ended up.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* ── THE DIALS READ YAW, PITCH, ROLL — NOT X, Y, Z ────────────────────────
+   `ORBIT_AX` IS IN AXIS ORDER because that is what the ARCS are: X, Y, Z, and
+   the rings must not be reordered because their colours are that convention.
+   The dials are not the arcs. They are three named angles, and the name order
+   is the one every viewport in this system prints — yaw, pitch, roll.
+
+   Iterating the wrong one put PITCH on the left and crossed its wire over
+   yaw's on the way to the middle, which is a panel telling you its own layout
+   is a coincidence. Two orders, both correct, and neither is the other. */
+const BAY_ORDER = ['yaw', 'pitch', 'roll'];
+const BAY_AT = { yaw: -34, pitch: 0, roll: 34 };   // degrees off straight down
+const BAY_DROP = 10;                               // straight run into the dial
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
+  const wrap = el('div', 'orbay');
+  const st = { yaw, pitch, roll };
+  let syncing = false;
+
+  const ball = orbit({
+    size, yaw, pitch, roll,
+    onChange: (v, ax) => { live(ax, false, true); push(v); },
+    onHover: ax => live(ax, true),
+  });
+
+  const trace = document.createElementNS(SVGNS, 'svg');
+  trace.setAttribute('class', 'orbay-trace');
+  trace.setAttribute('preserveAspectRatio', 'none');
+
+  const row = el('div', 'orbay-knobs');
+  const knobs = {};
+
+  /* ── WHICH AXIS IS LIT, AND WHY IT NEEDS THREE ANSWERS ───────────────────
+     POINTED AT is a question and lights the arc, its wire and its dial's name.
+     BEING TURNED is a fact and adds the ball's own recesses. AND A HAND THAT
+     HAS STOPPED MOVING HAS NOT LET GO — a drag ends with no event of its own,
+     so the lit state times out; but while a button is down nothing has been
+     released, so no timer is armed. */
+  let liveT = 0, downNow = false;
+  const live = (k, hold, driving) => {
+    wrap.dataset.live = k || '';
+    ball.live(k, driving);
+    clearTimeout(liveT);
+    if (k && !hold && !downNow) liveT = setTimeout(() => { wrap.dataset.live = ''; }, 420);
+  };
+
+  const push = v => {
+    Object.assign(st, v);
+    if (syncing) return;
+    syncing = true;
+    for (const k in knobs) knobs[k].set(Math.round(st[k]));
+    syncing = false;
+    onChange && onChange({ ...st });
+  };
+
+  BAY_ORDER.forEach(k => {
+    const a = ORBIT_AX.find(x => x.key === k);
+    knobs[k] = knob({
+      label: k[0].toUpperCase() + k.slice(1), arc: a.col, endless: true,
+      min: -180, max: 180, step: 1, bipolar: true, size: 44, value: st[k],
+      fmt: v => `${Math.round(v)}°`,
+      onChange: v => {
+        st[k] = v;
+        if (syncing) return;
+        live(k, false, true);
+        syncing = true;
+        ball.set({ [k]: v });
+        syncing = false;
+        onChange && onChange({ ...st });
+      },
+    });
+    knobs[k].addEventListener('pointerenter', () => live(k, true));
+    /* NOT WHILE A BUTTON IS DOWN: a knob drag captures the pointer, so the hand
+       routinely leaves the dial's box mid-turn, and leaving is not stopping. */
+    knobs[k].addEventListener('pointerleave', e => { if (!e.buttons) live(null); });
+    row.append(knobs[k]);
+  });
+
+  wrap.append(ball, trace, row);
+
+  const layout = () => {
+    const wb = wrap.getBoundingClientRect();
+    const bb = ball.getBoundingClientRect();
+    if (!wb.width || !bb.width) return;
+    trace.style.height = wb.height + 'px';
+    trace.setAttribute('viewBox', `0 0 ${wb.width} ${wb.height}`);
+    const cx = (bb.left + bb.right) / 2 - wb.left;
+    const cy = (bb.top + bb.bottom) / 2 - wb.top;
+    /* SHORT OF THE BALL, NOT ON IT. Two objects sharing a contour look welded,
+       and this one arrives at a socket rather than being continuous with what
+       sits in it. */
+    const rr = bb.width / 2 + 5;
+    trace.textContent = '';
+    BAY_ORDER.forEach(k => {
+      const el2 = knobs[k];
+      const r2 = el2.getBoundingClientRect();
+      const kx = (r2.left + r2.right) / 2 - wb.left;
+      const ky = r2.top - wb.top - 2;              /* short of the name */
+      const th = BAY_AT[k] * Math.PI / 180;
+      const ax = cx + rr * Math.sin(th), ay = cy + rr * Math.cos(th);
+      const dx = kx - ax, adx = dx < 0 ? -dx : dx;
+      const run = Math.min(adx, Math.max(0, ky - ay - BAY_DROP));
+      const d = adx < 1.5
+        ? `M${ax} ${ay} V${ky}`
+        : `M${ax} ${ay} L${ax + (dx < 0 ? -run : run)} ${ay + run} H${kx} V${ky}`;
+      /* TWO PATHS ON ONE ROUTE: the cut, always there and made of metal, and
+         the filament lying at the bottom of it that only exists when its axis
+         is carrying. A third the width, so you are looking past two dark walls
+         at something further away — which is the whole depth cue. */
+      for (const cls of ['ot-cut', 'ot-lit']) {
+        const path = document.createElementNS(SVGNS, 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'ot ' + cls + ' ot-' + k);
+        path.setAttribute('vector-effect', 'non-scaling-stroke');
+        trace.append(path);
+      }
+    });
+  };
+
+  addEventListener('pointerdown', () => { downNow = true; clearTimeout(liveT); });
+  addEventListener('pointerup', () => { downNow = false; live(null); });
+  addEventListener('pointercancel', () => { downNow = false; live(null); });
+  addEventListener('resize', layout);
+  requestAnimationFrame(layout);
+
+  wrap.set = (v = {}) => {
+    Object.assign(st, v);
+    ball.set(st);
+    for (const k in knobs) knobs[k].set(Math.round(st[k]));
+    return wrap;
+  };
+  wrap.turn = (v = {}) => { ball.turn(v); return wrap; };
+  wrap.value = () => ({ ...st });
+  wrap.relayout = layout;
+  return wrap;
+}
+
 function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } = {}) {
   size = ORBIT_SIZE[size] || +size || ORBIT_SIZE.sm;
   const C    = size / 2;
@@ -3535,15 +3697,22 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
   let spAxis = null, spRate = 0, spRAF = 0, spPrev = null, spT = 0, rzRAF = 0;
   const spBuf = [];              // recent turns: rotation vectors and their spans
   const SPIN_MIN  = 1.6e-4;      // rad/ms below which it has stopped
-  const SPIN_MAX  = 0.02;        // and a ceiling, so a 2px flick is not a blur
-  /* ── THE THROW IS SCALED DOWN, AND IT IS NOT THE SAME KNOB AS THE DECAY ────
-     1:1 WITH THE HAND IS RIGHT WHILE YOU ARE HOLDING IT and wrong the moment
-     you let go. During a drag the ball has to track the finger exactly — that
-     is what an arcball promises. A throw is a different question: the hand's
-     last speed is how fast you MOVED, not how fast you meant the thing to go,
-     and on a part this small a hand moves very fast indeed. A third of it
-     reads as the same gesture carried by something with weight. */
-  const SPIN_GAIN = 1 / 3;
+  const SPIN_MAX  = 0.045;       // and a ceiling, so a 2px flick is not a blur
+  /* ── THE BALL LEAVES YOUR HAND AT THE SPEED IT WAS GOING ──────────────────
+     THIS WAS A THIRD, AND A THIRD IS A SEAM. The argument for it sounded fine
+     — the hand's last speed is how fast you MOVED, not how fast you meant the
+     thing to go — and it produced a ball that lost two thirds of its speed in
+     the frame you let go of it. On a fast drag, with the ceiling also biting,
+     ninety percent. That is not weight, it is a brake, applied at exactly the
+     moment the illusion depends on nothing happening.
+
+     MOMENTUM HAS TO BE CONTINUOUS AT THE RELEASE. How long it lasts afterwards
+     is a different question with its own two numbers — the half-life and the
+     floor — and that is where "too fast" and "too long" belong, because
+     neither of them is visible as a discontinuity. The ceiling stays but
+     doubles: it is there to stop a two-pixel twitch launching a blur, not to
+     tax an honest throw. */
+  const SPIN_GAIN = 1;
   /* 450ms TO HALVE, AND THE FLOOR DOES HALF THE WORK. Sustain and abruptness
      pull opposite ways on a half-life alone: 320 stopped it dead, 800 gave it
      a tail that crawls for seconds at a speed too low to read as motion but
@@ -3948,7 +4117,10 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
         nz += kr * ((A === 2 ? sg : 0) - aa2 * oz);
       }
       if (kw || kr) {
-        const nm = Math.hypot(nx, ny, nz) || 1;
+        /* NOT `Math.hypot`. It guards against overflow by scaling, which these
+           three cannot need — they are components of a near-unit vector — and
+           it measures a third slower for the trouble, once per cut pixel. */
+        const nm = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
         nx /= nm; ny /= nm; nz /= nm;
       }
 
@@ -4391,7 +4563,15 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
          which is enough to see and not enough to put the well back to black. */
       let f = (AMB * (.46 + .54 * sun) + DIF * dif * sun) * lit;
       const hs = nx * hx + ny * hy + nz * hz;
-      let sp = hs > 0 ? SPEC * lit * Math.pow(hs, SHINE) * 255 : 0;
+      /* SHINE IS 30 AND 30 IS 16 + 8 + 4 + 2, so the specular exponent is four
+         squarings and three multiplies rather than a general `Math.pow`, which
+         goes through exp and log and costs nearly three times as much. Measured
+         at 19ns against 7. It runs on every lit pixel. */
+      let sp = 0;
+      if (hs > 0) {
+        const h2 = hs * hs, h4 = h2 * h2, h8 = h4 * h4, h16 = h8 * h8;
+        sp = SPEC * lit * (h16 * h8 * h4 * h2) * 255;
+      }
       /* MATTE INSIDE A GROOVE. A moulded face has a broad sheen; the bottom of
          a machined slot does not — it is a cut surface, and a glint down there
          is what made the arcs read as polished ribbons laid on the ball rather
@@ -4563,10 +4743,14 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
          it tinted a whole hemisphere and the tint TURNED WITH THE BALL, so the
          colour read as a property of the plastic. Keyed to down, it reads as a
          property of the room — something under the panel is on. */
-      const nyv = m[3] * nx + m[4] * ny + m[5] * nz;
-      if (LC && nyv < 0) {
-        const dn = -nyv, cw = dn * dn * CAST_STR;
-        gr += LC[0] * cw; gg += LC[1] * cw; gb += LC[2] * cw;
+      /* the dot product is only worth taking when there is a light to take it
+         for — at rest that is every pixel on the ball paying for nothing */
+      if (LC) {
+        const nyv = m[3] * nx + m[4] * ny + m[5] * nz;
+        if (nyv < 0) {
+          const dn = -nyv, cw = dn * dn * CAST_STR;
+          gr += LC[0] * cw; gg += LC[1] * cw; gb += LC[2] * cw;
+        }
       }
 
       const o = IDX[i];
@@ -5010,6 +5194,23 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange, onHover } 
     const i = key == null ? -1 : ORBIT_AX.findIndex(a => a.key === key);
     const d = !!driving;
     if (i === extAx && d === extDrive) return wrap;
+    /* ── A BALL DRIVEN FROM OUTSIDE IS A BALL THAT IS MOVING ────────────────
+       ONLY THE ONE UNDER THE HAND WAS DROPPING TO DRAG RESOLUTION. Where three
+       of these share a state, turning any one repaints all three — and the two
+       you are not touching were repainting at FULL resolution, every frame, at
+       roughly three times the cost of the one you are. The whole point of the
+       two-resolution trade is that a moving ball does not need the pixels; a
+       ball moving because something else moved needs them no more than one
+       moving because you moved it. */
+    if (d !== extDrive) {
+      /* AND GOING BACK UP HAS TO ASK WHETHER THE BALL HAS STOPPED. The release
+         starts a throw and clears the driving flag in the same breath — in
+         that order, so a plain `quality(DPR_HI)` here would rebuild the grid
+         at full resolution one frame into a spin and hold it there for the
+         whole coast. The spin restores it itself when it settles. */
+      if (d) quality(DPR_LO);
+      else if (!spRAF && !rzRAF && held < 0) quality(DPR_HI);
+    }
     extAx = i; extDrive = d;
     markLive();
     paint();
@@ -5707,7 +5908,7 @@ function keyBank({ label, options, index = 0, cols, onChange }) {
 
 
 window.SkewKit = {
-  el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
-  VERSION: '1.96.0',
+  el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, orbitBay, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
+  VERSION: '1.97.0',
 };
 })();

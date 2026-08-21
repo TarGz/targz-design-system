@@ -2635,7 +2635,7 @@ html{ -webkit-tap-highlight-color:transparent; }
    name and comes out on the collar, which is what the eye was going to assume
    anyway. Scoped to this panel: everywhere else the etched mark is right,
    because everywhere else there is no wire arriving at it. */
-.orbsmall .knob.bi .knob-collar::after{
+.orbay .knob.bi .knob-collar::after{
   height:7px; top:-3px; border-radius:0;
   background:#0d1013;
   box-shadow:0 1px 0 rgba(255,255,255,.085), 0 -1px 0 rgba(0,0,0,.55);
@@ -3413,20 +3413,25 @@ html{ -webkit-tap-highlight-color:transparent; }
   display:flex; gap:44px; align-items:center;
   flex-wrap:wrap; justify-content:center;
 }
-.orbsmall{
-  /* THE DIALS SIT AS CLOSE UNDER THE BALL AS THE WIRES WILL ALLOW. They are
-     its knobs; distance between them is distance between a thing and its own
-     controls, and the trace only needs enough height to make one bend. */
-  display:flex; flex-direction:column; align-items:center; gap:22px;
-  margin-left:40px; margin-top:38px;
-}
+/* WHERE THE BAY SITS IN THE THREE-BALL ROW — the page's decision, not the
+   part's. Pushed right and dropped down so the one being driven does not sit
+   in line like a third sample. */
+.orbay.orbspec{ margin-left:40px; margin-top:38px; }
 /* THE THREE DIALS GO ACROSS, NOT DOWN. `.knobcol` is a column because that is
    what a bay of them is elsewhere; under a ball they are one row of three
    axes, and stacked they are taller than the ball they belong to — which puts
    the last one so far from it that it stops looking like its knob. Overridden
    here rather than changed at the source: every other user of `.knobcol` still
    wants a column. */
-.orbsmall .knobcol{ flex-direction:row; gap:20px; }
+/* ── THE BAY: BALL, WIRES, DIALS ─────────────────────────────────────────────
+   The kit builds this; the page only decides where it sits. Dials as close
+   under the ball as the wires need — they are its knobs, and distance between
+   them is distance between a thing and its own controls. */
+.orbay{
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; gap:22px;
+}
+.orbay-knobs{ display:flex; flex-direction:row; gap:20px; padding:1px 2px; }
 
 /* ── THE TRACES, AND THEY ARE GROOVES BEFORE THEY ARE SIGNALS ────────────────
    CUT, NOT PRINTED. Same argument as the ball's own arcs: a line drawn on a
@@ -3439,9 +3444,9 @@ html{ -webkit-tap-highlight-color:transparent; }
    would be three claims competing at once, which is the state this panel is in
    least often; the useful moment is the one where exactly one thing is being
    turned, and then the panel can afford to say so loudly. */
-.orbsmall{ position:relative; }
-.orbtrace{
-  position:absolute; left:0; width:100%; pointer-events:none; overflow:visible;
+
+.orbay-trace{
+  position:absolute; left:0; top:0; width:100%; pointer-events:none; overflow:visible;
   /* OVER THE BALL, because the last few pixels of every channel are cut INTO
      it — a wire that stops at the silhouette is touching the sphere, one that
      crosses it is going in. The canvas cannot draw these: it knows nothing
@@ -3478,12 +3483,12 @@ html{ -webkit-tap-highlight-color:transparent; }
    `:has` rather than a JS hover handler: the trace sits BEFORE the dials in
    the DOM and no amount of sibling selector reaches backwards, but the parent
    knows about both. */
-.orbsmall:has(.knobcol > :nth-child(1):hover) .ot-lit.ot-yaw,
-.orbsmall:has(.knobcol > :nth-child(2):hover) .ot-lit.ot-pitch,
-.orbsmall:has(.knobcol > :nth-child(3):hover) .ot-lit.ot-roll,
-.orbsmall[data-live="yaw"]   .ot-lit.ot-yaw,
-.orbsmall[data-live="pitch"] .ot-lit.ot-pitch,
-.orbsmall[data-live="roll"]  .ot-lit.ot-roll{
+.orbay:has(.orbay-knobs > :nth-child(1):hover) .ot-lit.ot-yaw,
+.orbay:has(.orbay-knobs > :nth-child(2):hover) .ot-lit.ot-pitch,
+.orbay:has(.orbay-knobs > :nth-child(3):hover) .ot-lit.ot-roll,
+.orbay[data-live="yaw"]   .ot-lit.ot-yaw,
+.orbay[data-live="pitch"] .ot-lit.ot-pitch,
+.orbay[data-live="roll"]  .ot-lit.ot-roll{
   stroke:var(--lit);
   /* THE BLOOM HUGS THE LINE, BUT IT HAS TO BE THERE TO HUG IT. Two passes at
      2 and 5 was so tight it was indistinguishable from the stroke itself —
@@ -3505,12 +3510,12 @@ html{ -webkit-tap-highlight-color:transparent; }
 /* THE LABEL GOES WITH IT. The knob already wears its axis on the arc; while it
    is the one being turned, its NAME says so too — which is the half you can
    read without looking at the dial. */
-.orbsmall .knobcol > :nth-child(1):hover .klab,
-.orbsmall .knobcol > :nth-child(2):hover .klab,
-.orbsmall .knobcol > :nth-child(3):hover .klab,
-.orbsmall[data-live="yaw"]   .knobcol > :nth-child(1) .klab,
-.orbsmall[data-live="pitch"] .knobcol > :nth-child(2) .klab,
-.orbsmall[data-live="roll"]  .knobcol > :nth-child(3) .klab{
+.orbay .orbay-knobs > :nth-child(1):hover .klab,
+.orbay .orbay-knobs > :nth-child(2):hover .klab,
+.orbay .orbay-knobs > :nth-child(3):hover .klab,
+.orbay[data-live="yaw"]   .orbay-knobs > :nth-child(1) .klab,
+.orbay[data-live="pitch"] .orbay-knobs > :nth-child(2) .klab,
+.orbay[data-live="roll"]  .orbay-knobs > :nth-child(3) .klab{
   color:var(--klit); text-shadow:0 0 7px var(--klit);
 }
 /* ── THE POINTER LIGHTS, NOT THE NOTCH ──────────────────────────────────────
@@ -3526,20 +3531,20 @@ html{ -webkit-tap-highlight-color:transparent; }
    pointer with the knob's own `arc`, and these three already pass their axis
    colour as `arc`, so the panel does not have to say it twice. What is left
    here is only the BRIGHTENING, which is a state and belongs to the panel. */
-.orbsmall .knobcol > :nth-child(1):hover .knob-cap::after,
-.orbsmall .knobcol > :nth-child(2):hover .knob-cap::after,
-.orbsmall .knobcol > :nth-child(3):hover .knob-cap::after,
-.orbsmall[data-live="yaw"]   .knobcol > :nth-child(1) .knob-cap::after,
-.orbsmall[data-live="pitch"] .knobcol > :nth-child(2) .knob-cap::after,
-.orbsmall[data-live="roll"]  .knobcol > :nth-child(3) .knob-cap::after{
+.orbay .orbay-knobs > :nth-child(1):hover .knob-cap::after,
+.orbay .orbay-knobs > :nth-child(2):hover .knob-cap::after,
+.orbay .orbay-knobs > :nth-child(3):hover .knob-cap::after,
+.orbay[data-live="yaw"]   .orbay-knobs > :nth-child(1) .knob-cap::after,
+.orbay[data-live="pitch"] .orbay-knobs > :nth-child(2) .knob-cap::after,
+.orbay[data-live="roll"]  .orbay-knobs > :nth-child(3) .knob-cap::after{
   box-shadow:0 0 0 1px color-mix(in srgb, var(--klit) 55%, transparent),
              0 0 7px var(--klit), 0 0 15px var(--klit);
 }
 .knob-cap::after{ transition:background .16s linear, box-shadow .16s linear; }
 /* THE COLOUR IS THE DIAL'S OWN, whichever way it came to be lit */
-.orbsmall .knobcol > :nth-child(1){ --klit:#4ADE80; }
-.orbsmall .knobcol > :nth-child(2){ --klit:#FF4A4A; }
-.orbsmall .knobcol > :nth-child(3){ --klit:#5AA9FF; }
+.orbay .orbay-knobs > :nth-child(1){ --klit:#4ADE80; }
+.orbay .orbay-knobs > :nth-child(2){ --klit:#FF4A4A; }
+.orbay .orbay-knobs > :nth-child(3){ --klit:#5AA9FF; }
 .klab{ transition:color .16s linear, text-shadow .16s linear; }
 /* NO AXIS BADGE. A small orange X/Y/Z appeared in the corner while a ring was
    held — a label naming the thing you already have hold of, in a colour that

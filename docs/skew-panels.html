@@ -1905,7 +1905,7 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   const box = document.getElementById('viewport');
   const VIEWS = ['Front', 'Right', 'Top', 'Back', 'Left', 'Bottom'];
   const st2 = { view: 0, yaw: 0, pitch: 0, roll: 0 };
-  let knobs = [], ball = null;
+  let bay = null;
   /* ── WHERE EACH KEY POINTS THE BALL ──────────────────────────────────────
      Checked rather than guessed: at each of these the named axis is the one
      facing the viewer — Right puts +X at you, Top puts +Y, Back puts −Z. The
@@ -1928,63 +1928,32 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     head.append(lcd);
     const body = el('div', 'box-body');
 
-    /* ── THE ORBIT BALL, IN PLACE OF THE AXIS BALL ────────────────────────
-       THE FLAT BALL WITH SIX NODES WAS THE SAME CONTROL AS THE PAD BELOW IT.
-       Each node snapped to a view; so does each key, and the keys say which
-       one is current. Two parts for one question, and the one that went is the
-       one that could not answer the OTHER question — what if the angle you
-       want is not one of the six.
+    /* ── THE BAY: BALL, WIRES AND DIALS, BUILT BY THE KIT ─────────────────
+       THIS PANEL AND THE SYSTEM PAGE WERE BUILDING THE SAME THING TWICE, and
+       the difference between them was not a decision — it was the second one
+       being written first. `orbitBay` is the ARRANGEMENT: which dial belongs
+       to which axis, where its wire runs, and what lights when. The ball
+       itself stays a part that knows about arcs and nothing else.
 
-       AND THE ORDER FOLLOWS THE ANSWER, NOT THE PART. Ball, then the three
-       angles it produces, then the six places you can jump to instead. The
-       continuous control and its own readout are together; the discrete
-       shortcut sits under both, where a shortcut belongs. */
-    ball = SkewKit.orbit({
-      size: 'sm', yaw: st2.yaw, pitch: st2.pitch, roll: st2.roll,
-      onChange: v => {
-        st2.yaw = Math.round(v.yaw); st2.pitch = Math.round(v.pitch); st2.roll = Math.round(v.roll);
-        knobs[0].set(st2.yaw); knobs[1].set(st2.pitch); knobs[2].set(st2.roll);
-      },
+       AND THE ORDER FOLLOWS THE ANSWER, NOT THE PART. Ball, the three angles
+       it produces, then the six places you can jump to instead — the
+       continuous control with its own readout, and the discrete shortcut
+       under both, where a shortcut belongs. */
+    bay = SkewKit.orbitBay({
+      yaw: st2.yaw, pitch: st2.pitch, roll: st2.roll,
+      onChange: v => { st2.yaw = v.yaw; st2.pitch = v.pitch; st2.roll = v.roll; },
     });
-    body.append(ball);
-
-    /* Yaw / Pitch / Roll — three angles, so three knobs, and they sit under
-       the ball because that is what the ball is saying. The pointer IS the
-       angle, which is the one case where a knob is not a preference. */
-    /* EACH KNOB WEARS ITS OWN AXIS, out of `ORBIT_AX` rather than retyped —
-       three identical orange dials beside a ball that has already answered in
-       colour is the panel making you read a label to find out where you are. */
-    const axCol = k => SkewKit.ORBIT_AX.find(a => a.key === k).col;
-    /* THE KIT'S KNOB, NOT THIS PAGE'S. The inline copy predates `endless` and
-       an angle knob that stops at ±180 is a wall across open ground — the ball
-       above it turns through there without noticing. Using `SkewKit.knob` for
-       these three is also one fewer thing this page has to keep in step by
-       hand; the trap table upstairs says as much. */
-    const knob = SkewKit.knob;
-    const kr = el('div', 'knobrow');
-    knobs = [
-      knob({ endless: true, arc: axCol('yaw'), label: 'Yaw', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.yaw,
-             fmt: v => `${v}°`, onChange: v => { st2.yaw = v; ball.set({ yaw: v }); } }),
-      knob({ endless: true, arc: axCol('pitch'), label: 'Pitch', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.pitch,
-             fmt: v => `${v}°`, onChange: v => { st2.pitch = v; ball.set({ pitch: v }); } }),
-      knob({ endless: true, arc: axCol('roll'), label: 'Roll', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.roll,
-             fmt: v => `${v}°`, onChange: v => { st2.roll = v; ball.set({ roll: v }); } }),
-    ];
-    knobs.forEach(k => kr.append(k));
-    body.append(kr);
+    body.append(bay);
 
     body.append(el('div', 'divider'));
 
-    /* six latching view keys — the shortcut, under the thing it is short for */
-    const pad = el('div', 'keypad');
     /* A KEY SETS THE BALL, AND IT TURNS TO GET THERE. Snapping would make the
        six keys and the ball two separate pictures of the same state; turning
-       makes them one control with a shortcut. `draw` rebuilds the box for the
-       key's own pressed state — which replaces the ball — so the new one is
-       what gets told to move, from wherever the old one was. */
+       makes them one control with a shortcut. */
+    const pad = el('div', 'keypad');
     VIEWS.forEach((v, i) => pad.append(pkey(v, {
       down: i === st2.view, title: `${v} view`,
-      onClick: () => { st2.view = i; draw(); ball.turn(VIEW_AT[i]); },
+      onClick: () => { st2.view = i; draw(); bay.turn(VIEW_AT[i]); },
     })));
     body.append(pad);
 
@@ -1993,12 +1962,12 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     acts.append(key('<span>RESET</span>', { cls: 'act aux', title: 'Back to 0° on all three',
       onClick: () => {
         st2.yaw = st2.pitch = st2.roll = 0;
-        knobs.forEach(k => k.set(0));
-        ball.turn({ yaw: 0, pitch: 0, roll: 0 });
+        bay.turn({ yaw: 0, pitch: 0, roll: 0 });
       } }));
     body.append(acts);
 
     box.append(head, body);
+    requestAnimationFrame(() => bay.relayout());
   };
   draw();
 })();

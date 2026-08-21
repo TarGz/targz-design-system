@@ -1,6 +1,19 @@
-export const version = '1.96.0';
+export const version = '1.97.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.97.0',
+    date: '2026-08-20',
+    changes: [
+      '`orbitBay` — THE BALL, ITS THREE DIALS, AND THE WIRING BETWEEN THEM, BUILT ONCE. This composition existed twice before it existed once: the system page built it to demonstrate the ball, the viewport panel needed the same thing and got an older plainer version, and the difference between them was not a decision anybody made — it was the second one being written first. Every part of it, the routed channels, the measured geometry, the lit states, the two-way sync, is the same in both places now or it is a bug in one of them.',
+      'IT IS A COMPOSITION AND NOT A CONTROL, which is why it sits beside `orbit` rather than inside it. The ball is a PART: it knows about arcs and attitudes and nothing else, and it has to stay that way — a sphere that also owns three knobs is a sphere you cannot use without them. What the bay adds is the ARRANGEMENT, which dial belongs to which axis and where its wire runs, and those were the decisions being made twice.',
+      'THE DIALS READ YAW, PITCH, ROLL — NOT X, Y, Z. `ORBIT_AX` is in axis order because that is what the ARCS are, and their colours are that convention; the dials are three named angles and the name order is the one every viewport in this system prints. Iterating the wrong one put pitch on the left and crossed its wire over yaw\'s on the way to the middle, which is a panel announcing that its own layout is a coincidence.',
+      'THE BALL LEAVES YOUR HAND AT THE SPEED IT WAS GOING, and it did not before. The throw was scaled to a third — the argument being that the hand\'s last speed is how fast you MOVED rather than how fast you meant the thing to go — and it produced a ball that lost two thirds of its speed in the frame you released it, ninety percent on a fast drag with the ceiling also biting. That is not weight, it is a brake, applied at exactly the moment the illusion depends on nothing happening. Momentum has to be continuous at the release; how long it lasts afterwards has its own two numbers, and neither of those is visible as a discontinuity.',
+      'DRAGGING ONE OF THREE SYNCED BALLS COST 55ms A FRAME AND NOW COSTS 22. Only the ball under the hand was dropping to drag resolution — the other two repainted at FULL resolution every frame, at roughly three times the cost of the one being held. A ball moving because something else moved needs the pixels no more than one moving because you moved it. The restore has to ask whether the ball has stopped, though: the release starts a throw and clears the driving flag in that order, so a plain restore rebuilt at full resolution one frame into a spin and held it there for the whole coast.',
+      'AND THREE MEASURED MICRO-WINS IN THE PIXEL LOOP. `Math.hypot` guards against overflow by rescaling, which components of a near-unit vector cannot need — 11.7ns against 8.7 for the sqrt it wraps. `Math.pow(hs, 30)` goes through exp and log at 19ns where four squarings are exact and cost 7, on every lit pixel. And the under-light\'s dot product was being taken on every pixel of the ball whether or not there was a light to take it for.',
+      'AN ENDLESS KNOB\'S POINTER IS ITS READOUT, and that is the kit\'s now rather than one panel\'s. A pot paints `arc` round its ring because the arc is what it says its number with; a knob with no ends draws no arc, so the same option goes on the pointer. It is lit always, because a dial you can only read while touching it is not a readout.',
+    ],
+  },
   {
     version: '1.96.0',
     date: '2026-08-20',

@@ -2597,6 +2597,18 @@ html{ -webkit-tap-highlight-color:transparent; }
   transform:rotate(135deg);            /* put the 90° dead zone at the bottom */
   color:var(--arc,#FF6A00);
 }
+/* AND AN ENDLESS KNOB HAS NO DEAD ZONE TO PUT ANYWHERE. An SVG circle starts
+   at three o'clock, so the ring turns back to −90° to start the trace at
+   twelve — which is where zero is on a knob that reads an angle. */
+.knob.endless .knob-ring{ transform:rotate(-90deg); }
+/* THE LAMP AT THE HEAD OF THE TRACE. Filled rather than stroked, so it reads
+   as a light sitting ON the ring rather than as a thicker piece of the ring —
+   and it takes the arc's own colour and glow, because it is the same signal. */
+.kr-dot{
+  fill:currentColor; stroke:none;
+  transform-origin:50% 50%;
+  filter:drop-shadow(0 0 3px currentColor);
+}
 /* A BIPOLAR knob reads from the CENTRE, not from the minimum — Yaw at 0° with
    a half-full arc says "half way up the range", which is true and useless;
    what you want to see is how far off centre you are, and which side. So the

@@ -1019,6 +1019,8 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      '<span class="lcd">3 RUNNING</span><span class="lcd dim">0 SHOWN</span>'],
     ['Knob',
      '<span id="mat-knob"></span>'],
+    ['Knob · endless',
+     '<span id="mat-knob360"></span>'],
     ['Light direction',
      '<span id="mat-light"></span>'],
     ['Selector',
@@ -1102,7 +1104,7 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      genuinely miscategorised tile. */
   const GROUPS = [
     ['Light',         ['Jewel LED', 'Light pipe', 'Readout']],
-    ['Setting a value', ['Knob', 'Light direction', 'Axis ball', 'Colour picker',
+    ['Setting a value', ['Knob', 'Knob · endless', 'Light direction', 'Axis ball', 'Colour picker',
                          'Fader · vertical bank', 'Fader · one cap',
                          'Fader · centre detent', 'Range fader']],
     /* THE ORDER IS THE ARGUMENT, and it is a count: a rotary is aimable to
@@ -1185,6 +1187,21 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
 
   document.getElementById('mat-knob')
           .replaceWith(knob({ label: '', min: 0, max: 100, value: 62, size: 58 }));
+
+  /* ── AND THE SAME KNOB WITH ITS STOPS TAKEN OFF ─────────────────────────
+     POSED BESIDE THE POT ON PURPOSE. The two are one part and one flag, and
+     the whole of the difference is visible in the track: 270° with a dead
+     zone at the bottom, against a full circle with none. A reader who has
+     found one has found the other, which is the argument this whole row is
+     built on.
+
+     IT READS AN ANGLE, because that is the case that needs it — a heading has
+     no least and no most, so −180 and +180 are the same place and a stop
+     between them is a wall across open ground. */
+  document.getElementById('mat-knob360').replaceWith(knob({
+    label: '', min: -180, max: 180, value: 48, size: 58,
+    bipolar: true, endless: true, fmt: v => `${Math.round(v)}°`,
+  }));
 
   /* AND SO DOES THE FADER TILE. It is the editor's own Zone row, same
      factory, same numbers: a sample of a control that cannot be dragged is a
@@ -1822,6 +1839,10 @@ document.getElementById('navspec').replaceWith(navBar({
          colour. Taken from `ORBIT_AX` rather than retyped, so the dial and the
          arc it drives cannot drift apart. */
       arc: ORBIT_AX.find(a => a.key === k).col,
+      /* ENDLESS, BECAUSE AN ANGLE HAS NO ENDS. −180° and +180° are the same
+         place; a stop between them is a wall across open ground, and the ball
+         beside it will happily keep turning past either. */
+      endless: true,
       label, min: -180, max: 180, step: 1, bipolar: true, value: st[k],
       fmt: v => `${Math.round(v)}°`,
       onChange: v => {

@@ -710,8 +710,25 @@ function typeable(el, read, write) {
 
    Every one of them is the same dial at the same angles; picking one is a
    question about the SURROUNDINGS, never about the control. */
+/* ── `endless`: A KNOB WITH NO ENDS ──────────────────────────────────────────
+   AN ORDINARY KNOB IS A POTENTIOMETER: 270° of sweep, a stop at each end, and
+   a 90° dead zone at the bottom where the wiper cannot reach. That is the
+   right part for a quantity that HAS a least and a most — a gain, a mix, a
+   pen width.
+
+   AN ANGLE HAS NEITHER. −180° and +180° are the same place, so a stop there is
+   a wall built across open ground: turn a heading knob far enough and it
+   refuses, when the thing it controls would happily have kept going. The
+   endless variant is the encoder rather than the pot — full 360° of travel, no
+   dead zone, and the value wraps instead of clamping.
+
+   IT IS A FLAG RATHER THAN A SECOND FACTORY because everything else about it
+   is a knob: same cap, same collar, same drag, same wheel, same keys. The two
+   things that change are what the sweep covers and what happens at the end of
+   it, and both are one line. */
 function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
-                layout = 'stack', size, bipolar = false, detents = null, onChange }) {
+                layout = 'stack', size, bipolar = false, detents = null,
+                endless = false, onChange }) {
   const row     = layout === 'row';
   const tile    = layout === 'tile';
   const compact = layout === 'compact';
@@ -719,7 +736,13 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   if (size == null) size = row ? 40 : compact || bare ? 34 : 46;
   const wrap = el('div', 'kwrap' + (row ? ' inline' : tile ? ' tile'
                                   : compact ? ' compact' : bare ? ' bare' : ''));
-  const k = el('div', 'knob' + (bipolar ? ' bi' : ''));
+  const SPAN = max - min;
+  /* how much of the circle the track uses — all of it when there are no ends.
+     DECLARED HERE, above the ring markup that interpolates it: a `const` read
+     before its line is a TDZ throw, and the ring is built in a template
+     literal several lines up from where the value used to live. */
+  const ARCF = endless ? 1 : .75;
+  const k = el('div', 'knob' + (bipolar ? ' bi' : '') + (endless ? ' endless' : ''));
   k.style.setProperty('--kd', size + 'px');
   k.style.setProperty('--arc', arc);
   k.tabIndex = 0;
@@ -731,25 +754,44 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   const ring = el('div', null,
     `<svg class="knob-ring" viewBox="0 0 100 100" aria-hidden="true">
        <circle class="kr-track" cx="50" cy="50" r="${RING_R}"
-               stroke-dasharray="${RING_C * .75} ${RING_C}"/>
+               stroke-dasharray="${RING_C * ARCF} ${RING_C}"/>
        <circle class="kr-val" cx="50" cy="50" r="${RING_R}"/>
+       ${endless ? `<circle class="kr-dot" cx="${50 + RING_R}" cy="50" r="3.4"/>` : ''}
      </svg>`).firstElementChild;
   const valArc = ring.querySelector('.kr-val');
+  const valDot = ring.querySelector('.kr-dot');
   const cap = el('div', 'knob-cap');
   k.append(el('div', 'knob-collar'), ring, cap);
   const val = el('div', 'kval');
   let v = value;
 
   const paint = () => {
-    const t = (v - min) / (max - min);
-    cap.style.setProperty('--deg', (-135 + t * 270) + 'deg');
+    const t = (v - min) / SPAN;
+    /* THE POT SWEEPS 270° FROM ITS LOWER STOP; THE ENCODER MAPS THE VALUE
+       STRAIGHT ONTO THE CIRCLE, with zero at twelve o'clock so a bipolar
+       angle reads as itself. */
+    cap.style.setProperty('--deg', (endless
+      ? (t - (bipolar ? .5 : 0)) * 360
+      : -135 + t * 270) + 'deg');
     // Unipolar grows from the start of the sweep; bipolar grows from its middle
     // in whichever direction you turned. One dasharray + one dashoffset does both.
     const from = bipolar ? 0.5 : 0;
-    const len = Math.abs(t - from) * .75 * RING_C;
+    const len = Math.abs(t - from) * ARCF * RING_C;
     valArc.setAttribute('stroke-dasharray', `${len} ${RING_C}`);
-    valArc.setAttribute('stroke-dashoffset', `${-Math.min(t, from) * .75 * RING_C}`);
+    valArc.setAttribute('stroke-dashoffset', `${-Math.min(t, from) * ARCF * RING_C}`);
     valArc.style.opacity = len < 1.2 ? 0 : 1;   // no round-cap dot at the origin
+    /* ── AND THE ENDLESS ONE CARRIES A LAMP AT THE HEAD OF THE TRACE ────────
+       A KNOB WITH NO STOPS HAS NO ZERO YOU CAN SEE. On a pot the arc grows out
+       of a fixed end, so its LENGTH tells you where you are; wrap the track
+       into a full circle and the same arc is a segment floating on a ring —
+       equally long at two very different settings, and at −180 and +180 it is
+       the same drawing. What is unambiguous is the position of its head, so
+       the head gets a light: a dot riding the ring at the value itself.
+
+       IT SITS AT THREE O'CLOCK IN THE MARKUP and the ring's own −90° rotation
+       carries it to twelve, so it starts where zero is and turns with the
+       value — one transform, no second coordinate system to keep in step. */
+    if (valDot) valDot.style.transform = `rotate(${t * 360}deg)`;
     val.textContent = fmt ? fmt(v) : String(v);
     k.setAttribute('aria-valuenow', v);
     k.setAttribute('aria-valuetext', val.textContent);
@@ -771,7 +813,11 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
   let enc = notch(v), held = null;
   const set = (nv, quiet) => {
     const q = Math.round(nv / step) * step;
-    v = +Math.min(max, Math.max(min, q)).toFixed(6);
+    /* WRAPPED, NOT CLAMPED. Past the top it comes round the bottom, which is
+       what the control is claiming by having no stops. */
+    v = endless
+      ? +(min + (((q - min) % SPAN) + SPAN) % SPAN).toFixed(6)
+      : +Math.min(max, Math.max(min, q)).toFixed(6);
     let fell = false;
     if (detents) {
       // `held` is what makes this fire ONCE. Without it the cap is re-snapped
@@ -3224,8 +3270,38 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   const STEP = 72;                    // ring samples, for the pick only
   const W    = size * 0.0241;
   const GRAB = Math.max(13, size * 0.05);
+  /* RADIANS PER BALL-RADIUS OF TANGENTIAL PUSH, and it is a constant on purpose
+     — see the drag. A shade under the free roll's, because a ring is a fine
+     adjustment: you reach for one when the whole ball turning at once is more
+     than you wanted. */
+  const RING_GAIN = 0.6;
 
   const val = { yaw, pitch, roll };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     THE ORIENTATION IS A MATRIX. THE THREE ANGLES ARE A READOUT.
+
+     IT WAS THE OTHER WAY ROUND AND THAT IS WHERE THE LOCK CAME FROM. Every
+     drag step built a matrix out of yaw/pitch/roll, turned it, and decomposed
+     the result straight back to three angles — so the angles were the state
+     and the matrix was scratch. Euler angles cannot carry an orientation
+     continuously: at pitch ±90 the yaw and roll axes become the SAME axis, the
+     split between them is arbitrary, and only their sum is determined. Feed
+     that back in as the next step's starting point and the ball stops turning
+     where it was going and starts turning where the decomposition guessed.
+
+     A MATRIX HAS NO POLES. It carries the orientation exactly, a turn is one
+     multiply, and nothing is ever reconstructed from angles. `val` is derived
+     from it for the readout and for `onChange`, which is the one place three
+     angles belong — the knobs still want three numbers, and those numbers are
+     still ambiguous near the pole. That ambiguity is now confined to what is
+     PRINTED. The ball itself never stops. */
+  let MAT = orbitMat(val.yaw, val.pitch, val.roll);
+  const sync = () => {
+    const e = orbitEuler(MAT);
+    val.yaw = e.yaw; val.pitch = e.pitch; val.roll = e.roll;
+  };
+  const turnBy = (ax, th) => { MAT = orbitMul(orbitAxisMat(ax, th), MAT); sync(); };
 
   const wrap = el('div', 'orbit');
   wrap.style.width = wrap.style.height = size + 'px';
@@ -3401,7 +3477,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   const SPIN_WIN = 90;
 
   const spinSample = () => {
-    const now = Date.now(), M = orbitMat(val.yaw, val.pitch, val.roll);
+    const now = Date.now(), M = MAT;
     const dt = now - spT;
     if (spPrev && dt > 0 && dt < 200) {
       /* D = M · Mprev', the turn made since the last sample */
@@ -3450,8 +3526,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
       t0 = t;
       spRate *= Math.pow(.5, dt / SPIN_HALF);
       if (spRate < SPIN_MIN) { spRAF = 0; quality(DPR_HI); return; }
-      Object.assign(val, orbitEuler(orbitMul(
-        orbitAxisMat(spAxis, spRate * dt), orbitMat(val.yaw, val.pitch, val.roll))));
+      turnBy(spAxis, spRate * dt);
       paint();
       onChange && onChange({ ...val }, null);
       spRAF = requestAnimationFrame(step);
@@ -3461,7 +3536,7 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   let proj = [];        // ring samples in screen space, for the pick
 
   function paint() {
-    const m = orbitMat(val.yaw, val.pitch, val.roll);
+    const m = MAT;
     proj = RINGS.map(pts => pts.map(p => {
       const v = orbitApply(m, p);
       return { x: C + R * v[0], y: C - R * v[1], z: v[2] };
@@ -4434,6 +4509,9 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
   };
 
   let from = null, axis = null, base = null;   // `held` is declared with the raster
+  /* where the hand was last frame, in client pixels — the roll is a DELTA and
+     a delta needs somewhere to measure from */
+  let lastX = 0, lastY = 0;
 
   /* ══════════════════════════════════════════════════════════════════════
      DOUBLE-CLICK RETURNS IT TO ZERO, ALONG THE WAY IT WOULD ACTUALLY TURN.
@@ -4456,29 +4534,46 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
      EASED OUT, because it is arriving rather than departing — and the ball
      stays at drag resolution while it moves, like every other time it moves. */
   const RESET_MS = 460;
-  const resetGo = () => {
+  /* ── ONE ANIMATED MOVE, AND THE RESET IS JUST ITS COMMONEST TARGET ────────
+     This began as "return to zero" and zero turned out to be an argument
+     rather than a special case: the path from here to ANY attitude is the same
+     single turn about a single axis, and identity is simply one destination.
+     So it takes a target, the double-click passes zero, and a host with six
+     view keys can pass the other five without the part growing a second way
+     to move. */
+  const turnTo = (t = {}) => {
     spinStop();
-    const M = orbitMat(val.yaw, val.pitch, val.roll);
-    const co = Math.max(-1, Math.min(1, (M[0] + M[4] + M[8] - 1) / 2));
+    const tgt = {
+      yaw:   t.yaw   != null ? t.yaw   : val.yaw,
+      pitch: t.pitch != null ? t.pitch : val.pitch,
+      roll:  t.roll  != null ? t.roll  : val.roll,
+    };
+    const M0 = MAT;
+    const M1 = orbitMat(tgt.yaw, tgt.pitch, tgt.roll);
+    /* D = M1 · M0', the turn that takes where it is to where it is going */
+    const D = new Array(9);
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++)
+      D[r * 3 + c] = M1[r * 3] * M0[c * 3] + M1[r * 3 + 1] * M0[c * 3 + 1] + M1[r * 3 + 2] * M0[c * 3 + 2];
+    const co = Math.max(-1, Math.min(1, (D[0] + D[4] + D[8] - 1) / 2));
     const ang = Math.acos(co);
     const land = () => {
-      val.yaw = val.pitch = val.roll = 0;
+      MAT = M1; Object.assign(val, tgt);
       paint(); onChange && onChange({ ...val }, null);
     };
     if (ang < 2e-3) { land(); return; }
-    let ax = norm([M[7] - M[5], M[2] - M[6], M[3] - M[1]]);
+    let ax = norm([D[7] - D[5], D[2] - D[6], D[3] - D[1]]);
     if (!ax) {
       /* HALF A TURN, WHERE THE ANTISYMMETRIC PART VANISHES. R = 2nnᵀ − I
          there, so the axis is in the DIAGONAL — take the largest component,
          which is the numerically safe one, and let its row fix the other two
-         signs. Rare, and the one attitude a naive extraction sends nowhere. */
-      const d = [(M[0] + 1) / 2, (M[4] + 1) / 2, (M[8] + 1) / 2];
+         signs. Rare, and the one case a naive extraction sends nowhere: it is
+         also exactly Front-to-Back on a six-view pad. */
+      const d = [(D[0] + 1) / 2, (D[4] + 1) / 2, (D[8] + 1) / 2];
       const k = d[0] >= d[1] && d[0] >= d[2] ? 0 : d[1] >= d[2] ? 1 : 2;
       const v = Math.sqrt(Math.max(0, d[k])) || 1;
-      ax = k === 0 ? [v, M[1] / (2 * v), M[2] / (2 * v)]
-         : k === 1 ? [M[1] / (2 * v), v, M[5] / (2 * v)]
-                   : [M[2] / (2 * v), M[5] / (2 * v), v];
-      ax = norm(ax);
+      ax = norm(k === 0 ? [v, D[1] / (2 * v), D[2] / (2 * v)]
+              : k === 1 ? [D[1] / (2 * v), v, D[5] / (2 * v)]
+                        : [D[2] / (2 * v), D[5] / (2 * v), v]);
       if (!ax) { land(); return; }
     }
     quality(DPR_LO);
@@ -4486,13 +4581,14 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     const step = () => {
       const u = Math.min(1, (Date.now() - t0) / RESET_MS);
       const e = 1 - Math.pow(1 - u, 3);
-      Object.assign(val, orbitEuler(orbitAxisMat(ax, ang * (1 - e))));
+      MAT = orbitMul(orbitAxisMat(ax, ang * e), M0); sync();
       paint(); onChange && onChange({ ...val }, null);
       if (u < 1) { rzRAF = requestAnimationFrame(step); return; }
       rzRAF = 0; land(); quality(DPR_HI);
     };
     rzRAF = requestAnimationFrame(step);
   };
+  const resetGo = () => turnTo({ yaw: 0, pitch: 0, roll: 0 });
   cv.addEventListener('dblclick', resetGo);
 
   /* A REPAINT ONLY WHEN IT CHANGES. `pick` is a walk over a few hundred
@@ -4512,9 +4608,10 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     const k = pick((e.clientX - r.left) * size / r.width,
                    (e.clientY - r.top) * size / r.height);
     spinStop();                 /* catching it stops it, like catching a ball */
+    lastX = e.clientX; lastY = e.clientY;
     quality(DPR_LO);
     spPrev = null; spT = Date.now(); spBuf.length = 0;
-    base = orbitMat(val.yaw, val.pitch, val.roll);
+    base = MAT;
     if (k < 0) {
       /* ── NOT ON A RING: ROLL THE BALL ────────────────────────────────────
          A BALL YOU CAN ONLY TURN BY ITS RINGS IS NOT A BALL, it is three
@@ -4566,35 +4663,98 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     if (held === -1) return;
     const r = cv.getBoundingClientRect();
     if (held === -2) {
-      const to = norm(ballPt(e, r));
-      if (!to) return;
-      const c = cross(from, to), m = Math.hypot(c[0], c[1], c[2]);
-      /* the two points coincide — no axis, and no rotation to make */
-      if (m < 1e-7) return;
-      const th = Math.atan2(m, dot(from, to));
-      Object.assign(val, orbitEuler(orbitMul(
-        orbitAxisMat([c[0] / m, c[1] / m, c[2] / m], th), base)));
+      /* ── THE BALL ROLLS UNDER THE FINGER ─────────────────────────────────
+         AN ARCBALL CANNOT EXCEED THE SPHERE IT IS PROJECTED ON. Even measured
+         step by step, the point the hand maps to slides toward the equator and
+         then stops: a straight drag runs out of sphere before it runs out of
+         desk, so the ball reached about a half turn and sat there while the
+         hand kept going. On a real ball you push until you stop pushing.
+
+         SO A MOVE IS A ROLL: the axis is perpendicular to the hand's travel in
+         the plane of the screen, and the angle is how far it travelled. One
+         ball-radius of hand is a quarter turn, which is what the arcball gave
+         across the middle of the disc — so it feels the same where the arcball
+         was honest, and keeps going where it was not. Nothing is projected, so
+         there is nothing to run out of. */
+      const px = e.clientX - lastX, py = e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      const dx =  px / (R * r.width  / size);
+      const dy = -py / (R * r.height / size);      /* view space is +y up */
+      const m = Math.hypot(dx, dy);
+      if (m < 1e-6) return;
+      const c = [-dy, dx, 0];
+      const th = m * Math.PI / 2;
+      /* ── FROM THE LAST POSITION, NOT FROM THE GRAB ───────────────────────
+         MEASURED AGAINST THE START POINT, A DRAG CANNOT EXCEED HALF A TURN.
+         The arc between two points on a sphere is at most 180° by definition,
+         so the ball reached the far side and then went BACKWARDS as the hand
+         kept going — and near the rim it saturated long before that. Which is
+         a strange thing for a ball: you can spin a real one as far as you can
+         keep pushing it.
+
+         SO EVERY MOVE IS A SEPARATE LITTLE TURN, applied to wherever the ball
+         has got to. Each one is a few degrees, nowhere near the 180° ceiling,
+         and they accumulate without limit — three full rotations in one drag
+         is three hundred small ones. It is also more correct, not less: the
+         hand's path between two points is information the absolute version
+         threw away, so going out and back round the other side now leaves the
+         ball where you took it rather than where you started. */
+      turnBy([c[0] / m, c[1] / m, c[2] / m], th);
       spinSample();
       paint();
       onChange && onChange({ ...val }, null);
       return;
     }
+    /* ── A RING IS A WHEEL YOU PUSH, NOT AN AZIMUTH YOU POINT AT ──────────
+       BOTH OF THE PREVIOUS MODELS FAILED ON A RING SEEN EDGE ON, differently.
+       Reading the pointer's angle about the axis after projecting it onto the
+       BALL confines it to the visible hemisphere — which spans half a circle,
+       so the ring locked at 180° however far the hand went. Reading it FLAT
+       is worse: a screen point has no z at all, so for any axis lying in the
+       plane of the screen the flattened point collapses onto a line, the
+       azimuth degenerates to ±90°, and the signed angle between two nearly
+       opposite vectors is noise — which is a ring that is both stuck AND
+       turning about something other than itself.
+
+       SO IT IS MEASURED THE WAY YOU WOULD PUSH A WHEEL. Under a small turn
+       about `axis`, the point at `p` moves at `axis × p`; project that to the
+       screen and it is the direction the hand should travel to wind the ring
+       forward. How far the hand actually went ALONG that direction, over how
+       far a full radian would carry it, is the angle — a projection of the
+       real motion onto the only motion the ring can make.
+
+       IT IS UNBOUNDED, because it is a rate rather than a position: nothing is
+       being compared to where the drag started, so the turns simply keep
+       adding. It works edge on, where the ring's tangent is exactly the one
+       direction still visible. And the lever arm is the pointer's own distance
+       from the axis, so pushing near the hub turns further per pixel than
+       pushing at the rim, which is what a wheel does. */
+    /* ── THE LEVER COMES OFF THE BALL, THE PUSH COMES OFF THE SCREEN ──────
+       THE POINT BEING TURNED HAS A DEPTH AND THE HAND DOES NOT. Taking the
+       lever from the flat pointer looks equivalent and is not: a ring seen
+       edge on draws as a LINE THROUGH THE MIDDLE of the ball, so the pointer
+       sits near the centre, `p` is nearly zero, and the cross product with it
+       is nothing — the one ring that most needs pushing is the one that
+       reports no lever at all. Projected onto the ball the same pointer is
+       (0, 0, 1), out at the front, and its tangent is a full radius of screen
+       travel. The motion stays flat, because a hand moves in the plane of the
+       page whatever the ball is doing. */
     const to = flatten(ballPt(e, r), axis);
     /* THE POINTER IS ON THE AXIS ITSELF — no component in the plane, so no
        angle to read. Hold, do not guess. */
     if (!to) return;
-    const th = signedAngle(from, to, axis);
-    /* TURNED ABOUT THE RING'S OWN AXIS AND THEN READ BACK AS THREE ANGLES.
-       Adding the angle straight onto one Euler term — which is what this did
-       before — is a rotation about one of the THREE AXES THE ANGLES ARE
-       WRITTEN IN, not about the ring, so the ring swung away from the hand and
-       the two you were not touching stayed put. Exactly backwards.
+    /* TURNED ABOUT THE RING'S OWN AXIS AND THEN READ BACK. Measured from where
+       the drag started, which caps one drag at half a turn — the arc between
+       two points on a sphere cannot be more. That ceiling is REAL and known;
+       three attempts to lift it made the rings worse in three different ways
+       and none of them shipped. The ball itself rolls without limit, which was
+       the thing that mattered; a ring is a fine adjustment and half a turn of
+       one is not what anybody was short of.
 
        NO CLAMP, EVER: the decomposition returns (-180, 180] on its own, so the
-       ball turns forever in either direction and there is no edge to run into.
-       A rotation has no ends; only a knob does, and the knob is showing the
-       same angle written the other way round. */
-    Object.assign(val, orbitEuler(orbitMul(orbitAxisMat(axis, th), base)));
+       ball turns forever in either direction and there is no edge to run into. */
+    const th = signedAngle(from, to, axis);
+    MAT = orbitMul(orbitAxisMat(axis, th), base); sync();
     spinSample();
     paint();
     onChange && onChange({ ...val }, ORBIT_AX[held].key);
@@ -4638,9 +4798,18 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, onChange } = {}) {
     if (v.yaw   != null) val.yaw   = v.yaw;
     if (v.pitch != null) val.pitch = v.pitch;
     if (v.roll  != null) val.roll  = v.roll;
+    /* A HOST SPEAKS EULER, so this is the one door where three angles become
+       the orientation rather than the other way round. */
+    MAT = orbitMat(val.yaw, val.pitch, val.roll);
     paint();
     return wrap;
   };
+  /* AND THE SAME THING WITH THE TURN LEFT IN. `set` is a host syncing a value
+     it already knows about; `turn` is the host asking the ball to GO somewhere,
+     which is a different statement and has to be seen to happen. It reports
+     through `onChange` all the way, so anything bound to the angles follows
+     the animation rather than jumping at the end of it. */
+  wrap.turn = (v = {}) => { turnTo(v); return wrap; };
   wrap.get = () => ({ ...val });
   return wrap;
 }

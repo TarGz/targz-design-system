@@ -57,6 +57,12 @@
   <footer>targz design system · skew · exploration 01 · skew-panels.html</footer>
 </div>
 <!-- the hatch engine: KIT, HANDS, HATCH. Shared with the HATCH page. -->
+<!-- THE BUILT KIT, NOT THE SOURCE. This page carries its own inline copy of the
+     factories, so `../src/skew-kit.js` would be a duplicate top-level `const el`
+     and a SyntaxError. `dist/` is the same code wrapped in an IIFE publishing
+     `window.SkewKit`, which is exactly the shape a second copy needs to be able
+     to sit beside the first. It is here for `orbit` and nothing else. -->
+<script src="../dist/skew-kit.js"></script>
 <script src="../src/skew-hatch.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1899,7 +1905,20 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   const box = document.getElementById('viewport');
   const VIEWS = ['Front', 'Right', 'Top', 'Back', 'Left', 'Bottom'];
   const st2 = { view: 0, yaw: 0, pitch: 0, roll: 0 };
-  let knobs = [];
+  let knobs = [], ball = null;
+  /* ── WHERE EACH KEY POINTS THE BALL ──────────────────────────────────────
+     Checked rather than guessed: at each of these the named axis is the one
+     facing the viewer — Right puts +X at you, Top puts +Y, Back puts −Z. The
+     order matches VIEWS and it is not reorderable for the same reason the
+     six keys are not. */
+  const VIEW_AT = [
+    { yaw:   0, pitch:   0, roll: 0 },   // Front
+    { yaw: -90, pitch:   0, roll: 0 },   // Right
+    { yaw:   0, pitch:  90, roll: 0 },   // Top
+    { yaw: 180, pitch:   0, roll: 0 },   // Back
+    { yaw:  90, pitch:   0, roll: 0 },   // Left
+    { yaw:   0, pitch: -90, roll: 0 },   // Bottom
+  ];
 
   const draw = () => {
     box.textContent = '';
@@ -1909,68 +1928,74 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     head.append(lcd);
     const body = el('div', 'box-body');
 
-    /* the axis ball. Each node is a view — the picture IS the control. */
-    const gz = el('div', 'gizmo');
-    const arm = (deg, len, ax) => {
-      const a = el('div', 'gz-arm');
-      a.style.cssText = `width:${len}px;transform:rotate(${deg}deg) translateY(-1px)`;
-      a.style.setProperty('--ax', ax);
-      return a;
-    };
-    const node = (x, y, ax, view, hollow) => {
-      const b = el('button', 'gz-node' + (hollow ? ' hollow' : ''));
-      b.type = 'button';
-      b.style.cssText = `left:${x}px;top:${y}px`;
-      b.style.setProperty('--ax', ax);
-      b.title = `${view} view`;
-      b.setAttribute('aria-label', `${view} view`);
-      b.addEventListener('click', () => { st2.view = VIEWS.indexOf(view); draw(); });
-      return b;
-    };
-    const C = 66, R = 40;
-    gz.append(arm(0, R, '#FF4A4A'), arm(180, R, '#FF4A4A'),
-              arm(-90, R, '#4ADE80'), arm(90, R, '#4ADE80'),
-              arm(-140, R * .62, '#5AA9FF'));
-    gz.append(node(C + R, C, '#FF4A4A', 'Right'), node(C - R, C, '#FF4A4A', 'Left', true),
-              node(C, C - R, '#4ADE80', 'Top'), node(C, C + R, '#4ADE80', 'Bottom', true),
-              node(C - R * .48, C - R * .40, '#5AA9FF', 'Back', true));
-    const hub = el('button', 'gz-node');
-    hub.type = 'button';
-    hub.style.cssText = `left:${C}px;top:${C}px;width:17px;height:17px;margin:-8.5px 0 0 -8.5px`;
-    hub.style.setProperty('--ax', '#5AA9FF');
-    hub.title = 'Front view';
-    hub.setAttribute('aria-label', 'Front view');
-    hub.addEventListener('click', () => { st2.view = 0; draw(); });
-    gz.append(hub);
-    body.append(gz);
+    /* ── THE ORBIT BALL, IN PLACE OF THE AXIS BALL ────────────────────────
+       THE FLAT BALL WITH SIX NODES WAS THE SAME CONTROL AS THE PAD BELOW IT.
+       Each node snapped to a view; so does each key, and the keys say which
+       one is current. Two parts for one question, and the one that went is the
+       one that could not answer the OTHER question — what if the angle you
+       want is not one of the six.
 
-    /* six latching view keys, interlocked with the ball */
-    const pad = el('div', 'keypad');
-    VIEWS.forEach((v, i) => pad.append(pkey(v, {
-      down: i === st2.view, title: `${v} view`, onClick: () => { st2.view = i; draw(); },
-    })));
-    body.append(pad);
+       AND THE ORDER FOLLOWS THE ANSWER, NOT THE PART. Ball, then the three
+       angles it produces, then the six places you can jump to instead. The
+       continuous control and its own readout are together; the discrete
+       shortcut sits under both, where a shortcut belongs. */
+    ball = SkewKit.orbit({
+      size: 'sm', yaw: st2.yaw, pitch: st2.pitch, roll: st2.roll,
+      onChange: v => {
+        st2.yaw = Math.round(v.yaw); st2.pitch = Math.round(v.pitch); st2.roll = Math.round(v.roll);
+        knobs[0].set(st2.yaw); knobs[1].set(st2.pitch); knobs[2].set(st2.roll);
+      },
+    });
+    body.append(ball);
 
-    body.append(el('div', 'divider'));
-
-    /* Yaw / Pitch / Roll — three angles, so three knobs. The pointer IS the
+    /* Yaw / Pitch / Roll — three angles, so three knobs, and they sit under
+       the ball because that is what the ball is saying. The pointer IS the
        angle, which is the one case where a knob is not a preference. */
+    /* EACH KNOB WEARS ITS OWN AXIS, out of `ORBIT_AX` rather than retyped —
+       three identical orange dials beside a ball that has already answered in
+       colour is the panel making you read a label to find out where you are. */
+    const axCol = k => SkewKit.ORBIT_AX.find(a => a.key === k).col;
+    /* THE KIT'S KNOB, NOT THIS PAGE'S. The inline copy predates `endless` and
+       an angle knob that stops at ±180 is a wall across open ground — the ball
+       above it turns through there without noticing. Using `SkewKit.knob` for
+       these three is also one fewer thing this page has to keep in step by
+       hand; the trap table upstairs says as much. */
+    const knob = SkewKit.knob;
     const kr = el('div', 'knobrow');
     knobs = [
-      knob({ label: 'Yaw', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.yaw,
-             fmt: v => `${v}°`, onChange: v => { st2.yaw = v; } }),
-      knob({ label: 'Pitch', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.pitch,
-             fmt: v => `${v}°`, onChange: v => { st2.pitch = v; } }),
-      knob({ label: 'Roll', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.roll,
-             fmt: v => `${v}°`, onChange: v => { st2.roll = v; } }),
+      knob({ endless: true, arc: axCol('yaw'), label: 'Yaw', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.yaw,
+             fmt: v => `${v}°`, onChange: v => { st2.yaw = v; ball.set({ yaw: v }); } }),
+      knob({ endless: true, arc: axCol('pitch'), label: 'Pitch', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.pitch,
+             fmt: v => `${v}°`, onChange: v => { st2.pitch = v; ball.set({ pitch: v }); } }),
+      knob({ endless: true, arc: axCol('roll'), label: 'Roll', min: -180, max: 180, step: 1, size: 44, bipolar: true, value: st2.roll,
+             fmt: v => `${v}°`, onChange: v => { st2.roll = v; ball.set({ roll: v }); } }),
     ];
     knobs.forEach(k => kr.append(k));
     body.append(kr);
 
+    body.append(el('div', 'divider'));
+
+    /* six latching view keys — the shortcut, under the thing it is short for */
+    const pad = el('div', 'keypad');
+    /* A KEY SETS THE BALL, AND IT TURNS TO GET THERE. Snapping would make the
+       six keys and the ball two separate pictures of the same state; turning
+       makes them one control with a shortcut. `draw` rebuilds the box for the
+       key's own pressed state — which replaces the ball — so the new one is
+       what gets told to move, from wherever the old one was. */
+    VIEWS.forEach((v, i) => pad.append(pkey(v, {
+      down: i === st2.view, title: `${v} view`,
+      onClick: () => { st2.view = i; draw(); ball.turn(VIEW_AT[i]); },
+    })));
+    body.append(pad);
+
     const acts = el('div', 'actrow');
     acts.append(key('<span>FIT</span>', { cls: 'act aux', title: 'Fit the piece in the view' }));
     acts.append(key('<span>RESET</span>', { cls: 'act aux', title: 'Back to 0° on all three',
-      onClick: () => { st2.yaw = st2.pitch = st2.roll = 0; knobs.forEach(k => k.set(0)); } }));
+      onClick: () => {
+        st2.yaw = st2.pitch = st2.roll = 0;
+        knobs.forEach(k => k.set(0));
+        ball.turn({ yaw: 0, pitch: 0, roll: 0 });
+      } }));
     body.append(acts);
 
     box.append(head, body);

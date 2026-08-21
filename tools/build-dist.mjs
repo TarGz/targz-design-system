@@ -153,12 +153,12 @@ function strip(css) {
    app reaching for it is reaching past the boundary. */
 const API = [
   'el', 'svg', 'eng', 'ICON', 'ENG',
-  'knob', 'fader', 'rangeFader', 'rotary', 'drum', 'gizmo', 'lightDir', 'selector', 'gate', 'keyBank',
+  'knob', 'fader', 'rangeFader', 'rotary', 'drum', 'gizmo', 'orbit', 'lightDir', 'selector', 'gate', 'keyBank',
   'key', 'pkey', 'swBtn', 'toggle', 'chevBtn', 'assetRow',
   'openPicker', 'openPlate', 'menu', 'plateKey', 'appDock', 'MODKEY',
   'typeable', 'engage', 'windowise', 'WIN_ICON',
   'hex2rgb', 'rgb2hex', 'rgb2hsv', 'hsv2rgb',
-  'RING_R', 'RING_C', 'CAP_W', 'panelShape',
+  'RING_R', 'RING_C', 'CAP_W', 'panelShape', 'ORBIT_AX',
   'SFX', 'clicky',
 ];
 

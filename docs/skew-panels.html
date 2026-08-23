@@ -857,19 +857,94 @@ function knob({ label, min, max, step = 1, value, fmt, arc = '#FF6A00',
    and they let you set from > to, which is not a state the piece has — it is
    just a slider that has not been corrected yet.
 
-   One slot, two caps, the band lit between them. The span is now a length you
-   can SEE, dragging either end keeps the other still, the caps cannot cross,
-   and the panel gets a row back. The band carries a fine hatch so it reads as
-   a solid piece between two thumbs rather than as a fill that happens to start
-   late — the same reason the cap has a knurl. */
-const CAP_W = 17, MIN_SPAN = 0.02;
+   ── TWO JAWS, NOT TWO CAPS ───────────────────────────────────────────────
+   The first version of this put a normal fader cap on each end, and that had
+   a failure it could not see. A cap is CAP_W wide and centred on its value,
+   so the two of them MERGE into one lump whenever
+
+       span / (max - min)  <  CAP_W / trackWidth
+
+   which on a panel row is about nine per cent of the range. `MIN_SPAN` was
+   guarding the VALUES at two per cent and the PIXELS at nothing, so the caps
+   had been overlapping for a long time before the clamp ever fired — and in
+   the merged state the nearest-cap pick put its decision boundary INSIDE the
+   lump, where two pixels of hand swapped which end you were holding.
+
+   The SHAPE fixes it, not the arithmetic. Each end is a JAW: a bar standing
+   at the value with its mass behind it, pointing AWAY from the band.
+
+       [▓▓]━┃■■■■■■■■■■■■┃━[▓▓]
+
+   NO TRIANGLE — two of them shipped and both were wrong, for the same reason
+   the second time as the first: a tapering shape has its least material
+   exactly where you look at it hardest, so there is nothing there to shade
+   and it reads as a DRAWING of a part rather than a part. There is no
+   lighting fix for that. The EQ-200's caps are the reference and they are
+   square, solid blocks, so the jaw is that block — the one this panel already
+   knows how to make.
+
+   A GRIP, A NECK AND A BLADE. The BLADE is the vertical bar standing at the
+   value, and it is the tallest piece because it is the one that means
+   something: its inner face is where the band stops. The GRIP is the square
+   cap, outboard, knurled, and it is what a thumb goes on. The NECK is the thin
+   section between them, laid down first so the other two paint over its ends
+   — what you see is one moulding waisted in the middle, not three parts in a
+   row with two seams.
+
+   Because each jaw's mass sits on the far side of its own blade, the two
+   bodies cannot overlap however close the values get — at zero span the blades
+   butt together and the grips are still a full jaw apart on either side, both
+   still there to take a thumb. Nothing has to be nudged, offset or faded to
+   keep them apart; they are apart because of what they are.
+
+   AND EVERY PIECE IS A ROUNDED RECTANGLE, WHICH IS HALF THE WIN. `clip-path`
+   was the whole source of the trouble on the pointed versions: it clips
+   pointer events, it clips inset shadows, and it is applied AFTER filters, so
+   it trims off the very shadow that was meant to sit outside the silhouette.
+   A rectangle needs none of it. The three pieces take the cap's own six inset
+   shadows unmodified, because they are the cap's own shape.
+
+   THAT IS WHAT LETS THE REST GO. `MIN_SPAN` is gone — a closed band is now a
+   legal state and a readable one, two blades butted together with no light
+   between them. The nearest-cap guess is gone — the jaws cannot overlap, so a
+   pointerdown on one is EXACT — and the pinned-at-the-stop trap goes with it,
+   the one where both ends sat on the same limit and the far one could never
+   be pulled off because `|v-a| <= |v-b|` is always true when a equals b.
+
+   And the band comes free. Nothing sits on top of it any more, so it can be
+   the third grip: drag the piece and the whole window slides with its span
+   held. That is the gesture a narrow band actually wants, and the two-cap
+   version had no way to offer it — every pointer event on the line was spoken
+   for by a cap.
+
+   The band keeps its fine hatch, which is now doing two jobs: it says the
+   band is a solid piece rather than a fill that starts late, and a solid
+   piece is a thing you can pick up. */
+const CAP_W = 17;
+/* THE JAW: a 4px blade at the value, a 3px neck, a 12px grip behind it — 19 in
+   total. It is two wider than the plain cap, which is what a part with a
+   handle AND a pointer costs, and the row's rhythm survives it. */
+const END_W = 19, RESERVE = 2 * END_W;
+/* THE SEAM: the lit gap the two blades keep between them when the band shuts.
+   It is DRAWN ONLY — the values may sit on top of each other, and at zero span
+   they do. What it buys is that a closed band still says something: a hairline
+   of light where the two ends have met, instead of a dark join you have to
+   read the numbers to interpret. */
+const SEAM = 3;
 function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
-  const row = el('div', 'fader');
+  const row = el('div', 'fader range');
   const slot = el('div', 'fslot');
   const track = el('div', 'ftrack');
   const band = el('div', 'ffill band');
-  const capA = el('div', 'fcap');
-  const capB = el('div', 'fcap');
+  const jaw = (n) => {
+    const j = el('div', 'fend fend-' + (n ? 'b' : 'a'));
+    /* THE NECK GOES DOWN FIRST so the grip and the blade paint over its ends
+       and the seams close. Three parts in a row is three parts; a thin section
+       tucked under two thick ones is one moulding. */
+    j.append(el('i', 'fend-neck'), el('i', 'fend-grip'), el('i', 'fend-blade'));
+    return j;
+  };
+  const capA = jaw(0), capB = jaw(1);
   const out = el('div', 'kval wide');
   track.append(band, capA, capB);
   slot.append(track, el('div', 'fticks'));
@@ -877,15 +952,51 @@ function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
 
   const q = v => +Math.min(max, Math.max(min, Math.round(v / step) * step)).toFixed(6);
   const norm = v => (v - min) / (max - min);
-  // x of a cap CENTRE, in %, allowing for the cap's own width at both ends
-  const cx = t => `calc(${t * 100}% - ${(t - .5) * CAP_W}px)`;
+  /* THE SCALE IS INSET BY A WHOLE JAW AT EACH END, where the cap version was
+     inset by half of one. A jaw is ONE-SIDED: at the bottom of the range the
+     start jaw's triangle hangs to the LEFT of its bar, so the bar has to stop
+     a jaw short of the groove's end or the triangle walks out of the slot.
+     `.fticks` is inset to match in the CSS — an engraved scale that marks
+     places the value cannot reach is a scale that lies. */
+  const bar = (t, off = 0) => `calc(${END_W + off}px + ${t} * (100% - ${RESERVE}px))`;  // a blade's inner face
+  /* THE SEAM IS THE ONLY PIXEL-MEASURED THING ON THIS CONTROL, and that is why
+     the track gets an observer. Everything else here is a percentage inside a
+     `calc()` and re-solves itself when the panel resizes; a three-pixel floor
+     cannot be written that way, because a custom property resolves ITS
+     percentages against the box that uses it and the blade's box is 19px, not
+     the track's. So the track is measured — once when it is laid out, and
+     again only when it actually changes size. Nothing is read during a drag. */
+  let usablePx = 0;
+  const run = d => `calc(${d} * (100% - ${RESERVE}px))`;                // a distance along the scale
 
   const paint = () => {
     const ta = norm(a), tb = norm(b);
-    capA.style.left = cx(ta);
-    capB.style.left = cx(tb);
-    band.style.left = cx(ta);
-    band.style.width = `calc(${(tb - ta) * 100}% - ${(tb - ta) * CAP_W}px)`;
+    /* THE BLADES EASE APART TO KEEP THE SEAM OPEN, AND THE VALUES DO NOT MOVE.
+       Below `SEAM` pixels of real span each blade is drawn up to a pixel and a
+       half further out, and the band is stretched by exactly what the two of
+       them gave up — so the lit gap holds at 3px however far the values close,
+       right down to a === b. The jaw BOXES stay where the values put them, so
+       the hit targets never lie about what they are over; only the drawn blade
+       shifts, through `--nudge`.
+       Above `SEAM` the nudge is zero and this is all inert: an end that has
+       room to be exact is drawn exactly. */
+    const spanPx = usablePx * (tb - ta);
+    const nud = usablePx && spanPx < SEAM ? (SEAM - spanPx) / 2 : 0;
+    capA.style.setProperty('--nudge', nud + 'px');
+    capB.style.setProperty('--nudge', nud + 'px');
+    capA.style.left = run(ta);      // the START jaw's box opens a full jaw BEFORE its blade
+    capB.style.left = bar(tb);      // the END jaw's box opens AT its blade
+    band.style.left = bar(ta, -nud);
+    band.style.width = `calc(${Math.max(0, tb - ta)} * (100% - ${RESERVE}px) + ${2 * nud}px)`;
+    /* A BAND THIS NARROW IS A GLOW, NOT A PIECE. The hatch says "solid thing
+       you can pick up" and cannot say it in three pixels, and the inset black
+       ring would eat two of the three. Both come off and the light is turned
+       up instead. */
+    band.classList.toggle('tight', nud > 0);
+    /* and if there is no measurement yet, a zero-span band is taken off the
+       panel rather than drawn: a box with no width still casts its shadow, and
+       this one's is a 6px orange glow that would sit where nothing is. */
+    band.style.display = tb > ta || nud > 0 ? '' : 'none';
     out.textContent = `${fmt ? fmt(a) : a}–${fmt ? fmt(b) : b}`;
     capA.setAttribute('aria-valuenow', a);
     capB.setAttribute('aria-valuenow', b);
@@ -898,32 +1009,82 @@ function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
      and, where the part has one, the notch at the centre. A ratchet on a fader
      is the sound of a control that does not exist. */
   const set = (which, v) => {
-    if (which === 0) a = Math.min(q(v), b - MIN_SPAN * (max - min));
-    else b = Math.max(q(v), a + MIN_SPAN * (max - min));
+    if (which === 0) a = Math.min(q(v), b);       // they may MEET. They may not cross.
+    else b = Math.max(q(v), a);
+    paint(); onChange && onChange(a, b);
+  };
+  /* SLIDING THE WHOLE WINDOW KEEPS THE SPAN EXACTLY, which is why `b` is
+     derived from `a` and never quantised on its own: two independent roundings
+     let the span breathe by a step as the band crosses the track, and a window
+     that changes width while you carry it is a window you stop trusting. */
+  const slide = (v0, w) => {
+    a = Math.min(Math.max(q(v0), min), max - w);
+    b = a + w;
     paint(); onChange && onChange(a, b);
   };
 
-  // The caps are painted, not hit — the TRACK takes every pointer event and
-  // hands it to whichever cap is nearer. Grabbing a 17px thumb exactly is a
-  // pointing task nobody should be set; clicking anywhere on the line and
-  // having the near end come to you is the same gesture with no aiming.
-  let active = 0;
-  const fromX = (e, pick) => {
+  /* THREE GRIPS ON ONE PART, and only the last one has to think.
+       a JAW   — exact, because two jaws cannot overlap. No aiming, no guess.
+       the BAND — the whole window, span held.
+       the TRACK — the two-cap version got this one right and it stays: click
+                   anywhere on the bare line and the near end comes to you,
+                   which is the same gesture with no aiming. It can no longer
+                   pick wrong, either: the jaws and the band have taken every
+                   position between the two values, so a hit that reaches the
+                   track is always OUTSIDE the pair.
+     Every drag is RELATIVE to where it started. Absolute was fine when the cap
+     was centred on its value, but a jaw is grabbed by a triangle that sits up
+     to a jaw-width off the value, and jumping the value to the pointer would
+     yank the end sideways the moment you touched it. A bare-track hit snaps
+     first and then runs relative, which is the same thing as absolute once the
+     value is under the pointer. */
+  let mode = 'end', active = 0, grabV = 0, grabFrom = 0, grabW = 0;
+  /* THE POSITION IS NOT CLAMPED HERE, AND CLAMPING IT HERE WAS A BUG YOU COULD
+     NOT ARGUE WITH: THE ENDS OF THE RANGE BECAME UNREACHABLE. A drag is
+     relative, so the value is `grabFrom + (vAt - grabV)`, and grabbing a jaw by
+     its grip puts the pointer a jaw-width BEFORE the blade — grabV is less
+     than a. Clamp `t` at 0 and that offset is preserved for ever: push the hand
+     off the left of the track and the best the start end can reach is
+     `a - grabV + min`, which is short of `min` by exactly however far up the
+     triangle you happened to grab. The reported floor was 0.11.
+     So the position runs past both stops and `q` clamps the VALUE, which is
+     where the limit actually lives. Drag past the end and the end is what you
+     get, whatever you are holding the part by. */
+  const vAt = (e) => {
     const r = track.getBoundingClientRect();
-    const usable = r.width - CAP_W;
-    const t = Math.min(1, Math.max(0, (e.clientX - r.left - CAP_W / 2) / usable));
-    const v = min + t * (max - min);
-    if (pick) active = Math.abs(v - a) <= Math.abs(v - b) ? 0 : 1;
-    set(active, v);
+    return min + ((e.clientX - r.left - END_W) / Math.max(1, r.width - RESERVE)) * (max - min);
+  };
+  const near = v => (v <= a ? 0 : v >= b ? 1 : Math.abs(v - a) <= Math.abs(v - b) ? 0 : 1);
+  const drag = (e) => {
+    const d = vAt(e) - grabV;
+    if (mode === 'band') slide(grabFrom + d, grabW);
+    else set(active, grabFrom + d);
   };
   track.addEventListener('pointerdown', e => {
-    track.setPointerCapture(e.pointerId); track.dataset.on = '1'; SFX.grab(); fromX(e, true);
+    const jawEl = e.target.closest('.fend');
+    const v = vAt(e);
+    if (jawEl) { mode = 'end'; active = jawEl === capB ? 1 : 0; }
+    else if (e.target.closest('.ffill')) { mode = 'band'; }
+    else { mode = 'end'; active = near(v); set(active, v); }
+    grabV = v;
+    grabFrom = mode === 'band' ? a : (active ? b : a);
+    grabW = b - a;
+    /* WHICH ONE AM I HOLDING. The CSS lifts the held jaw, and it has to be told
+       from here rather than read off `:active`: the pointer is captured by the
+       TRACK, so the jaw never sees the press and `:active` never lands on it.
+       With the two ends a pixel apart this lift is the only feedback left. */
+    if (mode === 'end') (active ? capB : capA).dataset.hold = '1';
+    track.setPointerCapture(e.pointerId); track.dataset.on = mode; SFX.grab();
   });
-  track.addEventListener('pointermove', e => { if (track.dataset.on) fromX(e, false); });
-  track.addEventListener('pointerup', () => {
+  track.addEventListener('pointermove', e => { if (track.dataset.on) drag(e); });
+  // see the note on the knob: capture can end without a pointerup
+  const fEnd = () => {
     if (track.dataset.on) SFX.drop();
-    delete track.dataset.on;
-  });
+    delete track.dataset.on; delete capA.dataset.hold; delete capB.dataset.hold;
+  };
+  track.addEventListener('pointerup', fEnd);
+  track.addEventListener('pointercancel', fEnd);
+  track.addEventListener('lostpointercapture', fEnd);
 
   [capA, capB].forEach((c, n) => {
     c.tabIndex = 0;
@@ -939,7 +1100,25 @@ function rangeFader({ label, min, max, step = 0.01, from, to, fmt, onChange }) {
   });
 
   paint();
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(rs => {
+      const w = Math.max(1, rs[0].contentRect.width - RESERVE);
+      if (w !== usablePx) { usablePx = w; paint(); }
+    }).observe(track);
+  }
   row.append(el('div', 'flab', label), slot, out);
+  /* THE SAME HANDLE THE OTHER FOUR EXPOSE, and the last one to get it. Two
+     arguments because a span is two numbers, and the far end is clamped the
+     same way a drag clamps it — a config that stored a crossed pair does not
+     get to put the control in a state a hand could not.
+     Silent, like the others: a host pushing a loaded config into a panel is
+     not a user turning a knob, and firing onChange here is how a config load
+     turns into a re-render per control. */
+  row.set = (x, y) => {
+    a = q(x);
+    b = Math.max(q(y), a);
+    paint();
+  };
   return row;
 }
 

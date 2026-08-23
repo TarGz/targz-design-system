@@ -2850,6 +2850,157 @@ html{ -webkit-tap-highlight-color:transparent; }
   box-shadow:0 0 5px var(--led), 0 0 10px rgba(255,106,0,.55), 0 1px 0 rgba(0,0,0,.8);
 }
 
+
+/* ── THE JAW: the range fader's end, and why it is not a cap ──────────────
+   A cap is centred on its value, so two of them merge into one lump as soon as
+   the span drops under a cap's width — see the note in the kit. A jaw puts its
+   MASS on the far side of the piece that carries the value, so the two bodies
+   cannot overlap however close the values get.
+
+       [▓▓]━┃■■■■■■■■■■■■┃━[▓▓]     grip · neck · blade · band · blade · neck · grip
+
+   NO TRIANGLE. Two of them shipped and both were wrong, the second for the
+   same reason as the first: a tapering shape has its least material exactly
+   where you look at it hardest, so there is nothing there to shade and it
+   reads as a DRAWING of a part. There is no lighting fix for a point. The
+   EQ-200's caps are the reference and they are square, solid blocks — bright
+   top rim, black waist, hard shadow underneath, mass everywhere. So the jaw is
+   built out of that block, which is the one shape this panel already knows how
+   to make.
+
+   AND EVERY PIECE IS A ROUNDED RECTANGLE, WHICH IS HALF THE WIN. `clip-path`
+   was the whole source of the trouble on the pointed versions: it clips
+   pointer events, so the part was ungrabbable exactly at the tip where the two
+   ends meet; it clips inset shadows, so the diagonals — the only edges that
+   made the shape anything — were the two edges with no light on them; and it
+   is applied AFTER filters, so a drop-shadow standing in for the bevel got
+   trimmed off at the very silhouette it was meant to sit outside. Every one of
+   those went away with the taper. The three pieces below take the cap's own
+   six inset shadows unmodified, because they ARE the cap's shape.
+
+   THE BOX IS STILL THE HIT TARGET and the three pieces are inert, because a
+   19px part with a 3px waist in it is not a thing to ask a hand to hit
+   precisely. It is also taller than anything it draws — the jaws sit on
+   opposite sides of their own blades, so growing them cannot make them
+   collide. */
+.fend{
+  position:absolute; top:50%; width:19px; height:28px; margin-top:-14px;
+  cursor:grab; touch-action:none;
+}
+.fend:active{ cursor:grabbing; }
+
+/* ONE MOULDING FOR ALL THREE PIECES — the cap's gradient and the cap's six
+   shadows, copied and not adapted. Waist dark, both shoulders lit, a white
+   hairline along the top, a black one down the inboard side, and the part
+   sitting on its own shadow. */
+.fend > i{
+  position:absolute; top:50%; pointer-events:none;
+  background:linear-gradient(180deg,#585d66 0%,#3a3e45 16%,#22252a 46%,#1a1c20 54%,#33373d 86%,#4c5158 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -1px 0 rgba(255,255,255,.22),
+    inset 1px 0 0 rgba(255,255,255,.10),
+    inset -1px 0 0 rgba(0,0,0,.6),
+    0 3px 6px rgba(0,0,0,.9),
+    0 0 0 1px rgba(0,0,0,.65);
+}
+
+/* THE GRIP — the square cap, outboard, and the only piece a thumb is invited
+   to. 12 x 20 with the cap's 4px corners: near enough square to read as the
+   button it is borrowed from, short enough that the blade beside it is clearly
+   the taller thing. */
+.fend-grip{ width:12px; height:20px; margin-top:-10px; border-radius:4px; }
+.fend-a .fend-grip{ left:0; }
+.fend-b .fend-grip{ right:0; }
+/* the cap's knurl, same 1px/2.5px pitch, teeth on the two shoulders and none
+   across the waist — a grip texture over the thin part is a grip on nothing */
+.fend-grip::before{
+  content:''; position:absolute; inset:2px 3px;
+  background-image:repeating-linear-gradient(0deg,
+    rgba(255,255,255,.13) 0 1px, rgba(0,0,0,.30) 1px 2.5px);
+  -webkit-mask:linear-gradient(180deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+          mask:linear-gradient(180deg,#000 0 34%, transparent 36% 64%, #000 66% 100%);
+  border-radius:3px;
+}
+/* AND THE LIT LINE ACROSS ITS WAIST, the cap's own indicator, because a grip
+   that looks like the cap and is missing the one mark the cap wears reads as a
+   cap with its lamp out. On the plain fader that line IS the value; here the
+   BLADE carries the value and this is the mark that says the piece is live —
+   the same part doing the lighter job, which is why it sits on the grip and
+   never on the blade. Orange on the blade would be orange against the orange
+   band, and cutting that band is the blade's whole job. The knurl's mask has
+   already cleared the waist for it, exactly as it does on the cap. */
+.fend-grip::after{
+  content:''; position:absolute; left:2px; right:2px; top:50%; height:2px; margin-top:-1px;
+  border-radius:1px; background:var(--led-hot);
+  box-shadow:0 0 5px var(--led), 0 0 10px rgba(255,106,0,.55), 0 1px 0 rgba(0,0,0,.8);
+}
+
+/* THE BLADE — the vertical bar standing at the value, and the tallest piece
+   because it is the one that means something: its INNER face is where the band
+   stops. It is NOT lit, and that is the whole reason its edge reads — the band
+   it terminates is orange, so a dark blade cuts it clean, where an orange
+   indicator would dissolve into the very thing it is there to bound. The plain
+   cap's lit hairline was marking a value against bare track and had nothing to
+   lose to. This one does. */
+.fend-blade{ width:4px; height:24px; margin-top:-12px; border-radius:2px; }
+/* THE BLADE EASES OUTWARD TO KEEP THE SEAM OPEN when the two ends close on
+   each other — `--nudge`, set from the kit, never more than a pixel and a half
+   and zero for any span with room to be exact. It moves the DRAWN blade only:
+   the jaw's box, which is the hit target, stays where the value put it. */
+.fend-a .fend-blade{ right:var(--nudge, 0px); }
+.fend-b .fend-blade{ left:var(--nudge, 0px); }
+
+/* THE NECK — the thin section that carries the load between them, 6 wide and
+   tucked 2px under the grip and 1px under the blade so both seams close. It
+   goes down FIRST in the kit so the two thick pieces paint over its ends:
+   three parts in a row is three parts, but a thin section under two thick ones
+   is one moulding with a waist in it. Its own shadows are lighter than the
+   others' for the same reason a waist is darker than a shoulder — less of it
+   is facing the lamp. */
+.fend-neck{ width:6px; height:8px; margin-top:-4px; border-radius:1.5px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(255,255,255,.12),
+    0 2px 4px rgba(0,0,0,.85),
+    0 0 0 1px rgba(0,0,0,.6);
+}
+.fend-a .fend-neck{ left:10px; }
+.fend-b .fend-neck{ right:10px; }
+
+/* THE HELD JAW CATCHES MORE LIGHT, and it is told to from the kit rather than
+   read off `:active` — the TRACK captures the pointer, so the jaw never sees
+   the press. With the two ends a pixel apart this is the only feedback left
+   that says which one you have. */
+.fend[data-hold] > i{ filter:brightness(1.22); }
+
+/* THE BAND IS A GRIP NOW. It always claimed to be a piece — that is what the
+   hatch is for — and it was the one part of this control you could not pick up,
+   because every pointer event on the line was already spoken for by a cap.
+   Dragging it slides the window with its span held. */
+.ffill.band{ cursor:grab; }
+.ftrack[data-on="band"] .ffill.band{ cursor:grabbing; }
+/* A CLOSED BAND IS A LEGAL STATE, AND IT IS LIT. The two blades hold a three
+   pixel seam open between them however far the values close, right down to
+   a === b, and what shows in it is the band itself — so a shut span reads as a
+   hairline of light where the two ends have met, rather than as a dark join
+   you have to read the numbers to interpret. The values are not touched by it;
+   only the drawn blades move.
+   AT THAT WIDTH THE BAND IS A GLOW, NOT A PIECE. The hatch says "solid thing
+   you can pick up" and cannot say it in three pixels; the inset black ring
+   would eat two of the three. Both come off and the light is turned up. */
+.ffill.band.tight{
+  background-image:none;
+  background:linear-gradient(180deg,#FFD9B4,var(--led-hot) 55%,#FF7A1A);
+  box-shadow:0 0 7px var(--led), 0 0 17px rgba(255,106,0,.5);
+}
+
+/* THE SCALE MOVES IN BY A WHOLE JAW AT EACH END. A jaw is one-sided, so the
+   value cannot reach the last 19px of groove at either end without walking its
+   grip out of the slot — and a tick engraved where the value cannot go is a
+   tick that lies. */
+.fader.range .fticks{ left:19px; right:19px; }
+
 /* ── THE CENTRE-DETENT SCALE ──────────────────────────────────────────────
    A trim fader's zero is a PLACE, so it is marked like one: a full-height
    tick at the middle where the others are stubs, and the cap notches into it.

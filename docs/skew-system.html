@@ -22,7 +22,7 @@
     <tbody>
       <tr><td>knob(…)</td><td>A <b>quantity</b>. 270° of travel, a lit arc, a pointer. Takes <code>detents:[…]</code> to notch at places a value is approached deliberately, <code>.set(v)</code> so another control can move it, and one of five <code>layout</code>s (§05)</td></tr>
       <tr><td>fader(…)</td><td>A <b>length</b>, which is a straight thing, so it keeps a track. <code>mode:'center'</code> for a trim, because a trim is not "how much" but "how far off"</td></tr>
-      <tr><td>rangeFader(…)</td><td>A <b>span</b>, the one thing a knob cannot say. Two caps in one slot with the band lit between them</td></tr>
+      <tr><td>rangeFader(…)</td><td>A <b>span</b>, the one thing a knob cannot say. Two <b>jaws</b> in one slot with the band lit between them — each jaw's mass points away from its own bar, so the ends can meet without ever overlapping</td></tr>
       <tr><td>drum(…)</td><td>A <b>long list</b>. Past about six names a rotary stops being aimable, so the names go on a real cylinder</td></tr>
       <tr><td>keyBank(…)</td><td>The same names as <b>keys</b>, mechanically interlocked — pressing one releases the others and the one that is down cannot be pressed up. A grid rather than a row, so nine of them is a block the size of a knob bay instead of 700px of bar. The control IS the list</td></tr>
       <tr><td>gate(…)</td><td>The same five-to-a-dozen <b>names</b>, with <b>nothing that opens</b>. A slot milled down the plate with a detent notch per position, a lever standing in it, the names engraved beside the notches. Everything legible at rest, and the only thing that moves is the lever</td></tr>
@@ -946,6 +946,9 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
     ['Range fader',
      '<span id="mat-fader"></span>',
      'wide'],
+    ['Range fader · ends together',
+     '<span id="mat-fader0"></span>',
+     'wide'],
     ['Rotary selector',
      '<span id="mat-rot"></span>'],
     ['Orbit ball',
@@ -1134,6 +1137,16 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
 
   document.getElementById('mat-fader').replaceWith(rangeFader({
     label: 'Zone', min: 0, max: 1, from: 0.24, to: 0.72,
+    fmt: v => v.toFixed(2),
+  }));
+  /* THE CASE THE CAPS COULD NOT DRAW, which is why it is a tile and not a
+     footnote. This one opens two steps wide — the state where two 17px caps
+     were one lump with the pick boundary inside it. Drag either jaw THROUGH
+     the other: they meet, they stop, the band closes, and there are still two
+     pieces on the panel with a thumb's worth of triangle each. Then drag the
+     band itself and the whole window slides with the span held. */
+  document.getElementById('mat-fader0').replaceWith(rangeFader({
+    label: 'Zone', min: 0, max: 1, step: 0.01, from: 0.46, to: 0.48,
     fmt: v => v.toFixed(2),
   }));
 

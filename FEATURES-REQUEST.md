@@ -27,6 +27,27 @@ future adoption pays for them again.
 
 ## Open
 
+### `[design system]` There is no LAYER LIST part, and three apps now have one
+Portrait-Typo has a layer dock, Portrait-ribbons has just grown one, and the hatch bay's
+surface strip was built as one before it went back to `.piano.sm`. Every time it is the same
+molecule: a raised row per module, an ink chip that opens `openPicker`, a `toggle` with an
+honest glyph for drawn/hidden, a `key` to delete, a name you can rename in place, and a bar
+underneath with a count and an add. Three apps composing one part three ways is how a language
+stops being one — the same argument `toggle` itself was grown from at v1.49.4.
+**Why it is missing:** needs markup and JS, and a decision about how a row carries a chevron
+to whatever is behind it.
+
+### `[design system]` `typeable` is numeric-only, and a name is not a number
+`typeable` is the right gesture for editing a value in place — double-click a lit readout, it
+grows a cursor, Enter commits, Escape puts it back — and it ends in `parseFloat`, because every
+readout it was written for is a number. A layer's NAME needs exactly the same gesture and
+cannot use it. Portrait-ribbons has a copy with the parse taken out (`nameable`, in its own
+`src/skew-panel.js`), wearing the kit's `.kedit-able` / `.kedit` surface; the `.kedit` rules are
+scoped to `.kval` and `.lcd`, so it also had to restate them.
+**Why it is missing:** cheap — a `parse` option on `typeable`, plus widening the `.kedit` rules
+past the two lit displays they were written for.
+
+
 ### `[design system]` `lightDir` cannot put the light BELOW the horizon
 
 The disc clamps elevation to 0…90 and says why: past the rim the elevation pins at 0 and the

@@ -3625,6 +3625,38 @@ html{ -webkit-tap-highlight-color:transparent; }
     0 1px 0 rgba(255,255,255,.04);
 }
 
+/* ── THE FRAME METER — DOC-ONLY, AND IT IS IN THE EXCLUDE LIST ────────────
+   The same shallow tray as the bench above it, shorter, because it is the same
+   kind of thing: equipment for deciding something rather than part of anything.
+   Every selector here names `.fpsmeter` or `.fpscell` and nothing else — pair
+   either with `.kval` and the rule stops being doc-only and ships, which is the
+   whole reason the readouts are addressed as bare children. */
+.fpsmeter{
+  display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-start;
+  gap:8px 20px; margin:12px auto 2px; padding:11px 20px 9px; max-width:940px;
+  border-radius:10px;
+  background:linear-gradient(178deg, rgba(0,0,0,.30), rgba(255,255,255,.012));
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.5),
+    inset 0 -1px 0 rgba(255,255,255,.045),
+    0 1px 0 rgba(255,255,255,.035);
+}
+.fpscell{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+.fpscell > *{ margin:0; }
+/* the copy button — a key, near enough, and the selector names `.fpsmeter`
+   and nothing else so the rule strips out of dist with the rest of the tray */
+.fpsmeter button{
+  font-family:var(--font); font-size:8px; letter-spacing:.14em; color:#aab1bc;
+  padding:6px 10px; border:0; border-radius:5px; cursor:pointer; white-space:nowrap;
+  background:linear-gradient(180deg,#4a4f57 0%,#2a2d33 52%,#3c414a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.30),
+    inset 0 -1px 0 rgba(255,255,255,.12),
+    0 2px 4px rgba(0,0,0,.8),
+    0 0 0 1px rgba(0,0,0,.6);
+}
+.fpsmeter button:active{ background:linear-gradient(180deg,#33373d 0%,#22252a 52%,#2e3238 100%); }
+
 /* ── THE THREE BALLS, AND THE SMALL ONE STEPS OUT OF LINE ────────────────────
    IT IS THE ONE BEING DRIVEN, so it is the one that should not sit in the row
    like a third sample. Pushed right and dropped down, with its knobs beneath

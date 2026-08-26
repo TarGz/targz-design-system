@@ -3672,10 +3672,29 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
   addEventListener('resize', layout);
   requestAnimationFrame(layout);
 
+  /* ── A SYNC IS NOT AN EDIT, AND THIS ONE WAS ─────────────────────────────
+     `wrap.set` is silent, as every `.set` in this file claims to be, and this
+     one was not: a `knob`'s exposed setter ends in `onChange` unconditionally —
+     its quiet flag silences the SOUND and nothing else — so pushing a pose in
+     ran the bay's own knob handler three times. That handler is the one that
+     LIGHTS an axis and calls the host back, so a host syncing the bay to a pose
+     it already knows about lit all three channels in turn, left the last one
+     glowing for 420ms, and reported three edits nobody made.
+
+     WHICH IS INVISIBLE UNTIL A HOST DRIVES THE BALL FROM SOMEWHERE ELSE. The
+     viewport on this site turns it with `turn()` and never syncs, so the bay has
+     no caller here that can show this; an app whose camera is also draggable on
+     its own canvas has one on every pointermove, and what it looks like there is
+     the ROLL wire lit while you are dragging yaw.
+
+     The flag is the one already in this function, raised around the writes. */
   wrap.set = (v = {}) => {
     Object.assign(st, v);
+    const was = syncing;
+    syncing = true;
     ball.set(st);
     for (const k in knobs) knobs[k].set(Math.round(st[k]));
+    syncing = was;
     return wrap;
   };
   wrap.turn = (v = {}) => { ball.turn(v); return wrap; };

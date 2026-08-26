@@ -719,6 +719,14 @@
          app gets it — a part whose material is a knob row is a part nobody can
          adopt without deciding nine things first. -->
     <div id="orbitspec-bench" class="orbench"></div>
+    <!-- ── THE FRAME METER ────────────────────────────────────────────────
+         DOC-ONLY like the bench above it, and for the same reason: it is
+         equipment for deciding something, not part of anything. It answers one
+         question — is a slow drag the SHADING or the MACHINE — which is why it
+         keeps two figures rather than one. Idle is what this browser does with
+         nothing asked of it; held is what it does while a pointer is down. A
+         machine that cannot manage the page at rest reads low on both. -->
+    <div id="orbitspec-fps" class="fpsmeter"></div>
   </div>
   <table class="spec">
     <thead><tr><th>Field</th><th>Contract</th></tr></thead>
@@ -1018,7 +1026,8 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
     ['Light',         ['Jewel LED', 'Light pipe', 'Readout']],
     ['Setting a value', ['Knob', 'Knob · endless', 'Light direction', 'Orbit ball', 'Colour picker',
                          'Fader · vertical bank', 'Fader · one cap',
-                         'Fader · centre detent', 'Range fader']],
+                         'Fader · centre detent', 'Range fader',
+                         'Range fader · ends together']],
     /* THE ORDER IS THE ARGUMENT, and it is a count: a rotary is aimable to
        about six, the selector carries five to a dozen, the drum takes a list
        too long to show. Read left to right the group says WHEN each one stops
@@ -1057,12 +1066,19 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
       <div class="mats">${names.map(n => tile(byName.get(n))).join('')}</div>
     </div>`).join('');
 
-  /* A MISSING NAME IS A SILENT HOLE, so it is not silent: a tile renamed above
-     and not renamed in GROUPS would simply vanish from the page and the count
-     in the heading would go on agreeing with itself. */
+  /* A MISSING NAME IS A SILENT HOLE, so it is not silent — AND IT THROWS,
+     which a `console.warn` had no way to do. The warn was written for a tile
+     that vanishes quietly, and a tile that vanishes does not stay quiet: every
+     one of them has a line further down replacing its `<span>` with the live
+     part, and that line finds `null`. So the real failure was never the missing
+     tile, it was a `Cannot read properties of null` a hundred lines away with
+     nothing in it naming the tile — and it took the whole of `materials()` with
+     it, so every part wired AFTER the hole went dark too. One missing name in
+     this list emptied the orbit ball, the drum and the asset row.
+     Failing here says which name, before anything downstream can misreport it. */
   const placed = GROUPS.flatMap(g => g[1]);
   const lost = tiles.map(t => t[0]).filter(n => !placed.includes(n));
-  if (lost.length) console.warn('mats: not in any group →', lost);
+  if (lost.length) throw new Error('mats: tile not in any GROUP → ' + lost.join(', '));
   /* THE TILE'S TWO ROCKERS GET THE SAME SKELETON THE STAGE USES. A specimen
      built from different markup than the part is a specimen that can be right
      here and broken in §06. */
@@ -1811,11 +1827,190 @@ document.getElementById('navspec').replaceWith(navBar({
     const k = knob({
       label, min, max, step, value: ORBIT_GLASS[key], layout: 'stack',
       fmt: v => step < 1 ? v.toFixed(3) : String(Math.round(v)),
-      onChange: v => { ORBIT_GLASS[key] = v; reglaze(); },
+      /* THE ONE COST THIS PAGE CAN TIME FROM OUTSIDE, because it is the one
+         it calls itself: four re-glazes, the bay and three balls, every knob
+         step. Nothing is reached into to get it. */
+      onChange: v => {
+        ORBIT_GLASS[key] = v;
+        const t0 = performance.now();
+        reglaze();
+        outGlaze.textContent = (performance.now() - t0).toFixed(1);
+      },
     });
     k.title = title;
     bench.append(k);
   });
+
+  /* ── THE FRAME METER ──────────────────────────────────────────────────
+     IT MEASURES THE BROWSER, NOT THE BALL, and that is deliberate: nothing here
+     reaches inside `orbit`, so there is no instrumentation to leave behind in
+     a shipped control. Frame-to-frame time is enough, because a paint that
+     overruns blocks the main thread and the next frame is late by exactly what
+     it cost.
+
+     TWO FIGURES, BECAUSE ONE CANNOT ANSWER THE QUESTION. A single number falls
+     during a drag and says nothing about why. Idle and held, sampled into
+     separate windows and flushed whenever the pointer state changes, do: idle
+     high and held collapsed is the shading, both low is the machine or the
+     browser, and neither is a thing you can tell from watching one figure move.
+
+     WORST is the one to read for judder. An average of 40fps made of even
+     frames feels different from the same average made of one 200ms stall, and
+     only the second is a bug. */
+  const fps = document.getElementById('orbitspec-fps');
+  const cell = (name) => {
+    const c = el('div', 'fpscell');
+    const v = el('div', 'kval');
+    v.textContent = '—';
+    c.append(el('div', 'klab', name), v);
+    fps.append(c);
+    return v;
+  };
+  const outIdle = cell('IDLE'), outHeld = cell('HELD'), outWorst = cell('WORST MS'),
+        outEv = cell('EVENT MS'), outLoad = cell('INPUT %'),
+        outGlaze = cell('RE-GLAZE MS'), outDpr = cell('DPR');
+  outDpr.textContent = (window.devicePixelRatio || 1).toFixed(2);
+
+  /* ── WHAT 60 FPS DOES NOT TELL YOU ────────────────────────────────────
+     A CONTROL CAN HOLD SIXTY AND STILL FEEL HEAVY, and the frame counter has
+     no way to say so. If the work for one pointermove takes most of a frame,
+     the frames still arrive on time — they just each carry a value the hand
+     has already moved on from, and what you feel is LATENCY rather than
+     judder. Sixty with a saturated frame and sixty with an idle one are the
+     same number and completely different controls.
+
+     SO THE HANDLER IS TIMED FROM OUTSIDE IT. Every pointer handler in the kit
+     is bound to an ELEMENT — `cv`, `k`, `knob`, `track`, never document — so a
+     capture-phase listener up here runs before all of them and a bubble-phase
+     one runs after all of them. The gap between the two is the work the
+     control did for that event, measured without reaching into anything.
+
+     EVENT MS is that gap, averaged. INPUT % is the same figure against wall
+     clock: how much of each second the main thread spent inside pointermove
+     handlers. Past about seventy there is no headroom left and the control
+     trails the hand however good the frame rate looks. */
+  let held = false, mark = performance.now(), acc = 0, frames = 0, worst = 0;
+  let evT0 = 0, evAcc = 0, evN = 0, winT0 = performance.now();
+  addEventListener('pointermove', (e) => {
+    evT0 = performance.now();
+    if (held && lastPt) { handPx += Math.hypot(e.clientX - lastPt[0], e.clientY - lastPt[1]); }
+    if (held) lastPt = [e.clientX, e.clientY];
+  }, true);
+  addEventListener('pointermove', () => {
+    if (!evT0) return;
+    const ms = performance.now() - evT0;
+    evAcc += ms; evN++; evT0 = 0;
+    if (held) samples.push(ms);
+  }, false);
+  const flush = () => {
+    const wall = performance.now() - winT0;
+    /* THREE FRAMES IS THE FLOOR. A window flushed on a pointer change can be
+       one frame long, and one frame is not a rate — it is whatever happened to
+       be in flight when the hand moved. */
+    if (frames >= 3 && acc > 0) {
+      (held ? outHeld : outIdle).textContent = String(Math.round(frames * 1000 / acc));
+      outWorst.textContent = worst.toFixed(1);
+    }
+    if (evN > 0 && wall > 0) {
+      outEv.textContent = (evAcc / evN).toFixed(1);
+      outLoad.textContent = String(Math.round(evAcc / wall * 100));
+    }
+    acc = 0; frames = 0; worst = 0; evAcc = 0; evN = 0; winT0 = performance.now();
+  };
+  /* ── A DRAG LOG, BECAUSE A NUMBER THAT MOVES IS NOT EVIDENCE ──────────
+     The five readouts say what is happening NOW and there is no way to hand
+     that to anyone. A drag is a closed thing with a start and an end, so it
+     gets a record: what was held, how long, how many events, what each one
+     cost, and what the frame rate did while it was costing that. Printed on
+     release and kept, so a session's worth can go somewhere useful in one go.
+
+     EVERY SAMPLE IS KEPT rather than averaged as it goes, because the average
+     is the figure least likely to be the problem. A drag whose handler costs
+     2ms with one 40ms stall in it averages under four and feels broken, and
+     the only way to see that is the spread — so p50 and MAX are printed
+     beside the mean. */
+  const LOG = [];
+  let dragT0 = 0, dragWhat = '', samples = [], dragFrames = 0, handPx = 0, lastPt = null;
+
+  /* WHAT WAS HELD, NAMED THE WAY THE PAGE NAMES IT. The kit's own wrappers
+     carry the part's identity — `orbit`, `kwrap`, `fader`, `orbay` — and the
+     caption beside it is already in the DOM, so nothing has to be guessed or
+     hard-coded against a control that might get renamed. */
+  const describe = (t) => {
+    if (!(t instanceof Element)) return 'page';
+    const part = t.closest('.orbit, .orbay, .kwrap, .fader, .drum, .lwrap');
+    if (!part) return t.closest('[id]')?.id || t.tagName.toLowerCase();
+    const kind = ['orbit', 'orbay', 'kwrap', 'fader', 'drum', 'lwrap']
+      .find(c => part.classList.contains(c)) || 'part';
+    const lab = part.querySelector('.klab, .flab')?.textContent?.trim();
+    const host = part.closest('[id]')?.id;
+    const px = kind === 'orbit' ? ' ' + Math.round(part.getBoundingClientRect().width) + 'px' : '';
+    return kind + (lab ? ' “' + lab + '”' : '') + (host ? ' #' + host : '') + px;
+  };
+
+  const report = () => {
+    if (!samples.length) return;
+    const ms = performance.now() - dragT0;
+    const srt = [...samples].sort((a, b) => a - b);
+    const sum = srt.reduce((a, b) => a + b, 0);
+    const r = {
+      what: dragWhat,
+      held_ms: Math.round(ms),
+      events: samples.length,
+      ev_per_s: +(samples.length / (ms / 1000)).toFixed(1),
+      fps: +(dragFrames / (ms / 1000)).toFixed(1),
+      event_ms_mean: +(sum / srt.length).toFixed(2),
+      event_ms_p50: +srt[srt.length >> 1].toFixed(2),
+      event_ms_max: +srt[srt.length - 1].toFixed(2),
+      input_pct: Math.round(sum / ms * 100),
+      hand_px: Math.round(handPx),
+      dpr: +(window.devicePixelRatio || 1).toFixed(2),
+    };
+    LOG.push(r);
+    console.log('%c⟨drag⟩ ' + r.what, 'color:#FF6A00',
+      '\n  held ' + r.held_ms + 'ms · hand ' + r.hand_px + 'px · ' + r.events + ' events (' + r.ev_per_s + '/s)'
+      + '\n  fps ' + r.fps + ' · event ms mean ' + r.event_ms_mean + ' p50 ' + r.event_ms_p50 + ' max ' + r.event_ms_max
+      + '\n  input ' + r.input_pct + '% of wall clock · dpr ' + r.dpr);
+    samples = []; dragFrames = 0; handPx = 0; lastPt = null;
+  };
+
+  addEventListener('pointerdown', (e) => {
+    flush(); held = true;
+    dragT0 = performance.now(); dragWhat = describe(e.target);
+    samples = []; dragFrames = 0; handPx = 0; lastPt = [e.clientX, e.clientY];
+  }, true);
+  const release = () => { if (held) { report(); flush(); held = false; } };
+  addEventListener('pointerup', release, true);
+  addEventListener('pointercancel', release, true);
+  requestAnimationFrame(function tick(t) {
+    const dt = t - mark; mark = t;
+    /* A TAB THAT WAS IN THE BACKGROUND COMES BACK WITH ONE ENORMOUS DELTA, and
+       it is not a dropped frame — rAF simply stopped being called. Anything
+       past a quarter second is that, not judder, so it is dropped rather than
+       recorded as the worst frame of the session. */
+    if (dt > 0 && dt < 250) { acc += dt; frames++; if (held) dragFrames++; if (dt > worst) worst = dt; }
+    if (acc >= 400) flush();
+    requestAnimationFrame(tick);
+  });
+
+  /* AND A WAY TO GET IT OUT. A console full of drags is evidence nobody can
+     hand over; one button that puts the lot on the clipboard is. It falls back
+     to printing the whole array when the clipboard is refused, which it will be
+     on any page not served over https or localhost. */
+  const logCell = el('div', 'fpscell');
+  const copy = el('button', '', 'COPY LOG');
+  copy.type = 'button';
+  copy.addEventListener('click', async () => {
+    if (!LOG.length) { copy.textContent = 'NOTHING YET'; }
+    else {
+      const text = JSON.stringify(LOG, null, 1);
+      try { await navigator.clipboard.writeText(text); copy.textContent = 'COPIED · ' + LOG.length; }
+      catch { console.log(text); copy.textContent = 'SEE CONSOLE'; }
+    }
+    setTimeout(() => { copy.textContent = 'COPY LOG'; }, 1600);
+  });
+  logCell.append(el('div', 'klab', 'DRAG LOG'), copy);
+  fps.append(logCell);
 
   const gcell = document.getElementById('orbitspec-glass');
   gcell.append(el('span', 'tagcut', 'DOME'), toggle({

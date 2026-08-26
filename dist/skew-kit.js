@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.100.0
+     at       Skew v1.100.1
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -3685,10 +3685,29 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
   addEventListener('resize', layout);
   requestAnimationFrame(layout);
 
+  /* ── A SYNC IS NOT AN EDIT, AND THIS ONE WAS ─────────────────────────────
+     `wrap.set` is silent, as every `.set` in this file claims to be, and this
+     one was not: a `knob`'s exposed setter ends in `onChange` unconditionally —
+     its quiet flag silences the SOUND and nothing else — so pushing a pose in
+     ran the bay's own knob handler three times. That handler is the one that
+     LIGHTS an axis and calls the host back, so a host syncing the bay to a pose
+     it already knows about lit all three channels in turn, left the last one
+     glowing for 420ms, and reported three edits nobody made.
+
+     WHICH IS INVISIBLE UNTIL A HOST DRIVES THE BALL FROM SOMEWHERE ELSE. The
+     viewport on this site turns it with `turn()` and never syncs, so the bay has
+     no caller here that can show this; an app whose camera is also draggable on
+     its own canvas has one on every pointermove, and what it looks like there is
+     the ROLL wire lit while you are dragging yaw.
+
+     The flag is the one already in this function, raised around the writes. */
   wrap.set = (v = {}) => {
     Object.assign(st, v);
+    const was = syncing;
+    syncing = true;
     ball.set(st);
     for (const k in knobs) knobs[k].set(Math.round(st[k]));
+    syncing = was;
     return wrap;
   };
   wrap.turn = (v = {}) => { ball.turn(v); return wrap; };
@@ -6475,6 +6494,6 @@ function keyBank({ label, options, index = 0, cols, onChange }) {
 
 window.SkewKit = {
   el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, orbitBay, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
-  VERSION: '1.100.0',
+  VERSION: '1.100.1',
 };
 })();

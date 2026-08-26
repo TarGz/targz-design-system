@@ -72,6 +72,7 @@ const WRITE = process.argv.includes('--write');
    much as this page does. */
 const DOC_ONLY = new Set([
   'orbench',          // the glass tuning bench on SYSTEM 12 — no app gets it
+  'fpsmeter', 'fpscell',   // and the frame meter beside it, same argument
 
   'wrap', 'masthead', 'lede', 'sub', 'spec', 'tok', 'trap',
   'mats', 'mat', 'mat-body', 'mat-d', 'mat-keys', 'mat-row', 'mat-stage', 'mat-t',

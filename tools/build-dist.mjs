@@ -85,6 +85,12 @@ const DOC_ONLY = new Set([
   'gridbody', 'gridrow', 'gridcol', 'gridswatch', 'gridmoved',
   'loupe', 'loupe-glass', 'loupe-mark',
   'detail', 'detail-tab', 'detail-nm', 'detail-n',
+  'lightroom', 'ground', 'ground-nm', 'ground-z', 'ground-marks', 'ground-plate', 'ground-cut',
+  'leadstub', 'capmap-sheet', 'capmap-key',
+  'bp', 'bp-view', 'bp-legend', 'bp-lead', 'bp-dim', 'bp-dim-hot', 'bp-out',
+  'bp-tick', 'bp-dash', 'bp-lit', 'bp-hatch', 'bp-thin', 'bp-break', 'bp-zig',
+  'bp-part', 'bp-note', 'bp-plus', 'benchpanels', 'benchpanel', 'capsblock', 'xray', 'xraykey',
+  'bp-fill-bay', 'bp-fill-hole', 'bp-fill-face', 'bp-fill-front', 'bp-fill-spec',
 ]);
 
 /* ── A BRACE WALKER, BECAUSE A REGEX CANNOT DO THIS ───────────────────────────

@@ -813,6 +813,378 @@
     </tbody>
   </table>
 
+  <!-- ── 14 · THE LIGHT SKIN ─────────────────────────────────────────────
+       IT IS AN ISLAND, NOT A PAGE STATE, and that is what makes it reviewable.
+       `[data-skin="light"]` is an attribute selector, so it works on any
+       element — the nav's LIGHT chip puts it on <html> and inverts the whole
+       site, and this section puts it on one <div> so the two skins can be read
+       side by side in one scroll. A skin you can only see by leaving the dark
+       one is a skin you compare from memory. -->
+  <h2>14 <span>/</span> The light skin</h2>
+  <p class="lede">Four <b>materials</b>, four grounds. Colour attaches to the bay — never the
+     chassis, never invented per component — and the z-position is forced by the value:
+     a bay lighter than the case cannot also read as a hole.</p>
+
+  <div class="stage lightroom" data-skin="light">
+    <div class="stage-note">the four grounds · one plane, four materials, a seam between</div>
+    <div id="grounds"></div>
+  </div>
+
+  <div class="stage lightroom" data-skin="light">
+    <div class="stage-note">the leader · four positions, one primitive · the live one is on</div>
+    <div id="leaders"></div>
+  </div>
+
+  <!-- THE BLUEPRINT. Two orthographic views, every part labelled with the name
+       it actually has in the stylesheet \u2014 because "the front thing" cost four
+       rounds. Drawn linework rather than a photograph of the part: a SECTION
+       cannot be photographed, and the section is where the gap, the pocket
+       depth and the travel actually live. -->
+  <div class="stage" data-skin="light">
+    <div class="stage-note">the cap \u00b7 blueprint</div>
+<svg class="bp" viewBox="0 0 940 1420" role="img"
+     aria-label="Blueprint of a cap: elevation and section, every part labelled with its class or token">
+  <defs>
+    <marker id="bp-t" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+      <path class="bp-tick" d="M3.5 .5 V6.5"/>
+    </marker>
+    <clipPath id="bp-cap"><rect x="360" y="120" width="220" height="220" rx="12"/></clipPath>
+  </defs>
+
+  <!-- ══ ELEVATION ══════════════════════════════════════════════════════ -->
+  <text class="bp-view" x="24" y="34">ELEVATION</text>
+
+  <!-- THE BAY IS NOT DRAWN IN ELEVATION, AND THAT IS THE CORRECT AMOUNT OF IT.
+       It is the surface you are looking AT, so it has no edge, no outline and
+       no extent — it is simply everything that is not the hole. It was a filled
+       rounded rectangle, then a filled rectangle with break lines, and both
+       were the same mistake in two costumes: any boundary at all turns the
+       panel into a tile with a hole in it. The section below still draws it,
+       because there it is CUT material and a section that does not show what
+       was cut is not a section. -->
+  <!-- ⚠ STALE, AND SAYING SO IS THE POINT. This drawing was true at the
+       defaults it was made for and it is not true at the current ones. Three
+       things moved under it and none of them are one-line edits here:
+
+         · `--hole-r` is 7, not 0, so the aperture is not square any more
+         · the front is ONE solid row, not two
+         · and the cap is LIFTED off its seat by `--skirt-h`, which is the
+           whole geometry of the elevation — face above the cut, base on the
+           floor — where this still shows a cap sitting level in its hole
+
+       IT IS FLAGGED RATHER THAN HALF-FIXED. Rounding the rect and leaving the
+       elevation wrong would make the drawing look current while still teaching
+       the pre-lift model, which is worse than a drawing that admits its date:
+       the whole value of a blueprint is that you can trust it without checking
+       it against the part. Redraw it as one job, or delete it. -->
+  <rect class="bp-fill-hole" x="348" y="108" width="244" height="244"/>
+  <rect class="bp-out"       x="348" y="108" width="244" height="244"/>
+
+  <!-- THE FRONT IS THE CAP'S OWN SILHOUETTE, OFFSET DOWN. Two solid rows, so
+       its top edge IS the cap's bottom edge — curved, with no seam and no
+       corner pieces, because a shadow is the shape moved rather than a new
+       shape drawn. Everything the cap covers is hidden; what is left is the
+       side you can see. -->
+  <rect class="bp-fill-front" x="360" y="148" width="220" height="220" rx="12"/>
+  <!-- THE FACE IS INSET BY THE BEVEL, ROUNDED ON ALL FOUR CORNERS. What is left
+       showing round it is the chamfer; what is left showing below it is the
+       front. Same surface, two amounts of it. -->
+  <!-- THE FACE: A ROUNDED RECTANGLE, ALL FOUR CORNERS, SAME RADIUS. Flat across
+       the bottom with a quarter-circle at each end, which is the top edge
+       upside down. The part draws the two bottom corners as radial-gradient
+       notches; this draws them as one rx. Same shape, two mechanisms. -->
+  <!-- THE FACE. `--bevel` IS 0, so it reaches the cap's own edge on three sides
+       and stops at the front on the fourth. Rounded at all four corners, same
+       radius, flat across the bottom with a quarter-circle at each end. -->
+  <clipPath id="bp-face"><rect x="360" y="120" width="220" height="220" rx="12"/></clipPath>
+  <rect class="bp-fill-face" x="360" y="120" width="220" height="220" rx="12"/>
+  <g clip-path="url(#bp-face)">
+    <ellipse class="bp-fill-spec" cx="416" cy="176" rx="92" ry="72"/>
+  </g>
+  <rect class="bp-out" x="360" y="120" width="220" height="220" rx="12"/>
+  <path class="bp-out bp-thin" fill="none" d="M360 148 h220"/>
+  <path class="bp-lit"  d="M378 121 H562 M361 138 V322"/>
+  <text class="bp-legend" x="470" y="238">KEY</text>
+
+  <!-- dimension: --front-h -->
+  <g class="bp-dim">
+    <path d="M616 312 V340" marker-start="url(#bp-t)" marker-end="url(#bp-t)"/>
+    <path d="M580 312 H622 M580 340 H622"/>
+  </g>
+
+  <!-- LEFT LABELS — ordered by the height of what they point at, so no leader
+       ever has to cross another one. -->
+  <g class="bp-lead">
+    <path d="M354 128 L292 140 H286"/><circle cx="354" cy="128" r="2.6"/>
+    <text x="278" y="144" text-anchor="end">8 gap · --hole-pad</text>
+
+    <path d="M406 162 L292 186 H286"/><circle cx="406" cy="162" r="2.6"/>
+    <text x="278" y="190" text-anchor="end">3 sheen · --M-spec</text>
+
+    <path d="M470 200 L292 232 H286"/><circle cx="470" cy="200" r="2.6"/>
+    <text x="278" y="236" text-anchor="end">1 face · --M-surface</text>
+
+
+    <path d="M442 232 L292 278 H286"/><circle cx="442" cy="232" r="2.6"/>
+    <text x="278" y="282" text-anchor="end">4 legend · --legend / --etch</text>
+
+  </g>
+
+  <!-- RIGHT LABELS -->
+  <g class="bp-lead">
+    <path d="M588 114 L676 96 H682"/><circle cx="588" cy="114" r="2.6"/>
+    <text x="690" y="100">11 hole corner · --hole-r</text>
+
+    <path d="M470 121 L676 140 H682"/><circle cx="470" cy="121" r="2.6"/>
+    <text x="690" y="144">2 lit edge · --lip-k</text>
+
+    <path d="M572 130 L676 184 H682"/><circle cx="572" cy="130" r="2.6"/>
+    <text x="690" y="188">7 cap corner · --cap-r</text>
+
+    <path d="M628 326 L676 314 H682"/>
+    <text x="690" y="318">--front-h</text>
+
+    <path d="M470 324 L676 358 H682"/><circle cx="470" cy="324" r="2.6"/>
+    <text x="690" y="362">5 front · --M-skirt</text>
+
+    <path d="M470 337 L676 402 H682"/><circle cx="470" cy="337" r="2.6"/>
+    <text x="690" y="406">6 front base · --M-skirt-lo</text>
+  </g>
+
+  <!-- ══ SECTION ════════════════════════════════════════════════════════ -->
+  <text class="bp-view" x="24" y="574">SECTION A–A</text>
+
+  <!-- the bay, cut -->
+  <path class="bp-fill-bay" d="M200 760 H740 V880 H200 Z"/>
+  <!-- only the CUT faces are outlined; the two ends are breaks -->
+  <path class="bp-out"   d="M200 760 H330 M610 760 H740 M200 880 H740"/>
+  <path class="bp-break" d="M200 760 V880 M740 760 V880"/>
+  <path class="bp-zig" d="M200 820 l10 -8 -20 -10 20 -10 -10 -8"/>
+  <path class="bp-zig" d="M740 820 l-10 -8 20 -10 -20 -10 10 -8"/>
+  <!-- the pocket -->
+  <path class="bp-fill-hole" d="M330 760 V812 H610 V760 Z"/>
+  <path class="bp-out"       d="M330 760 V812 H610 V760"/>
+  <!-- the cap in it -->
+  <rect class="bp-fill-face" x="354" y="654" width="232" height="152" rx="7"/>
+  <rect class="bp-out"       x="354" y="654" width="232" height="152" rx="7"/>
+  <path class="bp-dash" d="M354 760 H586"/>
+
+  <g class="bp-dim">
+    <path d="M330 836 H354" marker-start="url(#bp-t)" marker-end="url(#bp-t)"/>
+    <path d="M586 836 H610" marker-start="url(#bp-t)" marker-end="url(#bp-t)"/>
+    <path d="M660 794 V806" marker-start="url(#bp-t)" marker-end="url(#bp-t)"/>
+    <path d="M586 794 H668 M586 806 H668"/>
+    <text x="676" y="804">travel 2px</text>
+  </g>
+
+  <g class="bp-lead">
+    <path d="M470 700 L182 690 H176"/><circle cx="470" cy="700" r="2.6"/>
+    <text x="168" y="694" text-anchor="end">.key — the cap</text>
+
+    <path d="M340 766 L182 744 H176"/><circle cx="340" cy="766" r="2.6"/>
+    <text x="168" y="748" text-anchor="end">9 near wall · --M-pocket</text>
+
+    <path d="M470 786 L182 798 H176"/><circle cx="470" cy="786" r="2.6"/>
+    <text x="168" y="802" text-anchor="end">5 front, below the surface</text>
+
+    <path d="M420 812 L182 852 H176"/><circle cx="420" cy="812" r="2.6"/>
+    <text x="168" y="856" text-anchor="end">10 hole floor · --hole-tone</text>
+
+    <path d="M250 872 L182 906 H176"/><circle cx="250" cy="872" r="2.6"/>
+    <text x="168" y="910" text-anchor="end">13 bay · .bay + .m-*</text>
+  </g>
+
+  <g class="bp-lead">
+    <path d="M330 786 L764 690 H770"/><circle cx="330" cy="786" r="2.6"/>
+    <text x="778" y="694">.hole — the aperture</text>
+
+    <path d="M342 836 L764 744 H770"/>
+    <text x="778" y="748">8 gap · --hole-pad</text>
+
+    <path d="M470 806 L764 872 H770"/><circle cx="470" cy="806" r="2.6"/>
+    <text x="778" y="876">12 contact · --cast</text>
+  </g>
+
+  <!-- ══ PARTS ══════════════════════════════════════════════════════════
+       THE TWO PIECES ON THEIR OWN, BECAUSE ASSEMBLED THEY EXPLAIN EACH OTHER
+       AWAY. In the elevation above, the only thing you can see of the hole is
+       a ring of it, and the only thing you can see of the cap is the part the
+       hole does not cover — so every question about either one turns into a
+       question about the pair. Drawn separately, each is just itself. This is
+       what an exploded view is for and it is the oldest device in the trade. -->
+  <text class="bp-view" x="24" y="1024">PARTS</text>
+
+  <!-- .hole, alone: a cut, with nothing in it -->
+  <rect class="bp-fill-hole" x="200" y="1060" width="180" height="180"/>
+  <rect class="bp-out"       x="200" y="1060" width="180" height="180"/>
+  <text class="bp-part" x="290" y="1276">.hole</text>
+  <text class="bp-note" x="290" y="1298">a cut. No material of its own —</text>
+  <text class="bp-note" x="290" y="1316">it shows what it is cut in, less some light.</text>
+
+  <text class="bp-plus" x="470" y="1158">+</text>
+
+  <!-- .key, alone: face, front, two bottom corners -->
+  <clipPath id="bp-cap2"><rect x="560" y="1060" width="180" height="202" rx="10"/></clipPath>
+  <g clip-path="url(#bp-cap2)">
+    <rect class="bp-fill-front" x="560" y="1082" width="180" height="180" rx="10"/>
+    <rect class="bp-fill-face"  x="560" y="1060" width="180" height="180" rx="10"/>
+    <ellipse class="bp-fill-spec" cx="606" cy="1098" rx="76" ry="54"/>
+  </g>
+  <rect class="bp-out" x="560" y="1060" width="180" height="180" rx="10"/>
+  <path class="bp-lit" d="M572 1061 H728 M561 1072 V1228"/>
+  <text class="bp-part" x="650" y="1276">.key</text>
+  <text class="bp-note" x="650" y="1298">face, front, and one radius</text>
+  <text class="bp-note" x="650" y="1316">on all four corners of both.</text>
+
+  <!-- and the assembly is the elevation at the top of the sheet -->
+  <g class="bp-lead">
+    <path d="M290 1046 V1012 H470 V1000"/>
+    <path d="M650 1046 V1012 H470"/>
+    <text class="bp-note" x="470" y="990">assembled — see ELEVATION</text>
+  </g>
+</svg>
+
+  </div>
+
+  <table class="spec capmap-key">
+    <tbody>
+      <tr><td>1 · Face</td><td>The top of the cap — the surface you look at. <code>--M-surface</code>,
+          shaded between <b>Face lit</b> and <b>Face dark</b>.</td></tr>
+      <tr><td>2 · Lit edge</td><td>The chamfer along the <b>top and left</b>, where the cap turns into
+          the lamp. Knob: <b>Edge</b>.</td></tr>
+      <tr><td>3 · Sheen</td><td>The specular on the face. Broad, never centred, and it goes out when
+          the cap is pressed. Knob: <b>Sheen</b>.</td></tr>
+      <tr><td>4 · Legend</td><td>The cap's own identity, on the face. A shift layer goes
+          <b>outside</b>, in the gutter.</td></tr>
+      <tr><td>5 · Front</td><td>The side of the cap you can see. Knob: <b>Front</b>.</td></tr>
+      <tr><td>6 · Front base</td><td>Where the front turns under. Knobs: <b>Front lit</b> (its top)
+          and <b>Front base</b> (its bottom).</td></tr>
+      <tr><td>7 · Cap corner</td><td>The cap's radius. Knob: <b>Cap corner</b>.</td></tr>
+      <tr><td>8 · Gap</td><td>The clearance between the cap and the wall of its hole. Knob:
+          <b>Gap</b>.</td></tr>
+      <tr><td>9 · Near wall</td><td>The top edge of the cut, overhanging and shading the pocket.
+          <code>--M-pocket</code>.</td></tr>
+      <tr><td>10 · Hole floor</td><td>The bottom of the pocket. Knob: <b>Hole tone</b>, as a share of
+          the bay's own tone.</td></tr>
+      <tr><td>11 · Hole corner</td><td>The aperture's radius — squarer than the cap. Knob:
+          <b>Hole corner</b>.</td></tr>
+      <tr><td>12 · Contact</td><td>The shadow where the cap meets the pocket floor. Knob:
+          <b>Contact</b>.</td></tr>
+      <tr><td>13 · Bay</td><td>The material the hole is cut into. A cap with no material of its own
+          is made of this one.</td></tr>
+      <tr><td>14 · Travel</td><td>How far the cap drops when pressed — 2px, and the front loses
+          exactly that much. Not a knob: it is the transform.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- THE CAP BENCH. Same arrangement §12 uses for the glass, and for the same
+       reason: "how much of the front face do you see" is not a number anybody
+       gets right by reasoning about it. The knobs write to the island itself,
+       which they have to — a custom property is substituted where it is
+       DECLARED, so setting these on an inner wrapper would do nothing. -->
+  <div class="stage lightroom" id="capbench-room" data-skin="light">
+    <div class="stage-note">the cap · nine numbers, live</div>
+    <div id="capbench-stage"></div>
+
+    <!-- AND EVERY CAP IN THE LANGUAGE IS ON THE SAME ISLAND AS THE KNOBS.
+         These lived on their own `.stage` two sections up, which meant the
+         bench could not reach them: the knobs write to the element carrying
+         `data-skin`, and a custom property set on one island is not set on the
+         next one. So the panel that shows what the parts LOOK like and the
+         panel that decides it were two documents, and every judgement had to be
+         carried between them by memory.
+
+         MOVED WHOLE, MARKUP UNCHANGED. `lightcaps()` still finds `#lightcaps`
+         by id and fills it exactly as before; all that changed is which island
+         it hangs under, and therefore whose tokens it inherits. Four specimens
+         and thirteen caps now turn together, which is the only way to see that
+         a number good for one cap is bad for a row of them. -->
+    <div class="benchpanel capsblock">
+      <span class="tagcut">caps — tone-on-tone by default, contrast by exception</span>
+      <div id="lightcaps"></div>
+    </div>
+
+    <!-- TWO TRAYS, ONE PER PART. Thirteen knobs in one row is a row you scan;
+         split by what they act on, it is two short lists you can hold. It also
+         makes the one thing worth knowing about this control visible without
+         being told: three of these change the panel, ten change the cap, and
+         none of them change both. -->
+    <div class="benchpanels">
+      <div class="benchpanel">
+        <span class="tagcut">.hole — the cut</span>
+        <div id="capbench-hole" class="orbench"></div>
+      </div>
+      <div class="benchpanel">
+        <span class="tagcut">.key — the cap</span>
+        <div id="capbench-key" class="orbench"></div>
+      </div>
+    </div>
+  </div>
+
+  <table class="spec">
+    <tbody>
+      <tr><td>All four are flush</td><td>A panel is <b>one milled face with different material let
+          into it</b> — inlays, not shelves and pits. The bays share a plane and the change of
+          material is the whole of the separation.</td></tr>
+      <tr><td>pale · white</td><td>Identity plates, primary caps, label areas.</td></tr>
+      <tr><td>mid · beige</td><td>The chassis and the default bay — the ground.</td></tr>
+      <tr><td>accent · orange</td><td>Consequence. One bay per panel, maximum.</td></tr>
+      <tr><td>dark · black</td><td>Display glass, dark caps, engraved legends.</td></tr>
+      <tr class="trap">
+        <td>Flush is about panels, not everything</td>
+        <td><code>--raised</code> and <code>--sunk</code> are still live: a <b>cap</b> stands proud
+            of its bay and a pressed cap cuts into it. A control is an object you push; a bay is a
+            surface you do not.</td>
+      </tr>
+      <tr class="trap">
+        <td>No dim tier on accent</td>
+        <td>Measured, secondary ink on <code>#FF6A00</code> drops below 4.5:1 the moment it is
+            dimmed at all — the floor is 87% strength. A caption on an accent face is either full
+            ink or unreadable. If a bay needs a caption tier, it is not an accent bay.</td>
+      </tr>
+      <tr><td>The leader</td><td><code>.lead</code> with <code>.over</code>, <code>.side</code>,
+          <code>.rail</code> or <code>.gutter</code>. A skin themes three values —
+          <code>--lead-line</code>, <code>--lead-ink</code>, <code>--lead-lit</code> — and nothing
+          else. <code>.on</code> makes a group live.</td></tr>
+      <tr><td>Caps</td><td>A cap with no material is made of <b>its bay's</b>. Contrast is the
+          exception — <code>.m-dark</code>, <code>.m-pale</code>, <code>.m-accent</code> on the key
+          itself, for the two or three genuinely consequential keys on a panel.</td></tr>
+      <tr><td>Stack vs split</td><td>A <code>.stack</code> is two keys glued into one module and
+          gives <b>two</b> presses; a <code>.split</code> is <b>one</b> key whose legend names a pair
+          or a range. Reach for the stack when the halves do different things, the split when they
+          are one thing with two ends.</td></tr>
+      <tr class="trap">
+        <td>A split cap must not be <code>.skirt</code></td>
+        <td>The divider is <code>.split::before</code> and the chamfer is <code>.key::before</code>.
+            One element, one <code>::before</code> — the divider is the later rule and wins, so the
+            cap silently loses its chamfer and nothing tells you until the pressed state looks flat.</td>
+      </tr>
+      <tr class="trap">
+        <td>No backlight on a beige key</td>
+        <td>The dark theme lights a latched legend because a black cap 2px down in a black panel is
+            invisible. Here the shadow does that job, and a lamp drawn on a surface nobody believes
+            is backlit is the sticker failure with a legend on it. A latched light cap is
+            <b>down</b>, not lit — except a dark one, which loses its edges to its own shadow and
+            keeps its lamp.</td>
+      </tr>
+      <tr class="trap">
+        <td>A live leader is not the brand orange</td>
+        <td>At 1px, <code>#FF6A00</code> measures 1.88:1 against the room — a live group nobody can
+            see is live. <code>--accent-line</code> is the accent darkened until a stroke clears
+            3:1. It is for marks only; a face or a cap still uses <code>--accent</code>, or the
+            panel has two oranges.</td>
+      </tr>
+      <tr class="trap">
+        <td>Two tinted bays, one edge</td>
+        <td>Never butt them. A chassis rib or a seam goes between. With the z-fork gone this stopped
+            being advice and became <b>the mechanism</b> — the seam is now the only thing telling you
+            where one bay ends and the next begins. The rib between them is <code>--rib</code>, and
+            it is a real surface rather than spacing: under about 16px it stops reading as the case
+            showing through and goes back to looking like a fat border.</td>
+      </tr>
+    </tbody>
+  </table>
+
   <footer>targz design system · skew · 00 · skew-system.html</footer>
 </div>
 
@@ -1018,7 +1390,8 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
     ['Light',         ['Jewel LED', 'Light pipe', 'Readout']],
     ['Setting a value', ['Knob', 'Knob · endless', 'Light direction', 'Orbit ball', 'Colour picker',
                          'Fader · vertical bank', 'Fader · one cap',
-                         'Fader · centre detent', 'Range fader']],
+                         'Fader · centre detent', 'Range fader',
+                         'Range fader · ends together']],
     /* THE ORDER IS THE ARGUMENT, and it is a count: a rotary is aimable to
        about six, the selector carries five to a dozen, the drum takes a list
        too long to show. Read left to right the group says WHEN each one stops
@@ -1062,7 +1435,15 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
      in the heading would go on agreeing with itself. */
   const placed = GROUPS.flatMap(g => g[1]);
   const lost = tiles.map(t => t[0]).filter(n => !placed.includes(n));
-  if (lost.length) console.warn('mats: not in any group →', lost);
+  /* AND IT WARNS ABOUT THE WRONG THING, which is how it cost an afternoon. A
+     tile not in a group does not "simply vanish": its <span id> never renders,
+     so the getElementById().replaceWith() eighty lines below throws on null and
+     the whole IIFE dies — every section after the materials wall silently never
+     builds. The warning above it says `mats: not in any group` and reads like a
+     cosmetic note. It is the cause of a dead page, so it says so. */
+  if (lost.length) console.error('mats: not in any group → ' + lost.join(', ')
+    + ' — their ids never render, so the replaceWith() calls below WILL throw '
+    + 'and the rest of this page will not build. Add them to GROUPS.');
   /* THE TILE'S TWO ROCKERS GET THE SAME SKELETON THE STAGE USES. A specimen
      built from different markup than the part is a specimen that can be right
      here and broken in §06. */
@@ -2343,6 +2724,332 @@ function ROCKER() {
       t.style[across ? 'left' : 'top'] = `${(i / A4) * 100}%`;
       r.append(t);
     }
+  });
+})();
+
+/* ── 14 · THE FOUR GROUNDS ─────────────────────────────────────────────────
+   ONE CHASSIS, FOUR BAYS, NOTHING IN THEM. The step this specimen exists for
+   is judging the grounds BEFORE anything is built on them, and a bay with a
+   knob in it is a specimen of the knob. Each bay carries only its own name,
+   engraved in its own ink, plus the two marks that prove the material knows
+   what a form and a hole look like on it: one plate and one cut.
+
+   THE RIB BETWEEN THEM IS RULE 5 AND IT IS LOAD-BEARING. Two tinted bays butted
+   directly read as a flag. The gap is chassis, and it is the same chassis
+   showing through that the flush mid bay is made of, which is the fastest way
+   to see why mid is flush. */
+(function grounds() {
+  const row = document.getElementById('grounds');
+  if (!row) return;
+  /* THE GAP IS `--rib` AND NOT A NUMBER TYPED HERE. It is the chassis showing
+     between two inlays, which is the thing that makes them read as different
+     material rather than as one surface wearing different paint. The row's
+     padding is the same value, so the case shows the same amount at the edge of
+     the panel as it does between two bays \u2014 which is what a milled plate
+     actually does. */
+  row.style.cssText = 'display:flex; gap:var(--rib); align-items:stretch; '
+                    + 'justify-content:center; flex-wrap:wrap; padding:var(--rib); '
+                    + 'border-radius:16px';
+  row.className = 'dock';
+  row.style.width = 'auto';
+  row.style.flex = '0 1 auto';
+
+  /* THE SECOND LINE IS THE MATERIAL'S JOB, NOT ITS HEIGHT. It said raised /
+     flush / recessed until the z-fork was dropped; with all four level that
+     column would have read "flush" four times, which is a column that has
+     stopped carrying anything. What actually differs between them is what each
+     one is FOR, and that is the question a reader arrives with. */
+  const MATERIALS = [
+    ['pale',   'PALE',   'identity · label'],
+    ['mid',    'MID',    'the ground'],
+    ['accent', 'ACCENT', 'consequence'],
+    ['dark',   'DARK',   'glass · legends'],
+  ];
+
+  row.innerHTML = MATERIALS.map(([m, name, z]) => `
+    <div class="bay m-${m} ground">
+      <span class="ground-nm">${name}</span>
+      <span class="ground-z">${z}</span>
+      <span class="ground-marks"><i class="ground-plate"></i><i class="ground-cut"></i></span>
+    </div>`).join('');
+})();
+
+/* ── 14 · THE LEADER, FOUR POSITIONS ───────────────────────────────────────
+   WHAT IS BEING ANNOTATED IS DELIBERATELY DUMB. Every leader in the references
+   points at a control, and this page has no light controls yet — step 4 onward.
+   Posing the primitive against real keys would make the tile a specimen of the
+   keys, and it would have to be rebuilt the moment they land. Plain material
+   plates say "something is here" and nothing more, which is exactly as much as
+   a leader needs from the thing it names.
+
+   ONE OF THE FOUR IS `on`, because a family drawn entirely in its rest state is
+   a family whose one semantic distinction is untested. */
+(function leaders() {
+  const row = document.getElementById('leaders');
+  if (!row) return;
+  row.style.cssText = 'display:flex; gap:46px; align-items:flex-start; '
+                    + 'justify-content:center; flex-wrap:wrap';
+
+  const stub  = (m, w = 34, h = 34) =>
+    `<i class="m-${m} leadstub" style="width:${w}px;height:${h}px"></i>`;
+
+  row.innerHTML = `
+    <div class="lead over">
+      <span class="lead-lab">Filter</span>
+      <i class="lead-arm"></i>
+      <div class="lead-body">${stub('mid')}${stub('mid')}</div>
+    </div>
+
+    <div class="lead side">
+      <span class="lead-lab">Bus A</span>
+      <i class="lead-arm"></i>
+      <div class="lead-body" style="flex-direction:column;gap:7px">
+        ${stub('mid', 34, 22)}${stub('mid', 34, 22)}${stub('mid', 34, 22)}
+      </div>
+    </div>
+
+    <div class="lead over on">
+      <span class="lead-lab">Arm</span>
+      <i class="lead-arm"></i>
+      <div class="lead-body">${stub('dark')}${stub('accent')}</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:20px;min-width:190px">
+      <div class="lead rail">
+        <span class="lead-lab">Record</span>
+        <i class="lead-arm"></i>
+        <span class="lead-lab">Undo</span>
+      </div>
+      <div style="display:flex;gap:22px;justify-content:center">
+        <span class="lead gutter"><i class="pilot"></i><span class="lead-lab">Cue</span></span>
+        <span class="lead gutter on"><i class="pilot"></i><span class="lead-lab">Live</span></span>
+      </div>
+    </div>`;
+})();
+
+/* ── 14 · THE CAPS ─────────────────────────────────────────────────────────
+   THE FIRST ROW IS THE ONE THAT MATTERS AND IT IS THE BORING ONE. Four keys in
+   a mid bay, none of them carrying a material, all four beige — that is rule 2,
+   and it is what a panel looks like nine times out of ten. The interesting rows
+   below it are the exception, and a page that shows only exceptions teaches the
+   exception as the default.
+
+   EVERY KEY HERE IS LATCHABLE, because the pressed state is half of what a cap
+   is and a specimen posed only at rest is a photograph. Click them. */
+(function lightcaps() {
+  const box = document.getElementById('lightcaps');
+  if (!box) return;
+  box.style.cssText = 'display:flex; flex-direction:column; gap:26px; align-items:center';
+
+  /* SQUARE BY DEFAULT. A key is square on every one of the references; the two
+     that are not are the two carrying two words, and those are wide because
+     their LEGEND is, which is a different reason from being a different part. */
+  const K = (cls, inner, w = 44) =>
+    `<span class="hole"><button type="button" class="key skirt ${cls}"
+       style="width:${w}px;height:44px">${inner}</button></span>`;
+  const dual = (a, b) => `<span class="dual-1">${a}</span><span class="dual-2">${b}</span>`;
+
+  box.innerHTML = `
+    <div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:11px">
+      ${K('', 'A')}${K('', 'B')}${K('', 'C')}${K('', 'D')}
+    </div>
+
+    <div style="display:flex;gap:38px;align-items:flex-end;flex-wrap:wrap;justify-content:center">
+      <div class="lead over">
+        <span class="lead-lab">contrast</span>
+        <i class="lead-arm"></i>
+        <div class="lead-body">
+          ${K('m-dark', 'REC')}${K('m-pale', 'CUE')}${K('m-accent', 'ARM')}
+        </div>
+      </div>
+
+      <div class="lead over">
+        <span class="lead-lab">dual legend</span>
+        <i class="lead-arm"></i>
+        <div class="lead-body">
+          ${K('dual', dual('PLAY', '1-8'), 58)}${K('dual m-dark', dual('FILTER', 'LP'), 58)}
+        </div>
+      </div>
+
+      <div class="lead over">
+        <span class="lead-lab">stacked pair</span>
+        <i class="lead-arm"></i>
+        <div class="lead-body">
+          <span class="stack">
+            <button type="button" class="key skirt m-dark" style="width:56px;height:28px">SHIFT</button>
+            <button type="button" class="key skirt m-pale" style="width:56px;height:36px">PAD</button>
+          </span>
+          <span class="stack">
+            <button type="button" class="key skirt m-dark" style="width:56px;height:28px">SHIFT</button>
+            <button type="button" class="key skirt m-accent" style="width:56px;height:36px">REC</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="lead over">
+        <span class="lead-lab">split cap</span>
+        <i class="lead-arm"></i>
+        <div class="lead-body">
+          <button type="button" class="key split" style="width:80px;height:44px">
+            <span>MIN</span><span>MAX</span></button>
+          <button type="button" class="key split m-dark" style="width:80px;height:44px">
+            <span>A</span><span>B</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- THE SHIFT LAYER IS OUTSIDE THE CAP AND THAT IS THE RULE BEING SHOWN.
+         Same two keys, once with their shift names in the gutter under them. -->
+    <div style="display:flex;gap:22px;align-items:flex-start">
+      <span style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        ${K('', 'A')}<span class="lead gutter"><span class="lead-lab">tune</span></span>
+      </span>
+      <span style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        ${K('', 'B')}<span class="lead gutter"><span class="lead-lab">swing</span></span>
+      </span>
+      <span style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        ${K('m-dark', 'C')}<span class="lead gutter on"><span class="lead-lab">live</span></span>
+      </span>
+    </div>`;
+
+  box.querySelectorAll('.key').forEach(k =>
+    k.addEventListener('click', () => k.classList.toggle('is-down')));
+})();
+
+/* THE SPECIMEN ROWS ARE NOT IN A `.bay`, AND THAT IS THE SAME CORRECTION THE
+   BLUEPRINT GOT. A bay is a REGION OF MATERIAL — an inlay, with a rib round it
+   and a seam where it meets the case. It is not a box to put keys in. Using one
+   as a container drew a bounded rounded rectangle round every row, which says
+   "these keys are in a tile" when what is true is "these keys are in a panel".
+   The caps sit on the stage, which is the panel, and the panel has no edge.
+
+   AND THE BLUEPRINT AND THE PART MOVE TOGETHER, ALWAYS. A drawing that is only
+   corrected when somebody looks at the drawing is a drawing that documents a
+   previous version, which is worse than none — you would at least go and read
+   the CSS. Every change from here lands in both or in neither. */
+
+/* ── 14 · THE CAP BENCH ────────────────────────────────────────────────────
+   NINE KNOBS AND ONE ROW OF CAPS, and the row is one of each material because
+   a shape tuned on a single tone is a shape tuned for that tone. The dark cap
+   is the one that shows the front face most and the pale cap is the one that
+   shows it least, so both have to be in shot while the number moves.
+
+   IT WRITES TO THE ISLAND, NOT TO THE STAGE OR THE ROW. `--pale-raised` and
+   friends are declared by the `[data-skin="light"]` selector, and a custom
+   property resolves its own `var()`s where it is DECLARED — so the only element
+   whose `--skirt-h` those recipes will ever read is the one carrying the
+   attribute. Written anywhere else this bench would move nothing, silently.
+
+   ONE CAP IS HELD DOWN, because the pressed state is where a too-tall front
+   face stops working: the travel is 2px and the front is however tall this
+   says, so past a certain height the cap cannot sink far enough to look sunk. */
+(function capbench() {
+  const room  = document.getElementById('capbench-room');
+  const stage = document.getElementById('capbench-stage');
+  const trays = {
+    hole: document.getElementById('capbench-hole'),
+    key:  document.getElementById('capbench-key'),
+  };
+  if (!room || !stage || !trays.hole || !trays.key) return;
+
+  /* ONE CAP, TAKEN APART, ALL THREE LIVE. Five caps in two rows answered
+     "what does this look like"; the question by this point is "what does this
+     KNOB do", and for that the assembly is the worst possible specimen — the
+     hole is hidden under the cap and the cap's edges are hidden under the hole,
+     so half of every change happens where you cannot see it.
+
+     ASSEMBLED, THEN THE CUT ALONE, THEN THE CAP ALONE, off the same knobs. Turn
+     `Gap` and the middle cell grows while the right one does not; turn `Front`
+     and the right one changes while the middle one does not. Which knob owns
+     which part stops being something to remember.
+
+     THE EMPTY HOLE IS SIZED BY AN INVISIBLE SPACER the size of the cap, so it
+     tracks `--hole-pad` exactly as the real one does rather than being given a
+     width that would have to be kept in step by hand.
+
+     AND ONE AT PANEL SIZE, still, because every one of these numbers is in
+     pixels and none of them scale. */
+  const S = 150;
+  stage.style.cssText = 'display:flex; gap:52px; align-items:flex-end; '
+                      + 'justify-content:center; flex-wrap:wrap; padding:30px 0 34px';
+
+  const cell = (inner, name, note) => `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;justify-content:center">${inner}</div>
+      <span class="tagcut">${name}</span>
+      <span class="tab-sub" style="margin-top:-6px">${note}</span>
+    </div>`;
+
+  const KEY = (px, nm) => `<button type="button" class="key skirt"
+      style="width:${px}px;height:${px}px;font-size:${Math.round(px / 8)}px">${nm}</button>`;
+
+  stage.innerHTML =
+      cell(`<span class="hole">${KEY(S, 'KEY')}</span>`, 'assembled', 'click to press')
+    + cell(`<span class="hole"><i style="display:block;width:${S}px;height:${S}px"></i></span>`,
+           '.hole', 'the cut, with nothing in it')
+    + cell(KEY(S, 'KEY'), '.key', 'the cap, out of its hole')
+    + cell(`<span class="hole">${KEY(54, 'KEY')}</span>`, 'panel size',
+           'the same numbers, in pixels');
+
+  /* X-RAY. A chip and a legend, and the legend is painted in the same colours
+     it names — a key read off the drawing rather than off a paragraph. */
+  const XKEY = [
+    ['#00A651', 'face'], ['#0047A0', 'front'], ['#B14FE0', 'sheen'], ['#FFE000', 'lit edge top'],
+    ['#00C8D7', 'lit edge left'], ['#7A00A0', 'under lip'],
+    ['#003 08F'.replace(' ', ''), 'hole floor'], ['#7FBF00', 'near wall'],
+    ['#FF6FB5', 'hole lip'], ['#E4002B', 'contact'], ['#FF8200', 'foot'],
+  ];
+  const bar = document.createElement('div');
+  bar.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;width:100%';
+  const chip = document.createElement('button');
+  chip.type = 'button'; chip.className = 'chip'; chip.textContent = 'X-RAY';
+  chip.setAttribute('aria-pressed', 'false');
+  const legend = document.createElement('div');
+  legend.className = 'xraykey';
+  legend.hidden = true;
+  legend.innerHTML = XKEY.map(([c, n]) =>
+    `<span><i style="background:${c}"></i>${n}</span>`).join('');
+  chip.addEventListener('click', () => {
+    const on = room.classList.toggle('xray');
+    chip.classList.toggle('is-down', on);
+    chip.setAttribute('aria-pressed', String(on));
+    legend.hidden = !on;
+  });
+  bar.append(chip, legend);
+  stage.append(bar);
+
+  stage.querySelectorAll('.key').forEach(k =>
+    k.addEventListener('click', () => k.classList.toggle('is-down')));
+
+  /* part, prop, label, min, max, step, unit, what it is */
+  const KNOBS = [
+    ['key', '--top-d',      'Top',         0,  20, 1,  'px', 'Where the face sits AT REST, measured from the plate: how far the cap stands proud of the panel. The side wall grows to match on its own \u2014 it fills the gap down to the floor of the cut, so it is never a number you set.'],
+    ['key', '--bottom-d',   'Bottom',      0,  20, 1,  'px', 'Where the face sits WHEN THE KEY IS DOWN, measured from the same plate: how far below the panel it goes. Top plus Bottom is the travel. Past the point where the cap reaches the bottom of its aperture the plate starts occluding it, which is a key going into a slot.'],
+    ['key', '--front-p',    'Front tone', 40,  84, 1, '%',  'How DARK the front face is, as a share of the top face. One step down, because it is the same material turned away from the lamp. It stops at 84 and FACE DARK starts at 86 so the fold can only ever step DOWN \u2014 a wall lighter than the face it folds off is not an edge.'],
+    ['key', '--cap-r',      'Cap corner',  0,  16, 1,  'px', 'The cap\u2019s own radius.'],
+    ['hole', '--hole-r',     'Hole corner', 0,  16, 1,  'px', 'The aperture\u2019s radius. The reference is a rounded cap in a squarer hole \u2014 these two are not the same number.'],
+    ['hole', '--hole-pad',   'Gap',         0,  16, 1,  'px', 'How much panel shows between the cap and the wall of its hole. It no longer decides how far the cap pops \u2014 Top says that outright and the wall grows to cover the difference. All this sets is how much cut you can see beside the cap, which is all a clearance was ever meant to say.'],
+    ['hole', '--foot',       'Foot',        0,   1, 0.02, '', 'How DARK the bottom of the cut is. Light does not reach the foot of a pocket \u2014 this is the layer that says so, laid over the whole aperture so the floor and the bottom of the cap\u2019s front wall lose the same light at the same depth.'],
+    ['hole', '--foot-h',     'Foot reach',  0,  30, 1,  'px', 'How far UP the cut the darkening reaches, from the bottom edge of the aperture. It paints UNDER the cap, so what you see of it is the gap around the cap\u2019s base \u2014 light the cap is blocking. Past the top of the aperture there is nothing left to darken.'],
+    ['hole', '--hole-tone',  'Hole tone',  55, 100, 1,  '',   'How much light the pocket loses. 100 is flush with whatever it is cut in, 55 is a deep pocket. A hole has no colour of its own \u2014 it shows the surface it is cut in, less some light.'],
+    ['key', '--face-hi-p',  'Face lit',   70, 100, 1,  '%',  'The top of the face, turned toward the lamp.'],
+    ['key', '--face-lo-p',  'Face dark',  86, 100, 1,  '%',  'The bottom of the face, turned away. Shallow on purpose: the FOLD carries the turn now, so the face only has to lean. Floored at 86 so it can never dip under FRONT TONE.'],
+    ['key', '--lip-k',      'Edge',        0,   2, 0.05, '', 'The lit top-left edge, scaled across all four materials.'],
+    ['key', '--spec-k',     'Sheen',       0,   2, 0.05, '', 'The specular on the face. Broad, never centred.'],
+    ['key', '--cast-k',     'Contact',     0,   3, 0.05, '', 'The shadow under the cap, thrown from the BOTTOM of the front face. It used to be thrown from the top face and buried under the front, which is why turning this did nothing at all. On beige it is the one that turns into dirt.'],
+  ];
+
+  const read = prop =>
+    parseFloat(getComputedStyle(room).getPropertyValue(prop)) || 0;
+
+  KNOBS.forEach(([part, prop, label, min, max, step, unit, title]) => {
+    const k = knob({
+      label, min, max, step, value: read(prop), layout: 'stack',
+      fmt: v => step < 1 ? v.toFixed(2) : String(Math.round(v)),
+      onChange: v => room.style.setProperty(prop, v + unit),
+    });
+    k.title = `${label} \u2014 ${title}`;
+    trays[part].append(k);
   });
 })();
 </script>

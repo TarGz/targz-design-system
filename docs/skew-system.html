@@ -1110,6 +1110,23 @@
          being told: three of these change the panel, ten change the cap, and
          none of them change both. -->
     <div class="benchpanels">
+      <!-- THE SHADOW TRAY GOES FIRST, WHICH IS A LAYOUT DECISION WITH A REASON.
+           It is the tray whose knobs you cannot judge without watching the part
+           at the same time — a contact and a penumbra are read off the caps
+           above, not off the numbers — so it sits closest to them and the two
+           trays you can reason about get pushed down. Reading order here is
+           "what do I need to SEE while I turn this", not "which part owns it".
+
+           A THIRD TRAY, AND THE SPLIT IS OTHERWISE THE SAME ONE: what does this
+           knob act on. The cut, the cap, and the SHADOW — which is neither, and
+           had been living in the cap's tray under one knob called Contact
+           because there was nowhere else to put it. A shadow is a property of
+           the room and of what the object stands on; it is not part of the cap
+           any more than the panel is. -->
+      <div class="benchpanel">
+        <span class="tagcut">pressed — the cut's shadow on the cap</span>
+        <div id="capbench-cast" class="orbench"></div>
+      </div>
       <div class="benchpanel">
         <span class="tagcut">.hole — the cut</span>
         <div id="capbench-hole" class="orbench"></div>
@@ -2949,6 +2966,7 @@ function ROCKER() {
   const trays = {
     hole: document.getElementById('capbench-hole'),
     key:  document.getElementById('capbench-key'),
+    cast: document.getElementById('capbench-cast'),
   };
   if (!room || !stage || !trays.hole || !trays.key) return;
 
@@ -2997,7 +3015,7 @@ function ROCKER() {
     ['#00A651', 'face'], ['#0047A0', 'front'], ['#B14FE0', 'sheen'], ['#FFE000', 'lit edge top'],
     ['#00C8D7', 'lit edge left'], ['#7A00A0', 'under lip'],
     ['#003 08F'.replace(' ', ''), 'hole floor'], ['#7FBF00', 'near wall'],
-    ['#FF6FB5', 'hole lip'], ['#E4002B', 'contact'], ['#FF8200', 'foot'],
+    ['#FF6FB5', 'hole lip'], ['#E4002B', 'cast \u00b7 hard + soft'], ['#FF8200', 'foot'],
   ];
   const bar = document.createElement('div');
   bar.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;width:100%';
@@ -3024,23 +3042,68 @@ function ROCKER() {
   /* part, prop, label, min, max, step, unit, what it is */
   const KNOBS = [
     ['key', '--top-d',      'Top',         0,  20, 1,  'px', 'Where the face sits AT REST, measured from the plate: how far the cap stands proud of the panel. The side wall grows to match on its own \u2014 it fills the gap down to the floor of the cut, so it is never a number you set.'],
-    ['key', '--bottom-d',   'Bottom',      0,  20, 1,  'px', 'Where the face sits WHEN THE KEY IS DOWN, measured from the same plate: how far below the panel it goes. Top plus Bottom is the travel. Past the point where the cap reaches the bottom of its aperture the plate starts occluding it, which is a key going into a slot.'],
+    ['key', '--bottom-d',   'Bottom',      0,  20, 1,  '',   'Where the face sits WHEN THE KEY IS DOWN, in pixels below the plate \u2014 measured from the same surface as Top, so the two read against each other and their sum is the travel. It also sets how HARD the cut shades the cap: deeper is darker, from all four sides, because an aperture subtends less of the room the further down it you are. That is why it carries no unit \u2014 a length cannot become an alpha. Past the point where the cap reaches the bottom of its aperture the plate starts occluding it.'],
     ['key', '--front-p',    'Front tone', 40,  84, 1, '%',  'How DARK the front face is, as a share of the top face. One step down, because it is the same material turned away from the lamp. It stops at 84 and FACE DARK starts at 86 so the fold can only ever step DOWN \u2014 a wall lighter than the face it folds off is not an edge.'],
     ['key', '--cap-r',      'Cap corner',  0,  16, 1,  'px', 'The cap\u2019s own radius.'],
-    ['hole', '--hole-r',     'Hole corner', 0,  16, 1,  'px', 'The aperture\u2019s radius. The reference is a rounded cap in a squarer hole \u2014 these two are not the same number.'],
+    ['hole', '--hole-r',     'Hole corner', 0,  16, 1,  'px', 'The aperture\u2019s radius. It sat below Cap corner for a long time, because a squarer hole round a rounder cap leaves four thickening wedges of cut at the corners and the eye reads those as a hole with nothing outlined. At 10 against 10 the wedges are gone and the cut is carried by value instead \u2014 the foot, the vignette, the pocket rows. Take Gap back up and the difference between these two starts to matter again.'],
     ['hole', '--hole-pad',   'Gap',         0,  16, 1,  'px', 'How much panel shows between the cap and the wall of its hole. It no longer decides how far the cap pops \u2014 Top says that outright and the wall grows to cover the difference. All this sets is how much cut you can see beside the cap, which is all a clearance was ever meant to say.'],
     ['hole', '--foot',       'Foot',        0,   1, 0.02, '', 'How DARK the bottom of the cut is. Light does not reach the foot of a pocket \u2014 this is the layer that says so, laid over the whole aperture so the floor and the bottom of the cap\u2019s front wall lose the same light at the same depth.'],
     ['hole', '--foot-h',     'Foot reach',  0,  30, 1,  'px', 'How far UP the cut the darkening reaches, from the bottom edge of the aperture. It paints UNDER the cap, so what you see of it is the gap around the cap\u2019s base \u2014 light the cap is blocking. Past the top of the aperture there is nothing left to darken.'],
-    ['hole', '--hole-tone',  'Hole tone',  55, 100, 1,  '',   'How much light the pocket loses. 100 is flush with whatever it is cut in, 55 is a deep pocket. A hole has no colour of its own \u2014 it shows the surface it is cut in, less some light.'],
+    ['hole', '--hole-tone',  'Hole tone',   0, 100, 1,  '',   'How much light the pocket loses. 100 is flush with whatever it is cut in; 0 is SOLID, the full COLOUR beside it. It stopped at 55 for no reason anybody wrote down, so the deepest cut the bench could draw was a mid grey. A hole still has no colour of its own \u2014 it shows the surface it is cut in, less some light \u2014 which is why this stays a translucent darkening and not a fill.'],
     ['key', '--face-hi-p',  'Face lit',   70, 100, 1,  '%',  'The top of the face, turned toward the lamp.'],
     ['key', '--face-lo-p',  'Face dark',  86, 100, 1,  '%',  'The bottom of the face, turned away. Shallow on purpose: the FOLD carries the turn now, so the face only has to lean. Floored at 86 so it can never dip under FRONT TONE.'],
     ['key', '--lip-k',      'Edge',        0,   2, 0.05, '', 'The lit top-left edge, scaled across all four materials.'],
     ['key', '--spec-k',     'Sheen',       0,   2, 0.05, '', 'The specular on the face. Broad, never centred.'],
-    ['key', '--cast-k',     'Contact',     0,   3, 0.05, '', 'The shadow under the cap, thrown from the BOTTOM of the front face. It used to be thrown from the top face and buried under the front, which is why turning this did nothing at all. On beige it is the one that turns into dirt.'],
+    ['key', '--cast-k',     'Contact',     0,   3, 0.05, '', 'The shadow under a cap that is UP, scaling all three of its rows at once \u2014 contact, throw and ambient. Its shape is not on knobs: every row is a multiple of how high the cap stands, so turning TOP lengthens and softens it on its own. The shadow on a cap that is DOWN is a different layer with its own tray.'],
+    ['cast', '--ps-hard-w',  'Hard reach',  0,  30, 1,  'px', 'The HARD part \u2014 the occlusion right at the wall of the cut, where the face meets the side and almost nothing reaches \u2014 and how FAR it extends onto the face. It no longer decides how crisp it is; that is its own knob now.'],
+    ['cast', '--ps-hard-e',  'Hard edge',   0,  20, 1,  'px', 'How fast the hard part stops. At 0 it is a perfectly hard band exactly HARD REACH wide, with no falloff at all. These were one number until now, spread derived from blur, so a wider hard line was always a softer one and wide-and-crisp \u2014 which is what an occlusion at a wall actually looks like \u2014 was the one setting in the range you could not reach.'],
+    ['cast', '--ps-hard-a',  'Hard tone',   0,   2, 0.02, '', 'How dark the occlusion at the wall is. It reaches 2 rather than 1 because what lands in the paint is this times AMOUNT times the depth factor, and at a shallow press that factor is well under 1 \u2014 so the top of this knob was not the top of the range and nothing said so. Above opaque it simply clamps.'],
+    ['cast', '--ps-soft-b',  'Soft reach',  0,  60, 1,  'px', 'The SOFT part \u2014 the room closing over the cap as it goes down. This is the row that must have no edge anywhere on it, and it is what makes a deep key look DEEP rather than merely dark.'],
+    ['cast', '--ps-soft-a',  'Soft tone',   0,   2, 0.02, '', 'How dark the room-closing part is. On beige it is the one that turns into dirt \u2014 the gap between surface and shadow is enormous on a light ground, so it reads as a smudge long before it looks strong. Same doubled range as HARD TONE, for the same reason.'],
+    ['cast', '--ps-top',     'Top bias',    0,   1, 0.02, '', 'How much EXTRA comes off the top wall. The two rows above have no direction \u2014 a pocket does not throw, it closes. This one is the lamp, which is up the page. At 0 the cut is a pure vignette; at 1 it reads as a single wall throwing across the cap.'],
+    ['cast', '--ps-k',       'Amount',      0,   3, 0.05, '', 'The MASTER, over both tones at once. Reach for this when the whole thing is too much on a particular ground; use the two tones for the balance between hard and soft. Note that the reaches and the tones also grow with BOTTOM on their own \u2014 depth is not a preference, so it is not a knob.'],
   ];
 
   const read = prop =>
     parseFloat(getComputedStyle(room).getPropertyValue(prop)) || 0;
+
+  /* ── THE CUT'S COLOUR, AND IT IS THE KIT'S OWN PICKER ───────────────────
+     NOT A NEW CONTROL. `openPicker` and `.gridswatch` are what §11 uses to set
+     the grid's ink, so the shadow's colour is set the way every other colour in
+     this document is set. Inventing a second picker for the bench would be a
+     part that exists in no app, which is the one thing this file is not allowed
+     to contain.
+
+     IT WRITES `--ps-tint` TO THE ISLAND like every knob here, and for the same
+     reason: a custom property is substituted where it is DECLARED, so setting
+     it on the tray or on a cap would do nothing at all, silently. */
+  (() => {
+    const sw = document.createElement('button');
+    sw.type = 'button'; sw.className = 'gridswatch';
+    const read = document.createElement('span');
+    const set = hex => {
+      room.style.setProperty('--hole-tint', hex);
+      sw.style.setProperty('--sw', hex);
+      read.textContent = hex.toUpperCase();
+    };
+    sw.addEventListener('click', () =>
+      openPicker(sw, getComputedStyle(room).getPropertyValue('--hole-tint').trim() || '#000000', set));
+    set((getComputedStyle(room).getPropertyValue('--hole-tint').trim() || '#000000'));
+
+    /* THE SAME WRAPPER A STACKED KNOB BUILDS — `.kwrap` > `.klab` > control >
+       `.kval` — so the swatch sits on the tray's baseline with the seven dials
+       instead of near it. Copied from the factory rather than guessed at: a
+       control that is ALMOST in the row is the one thing worse than one that
+       is obviously not. */
+    const col = document.createElement('div');
+    col.className = 'kwrap';
+    const lab = document.createElement('div');
+    lab.className = 'klab'; lab.textContent = 'Colour';
+    read.className = 'kval';
+    col.append(lab, sw, read);
+    col.title = 'Colour \u2014 a hole shows what it is cut in, less some light, and the light being taken away is not necessarily neutral. On a warm beige plate a deep cut goes warm dark rather than grey. This is WHICH colour; HOLE TONE is how much of it.';
+    trays.hole.append(col);
+  })();
 
   KNOBS.forEach(([part, prop, label, min, max, step, unit, title]) => {
     const k = knob({

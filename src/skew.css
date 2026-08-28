@@ -335,8 +335,16 @@
      seat, and the wall has to be that tall. Turn the gap and the wall grows to
      match while the cap does not move — which is correct and is the whole
      reason this is a calc and not a copy. */
-  --top-d:      2px;    /* the face, at rest — how far ABOVE the plate         */
-  --bottom-d:   1px;    /* the face, pressed — how far BELOW the plate         */
+  --top-d:      1px;    /* the face, at rest — how far ABOVE the plate         */
+  /* AND `--bottom-d` IS A BARE NUMBER, WHICH IS NOT A STYLE CHOICE. It is
+     pixels, and it is written without the unit because two things now derive
+     from it and only one of them is a length: the position of the face, and how
+     HARD the cut shades it. There is no way back from a length to a number that
+     every browser agrees on — `calc(4px / 1px)` is Values 4 and not everywhere
+     — so the depth is kept as a scalar and multiplied by `1px` at the two
+     places that want a distance. Cheaper than the alternative, which is a
+     second knob saying the same thing in a different unit and drifting. */
+  --bottom-d:   2;      /* the face, pressed — how far BELOW the plate, in px  */
   --skirt-h:    calc(var(--top-d) + var(--hole-pad));  /* the wall = the lift  */
   --front-p:    70%;    /* the front face, as a share of the top face         */
   --face-hi-p:  94%;    /* the face, turned toward the lamp                   */
@@ -354,9 +362,109 @@
 
      WHAT IS LEFT SHOWING OF THE CUT is the two sides and the strip of floor at
      the near edge where the cap has risen off it. Nothing at the top, because
-     the face is over it. */  --hole-r:     7px;     /* the aperture's corner — squarer than the cap       */
-  --hole-pad:   1px;       /* the gap: how much panel shows between cap and wall */
-  --hole-tone:  55;     /* the pocket floor, as a % of the bay's own tone      */
+     the face is over it. */  --hole-r:     9px;     /* the aperture's corner — level with the cap now     */
+  --hole-pad:   2px;       /* the gap: how much panel shows between cap and wall */
+  /* ── THE CUT'S OWN COLOUR AND HOW MUCH OF IT ────────────────────────────
+     A HOLE HAS NO COLOUR — IT SHOWS WHAT IT IS CUT IN, LESS SOME LIGHT — and
+     that is still true and still why this is a translucent darkening rather
+     than a fill. What was missing is that the light being taken away is not
+     necessarily neutral. On a warm beige plate a deep cut goes warm dark, not
+     grey, and at the bottom of the range the difference is the whole of it:
+     `--hole-tone` 0 is now SOLID, and a solid patch of pure black in a beige
+     panel is a hole cut through the desk rather than into it.
+
+     SO THE TONE IS HOW MUCH AND `--hole-tint` IS WHICH. Two questions, two
+     controls, and folding them into one picker with an alpha channel would lose
+     exactly the distinction the pocket is built on.
+
+     AND THE FLOOR REACHES 0, WHICH IS THE OTHER HALF. It stopped at 55 — a
+     little under half opacity — for no reason anybody wrote down, so the
+     deepest cut the bench could draw was a mid grey. The range is 0 to 100 and
+     0 is solid. */
+  --hole-tint:  #000000;
+  --hole-tone:  0;      /* the pocket floor: 100 flush, 0 solid --hole-tint    */
+
+  /* ── THE FOOT OF THE CUT ────────────────────────────────────────────────
+     RESTORED, AND THE WAY IT WENT MISSING IS THE WARNING. These two were cut
+     out by a prose replacement that reached one declaration too far, and
+     NOTHING BROKE: `.hole::before` reads them as `var(--foot, .34)` and
+     `var(--foot-h, 11px)`, so the layer kept rendering at values nobody had
+     chosen while the bench knob read 0. A fallback is a default written at the
+     point of use, and its entire behaviour on a missing token is to look
+     plausible. The header of this file says so about fourteen of them; this is
+     the fifteenth, found by accident. */
+  --foot:       .56;   /* the dark at the bottom of the cut                   */
+  --foot-h:     7px;   /* how far up the cut it reaches                       */
+
+  /* ── THE SHADOW THE CUT THROWS ONTO A PRESSED CAP, IN TWO PARTS ─────────
+     THIS IS THE ONE THAT ASKED FOR CONTROLS, and it is a different shadow from
+     the one under a raised cap in every way that matters. That one is thrown BY
+     the object ONTO the panel. This one is thrown BY the aperture ONTO the
+     object — the cap has gone under the plate, and what lands on its face is
+     everything the mouth of the cut is keeping out.
+
+     AND IT IS HARD AND SOFT FOR THE SAME REASON ANY SHADOW IS. The hard part is
+     the occlusion right at the wall: a tight dark line where the face meets the
+     side of the cut, which is where almost nothing reaches. The soft part is the
+     room closing over the cap as it goes down — wide, edgeless, and the reason
+     a deep key looks DEEP rather than merely dark. One inset with one blur
+     cannot be both, which is what this has been for three versions.
+
+     ── THE NAMES DESCRIBE THE CAUSES, NOT THE SETTINGS, AND AT THE SHIPPED
+     VALUES THEY HAVE CROSSED OVER. `hard` is 4 wide at edge 7 and `soft` is 2
+     with almost no reach — so the row called hard is now the broad diffuse one
+     and the row called soft is the tight one. That is not a mistake and it is
+     not worth renaming: the two rows are two PLACES the light fails, at the
+     wall and across the mouth, and which of them happens to be crisper is a
+     tuning result. Renaming them after one set of numbers would make the next
+     set look wrong, which is exactly how `--M-skirt` ended up meaning the floor
+     of a cut. Worth knowing before turning them: HARD is the one anchored at
+     the wall whatever its blur says.
+
+     THE TOP GETS AN EXTRA HELPING, ON ITS OWN KNOB. The ring is the room and
+     has no direction; the top row is the LAMP, which is up the page. Two
+     different physical claims, and `--ps-top` is how much of the second there
+     is — at 0 the cut is a pure vignette, at 1 it reads as one wall throwing.
+
+     ALL OF IT STILL GROWS WITH `--bottom-d`, which is the answer to "quantity
+     varies with the depth" and is not a knob because it is not a preference: a
+     cap one pixel down is barely in shadow and a cap twelve pixels down is in a
+     well. The depth adds to both reaches and multiplies both tones, capped at
+     full so a very deep press does not simply black the cap out. */
+  /* AND THE HARD PART HAS A WIDTH AND AN EDGE, WHICH ARE NOT ONE NUMBER.
+     IT WAS A BLUR WITH A SPREAD DERIVED FROM IT — a quarter of it — so the band
+     could only ever be as crisp as it was narrow. Ask for a wider hard line and
+     you got a wider blur, which is a softer one; ask for a harder line and it
+     shrank to nothing. Wide-and-crisp, which is what an occlusion at a wall
+     actually looks like, was the one thing in the range you could not reach.
+
+     THEY ARE THE TWO INDEPENDENT FACTS ABOUT ANY EDGE: how far it extends, and
+     how quickly it stops. `--ps-hard-w` is the spread and `--ps-hard-e` is the
+     blur, and at an edge of 0 the band is exactly `w` wide with no falloff at
+     all. That is the same mistake as the raised cast being one row: two things
+     with different causes tied to one number, and the tell is the same — some
+     obviously reasonable setting turns out to be unreachable. */
+  --ps-hard-w:  4px;   /* the occlusion at the wall — how WIDE                */
+  --ps-hard-e:  7px;   /* the occlusion at the wall — how soft its edge is    */
+  --ps-hard-a:  .28;   /* the occlusion at the wall — how dark                */
+  --ps-soft-b:  2px;   /* the room closing over it — how soft                 */
+  --ps-soft-a:  .20;   /* the room closing over it — how dark                 */
+  /* ── THE TONES REACH 2, SO A SOLID SHADOW IS ACTUALLY IN RANGE ──────────
+     THEY STOPPED AT 1 AND COULD NOT GET THERE, because what lands in the paint
+     is the tone times AMOUNT times the depth factor — and that factor is 0.70
+     at the current press. A tone of 1 was arriving as 0.80 at best, so the top
+     of the knob was not the top of the range and nothing said so. Doubled,
+     which puts a solid shadow inside the travel at every depth rather than only
+     at the deepest.
+
+     AND THE ALPHA IS `rgba`, NOT A `color-mix`, WHICH IS WHY IT CAN SAFELY GO
+     PAST 1. rgba clamps; a color-mix percentage outside 0–100 is INVALID, and
+     an invalid declaration is dropped — the row stops painting instead of
+     saturating. That difference decides which of the two this can be written
+     with, and it is the reason to reach for rgba on anything a knob multiplies. */
+  --ps-top:     1;     /* how much extra comes off the top wall               */
+  --ps-k:       1.15;   /* the master, over both tones                         */
+  --ps-depth:   min(1, calc(.4 + var(--bottom-d) * .15));
 
   /* ── AND THE TRAVEL IS THE SUM, NOT A THIRD NUMBER ──────────────────────
      The cap starts `--top-d` above the plate and ends `--bottom-d` below it, so
@@ -364,7 +472,7 @@
      decide. It is a token because it is used in two places that have to agree
      — the transform and the hit pad — and any disagreement between them is a
      dead band along the top edge exactly the size of the difference. */
-  --press-travel: calc(var(--top-d) + var(--bottom-d));
+  --press-travel: calc(var(--top-d) + var(--bottom-d) * 1px);
 
 
   /* ── THE POCKET, AND WHY IT IS NOT HERE ─────────────────────────────────
@@ -513,78 +621,28 @@
      rule 10 taken literally: tight contact, short travel, low blur. The first
      numbers here were still carrying dark-theme habits — .14 and .17 over 2px
      and 6px — and every cap on the panel wore them. */
-  /* AND IT FALLS DOWN AND TO THE RIGHT, BECAUSE THE LAMP IS UP AND TO THE LEFT.
-     It had no horizontal offset at all, which put the light in two places at
-     once on every cap: a lit edge along the TOP AND LEFT, a specular at 32%/24%,
-     and then a shadow straight down as though the lamp were overhead. Nothing
-     else on the panel is lit that way, and a shadow is the largest, softest
-     thing a cap owns — it is the one that decides where the room's light comes
-     from, whatever the 1px edges claim.
+  /* ── THE RAISED CAST IS NOT ON KNOBS, AND THAT WAS THE WRONG READING ────
+     IT WAS SPLIT INTO HARD AND SOFT AND GIVEN SEVEN CONTROLS, and the request
+     was about the OTHER shadow — the one the cut throws down onto a cap that
+     has gone under the plate. The cap standing up was never the complaint.
+     Reverted whole: three rows, straight down, every one a multiple of how high
+     the cap stands. See `.hole::after` for the layer that actually asked.
 
-     THE OFFSET IS EQUAL IN X AND Y because the lamp sits at 45° in plan, which
-     is the same angle the specular is placed from and the same one `--chamfer`
-     has used since the dark theme. One lamp, one direction, every part. */
-  /* ── AND IT IS THROWN FROM THE BOTTOM OF THE OBJECT, WHICH IT WAS NOT ───
-     THIS IS THE BUG THAT MADE THE SHADOW KNOB DO NOTHING. The side wall is a
-     solid copy of the cap offset `--skirt-h` down — sixteen pixels, opaque. The
-     cast was offset one and two pixels from the CAP. So every pixel of shadow
-     was painted underneath the top face and then covered by the wall, and the
-     key stood on the panel with no contact anywhere. It was not a faint
-     shadow, it was no shadow: the part had nothing holding it down and read as
-     a coloured rectangle with a darker bar under it.
-
-     A SHADOW STARTS WHERE THE OBJECT ENDS. The object ends at the bottom of the
-     side wall, so both rows carry `--skirt-h` in their offset and the shadow
-     appears where the wall meets the panel. Which is the one thing the
-     two-element version of this button gets for free — there the shadow belongs
-     to the BODY, and a body cannot be mistaken for its own top face.
-
-     THE ALPHAS COME BACK DOWN AT THE SAME TIME. They were tuned upward against
-     a shadow that could not be seen, so the first thing they will do once it IS
-     seen is read as dirt. `--cast-k` goes back to 1 for the same reason. */
-  /* ── AND THE FOOT OF THE CUT IS A GRADIENT, WHICH IS JULIEN'S CALL ──────
-     LIGHT DOES NOT REACH THE BOTTOM OF A POCKET, and nothing in this assembly
-     was saying so. The front face was one flat tone from its top edge to its
-     bottom one — a wall lit identically at the mouth of the cut and four
-     millimetres down inside it — so the cap read as standing IN FRONT OF its
-     hole rather than down in it, whatever the aperture clipped.
-
-     THE FIRST ANSWER WAS A SECOND SOLID BAND AND IT WAS WRONG. A darker strip
-     under the front is another EDGE, and the cap already has the only edge it
-     is allowed: the fold between face and wall. Two steps down one side wall is
-     two folds, which is a cap with a skirt on it.
-
-     SO IT IS ONE LAYER OVER THE WHOLE MOUTH OF THE CUT, dark at the bottom and
-     gone by the top, laid on the APERTURE rather than on the cap. That is what
-     it physically is — the floor and the wall lose the same light at the same
-     depth, because depth is the only thing either of them has — and it means
-     the shading never has to know where the front ends. Turn the front and the
-     darkening stays put, because the cut did not move.
-
-     IT LIVES ON `.hole`, WHICH IS THE ONLY PART THAT KNOWS HOW DEEP IT IS. A
-     cap cannot draw this: it does not know it is in a hole, and half of what
-     the layer covers is floor the cap never painted. Same argument the pocket
-     itself was built on, one layer later.
-
-     TWO KNOBS, BOTH ASKED FOR, AND NOTHING ELSE WAS ADDED: how dark at the
-     bottom, and how far up it reaches. */
-  --foot:    .56;   /* the dark at the bottom of the cut                     */
-  --foot-h:  7px;   /* how far up the cut it reaches                         */
-
-  /* ── AND THE CONTACT HAS TO LAND ON THE FLOOR, NOT UNDER THE WALL ───────
-     IT WAS OFFSET `--skirt-h + 1` WITH A 1.5PX BLUR, which puts it one pixel
-     below an opaque copy of its own silhouette. The front covered its own
-     shadow to within about three quarters of a pixel: a contact in the
-     stylesheet and none on the screen, which is the original bug of this
-     section at one tenth the scale.
-
-     IT CLEARS THE FRONT BY THREE AND BLURS BY FOUR, so the dark of it falls on
-     the strip of pocket floor between the bottom of the cap and the bottom of
-     the cut. That strip is `--hole-pad` minus `--skirt-h`, which is why the gap
-     has to stay the wider of the two. */
+     THE THREE ROWS ARE A CONTACT, A THROW AND AN AMBIENT, and the third is what
+     keeps it from having an edge. All of them scale off `--skirt-h`, because an
+     object 3px off a surface throws a short hard shadow and the same object 20px
+     off throws a long soft one — the shadow is a consequence of the height
+     rather than a second opinion about it. */
   --cast:
-    1px calc(var(--skirt-h) + 3px) 4px -2px rgba(0,0,0,calc(.30 * var(--cast-k))),  /* the contact */
-    2px calc(var(--skirt-h) + 6px) 9px -4px rgba(0,0,0,calc(.16 * var(--cast-k)));  /* the throw   */
+    /* the contact — tight, dark, hugging the base of the wall */
+    0 calc(var(--skirt-h) + 1px) calc(var(--skirt-h) * .8 + 1px) -1px
+      rgba(0,0,0,calc(.20 * var(--cast-k))),
+    /* the throw — the body of it */
+    0 calc(var(--skirt-h) * 1.6) calc(var(--skirt-h) * 2 + 2px) -2px
+      rgba(0,0,0,calc(.13 * var(--cast-k))),
+    /* the ambient — wide, faint, the reason a real one has no edge */
+    0 calc(var(--skirt-h) * 2.4) calc(var(--skirt-h) * 4 + 4px) -4px
+      rgba(0,0,0,calc(.09 * var(--cast-k)));
 
   /* AND THE PRESSED CAP KEEPS ITS SHADOW, TIGHTER. `--M-pressed` ended at the
      wall and threw nothing, so pressing a key deleted its contact — the one
@@ -605,8 +663,8 @@
      `--M-pressed` IS UNTOUCHED AND STILL RIGHT, for a cap with no hole under
      it: two pixels down on a plate, still in the room, still lit by it. */
   --cast-down:
-    1px calc(max(0px, var(--skirt-h) - 2px) + 2px) 3px -2px rgba(0,0,0,calc(.34 * var(--cast-k))),
-    2px calc(max(0px, var(--skirt-h) - 2px) + 4px) 6px -4px rgba(0,0,0,calc(.11 * var(--cast-k)));
+    0 calc(max(0px, var(--skirt-h) - 2px) + 1px) 2px -1px rgba(0,0,0,calc(.26 * var(--cast-k))),
+    0 calc(max(0px, var(--skirt-h) - 2px) + 2px) 5px -3px rgba(0,0,0,calc(.10 * var(--cast-k)));
 
   /* ── THE LIT EDGE RUNS TOP AND LEFT, BECAUSE THE LAMP IS UP AND LEFT ────
      One inset along the top was half a chamfer. This file has said where the
@@ -2724,8 +2782,30 @@ h2 span{ color:#3d4149; }
    AND THE SHADOW LANDS ON THE PLATE, where a raised thing puts it. That is the
    same sentence this section opened with three versions ago, and it is the one
    that has been true the whole way through. */
+/* ── A SEAT HAS TO BE FREE TO DROP IN, WHICH IS WHAT LETS THE NAV BAR HAVE ONE
+   `.hole` WAS INVENTED FOR THE LIGHT SKIN AND HAS NEVER EXISTED ANYWHERE ELSE.
+   Every instance of it in this repo is inside a `[data-skin="light"]` island, so
+   its clearance and its foot could be declared unconditionally and nobody was
+   ever going to see them on a dark panel.
+
+   THAT STOPS BEING TRUE THE MOMENT A CAP THAT IS ON EVERY PAGE WANTS A SEAT.
+   The nav bar's sections key and its skin chip are built once, by one script,
+   and rendered in BOTH skins — so a wrapper carrying 4px of padding and a dark
+   gradient would move the dark bar to pay for the light one. That is the same
+   trade this skin refused everywhere else: the dark theme is the default and
+   does not move.
+
+   SO THE GEOMETRY IS ZERO AND THE PAINT IS OFF UNTIL THE SKIN ASKS FOR THEM.
+   In the dark theme a `.hole` is an inline-flex wrapper and nothing else — no
+   clearance, no floor, no foot — which costs the dark theme exactly nothing and
+   means a seat can be written into shared markup wherever a cap might one day
+   want one. The light skin puts the padding back and lights the foot, and not
+   one number in the assembly changes.
+
+   `--hole-pad` IS STILL THE CLEARANCE AND STILL THE KNOB. What moved is where
+   it is applied, not what it means — see the skin's own `.hole` rule. */
 .hole{
-  display:inline-flex; padding:var(--hole-pad, 4px);
+  display:inline-flex; padding:0;
   border-radius:var(--hole-r, 4px);
   position:relative;
 }
@@ -2757,9 +2837,28 @@ h2 span{ color:#3d4149; }
    layer that covers ground it did not draw has to be a darkening, or it has to
    know what is behind it — and behind this one is a cap, a floor and whatever
    material the bay is made of, all at once. */
-.hole::before{
+/* ── AND A PIANO IS A CUT, SO IT TAKES THE SAME FLOOR ─────────────────────
+   THE SKIN ALREADY SAYS SO IN WORDS: "`.piano` is a cut, exactly like `.hole`".
+   It says it while giving the bar `--pocket` and a translucent floor, and then
+   stops — so the bar was a pocket with caps lying flat on it rather than caps
+   standing in it. The foot is the half that was missing, and it is the same
+   layer for the same reason: light does not reach the bottom of a cut, and what
+   you see of that is the strip of floor round the base of what is in it.
+
+   ONE BAR, ONE FOOT, NOT ONE PER KEY. A `.hole` holds one cap and a `.piano`
+   holds n, and the difference decides which layers can be shared. The foot is a
+   property of the CUT — it darkens the floor, and the floor is continuous under
+   all n keys — so it works unchanged. The pressed vignette below is not: it
+   shades one recessed FACE, and drawn on the bar it would darken every key on
+   it to say one of them is down. That one stays on `.hole` alone, and a piano
+   key that is down keeps the material's own `--pressed`.
+
+   OFF BY DEFAULT, BOTH OF THEM, so the dark theme is untouched — see `.hole`
+   above for why a seat has to cost the dark theme nothing. */
+.hole::before,
+.piano:not(.sm)::before{
   content:''; position:absolute; inset:0; pointer-events:none;
-  border-radius:inherit;
+  border-radius:inherit; opacity:0;
   background:linear-gradient(to top,
     rgba(0,0,0,var(--foot, .34)) 0, rgba(0,0,0,0) var(--foot-h, 11px));
 }
@@ -2785,29 +2884,37 @@ h2 span{ color:#3d4149; }
    front of the key. Two layers, opposite sides of the same object, each correct
    for the state it belongs to.
 
-   ── AND IT FALLS FROM THE TOP ONLY, WHICH IS JULIEN'S CALL ON THE LAMP.
-   It had a second gradient off the left wall at .22, on the grounds that the
-   rest of this file puts the lamp up AND left — the specular at 32%/24%, the
-   cast thrown down-right, `--M-pocket` dark at top-left. Correct by that
-   convention and wrong on the panel: down a cut, a band along the whole left
-   edge plus a band along the whole top is not a shadow pooling in a corner, it
-   is an L, and an L round two sides of a face reads as a bevel drawn on it.
+   ── IT CLOSES IN FROM EVERY SIDE, AND HARDER THE DEEPER THE CAP GOES.
+   THREE VERSIONS OF THIS LAYER WERE ONE ARGUMENT ABOUT WHAT A CUT DOES. First
+   it was top and left, from the lamp — an L round two sides, which reads as a
+   bevel drawn on the face rather than as light failing to arrive. Then top
+   alone, which is a shadow with a direction and looked right on one cap and
+   thin on a row of them.
 
-   THE LIGHT IN THIS ROOM COMES FROM THE TOP OF THE PAGE. That is the reading
-   the panel actually gives, whatever the token names say, and a recess is where
-   it shows: a shadow off one wall is a light with a direction, and a shadow off
-   two is a light that is merely somewhere above. One gradient, one wall, .38
-   rather than .34 because it is now carrying the whole of it.
+   BOTH WERE MODELLING THE WRONG THING. A wall casting a shadow has a direction;
+   a POCKET does not. What darkens the bottom of a cut is not one wall throwing
+   — it is the aperture subtending a smaller and smaller piece of the room as
+   you go down it, from all four sides at once. That is why the answer is a
+   vignette and not a gradient, and why the direction argument could not be won
+   from either side: the term that was missing had no direction in it.
+
+   SO: ONE INSET RING FROM EVERY EDGE, PLUS A SECOND HELPING OFF THE TOP WALL
+   because the lamp is up the page and the far wall does block the most. The
+   ring is the room closing; the top row is the light. Two rows, two different
+   physical claims, and neither is pretending to be the other.
+
+   AND THE QUANTITY VARIES WITH THE DEPTH, WHICH IS THE OTHER HALF. A cap one
+   pixel down is barely in shadow; a cap twelve pixels down is in a well. Both
+   the reach and the alpha are read off `--bottom-d` — `+6px` and `.10 + .055`
+   per pixel — so pressing deeper does not simply move the face, it darkens it,
+   which is what makes the depth legible without a second knob to say so. The
+   alpha is capped at .62: past that the cap stops being a recessed face and
+   becomes a hole with nothing in it.
 
    WORTH KNOWING, AND NOT CHANGED HERE: `--M-pocket` and `--M-sunk` still shade
-   top AND left, so the empty cut in §14 and this layer disagree by one wall.
-   Fixing that is a decision about every recess in the skin rather than about
-   this one, and it is not made by editing this rule.
-
-   ITS REACH SCALES WITH THE DEPTH AND GETS NO KNOB. A cap 2px down catches a
-   short shadow and a cap 12px down catches a long one, because the wall above
-   it is that much taller. `--bottom-d + 8px` is that relationship and there is
-   nothing in it to tune.
+   top AND left, so the empty cut in §14 and this layer model the same surface
+   two different ways. Fixing that is a decision about every recess in the skin
+   rather than about this one, and it is not made by editing this rule.
 
    OFF BY DEFAULT, ON WHEN THE KEY IS DOWN. Declared here with the geometry so
    there is one place to read it; switched by the `:has()` rule in the skin
@@ -2815,8 +2922,20 @@ h2 span{ color:#3d4149; }
 .hole::after{
   content:''; position:absolute; inset:0; pointer-events:none;
   border-radius:inherit; opacity:0;
-  background:linear-gradient(to bottom,
-    rgba(0,0,0,.38) 0, rgba(0,0,0,0) calc(var(--bottom-d, 1px) + 8px));
+  --ps-hw:calc(var(--ps-hard-w) + var(--bottom-d) * .5px);
+  --ps-sb:calc(var(--ps-soft-b) + var(--bottom-d) * 2px);
+  --ps-ha:calc(var(--ps-hard-a) * var(--ps-k) * var(--ps-depth));
+  --ps-sa:calc(var(--ps-soft-a) * var(--ps-k) * var(--ps-depth));
+  box-shadow:
+    /* hard — the occlusion right at the wall, all round. Blur and spread are
+       separate here: `e` decides how fast it stops, `w` how far it goes. */
+    inset 0 0 var(--ps-hard-e) var(--ps-hw)
+      rgba(0,0,0,var(--ps-ha)),
+    /* soft — the room closing over the cap, all round */
+    inset 0 0 var(--ps-sb) calc(var(--ps-sb) * .2) rgba(0,0,0,var(--ps-sa)),
+    /* and the top wall's extra, which is the only part with a direction */
+    inset 0 var(--ps-sb) var(--ps-sb) calc(var(--ps-sb) * -.45)
+      rgba(0,0,0,calc(var(--ps-sa) * var(--ps-top)));
 }
 /* THE CAP DOES NOT GROW. A hole is exactly its cap plus its clearance, so the
    thing inside is sized by itself and the aperture takes whatever that is. Let
@@ -7480,7 +7599,19 @@ span.nav-link{ cursor:default; }
   color:var(--room-dim);
   border-top-color:color-mix(in srgb, var(--mid) 85%, #000);
 }
-[data-skin="light"] .tagcut{ color:var(--field-ink); }
+/* THE TAG WAS DARK INK ON A DARK SLAB, WHICH IS THE HALF THAT GOT SET. The
+   skin picked `--field-ink` for it and left the dark theme's near-black fill
+   underneath, so every one of these labels went from quiet to unreadable. A
+   `.tagcut` is what its name says — a cut with a word in it — so it takes the
+   same fill the bars above take, at the same 82% every `--M-wall` uses, and the
+   material's own engraving on top. It is cut into the STAGE rather than into a
+   bay, and there is no `--field-wall` slot, so the ratio is written out here. */
+[data-skin="light"] .tagcut{
+  color:var(--field-ink);
+  background:color-mix(in srgb, var(--field) 82%, #000);
+  box-shadow:var(--sunk);
+  text-shadow:var(--etch);
+}
 [data-skin="light"] .tab-sub{ color:var(--field-dim); }
 
 /* ── THE SPEC TABLE ───────────────────────────────────────────────────────
@@ -7593,9 +7724,21 @@ span.nav-link{ cursor:default; }
    shading the top AND LEFT of the cut, and a lit lip along the bottom and right
    inside it — the same 45° lamp the cast shadow and the specular use, rather
    than a light directly overhead, which is what it drew before. Both
-   are surfaces catching or losing light; nothing traces the shape. What tells
-   you the hole is there is that its corners are squarer than the cap's, which
-   is what it was built for.
+   are surfaces catching or losing light; nothing traces the shape.
+
+   AND WHAT TELLS YOU THE HOLE IS THERE IS NO LONGER ITS CORNER. It was, and the
+   pocket was built for it: a squarer aperture round a rounder cap leaves four
+   thickening wedges of cut at the corners, which is a shape the eye reads as a
+   hole without anything being outlined. At `--hole-r` 0 against a cap of 7 that
+   wedge was most of the evidence.
+
+   AT 10 AND 10 THE TWO CORNERS ARE THE SAME AND THE WEDGES ARE GONE, so the
+   clearance is one even ring a pixel wide and the reading is carried entirely by
+   VALUE — the foot darkening the base of the cut, the vignette when the cap goes
+   down, and these two rows. Which is the stronger arrangement of the two: a
+   corner trick works at one gap and one pair of radii, and light works at all of
+   them. Worth knowing if the gap is ever taken back up, because that is the
+   setting where the missing wedge would start to be felt.
 
    THE FLOOR IS `--surface`, NOT `--wall`. A cap covers almost all of it, so
    what you see is the few pixels at the edge — the TOP of the pocket rather
@@ -7620,9 +7763,17 @@ span.nav-link{ cursor:default; }
      this one painted a flat tone over the wrong surface entirely. A part that
      covers ground it did not draw has to be transparent, or it has to be told
      what it is covering — and nothing was ever going to tell it. */
-  background:rgba(0,0,0, calc((100 - var(--hole-tone)) * .01));
+  /* THE CLEARANCE LIVES HERE NOW AND NOT ON THE PART — see the base rule for
+     why a seat has to be free in the dark theme. Same token, same value, one
+     selector further in. */
+  padding:var(--hole-pad, 4px);
+  background:color-mix(in srgb,
+    var(--hole-tint) clamp(0%, calc((100 - var(--hole-tone)) * 1%), 100%),
+    transparent);
   box-shadow:var(--pocket);
 }
+/* AND THE FOOT COMES ON, IN BOTH KINDS OF CUT. */
+[data-skin="light"] :is(.hole, .piano:not(.sm))::before{ opacity:1; }
 
 /* ── THE VOLUME LIVES IN THE CAP'S OWN BODY ───────────────────────────────
    A SPECULAR, AT THE ANGLE THIS FILE HAS ALWAYS NAMED. §02 states it: never
@@ -7699,7 +7850,25 @@ span.nav-link{ cursor:default; }
    the lift rather than adding two to the position — same 2px of travel, but now
    the base stays nailed to the seat instead of the whole object sliding down
    it, which is what a key going into a hole actually does. */
-[data-skin="light"] .hole > :is(.key, .pkey, .chip){
+/* ── AND `.piano` IS A SEAT, WHICH IS WHERE THE TABS AND THE NAV BAR COME IN
+   THE BAR WAS ALREADY DRAWN AS A CUT AND ITS KEYS WERE STILL LYING IN IT. Every
+   number in this assembly was tuned on one cap in one hole, and the parts that
+   most needed it — the page switcher, an interlock, the nav bar — were the ones
+   the rule could not reach, because it was welded to a class rather than to
+   what the class IS. A seat is a cut with a cap standing in it; `.hole` holds
+   one and `.piano` holds a row, and neither fact is about the lift.
+
+   `:not(.sm)` IS A DENSITY LINE AND IT IS THE PLAN'S OWN. A small strip does
+   not travel at all — 26px keys at 5px of padding, and the file says so where
+   it kills their travel — so lifting them 3px and dropping them 3px would be
+   the lurch that rule was written to prevent. Full-size bars stand their keys
+   up; dense ones stay quiet. Same call the toggles get.
+
+   WHAT A SEATED PIANO KEY GETS: the lift at rest, so the bar's floor shows
+   round the base of every key, the foot darkening that floor, and the tuned
+   travel. What it does not get is the aperture's vignette — see the foot above
+   for why one bar cannot shade one cap. */
+[data-skin="light"] :is(.hole, .piano:not(.sm)) > :is(.key, .pkey, .chip){
   transform:translateY(calc(-1 * var(--skirt-h)));
 }
 /* ── AND PRESSING SEATS IT, WHICH IS THE FULL TRAVEL AND NOT TWO PIXELS ───
@@ -7727,13 +7896,25 @@ span.nav-link{ cursor:default; }
    rather than a copied literal. Seven pixels of travel is seven pixels of dead
    band along the top edge if the pad travels with the cap — the exact failure
    the pad was invented for, at three and a half times the size. */
+[data-skin="light"] :is(.hole, .piano:not(.sm)) > :is(.key, .pkey, .chip):active,
+[data-skin="light"] :is(.hole, .piano:not(.sm)) > :is(.key.pressed, .key.skirt.is-down, .pkey.is-down, .chip.is-down){
+  transform:translateY(calc(var(--bottom-d) * 1px - var(--hole-pad)));
+}
+/* THE CAP GIVES UP ITS OWN SHADOW ONLY WHERE SOMETHING ELSE IS DRAWING ONE.
+   A cap at the bottom of a `.hole` is covered by that aperture's vignette, so
+   its own shading would be a second drawing of one event — the argument two
+   sections up, about one wall and two shadows. A cap at the bottom of a PIANO
+   has no such layer, because a vignette on the bar would darken the keys that
+   are up. So it keeps `--pressed`, which is the material's own answer to the
+   same question and is what every unseated pressed cap in this skin already
+   uses. Split into its own rule so the two cannot be turned on together by
+   accident. */
 [data-skin="light"] .hole > :is(.key, .pkey, .chip):active,
 [data-skin="light"] .hole > :is(.key.pressed, .key.skirt.is-down, .pkey.is-down, .chip.is-down){
-  transform:translateY(calc(var(--bottom-d) - var(--hole-pad)));
   box-shadow:none;
 }
-[data-skin="light"] .hole > :is(.key, .pkey, .chip):active::before,
-[data-skin="light"] .hole > :is(.key.pressed, .key.skirt.is-down, .pkey.is-down, .chip.is-down)::before{
+[data-skin="light"] :is(.hole, .piano:not(.sm)) > :is(.key, .pkey, .chip):active::before,
+[data-skin="light"] :is(.hole, .piano:not(.sm)) > :is(.key.pressed, .key.skirt.is-down, .pkey.is-down, .chip.is-down)::before{
   transform:translateY(calc(-1 * var(--press-travel)));
 }
 
@@ -7761,6 +7942,24 @@ span.nav-link{ cursor:default; }
   overflow:hidden;
   overflow:clip;
 }
+/* ── EXCEPT IN A DOCK, WHERE CLIPPING WOULD TAKE THE HIT PAD WITH IT ──────
+   A CAP IN A STRIP CARRIES A 9px PAD AND THE SEAT IS 2px WIDE. `.strip` sets
+   `--pkey-reach-y:9px` because a bar with 9px of padding has nine pixels of
+   frame above and below every key that belong to that key — and the pad is a
+   `::before` on the cap, so a seat that clips clips it, down to the clearance.
+
+   AND THE COST IS PERMANENT, NOT MOMENTARY, WHICH IS WHAT MAKES IT WORTH A
+   RULE. The clip is `:has(… .is-down)`, and the nav bar's skin chip is latched
+   for the entire life of the light skin — so the one cap that is always down is
+   the one whose hit area would always be short. The dead band is invisible,
+   it hugs the frame, and the frame is where a pointer aims.
+
+   NOTHING IS LOST BY IT. The clip exists to stop a face that has sunk BELOW the
+   plate sliding out of the bottom of its own cut; a dock's caps sit in 2px of
+   clearance in a bar that already has 9px of chassis round them, so there is
+   nowhere for one to go. Written after the rule it excepts, at equal
+   specificity, which is the only reason it wins — do not reorder them. */
+[data-skin="light"] .strip .hole{ overflow:visible; }
 /* AND THE WALL THROWS ITS SHADOW AT THE SAME MOMENT, for the same reason: the
    plate is now in front of the key. One condition, two consequences, written
    together so they cannot be turned on separately. */
@@ -8006,6 +8205,212 @@ span.nav-link{ cursor:default; }
    so it needs the air a stage of its own used to give it */
 .capsblock{ margin:38px 0 34px; }
 
+/* ── THE NAV BAR AND THE INTERLOCK ────────────────────────────────────────
+   NEITHER OF THESE NEEDED A NEW IDEA, WHICH IS THE TEST THE MATERIAL SYSTEM
+   HAS BEEN BUILDING TOWARD. A nav bar is a CHASSIS with a milled bar in it and
+   caps in that; an interlock is the same bar with different keys. Both are
+   parts this skin has already answered — `.strip` is `.dock` at nav scale and
+   `.piano` is a cut, exactly like `.hole` — so the whole of it is naming which
+   existing answer applies, and the caps come along for free because `.pkey` is
+   already in the cap rule.
+
+   `.piano` IS A CUT AND NOT A BAY, AND THE DIFFERENCE IS WHAT IS IN IT. A bay
+   is a REGION OF MATERIAL with things laid on it; a cut is a hole with things
+   sitting IN it. The keys of an interlock drop into their bar — that is the
+   whole claim the part makes, that these n things are one setting — so it takes
+   the pocket treatment, translucent, and shows whatever it is cut into.
+
+   THE READOUT IS LEFT ALONE ON PURPOSE. `--lcd` green on black in the middle of
+   a beige panel looks wrong until you remember rule 8: the glass gets colours
+   the panel does not. A display is a window, not a face, and a dark window in a
+   light case is what every one of the references has. Skinning it would be
+   turning the one emissive part of the panel into paint. */
+/* THE NAV BAR IS PALE, AND IT SETS THE MATERIAL RATHER THAN A COLOUR. Julien's
+   call, and it is the one place the "colour attaches to the bay, never the
+   chassis" rule is worth reading precisely: that rule is about not tinting the
+   CASE a panel is milled from. A nav dock is not that case. It is a separate
+   object floating over the page — the references are full of them — and an
+   object gets a material.
+
+   SO IT TAKES THE WHOLE PALE SET, exactly as `.m-pale` would, rather than a
+   white background. Everything inside it then inherits pale and comes out
+   tone-on-tone for free: the keys, their fronts, their lit edges and the ink on
+   them all move together, and switching the bar to another material later is
+   these four lines and nothing else. A `background:#fff` here would have been
+   one white bar with a beige panel's worth of parts sitting on it. */
+[data-skin="light"] .strip{
+  --tone:var(--pale); --hi:var(--pale-hi); --lo:var(--pale-lo); --wall:var(--pale-wall);
+  --front:var(--pale-front); --spec:var(--pale-spec);
+  --surface:var(--pale-surface); --raised:var(--pale-raised); --sunk:var(--pale-sunk);
+  --pressed:var(--pale-pressed); --pocket:var(--pale-pocket); --flush:var(--pale-flush);
+  --legend:var(--pale-legend); --dim:var(--pale-dim); --etch:var(--pale-etch);
+  --seam:var(--pale-seam);
+  background:linear-gradient(176deg,
+    var(--pale-hi) 0%, var(--pale) 30%, var(--pale-lo) 80%, var(--pale) 100%);
+  box-shadow:
+    0 12px 20px -15px rgba(0,0,0,.20),
+    0 3px 6px -4px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.80),
+    inset 0 -1px 0 rgba(0,0,0,.14);
+}
+[data-skin="light"] .strip::before{ opacity:.22; }
+[data-skin="light"] .navdock.seated > .strip{
+  box-shadow:
+    0 18px 26px -18px rgba(0,0,0,.26),
+    0 4px 8px -5px rgba(0,0,0,.18),
+    0 0 0 1px rgba(0,0,0,.06),
+    inset 0 1px 0 rgba(255,255,255,.80),
+    inset 0 -1px 0 rgba(0,0,0,.14);
+}
+
+/* ── THE BAR IS FILLED WITH `--wall`, AND THE ALTERNATIVE WENT SOLID BLACK ─
+   IT READ `--hole-tone` AND THAT KNOB IS NOT ABOUT THIS PART. The bar copied
+   the aperture's floor arithmetic — `rgba(0,0,0, (100 - tone) * .01)` — back
+   when the tone stopped at 55 and the worst it could do was a mid grey. The
+   bench then took the floor to 0, which means SOLID, and every piano on the
+   page turned into a black slab: the page switcher, the surfaces strip and the
+   nav bar's own tabs.
+
+   AND THE VALUE WAS NEVER THE PROBLEM. `--hole-tone` 0 is right for what it
+   was tuned on — a two-pixel ring of clearance round one cap, where solid black
+   reads as a true aperture and anything less reads as a darkened patch of bay.
+   A bar shows its floor by the square centimetre. Same token, two surfaces, and
+   only one of them is a sliver: the sliver can be a void and the floor cannot.
+
+   SO IT TAKES THE MATERIAL'S OWN WALL, WHICH THIS FILE ALREADY SPECIFIES. The
+   token block says it in one line — "A CUT IS FILLED WITH `--M-wall`, NOT
+   `--M-surface`. The floor of a hole is the same material seen deeper — the
+   case's colour minus SOME light, not minus all of it." That is exactly the
+   sentence this rule was breaking, and `--wall` is exactly 18% of the light off
+   whatever the bar is cut into.
+
+   AND IT FOLLOWS THE MATERIAL RATHER THAN GUESSING AT IT. `--wall` is a slot in
+   the set, so the nav bar's bar is cut into pale because `.strip` declares the
+   pale set, a bar in an accent bay is cut into accent, and nothing here has to
+   know which. That is the failure mode the aperture's own comment warns about
+   three times — an opaque fill that has an opinion about what is behind it —
+   avoided the other way: not by going transparent, but by being handed the
+   answer through the material.
+
+   WORTH KNOWING: a bar on a bare `.stage` gets `--mid-wall`, because the stage
+   sets `--field` and there is no `--field-wall` slot to set. Mid at 82% is
+   still darker than field at 93%, so it still reads as a cut into the stage —
+   which is why this is a note and not a bug. */
+[data-skin="light"] .piano{
+  background:var(--wall);
+  box-shadow:var(--pocket);
+}
+
+/* ── AND THE CLEARANCE IS A HAIRLINE, WHICH IS THE HALF THE COLOUR COULD NOT
+   FIX ────────────────────────────────────────────────────────────────────
+   THE REFERENCES DO NOT HAVE A CHANNEL ROUND A ROW OF KEYS. Nine of them, and
+   in every one a group of alternatives is caps with a SEAM between them —
+   `SOUND`/`EDIT`, `SAMPLE`/`CHOP`, `FX`/`OUTPUT` on the K.O. II are pairs
+   divided by about a pixel, sitting on the panel. Where there is a tray at all
+   it is barely off the panel value and the caps nearly fill it. There is
+   nothing anywhere that looks like a bar with keys floating in the middle of
+   it.
+
+   SO THE WIDTH WAS HALF THE BUG AND THE COLOUR WAS THE OTHER HALF. At 6px of
+   padding and 5px of gap, ANY fill reads as a channel: black read as a void and
+   `--wall` reads as a grey band, and neither is the reference. At the tuned
+   clearance the same `--wall` reads as what it is — a seam, the material seen
+   deeper where two parts meet. The value only became right once the width was.
+
+   IT IS `--hole-pad`, WHICH IS THE CLEARANCE KNOB AND ALREADY MEANS THIS. The
+   bench tuned it to 2px against a single cap in a single aperture; a bar is the
+   same question asked n times in a row, so it is the same answer. One number
+   for how much cut shows beside a cap, wherever the cap is.
+
+   AND THE HIT PAD FOLLOWS THE GAP, WHICH IT HAS TO. `--pkey-reach-x` is half a
+   gap — the file's own rule, that a key meets its neighbour at the midline and
+   never crosses it — and the values above are written against gaps of 6 and 7.
+   Leave them and each pad reaches 3px into a 2px gap, the two overlap, and the
+   one painted last quietly takes the seam. Derived, so it cannot drift off the
+   gap again.
+
+   `:not(.sm)` IS THE SAME DENSITY LINE AS THE SEAT. The small strips keep their
+   geometry: `.hb-tabs` is a two-row grid at 24px with its reaches written
+   against a 5/4 gap, and squeezing that is a change to a different part.
+   Tightening them is one line here if it is wanted. */
+[data-skin="light"] .piano:not(.sm){
+  padding:var(--hole-pad);
+  gap:var(--hole-pad);
+  --pkey-reach-x:calc(var(--hole-pad) / 2);
+}
+
+/* ── THE PALETTE IS THE DOCK STOOD ON END, SO IT TAKES THE DOCK'S ANSWER ───
+   IT WAS NEVER SKINNED AND IT SHOWED AS A BLACK SLAB. `.palette` is the same
+   object as `.strip` — the same 176° gradient, the same four shadow rows, the
+   same grain `::before`, laid out in a column instead of a row — so it was
+   sitting on a beige page still wearing the dark theme's chassis. Nothing about
+   it needed a new idea; it needed the one already written twelve lines up.
+
+   SO IT TAKES THE WHOLE PALE SET, exactly as the nav dock does and for the same
+   reason: a palette is not the case a panel is milled from, it is a separate
+   object floating over the page, and an object gets a material. Everything
+   inside it then comes out tone-on-tone for free.
+
+   PALE IS THE CALL WORTH RE-READING. `.strip` is pale because Julien said so
+   about the nav bar specifically. This assumes the same answer for the same
+   kind of object; switching it to another material is these four lines and
+   nothing else. */
+[data-skin="light"] .palette{
+  --tone:var(--pale); --hi:var(--pale-hi); --lo:var(--pale-lo); --wall:var(--pale-wall);
+  --front:var(--pale-front); --spec:var(--pale-spec);
+  --surface:var(--pale-surface); --raised:var(--pale-raised); --sunk:var(--pale-sunk);
+  --pressed:var(--pale-pressed); --pocket:var(--pale-pocket); --flush:var(--pale-flush);
+  --legend:var(--pale-legend); --dim:var(--pale-dim); --etch:var(--pale-etch);
+  --seam:var(--pale-seam);
+  background:linear-gradient(176deg,
+    var(--pale-hi) 0%, var(--pale) 30%, var(--pale-lo) 80%, var(--pale) 100%);
+  box-shadow:
+    0 12px 20px -15px rgba(0,0,0,.20),
+    0 3px 6px -4px rgba(0,0,0,.14),
+    inset 0 1px 0 rgba(255,255,255,.80),
+    inset 0 -1px 0 rgba(0,0,0,.14);
+}
+[data-skin="light"] .palette::before{ opacity:.22; }
+/* the palette's caption is a legend on the chassis — engraved, at the dim tier,
+   the same treatment the wordmark gets one object over. */
+[data-skin="light"] .pal-cap{
+  color:var(--dim);
+  text-shadow:0 1px 0 rgba(255,255,255,.9);
+}
+
+/* ── THE WORDMARK IS ENGRAVED, WHICH INVERTS ──────────────────────────────
+   `.demo-etch` cuts type INTO metal: dark ink with a lit hairline BELOW it, so
+   the lower wall of the cut catches the lamp. That recipe is the same on any
+   panel value — it is a pit, and rule 6 covers pits — but the two colours in it
+   are not, because on black the ink is near-black and the lip is white, and on
+   beige the ink is the beige gone deep and the lip is nearly white. */
+[data-skin="light"] .nav-mark{
+  /* MEASURED 2.99:1 AT ITS FIRST VALUE, WHICH IS A FAIL AND WAS NOT OBVIOUS.
+     An engraved mark reads as decoration, so it is easy to pick its tone by how
+     the CUT looks rather than by whether the word is legible — and a wordmark
+     is a legend like any other. It takes the surface's own dim tier, which is
+     measured, and the etch does the engraving on top of it. */
+  color:var(--dim);
+  text-shadow:0 1px 0 rgba(255,255,255,.9);
+}
+[data-skin="light"] a.nav-mark:hover{
+  color:var(--legend);
+  text-shadow:0 1px 0 rgba(255,255,255,.9);
+}
+
+/* ── WHICH PAGE YOU ARE ON, WITHOUT A LAMP ────────────────────────────────
+   The dark theme lights the current key orange. On this skin a latched cap is
+   DOWN rather than lit — there is a real shadow over it and you can see it from
+   across the room — so the current page is the key that has dropped, and its
+   legend goes to full ink while the others sit at the dim tier. Two signals,
+   neither of them colour, which is also the accessible answer. */
+[data-skin="light"] .nav-link{ color:var(--dim); }
+[data-skin="light"] .nav-link:hover{ color:var(--legend); }
+[data-skin="light"] span.nav-link,
+[data-skin="light"] .pkey.is-down{
+  color:var(--legend); text-shadow:var(--etch);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    X-RAY — EVERY LAYER IN A DIFFERENT COLOUR. DOC-ONLY.
 
@@ -8071,8 +8476,10 @@ span.nav-link{ cursor:default; }
     /* 2 lit edge, top  */ inset 0 1px 0 #FFE000,
     /* 2 lit edge, left */ inset 1px 0 0 #00C8D7,
     /* under lip        */ inset 0 -1px 0 #7A00A0,
-    /* 12 contact       */ 1px calc(var(--skirt-h) + 3px) 4px -2px rgba(228,0,43,.85),
-    /* 12 throw         */ 2px calc(var(--skirt-h) + 6px) 9px -4px rgba(228,0,43,.55),
+    /* 12 cast, hard    */ 0 calc(var(--skirt-h) + var(--sh-hard-y)) var(--sh-hard-b)
+                            calc(var(--sh-hard-b) * -.3) rgba(228,0,43,.85),
+    /* 12 cast, soft    */ 0 calc(var(--skirt-h) + var(--sh-soft-y)) var(--sh-soft-b)
+                            calc(var(--sh-soft-b) * -.3) rgba(228,0,43,.45),
     /* 5 front          */ 0 var(--skirt-h) 0 #0072CE;
   color:#111;
   text-shadow:none;
@@ -8082,8 +8489,10 @@ span.nav-link{ cursor:default; }
   box-shadow:
     inset 1px 1px 3px #B14FE0,
     inset -1px -1px 0 #FFE000,
-    1px calc(max(0px, var(--skirt-h) - 2px) + 2px) 3px -2px rgba(228,0,43,.85),
-    2px calc(max(0px, var(--skirt-h) - 2px) + 4px) 6px -4px rgba(228,0,43,.55),
+    0 calc(max(0px, var(--skirt-h) - 2px) + var(--sh-hard-y)) var(--sh-hard-b)
+      calc(var(--sh-hard-b) * -.3) rgba(228,0,43,.85),
+    0 calc(max(0px, var(--skirt-h) - 2px) + var(--sh-soft-y) * .5) calc(var(--sh-soft-b) * .5)
+      calc(var(--sh-soft-b) * -.15) rgba(228,0,43,.45),
     0 max(0px, calc(var(--skirt-h) - 2px)) 0 #0072CE;
 }
 /* the foot, in its own colour and at its own length — the layer Julien asked
@@ -8104,8 +8513,10 @@ span.nav-link{ cursor:default; }
 /* and the wall's shadow is `near wall` green, on the hole where it is thrown
    from, running over the floor and the cap in one piece */
 [data-skin="light"].xray .hole::after{
-  background:linear-gradient(to bottom,
-    rgba(127,191,0,.95) 0, rgba(127,191,0,0) calc(var(--bottom-d, 1px) + 8px));
+  box-shadow:
+    inset 0 0 var(--ps-hard-e) var(--ps-hw) rgba(127,191,0,.95),
+    inset 0 0 var(--ps-sb) calc(var(--ps-sb) * .2) rgba(127,191,0,.55),
+    inset 0 var(--ps-sb) var(--ps-sb) calc(var(--ps-sb) * -.45) rgba(127,191,0,.55);
 }
 [data-skin="light"].xray .hole::before{
   background:linear-gradient(to top,

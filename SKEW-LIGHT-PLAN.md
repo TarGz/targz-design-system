@@ -37,10 +37,12 @@ Colour attaches to the **bay**. Never the chassis, never invented per-component.
 
 | material | role | z |
 |---|---|---|
-| `pale` | white — identity plates, primary-action caps, label areas | raised |
+| `pale` | white — identity plates, primary-action caps, label areas | flush |
 | `mid` | beige — the chassis and the default bay, the ground | flush |
-| `accent` | orange — consequence; one bay per panel maximum | recessed |
-| `dark` | black — display glass, dark caps, engraved legends | recessed |
+| `accent` | orange — consequence; one bay per panel maximum | flush |
+| `dark` | black — display glass, dark caps, engraved legends | flush |
+
+The `z` column was `raised / flush / recessed / recessed` until 2026-08-26 — see rule 4.
 
 **A material is a set, not a value.** Each defines five things:
 
@@ -79,10 +81,16 @@ Without it the cap and its own cast shadow merge into one blob. This is the exac
 inverse of the dark theme's lit-top-edge logic. Get it wrong and every dark control
 looks like a hole.
 
-**4. Light bays are raised. Dark bays are recessed.**
-Forced by physics: a bay lighter than the chassis cannot also read as a hole. `.bay`
-is currently a well (`inset 0 3px 7px rgba(0,0,0,.85)`, skew.css:516). A `pale` bay
-becomes a raised plate instead. Real structural fork — plan for it.
+**4. ~~Light bays are raised. Dark bays are recessed.~~ All bays are flush.**
+**Overruled by Julien, 2026-08-26, at the step-4 review.** The original reasoning still
+holds — a bay lighter than the chassis cannot read as a hole — but it never established
+that the answer had to be *z*. A panel is **one milled face with different material let
+into it**: inlays, not shelves and pits. All four bays share a plane and the change of
+material is the whole of the separation.
+
+This promotes rule 5 from a caution to **the mechanism**: with nothing separating bays by
+height, the seam is the only thing telling you where one ends. `raised` / `recessed` stay
+live for **caps** — a control is an object you push, a bay is a surface you do not.
 
 **5. Two tinted bays never share a raw edge.**
 A chassis rib or a seam goes between them. Two colours butted directly reads as a flag,
@@ -130,10 +138,10 @@ below and move to the next step. If he does not, fix it and hand it back. Do not
 steps together, and do not start the next one while a review is open — a step built on
 an unvalidated step is a step you will build twice.
 
-- [ ] **1. Token layer.** The four material sets. No component touched.
-- [ ] **2. Chassis and bay materials.** One demo bay in each material, side by side, so
+- [x] **1. Token layer.** The four material sets. No component touched.
+- [x] **2. Chassis and bay materials.** One demo bay in each material, side by side, so
       Julien can judge the four grounds before anything is built on them.
-- [ ] **3. The leader primitive.** Highest-value single move — see below.
+- [x] **3. The leader primitive.** Highest-value single move — see below.
 - [ ] **4. Caps.** Cap materials, and rule 3's bright lip.
 - [ ] **5. Toggles.** Both variants — see below.
 - [ ] **6. Everything else**, component by component. Each component is its own review.

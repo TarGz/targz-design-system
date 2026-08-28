@@ -110,6 +110,88 @@
     return n;
   };
 
+  /* ── A CAP IN THE BAR STANDS IN A CUT, NOT ON THE BAR ─────────────────────
+     THE BAR IS PALE AND ITS KEYS ARE MADE OF IT, which is the tone-on-tone
+     default and correct — and it is also why they had nothing to stand out
+     against. A cap the colour of the surface it sits on is separated by form
+     and shadow alone, and the strongest form this language has for that is the
+     one the cap bench just spent eleven versions tuning: a face lifted off a
+     seat, with the cut doing the rest.
+
+     `.hole` IS THE SEAT AND IT COSTS THE DARK BAR NOTHING. In the dark theme
+     it is now an inline-flex wrapper with no padding and no paint — see the
+     note on `.hole` in skew.css — so this wrapper is invisible there and the
+     dark bar is pixel-for-pixel what it was. Under the light skin the cut
+     appears round the cap and the cap rises out of it.
+
+     THE PIANO IS NOT WRAPPED, AND THAT IS NOT AN OVERSIGHT. A bar of keys is
+     ALREADY a cut — the skin has drawn it as one for two steps — so it is a
+     seat in its own right and wrapping each key in a second one would put a
+     hole inside a hole. It would also break the four rules that reach the keys
+     with a child combinator: the hit pads, the end-key rims and `.hb-tabs`'s
+     nth-child frame all read `.piano > .pkey`. */
+  const seat = cap => { const h = mk('span', 'hole'); h.append(cap); return h; };
+
+  /* ── THE SKIN, AND IT IS SET BEFORE ANYTHING IS DRAWN ─────────────────────
+     This script is the first node in <body>, which is the only moment a skin
+     can be chosen without a flash of the other one. Read the store, stamp the
+     root, THEN build the bar. Do it inside navBar() instead and the page has
+     already begun laying out in the wrong skin.
+
+     THE ABSENCE OF THE ATTRIBUTE IS THE DARK THEME, not `data-skin="dark"`.
+     Dark is the default and defaults do not announce themselves — `:root`
+     already says everything dark needs, so there is nothing for a dark value
+     to select and a second name would be a second thing that can be wrong.
+
+     A `try` AROUND EVERY localStorage CALL, both ways. It throws outright in a
+     file:// document in some browsers and in a blocked third-party frame, and
+     a chrome script that throws takes the whole nav with it. A forgotten skin
+     is a nuisance; no nav bar is a broken page. */
+  const SKIN_KEY = 'skew-skin';
+
+  let LIGHT = false;
+  try { LIGHT = localStorage.getItem(SKIN_KEY) === 'light'; } catch (_) {}
+
+  function applySkin() {
+    if (LIGHT) document.documentElement.dataset.skin = 'light';
+    else delete document.documentElement.dataset.skin;
+  }
+  applySkin();
+
+  /* THE LEGEND IS THE STATE, NOT THE ACTION, and that is the same rule every
+     latched key on this site follows: `.pkey.is-down` is the page you are ON,
+     not the page you are going to. So the key reads LIGHT and is lit when the
+     light skin is on — a switch showing you where it stands. A key that read
+     DARK while the page was light would be the one control here that has to be
+     read backwards.
+
+     NO GLYPH. §02's rule: an arbitrary glyph is worse than none, and there is
+     no mark for "beige" that a reader would arrive at unprompted. A sun and a
+     moon would be a weather report about a machine finish.
+
+     AND IT IS A `.chip`, WHICH IS THE PART THIS ALREADY IS. The first version
+     was a `.key.skirt` with three lines of CSS resizing it, and those three
+     lines were the tell: `.strip .key` is 34px square because a key in a strip
+     is a GLYPH key, and a legend is not a glyph. A chip is the language's own
+     small latching legend — 28px, mono, tracked, with `.chip.is-down` already
+     drawing latched-and-lit — so it needs no new rule at all. A part that has
+     to be resized to fit is usually the wrong part. */
+  function skinKey() {
+    const b = mk('button', 'chip nav-skin', 'LIGHT');
+    b.type = 'button';
+    b.title = 'Light skin';
+    b.setAttribute('aria-pressed', String(LIGHT));
+    b.classList.toggle('is-down', LIGHT);
+    b.addEventListener('click', () => {
+      LIGHT = !LIGHT;
+      applySkin();
+      b.classList.toggle('is-down', LIGHT);
+      b.setAttribute('aria-pressed', String(LIGHT));
+      try { localStorage.setItem(SKIN_KEY, LIGHT ? 'light' : 'dark'); } catch (_) {}
+    });
+    return b;
+  }
+
   /* ── THE PRESS IS THE CLICK, ON EVERY PAGE OF THE SITE ────────────────────
      A DUPLICATE, AND THE COMMENT IS THE POINT OF IT. `pressFix` lives in
      skew-kit.js and installs itself, which covers an adopting app and covers
@@ -393,7 +475,13 @@
     /* ONE CHANNEL, NOT TWO. The key and the readout are both on the tools side
        of the split the bar already has — the same arrangement §09's dock uses,
        where everything right of its single channel is the workspace. */
-    if (!view && !isHome) strip.append(sectionsKey());
+    if (!view && !isHome) strip.append(seat(sectionsKey()));
+
+    /* ON EVERY PAGE AND IN EVERY MODE, unlike the sections key. Sections is a
+       door into THIS document and there is nothing to open on the home page;
+       the skin is a property of the whole site, so there is nowhere it does
+       not belong. */
+    strip.append(seat(skinKey()));
 
     const ver = mk('div', 'lcd nav-ver dim', 'v—');
     strip.append(ver);

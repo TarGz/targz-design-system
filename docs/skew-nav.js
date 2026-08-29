@@ -48,7 +48,8 @@
       kick: 'the language',
       line: 'The <b>parts</b>, and the rules that make them one language.',
       parts: ['factories', 'surfaces', 'tokens', 'primitives', 'knob layouts', 'toggle',
-              'interlock', 'nav bar', 'app dock', 'settings', 'the room', 'traps'],
+              'interlock', 'nav bar', 'app dock', 'settings', 'the room', 'orbit ball',
+              'progress', 'the modal', 'traps'],
     },
     {
       file: 'skew-panels.html',

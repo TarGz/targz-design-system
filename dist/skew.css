@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.100.1
+     at       Skew v1.101.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -5459,6 +5459,213 @@ body.drawer-open .sliders i:nth-child(3),
   flex:0 0 auto; height:22px; padding:0 10px; border-radius:6px;
   font-family:var(--font); font-size:8.5px; font-weight:700; letter-spacing:.1em;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE PROGRESS TRACK — moved up from the machine, because it was never a
+   machine part
+
+   MACHINE 07 wrote this as `.meter` and the argument for it had nothing to do
+   with plotters: a progress bar is a rectangle that grows, and the thing it is
+   worst at is the question actually being asked of it, which is "is it still
+   moving". A fill creeping 0.3% a minute is indistinguishable from a fill that
+   has stopped. Segments quantise it — the lit count is a number you can read
+   across a room, and the next one arriving is an EVENT. Same data, and it
+   ticks.
+
+   THAT IS AS TRUE OF AN UPLOAD AS OF A JOB, and an upload is where it turned
+   up next: the NextDraw sender draws exactly this track under a filename with
+   a byte count beneath it, and nothing in that panel is a machine part. The
+   rules below are byte for byte the ones the machine page has been running;
+   what changed is which file they live in, and skew-machine.css now has a note
+   where they were rather than a copy.
+
+   THE NAME AND THE CAPTION ARE THE PART, NOT DECORATION ROUND IT. A track on
+   its own says how far; it cannot say how far through WHAT, and every app that
+   drew one of these drew a name over it and a figure under it. Both lines take
+   `.filmrow`'s type unchanged — an 11px name that ellipsises rather than wraps,
+   a 9px engraved line under it — because a file being loaded and a file being
+   sent are the same fact at two moments.
+
+   AND THE NUMBER IS UNDER THE TRACK, NOT ON IT. The segments are for watching
+   and a number is for reporting: MACHINE 07 keeps a lit `.readout` beside its
+   meter for exactly that, and this caption is the quiet version of the same
+   decision. Nothing is ever printed inside the track, which would put moving
+   text on the one part whose whole job is to be readable at a glance.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.prog{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+/* THE NAME ELLIPSISES, AND THAT IS NOT A DETAIL. These are filenames, they are
+   long, and a name that wraps to three lines moves the track down the panel
+   every time the file changes — a layout that jumps while something is
+   uploading reads as a fault in the upload. */
+.prog-nm{
+  font-family:var(--font); font-size:11px; color:#dfe2e7;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.prog-cap{
+  font-family:var(--font); font-size:9px; letter-spacing:.08em; color:#61666f;
+  font-variant-numeric:tabular-nums;
+}
+
+/* THE METER — the track itself. A recess, and lit segments in it. */
+.meter{
+  display:flex; gap:2px; height:22px; padding:4px; border-radius:7px;
+  background:linear-gradient(180deg,#0a0c0d,#121517);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.92), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.06);
+}
+.meter i{
+  flex:1; border-radius:1.5px;
+  background:rgba(255,255,255,.05);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.7);
+  transition:background .1s, box-shadow .1s;
+}
+.meter i.on{
+  background:var(--led);
+  box-shadow:0 0 6px rgba(255,106,0,.75), inset 0 1px 0 rgba(255,255,255,.35);
+}
+/* THE LAST LIT SEGMENT IS THE ONE ARRIVING, SO IT IS THE HOT ONE — and it is
+   `.hot` rather than `.head`, which is what it was called for as long as this
+   part lived on the machine page and is the bug that came with it. `.head` is
+   a PART in this language: the engraved faceplate header, forty lines up, with
+   `display:flex` and 14px of padding on it. Nothing in `.meter i.on.head`
+   overrides a size, so the segment took the header's padding and its border,
+   and one `<i>` in the middle of a 22px track blew up to 30 by 26 with a lit
+   glow round it — visible on MACHINE 07 for as long as that page has had a
+   running job, and only noticed when the part moved somewhere it was looked at.
+   A state class on a shared element has to be as specific as the part is. */
+.meter i.on.hot{ background:var(--led-hot); box-shadow:0 0 10px rgba(255,178,115,.95); }
+.meter.done i.on{ background:#7CFFB0; box-shadow:0 0 7px rgba(124,255,176,.8); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE MODAL — a plate that stops the desk
+
+   THE ONE GAP WHERE THE APPS WERE NOT RE-COMPOSING BUT INVENTING. Nine of them
+   have a blocking layer — a question that has to be answered, a render that has
+   to finish — and all nine drew their own, because grepping this system for
+   "modal", "overlay" and "toast" returned nothing at all. A language exists to
+   settle that kind of thing once.
+
+   IT IS A PANEL AND NOT A NEW SURFACE. `.box` is the chassis, `.box-head` is
+   the title, `.box-body` is the room, `.actrow` is the foot: every part of this
+   was already here and the only thing that had never been written is what
+   happens to the DESK while it is up. Anything else would be a second kind of
+   card, and a system with two kinds of card has to explain which is which.
+
+   THE DESK GOES DARK AND STAYS THE DESK. The cover is `--room` thickened, not a
+   blur and not a wash of black — the grain, the lamp and whatever panel you
+   were working on are all still there, dimmer, which is what says the modal is
+   ON the desk rather than a new page. A blur would be the one effect on this
+   site that no machined object can make.
+
+   z-index 500, WHICH IS THE NUMBER THE WINDOW ALREADY NAMED. `.win.maxed` sits
+   at 400 and its comment says anything a host means to keep reachable from
+   there — a colour picker, a modal — sits above it by its own number. This is
+   that number, and the ladder is now page 1–3 · panels 80 · picker 99 ·
+   drawer 200 · maximised window 400 · modal 500.
+
+   440px WIDE, MEASURED OFF THE APP AND NOT CHOSEN. `.box` is 318 because that
+   is the width of a panel in a rail of panels. A modal is not in a rail: it has
+   a paragraph in it, and 318 turns four lines of prose into eight.
+
+   THE BACKDROP IS NOT A BUTTON. Clicking the desk does nothing. A modal asks a
+   question and the answer is a key — dismissing one of these by clicking past
+   it is how a confirmation gets answered by accident, and the two things it
+   guards here are a file being rewritten and a job being cancelled. Escape is
+   the keyboard's way out and it is wired to the CANCEL key, so a modal built
+   without one — a render that must not be abandoned halfway — has no accidental
+   way out either, deliberately.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* THE PAGE UNDER IT DOES NOT SCROLL, and it is a class on the body rather than
+   an inline style, the way `body.drawer-open` already is: the stylesheet owns
+   what a state looks like, and a factory that writes `style.overflow` has to
+   remember what was there before. What the cover blocks is the pointer; a wheel
+   over it still reaches the document, and a page sliding about behind a
+   question reads as a page that did not notice it was asked. */
+body.modal-open{ overflow:hidden; }
+.modal-cover{
+  position:fixed; inset:0; z-index:500;
+  display:flex; align-items:center; justify-content:center;
+  /* 22px, the margin `.win.maxed` already uses: edge to edge would make the
+     plate a page and lose the case, its shadow and the desk round it. */
+  padding:22px;
+  background:color-mix(in srgb, var(--room) 78%, transparent);
+}
+/* THE BODY IS WHAT SCROLLS, and `min-height:0` is what lets a flex child
+   actually shrink instead of pushing its parent open — the same three lines
+   `.win.maxed` needed, for the same reason: a listing of forty layers must not
+   push the two keys off the bottom of the screen. */
+.modal{
+  /* max-width, because 440 is wider than a phone and a plate that overflows its
+     own cover is a plate with its keys off the screen. */
+  width:440px; max-width:100%; flex:0 0 auto; max-height:100%;
+  display:flex; flex-direction:column;
+}
+.modal > .box-body{ min-height:0; overflow:auto; }
+/* A TITLE IS A LEGEND, so it is tracked out like every other legend on the
+   panel. `.box-head .nm` is set for a panel in a rail, where the name sits
+   beside controls and the tracking would fight them; this one is alone on its
+   bar and reads as engraving. */
+.modal .box-head .nm{ letter-spacing:.09em; }
+
+/* A PANEL HAS NO PROSE ANYWHERE ELSE, AND THIS ONE HAS TO HAVE IT. Every other
+   piece of text in the language is a legend — tracked, capitalised, mono, cut
+   into metal. None of that survives three sentences, so the modal's copy is the
+   UI face at reading size and it is the one place in this stylesheet where type
+   is set to be read rather than to be labelled. It stays `--txt`, which keeps
+   the title above it brighter and the caption below it dimmer. */
+.modal-say{
+  margin:0; font-family:var(--font-ui); font-size:13px; line-height:1.55;
+  color:var(--txt);
+}
+.modal-say + .modal-say{ margin-top:9px; }
+
+/* THE LISTING IS CUT INTO THE FACE. What goes in one of these is the evidence
+   for the question — the five layers about to be renamed, the four files about
+   to be overwritten — and evidence is a thing you read, not a thing you press.
+   So it takes the well every recess in this language takes, `--recess`, and the
+   empty slot's floor from `.filmrow`; nothing here is a new surface. */
+.modal-well{
+  border-radius:8px; padding:10px 12px;
+  display:flex; flex-direction:column; gap:6px;
+  background:linear-gradient(180deg,#0c0d0f,#141619);
+  box-shadow:var(--recess);
+}
+/* THREE COLUMNS AND THE ARROW IS ITS OWN, so every arrow in the well is in the
+   same place down the column. Two columns with the arrow glued to one of them
+   makes a ragged seam the eye reads as misalignment. */
+.modal-row{
+  display:grid; grid-template-columns:1fr 12px 1fr; gap:9px; align-items:baseline;
+  font-family:var(--font); font-size:11px; color:var(--txt);
+}
+.modal-row.one{ grid-template-columns:1fr; }
+/* WHAT IT IS NOW IS DIMMER THAN WHAT IT BECOMES, because the right-hand column
+   is the change and the left is the thing being changed. */
+.modal-row b{ font-weight:400; color:var(--txt-dim);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.modal-row b.to{ color:var(--txt); }
+.modal-row i{ font-style:normal; color:var(--txt-dim); text-align:center; }
+
+/* ── THE PRIMED KEY ────────────────────────────────────────────────────────
+   THE RING IS NOT A FOCUS RING, and it matters that it is not: this file paints
+   no focus indicator anywhere and says why. This is a MARK ON THE PART — the
+   ring an illuminated pushbutton wears when it is the one the panel is waiting
+   for — and it is there whether or not anything is focused, which is exactly
+   what a focus ring is not.
+
+   IT SAYS WHERE RETURN GOES. One key in a modal is the answer and the rest are
+   ways out, and without the ring the only thing separating them is that one of
+   them is green — which stops being true the moment the answer is destructive
+   and wears `.halt` instead.
+
+   `outline`, NOT A SHADOW, and that is the whole reason it can exist. `.act`
+   spends its box-shadow on the skirt, the rim and the lamp glow; a ring added
+   to that stack would be a fourth thing competing for the same property and
+   would have to be re-declared in every hover and active state. An outline
+   follows the border radius, sits outside the cap, and travels with it when the
+   key goes down — which is right, because it is painted on the cap and not on
+   the panel behind it. */
+.act.primed{ outline:2px solid var(--led); outline-offset:3px; }
+.act.primed:disabled{ outline-color:#5a4030; }
 /* A WIDE PART ASKS FOR ITS REAL LENGTH AS ITS BASIS, so the slack is shared in
    proportion to what each part actually needs rather than equally between a
    knob and a fader bank. */

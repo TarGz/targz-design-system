@@ -980,7 +980,7 @@ const SEGS = 40;
     const lit = Math.round(M.progress * SEGS);
     segs.forEach((s, i) => {
       s.classList.toggle('on', i < lit);
-      s.classList.toggle('head', i === lit - 1 && M.run === 'running');
+      s.classList.toggle('hot', i === lit - 1 && M.run === 'running');
     });
     meter.classList.toggle('done', M.progress >= 1);
     pct.textContent = (M.progress * 100).toFixed(1) + '%';

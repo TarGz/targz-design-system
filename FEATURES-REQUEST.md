@@ -512,6 +512,16 @@ the system and all three return nothing.
 This is the one gap where the apps are not merely re-composing: they are each inventing a
 blocking-interaction pattern, which is the kind of thing a language exists to settle once.
 
+**Built, 1.101.0.** `modal({title, say, list, body, confirm, cancel, tone})` is the plate —
+a `.box` on a dimmed room at z-index 500, Escape wired to the CANCEL key, an inert backdrop,
+a focus trap and a primed answer key wearing a ring. `progress({name, caption, segs})` is the
+track that goes in it, which is MACHINE 07's meter moved into the language with the name and
+the caption every app drew beside it by hand. `confirm:false` is the render overlay exactly:
+a message, a track, and one way out. Specified in SYSTEM 13 and 14.
+
+**The entry stays open until an app has replaced its own overlay with it** — this file's rule,
+and the same one THE MENU is still held to.
+
 ---
 
 ### `[design system]` RULERS AND ZOOM, at page scale rather than control scale

@@ -159,6 +159,7 @@ const API = [
   'knob', 'fader', 'rangeFader', 'rotary', 'drum', 'gizmo', 'orbit', 'orbitBay', 'lightDir', 'selector', 'gate', 'keyBank',
   'key', 'pkey', 'swBtn', 'toggle', 'chevBtn', 'assetRow',
   'openPicker', 'openPlate', 'menu', 'plateKey', 'appDock', 'MODKEY',
+  'progress', 'modal',
   'typeable', 'engage', 'windowise', 'WIN_ICON',
   'hex2rgb', 'rgb2hex', 'rgb2hsv', 'hsv2rgb',
   'RING_R', 'RING_C', 'CAP_W', 'panelShape', 'ORBIT_AX',

@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.100.1
+     at       Skew v1.101.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -2309,6 +2309,243 @@ function assetRow({ name, source, thumb, accept = 'image/*', label = 'No image',
   return row;
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE PROGRESS TRACK — a name, lit segments, and a figure
+
+   THE TRACK ITSELF IS MACHINE 07'S METER AND IT MOVED RATHER THAN BEING
+   REWRITTEN. The rules are now in skew.css; the reason they moved is in the
+   comment over them. What is here is the half the machine page kept for
+   itself: the name over the track and the caption under it, both of which
+   every app drew by hand next to its own copy of the bar.
+
+   FORTY SEGMENTS, WHICH IS THE ONE NUMBER WORTH ARGUING ABOUT. Fewer and a
+   long job sits on the same count for minutes at a time, which is the fault
+   the segments exist to fix. More and the lit ones stop being countable and
+   the whole thing collapses back into a fill with gaps in it. Forty is what
+   the plotter panel has run since it was written and what the sender's own
+   bar draws; it is a default and not a law, because a track 90px wide in a
+   dock cannot carry forty of anything.
+
+   THE HOT SEGMENT IS THE ONE ARRIVING, and it is lit whenever the job is
+   between its ends. MACHINE 07 gates it on `M.run === 'running'` because that
+   page has a pause key and a paused job with a hot head reads as a job still
+   going. A part with no transport cannot know that, so the rule here is the
+   honest general one — hot while there is more to come, and the whole bar
+   green when there is not.
+
+   `.set(v)` TAKES 0..1 AND NOTHING ELSE. Bytes, lines, frames and millimetres
+   are all the caller's, and so is how they are worded: the sender says
+   "19.6 M of 31.8 M · 62%" because that is what somebody watching an upload
+   wants to know, and no formatter in this kit could have guessed it. Pass a
+   caption and it is printed; pass none and it prints the percentage, which is
+   the answer when there is nothing better to say.
+   ══════════════════════════════════════════════════════════════════════════ */
+function progress({ name, caption, segs = 40, value = 0 } = {}) {
+  const wrap = el('div', 'prog');
+
+  /* textContent, NOT innerHTML. What goes on this line is a filename, and a
+     filename is the one string in an app that came from outside it. `el`
+     writes HTML by design — every legend in this kit is markup — so the two
+     lines that carry user text set it themselves. */
+  const nm = el('div', 'prog-nm');
+  const meter = el('div', 'meter');
+  const cells = Array.from({ length: Math.max(1, segs | 0) }, () => el('i'));
+  meter.append(...cells);
+  const cap = el('div', 'prog-cap');
+
+  if (name != null) { nm.textContent = name; wrap.append(nm); }
+  wrap.append(meter, cap);
+
+  let v = 0;
+  const paint = () => {
+    const lit = Math.round(v * cells.length);
+    cells.forEach((c, i) => {
+      c.classList.toggle('on', i < lit);
+      c.classList.toggle('hot', v < 1 && i === lit - 1);
+    });
+    meter.classList.toggle('done', v >= 1);
+  };
+
+  wrap.set = (nv, text) => {
+    const n = Number(nv);
+    v = Math.max(0, Math.min(1, Number.isFinite(n) ? n : 0));
+    cap.textContent = text != null ? text : Math.round(v * 100) + '%';
+    paint();
+  };
+  /* THE NAME IS A SETTER BECAUSE THE FILE CHANGES. A sender that uploads four
+     files in a row builds one track and re-labels it; rebuilding the part per
+     file throws the segments away and the bar flashes empty between them. */
+  wrap.setName = t => {
+    nm.textContent = t == null ? '' : t;
+    if (t != null && !nm.isConnected) wrap.prepend(nm);
+  };
+  wrap.set(value, caption);
+  return wrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE MODAL — a plate that stops the desk
+
+   NINE APPS, NINE BLOCKING LAYERS, AND NOTHING IN THE LANGUAGE. This is the
+   one gap where the adopters were not re-composing parts but inventing an
+   interaction: a message, something to look at while it works, and a way out.
+   The surface was never the problem — `.box` has been the chassis since the
+   layer editor — so what is written here is the half that is not CSS: what
+   happens to the page under it, where the keyboard goes, and what may dismiss
+   it.
+
+   ONE AT A TIME, AND THE NEW ONE REPLACES THE OPEN ONE. Two modals is a
+   question stacked on a question, and the app that wants that wants a wizard,
+   which is a different part. In practice the sequence is a confirm and then
+   the work it confirmed — the first is already closing when the second opens.
+
+   THE PRIMED KEY IS WHERE RETURN GOES, and the modal focuses it rather than
+   the first thing in the plate. That is the ordinary case answered with one
+   press. `confirm:false` builds a modal with no answer at all — the render
+   overlay, which has a track in it and CANCEL underneath — and then the focus
+   and Return both go to the way out, because it is the only key there.
+
+   NOTHING OUTSIDE IT TAKES THE KEYBOARD. Tab cycles inside the plate: a focus
+   ring is invisible in this language (see skew.css, NO FOCUS RING) so a tab
+   stop behind the cover is a keyboard that has silently left the room, and
+   the way you find out is by pressing Return on a control you cannot see.
+   The element that was focused when it opened gets the focus back when it
+   closes, which is where the hand already was.
+
+   ESCAPE IS THE CANCEL KEY AND NOT A SEPARATE ROUTE. If there is no cancel
+   key there is no Escape — a modal built with one way out has one way out, and
+   a render that must not be abandoned halfway must not be abandonable by a
+   key pressed at the wrong moment. Same argument as the backdrop, which is
+   inert; both are in the stylesheet's own comment.
+   ══════════════════════════════════════════════════════════════════════════ */
+let modalOpen = null;
+let modalSeq = 0;
+
+function modal({ title, say, list, body, confirm = 'OK', cancel = 'CANCEL',
+                 tone = 'go', onConfirm, onCancel } = {}) {
+  if (modalOpen) modalOpen.close();
+
+  const cover = el('div', 'modal-cover');
+  const plate = el('div', 'box modal');
+  cover.append(plate);
+
+  const head = el('div', 'box-head');
+  const nm = el('span', 'nm');
+  nm.textContent = title == null ? '' : title;
+  head.append(nm);
+
+  const room = el('div', 'box-body');
+  /* SAY IS ONE STRING OR SEVERAL, and several is several paragraphs — not one
+     paragraph with breaks in it, because the gap between two claims is what
+     makes them two claims. */
+  for (const line of (Array.isArray(say) ? say : say == null ? [] : [say])) {
+    const p = el('p', 'modal-say');
+    p.textContent = line;
+    room.append(p);
+  }
+
+  /* THE LISTING IS EVIDENCE, so it is text in a well and never a control. A
+     row is either one string or a pair, and a pair draws as `from → to` with
+     the arrow in its own column. */
+  if (list && list.length) {
+    const well = el('div', 'modal-well');
+    for (const item of list) {
+      const pair = Array.isArray(item);
+      const r = el('div', 'modal-row' + (pair ? '' : ' one'));
+      const a = el('b'); a.textContent = pair ? item[0] : item;
+      r.append(a);
+      if (pair) {
+        const arrow = el('i'); arrow.textContent = '→';
+        const b = el('b', 'to'); b.textContent = item[1];
+        r.append(arrow, b);
+      }
+      well.append(r);
+    }
+    room.append(well);
+  }
+
+  if (body) room.append(body);
+
+  const acts = el('div', 'actrow');
+  let cancelKey = null, confirmKey = null;
+  if (cancel) {
+    cancelKey = key(String(cancel), { cls: 'act aux', onClick: () => close('cancel') });
+    acts.append(cancelKey);
+  }
+  if (confirm) {
+    confirmKey = key(String(confirm), { cls: `act ${tone} primed`, onClick: () => close('confirm') });
+    acts.append(confirmKey);
+  }
+  if (cancelKey || confirmKey) room.append(acts);
+
+  plate.append(head, room);
+
+  const was = document.activeElement;
+  let done = false;
+
+  function close(how) {
+    if (done) return;
+    done = true;
+    modalOpen = null;
+    document.removeEventListener('keydown', onKey, true);
+    document.body.classList.remove('modal-open');
+    cover.remove();
+    if (was && was.isConnected && was.focus) was.focus();
+    if (how === 'confirm') onConfirm && onConfirm();
+    else if (how === 'cancel') onCancel && onCancel();
+  }
+
+  /* THE TRAP IS TWO ELEMENTS, NOT A LIST OF EVERYTHING FOCUSABLE. Tab off the
+     last one goes to the first and back off the first goes to the last; what
+     is between them is whatever the plate happens to hold, and asking the
+     document for it on every press is a query that has to stay right as the
+     body changes under it. `focusable()` reads the plate at the moment of the
+     press, which is the only moment it is true. */
+  const focusable = () => [...plate.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])')];
+
+  function onKey(e) {
+    if (e.key === 'Escape' && cancelKey) { e.preventDefault(); e.stopPropagation(); close('cancel'); return; }
+    if (e.key === 'Enter') {
+      const go = confirmKey || cancelKey;
+      /* NOT WHILE THE HAND IS IN A FIELD. A modal with an input in it — a
+         filename, a count — is a modal whose Return belongs to the field
+         first, and taking it is how a half-typed value gets committed. */
+      if (go && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')) {
+        e.preventDefault(); go.click();
+      }
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const f = focusable();
+    if (!f.length) { e.preventDefault(); return; }
+    const at = f.indexOf(document.activeElement);
+    if (at === -1) { e.preventDefault(); f[0].focus(); return; }
+    const to = e.shiftKey ? at - 1 : at + 1;
+    if (to < 0 || to >= f.length) { e.preventDefault(); f[e.shiftKey ? f.length - 1 : 0].focus(); }
+  }
+
+  plate.setAttribute('role', 'dialog');
+  plate.setAttribute('aria-modal', 'true');
+  if (title != null) {
+    /* THE TITLE IS THE LABEL, and it is pointed at by id rather than repeated
+       into an aria-label — two copies of one string is one of them going stale
+       the first time the wording is edited. */
+    nm.id = 'modal-title-' + (modalSeq++);
+    plate.setAttribute('aria-labelledby', nm.id);
+  }
+
+  document.body.append(cover);
+  document.body.classList.add('modal-open');
+  document.addEventListener('keydown', onKey, true);
+  modalOpen = { close };
+  (confirmKey || cancelKey || plate).focus?.();
+
+  plate.close = () => close();
+  plate.cover = cover;
+  return plate;
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    THE MENU — `.plate` was the surface; this is the mechanism.
@@ -6493,7 +6730,7 @@ function keyBank({ label, options, index = 0, cols, onChange }) {
 
 
 window.SkewKit = {
-  el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, orbitBay, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
-  VERSION: '1.100.1',
+  el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, orbitBay, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, progress, modal, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
+  VERSION: '1.101.0',
 };
 })();

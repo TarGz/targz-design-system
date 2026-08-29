@@ -42,6 +42,8 @@
       <tr><td>navBar({current, dock})</td><td>The bar at the top of this page. §08</td></tr>
       <tr><td>appDock({…})</td><td>The other bar — the one an app runs on. All verbs, a fixed slot list and one readout. §09</td></tr>
       <tr><td>menu(anchor, items)</td><td>A <code>.plate</code> that opens off a key and knows how to close. §09</td></tr>
+      <tr><td>progress({name, caption, segs})</td><td><b>How far, and how far through what</b> — a name that ellipsises, forty lit segments, and a figure under them. The track is MACHINE 07's meter, moved into the language because an upload and a render want it as much as a plot does. <code>.set(v)</code> takes 0..1 and a caption you write; the head segment is the one arriving and the bar goes green at the end. §13</td></tr>
+      <tr><td>modal({title, say, list, body, confirm, cancel})</td><td><b>A plate that stops the desk</b> — the blocking layer nine apps each drew for themselves. A <code>.box</code> on a dimmed room: title, prose, an optional well of evidence, and an <code>.actrow</code> whose answer key wears the ring. Escape is the CANCEL key, the backdrop is inert, and <code>confirm:false</code> is the render overlay. §14</td></tr>
       <tr class="trap">
         <td>Two copies exist</td>
         <td><code>skew-kit.js</code> and the inline copy inside
@@ -780,7 +782,140 @@
     </tbody>
   </table>
 
-  <h2>13 <span>/</span> Traps</h2>
+  <h2>13 <span>/</span> The progress track</h2>
+  <div class="stage" style="display:block">
+    <div class="stage-note">live · 40 segments · the head one is hot · press SEND</div>
+    <div id="progspec" class="box" style="margin:0 auto"></div>
+  </div>
+
+  <table class="spec">
+    <thead><tr><th>Part</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>.meter</td>
+        <td>The track. A recess with <code>n</code> segments in it, lit from the left. <b>Written on
+            the machine page and moved here</b>: it passed that file's test — no existing primitive
+            could say it — against a plotter job, and failed it against an upload, a render and an
+            export, none of which is a machine. The rules are byte for byte what MACHINE 07 has
+            been running and that page now reads them from this stylesheet</td>
+      </tr>
+      <tr>
+        <td>Segments, not a fill</td>
+        <td>A fill creeping 0.3% a minute is <b>indistinguishable from a fill that has stopped</b>,
+            which is the one question actually being asked of a progress bar. Segments quantise it:
+            the lit count is readable across a room and the next one arriving is an event. Forty is
+            the default because that is what both the plotter panel and the sender draw — it is not
+            a law, and a 90px track in a dock cannot carry forty of anything</td>
+      </tr>
+      <tr>
+        <td>.prog-nm</td>
+        <td>The name over the track, and it <b>ellipsises rather than wraps</b>. These are
+            filenames: a name that runs to three lines moves the track down the panel every time
+            the file changes, and a layout that jumps while something is uploading reads as a fault
+            in the upload. Same 11px as <code>.filmrow .fn</code> — a file being loaded and a file
+            being sent are one fact at two moments</td>
+      </tr>
+      <tr>
+        <td>.prog-cap</td>
+        <td>The figure under it, engraved. <b>Never inside the track</b>: the segments are for
+            watching and a number is for reporting, and moving text on the one part whose job is to
+            be readable at a glance costs the glance. <code>.set(v)</code> with no caption prints
+            the percentage; the sender passes <code>19.6 M of 31.8 M · 62%</code>, which no
+            formatter in this kit could have guessed</td>
+      </tr>
+      <tr class="trap">
+        <td>The hot segment does not know about pause</td>
+        <td>MACHINE 07 gates its hot segment on <code>M.run === 'running'</code>, because a paused
+            job with a live head reads as a job still going. The part has no transport and cannot
+            know: it lights the head whenever <code>0 &lt; v &lt; 1</code>. An app with a pause key
+            owns that distinction and can drop <code>.hot</code> itself</td>
+      </tr>
+      <tr class="trap">
+        <td>It is <code>.hot</code> and it was <code>.head</code></td>
+        <td><code>.head</code> is a <b>part</b> — the engraved faceplate header, <code>display:flex</code>
+            with 14px of padding. <code>.meter i.on.head</code> overrides no size, so the one segment
+            wearing it took the header's padding and border and blew up to 30&times;26 inside a 22px
+            track, lit, in the middle of the bar. It had been doing that on MACHINE 07 for as long as
+            that page has had a running job and was only seen when the part moved somewhere it got
+            looked at. <b>A state class on a shared element has to be as specific as the part is</b> —
+            <code>.on</code>, <code>.done</code> and <code>.hot</code> are clean, <code>.head</code>
+            never was</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>14 <span>/</span> The modal</h2>
+  <div class="stage">
+    <div class="stage-note">three shapes of one part · Escape or CANCEL comes back</div>
+    <div id="modalspec" class="actrow" style="width:340px"></div>
+  </div>
+
+  <table class="spec">
+    <thead><tr><th>Rule</th><th></th></tr></thead>
+    <tbody>
+      <tr>
+        <td>It is a panel</td>
+        <td><code>.box</code> is the chassis, <code>.box-head</code> the title,
+            <code>.box-body</code> the room, <code>.actrow</code> the foot. <b>Every part of it
+            already existed</b> — what had never been written is what happens to the desk while it
+            is up. A second kind of card is a system that has to explain which is which. 440px
+            wide, measured off the app: 318 is the width of a panel in a rail, and a rail is not
+            where a paragraph goes</td>
+      </tr>
+      <tr>
+        <td>The desk goes dark and stays the desk</td>
+        <td>The cover is <code>--room</code> thickened — <b>not a blur</b>, which is the one effect
+            on this site no machined object can make. The grain, the lamp and the panel you were
+            working on are all still there, dimmer, which is what says the modal is on the desk
+            rather than a new page</td>
+      </tr>
+      <tr>
+        <td>z-index 500</td>
+        <td>The number <code>.win.maxed</code> already named: it sits at 400 and its comment says
+            anything a host means to keep reachable from there — a colour picker, a modal — sits
+            above it by its own number. page 1–3 · panels 80 · picker 99 · drawer 200 ·
+            maximised window 400 · <b>modal 500</b></td>
+      </tr>
+      <tr>
+        <td>The primed key</td>
+        <td>An orange ring on the answer key, and it is <b>not a focus ring</b> — this language
+            paints none, and says so. It is the mark an illuminated pushbutton wears when it is the
+            one the panel is waiting for: there whether or not anything is focused, and it says
+            where Return goes. Without it the only thing separating the answer from the way out is
+            that one of them is green, which stops being true the moment the answer is destructive
+            and wears <code>.halt</code></td>
+      </tr>
+      <tr>
+        <td>Nothing outside it takes the keyboard</td>
+        <td>Tab cycles inside the plate, and it has to: a focus ring is invisible here, so a tab
+            stop behind the cover is a <b>keyboard that has silently left the room</b> — and the
+            way you find out is by pressing Return on a control you cannot see. Focus opens on the
+            primed key and goes back where it was on close</td>
+      </tr>
+      <tr>
+        <td>confirm:false is the render overlay</td>
+        <td>A message, a <code>progress()</code> in the body, and CANCEL underneath — the blocking
+            layer <b>all nine apps drew for themselves</b>. With no answer key, focus and Return
+            both go to the way out, because it is the only key there</td>
+      </tr>
+      <tr class="trap">
+        <td>The backdrop is not a button</td>
+        <td>Clicking the desk does nothing, and Escape only works when there is a CANCEL key.
+            Deliberate, both: a modal asks a question and the answer is a key. Dismissing one by
+            clicking past it is how a confirmation gets answered by accident, and a render that
+            must not be abandoned halfway must not be abandonable by a key pressed at the wrong
+            moment. <b>A modal built with one way out has one way out</b></td>
+      </tr>
+      <tr class="trap">
+        <td>Return belongs to a field first</td>
+        <td>A modal with an input in it — a filename, a count — is a modal whose Return is the
+            field's. The part checks what is focused before firing the primed key; a host that
+            builds its own answer key inside <code>body</code> has to make the same check</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>15 <span>/</span> Traps</h2>
   <table class="spec">
     <tbody>
       <tr class="trap">
@@ -2539,6 +2674,112 @@ function ROCKER() {
       r.append(t);
     }
   });
+})();
+
+/* ── 13 · THE PROGRESS TRACK ───────────────────────────────────────────────
+   A SPECIMEN OF A PROGRESS BAR THAT DOES NOT MOVE IS A PHOTOGRAPH OF ONE, and
+   the whole claim of this part is about movement — that the next segment
+   arriving is an event and a stalled fill is not. So there is a key, and it
+   runs an upload.
+
+   THE CAPTION IS THE SENDER'S OWN WORDING, megabytes and a percentage, because
+   that is the line the part was lifted from and a specimen that invents a
+   nicer one is documenting something nobody ships. */
+(function progspec() {
+  const box = document.getElementById('progspec');
+  const head = el('div', 'box-head');
+  head.append(el('span', 'nm', 'SEND'));
+  const lamp = el('div', 'readout', '0%');
+  lamp.style.minWidth = '54px';
+  head.append(lamp);
+
+  const body = el('div', 'box-body');
+  const TOTAL = 31.8;                                    // megabytes, the reference file
+  const bar = progress({ name: 'Portrait-Ribbons_all_2026-08-23T08-25-47-debug.svg' });
+
+  let at = 0, timer = null;
+  const show = () => {
+    bar.set(at, `${(at * TOTAL).toFixed(1)} M of ${TOTAL} M · ${Math.round(at * 100)}%`);
+    lamp.textContent = Math.round(at * 100) + '%';
+  };
+
+  const send = key('UPLOAD', {
+    cls: 'act fire', title: 'Run an upload',
+    onClick: () => {
+      clearInterval(timer);
+      at = 0; show();
+      timer = setInterval(() => {
+        at = Math.min(1, at + .017);
+        show();
+        if (at >= 1) clearInterval(timer);
+      }, 90);
+    },
+  });
+  const acts = el('div', 'actrow');
+  acts.append(send);
+
+  body.append(bar, acts);
+  box.append(head, body);
+  show();
+})();
+
+/* ── 14 · THE MODAL ────────────────────────────────────────────────────────
+   THREE KEYS, THREE SHAPES OF ONE PART, and the middle one is the reference:
+   the sender's own layer-numbering dialog, wording and listing included. The
+   third has no answer key at all, which is the render overlay — and it is the
+   entry in FEATURES-REQUEST.md that this part exists to close. */
+(function modalspec() {
+  const row = document.getElementById('modalspec');
+
+  const LAYERS = ['background', 'ribbon-shade', 'ribbon-back', 'ribbon-side', 'ribbon-outline'];
+
+  row.append(
+    key('CONFIRM', {
+      cls: 'act aux', title: 'The reference dialog',
+      onClick: () => modal({
+        title: 'NUMBER THE LAYERS',
+        say: 'Five layers have no number, so NextDraw cannot plot them alone. This rewrites '
+           + 'Portrait-Ribbons_all_2026-08-23T08-25-47-debug.svg. Layers that already have a '
+           + 'number, and %documentation layers, are left as they are.',
+        list: LAYERS.map((n, i) => [n, `${i + 1}-${n}`]),
+        confirm: 'NUMBER THEM',
+      }),
+    }),
+    key('DESTROY', {
+      cls: 'act aux', title: 'The same part with a red answer',
+      onClick: () => modal({
+        title: 'CLEAR EVERY LAYER',
+        say: ['Six layers and their strokes are thrown away. Nothing on the sheet survives this.',
+              'The file on disk is untouched until you save.'],
+        confirm: 'CLEAR ALL',
+        tone: 'halt',
+      }),
+    }),
+    /* NO ANSWER KEY. The work is the content, CANCEL is the only way out, and
+       Escape reaches it because CANCEL exists — build this one with
+       `cancel:false` as well and it would be a layer with no way out at all,
+       which is a thing this part will let you do and you had better mean. */
+    key('RENDER', {
+      cls: 'act aux', title: 'The blocking overlay',
+      onClick: () => {
+        const bar = progress({ name: 'ribbons · 4 800 strokes' });
+        const m = modal({
+          title: 'RENDERING',
+          say: 'Every ribbon is being resolved against the depth map. Cancelling leaves the sheet '
+             + 'as it was.',
+          body: bar,
+          confirm: false,
+          onCancel: () => clearInterval(timer),
+        });
+        let at = 0;
+        const timer = setInterval(() => {
+          at = Math.min(1, at + .02);
+          bar.set(at, `${Math.round(at * 4800)} of 4 800 strokes`);
+          if (at >= 1) { clearInterval(timer); m.close(); }
+        }, 80);
+      },
+    }),
+  );
 })();
 </script>
 </body>

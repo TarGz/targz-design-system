@@ -4,8 +4,14 @@
    This file is an ADDITION, never an override. physical-ui.css is loaded first
    and untouched: every key, switch, knob, fader, drum, rotary, jewel, lamp,
    window, bay and readout on the machine page is that file's, at a size. What
-   is here is the nine things a MACHINE has that a drawing tool does not — and
-   the test each one had to pass is that no existing primitive could say it.
+   is here is the things a MACHINE has that a drawing tool does not — and the
+   test each one had to pass is that no existing primitive could say it.
+
+   IT WAS NINE AND IT IS EIGHT. `.meter` went the other way: it passed that test
+   against a plotter job and failed it against an upload, a render and an
+   export, all of which want the same lit segments and none of which is a
+   machine. It is in skew.css now, under THE PROGRESS TRACK, and this page reads
+   it from there. A part leaving this file is the file working.
 
    THE JOG PARTS ARRIVED BY MOVING, not by being written: they were §11 of the
    layers document and its stylesheet, which is the wrong home for them —
@@ -18,7 +24,6 @@
      .runbank   start / pause / stop, with the destructive one under a guard
      .estop     the mushroom
      .annun     the annunciator — legends that are dark until they are not
-     .meter     a bargraph: progress as a column of lit segments
      .tape      the log as a printed roll
      .rail      the status rail along the bottom of the chassis
 
@@ -863,35 +868,20 @@
    still clears what can be cleared; it just no longer has a blink to stop. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   THE METER — progress as lit segments, not as a filled rectangle
+   THE METER MOVED UPSTREAM, and the page did not notice
 
-   A progress bar is a rectangle that grows, and the thing it is worst at is
-   the question actually being asked of it, which is "is it still moving". A
-   fill creeping 0.3% a minute is indistinguishable from a fill that stopped.
-   Segments quantise it: the lit count is a number you can read in the dark and
-   the next one arriving is an EVENT. Same data, and it ticks.
+   `.meter` and its three states were written here and are now in skew.css,
+   under THE PROGRESS TRACK, unchanged. The test this file applies to every
+   part in it is "no existing primitive could say this", and the meter passed
+   that test against a plotter job and failed it against everything else: an
+   upload, a render and an export all want the same lit segments, and none of
+   them is a machine. So it is a part of the language now rather than a part of
+   this document.
 
-   The percentage keeps its own glass beside the meter, because segments are
-   for watching and a number is for reporting. */
-.meter{
-  display:flex; gap:2px; height:22px; padding:4px; border-radius:7px;
-  background:linear-gradient(180deg,#0a0c0d,#121517);
-  box-shadow:inset 0 2px 6px rgba(0,0,0,.92), inset 0 -1px 0 rgba(255,255,255,.05),
-             0 1px 0 rgba(255,255,255,.06);
-}
-.meter i{
-  flex:1; border-radius:1.5px;
-  background:rgba(255,255,255,.05);
-  box-shadow:inset 0 1px 1px rgba(0,0,0,.7);
-  transition:background .1s, box-shadow .1s;
-}
-.meter i.on{
-  background:var(--led);
-  box-shadow:0 0 6px rgba(255,106,0,.75), inset 0 1px 0 rgba(255,255,255,.35);
-}
-/* the last lit segment is the one arriving, so it is the hot one */
-.meter i.on.head{ background:var(--led-hot); box-shadow:0 0 10px rgba(255,178,115,.95); }
-.meter.done i.on{ background:#7CFFB0; box-shadow:0 0 7px rgba(124,255,176,.8); }
+   NOTHING HERE CHANGED. This page loads skew.css first and its meter is the
+   same object it always was, at the same 40 segments, with the head one hot.
+   The rules are gone from this file so there is one copy and not two.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 /* four engraved fields under the meter: elapsed / remaining / line / travel */
 .stats{ display:grid; grid-template-columns:1fr 1fr; gap:7px; }

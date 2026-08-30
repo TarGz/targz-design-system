@@ -17,7 +17,7 @@
 //
 //   src/     what you edit
 //   dist/    what an app copies
-//   docs/    the four pages, which read src/ so the site cannot document a
+//   docs/    the six pages, which read src/ so the site cannot document a
 //            version of the language nobody ships
 //
 // ── WHAT THE CSS BUILD DOES, AND WHAT IT DELIBERATELY DOES NOT ───────────────
@@ -169,7 +169,7 @@ const API = [
 /* THE VERSION IS IMPORTED, NOT GREPPED, AND THAT IS THE WHOLE REASON THIS IS
    ASYNC. A regex over the file reported a perfectly good version number out of
    a file that had stopped parsing — a doubled `],` left by an edit — so every
-   build said `clean at v1.28.0` while the nav bar on all four pages sat at its
+   build said `clean at v1.28.0` while the nav bar on all six pages sat at its
    `v—` placeholder, because the pages read it with a dynamic import and the
    import was throwing. The build has to fail the way the page fails. */
 const version = async () => {

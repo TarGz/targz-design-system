@@ -107,6 +107,20 @@
    crop sideways, so the flex sizing is taken off and the centring does it. */
 .prev-win .stick{ flex:0 0 auto; margin:0; cursor:default; }
 
+/* THE PANEL STRIP CROPS THE SAME WAY THE STICK DOES, and it has further to
+   crop: 776px of status bar in a window a third that wide. `flex:0 0 auto` off
+   a fixed width is what lets it overflow instead of squeezing — a bar squeezed
+   to 240px would reflow the DRO onto the name and stop being a photograph of
+   the panel.
+
+   THE BAR'S HEIGHT IS A GRID ROW ON THE PAGE, so it does not travel with the
+   part. skew-nextdraw.css sizes it in `.nd-screen`'s `grid-template-rows`, and
+   34px is that row's real value — the same number the document's spec strip
+   prints. Set here rather than moved into the part, because a status bar with
+   an intrinsic height would be a claim about a panel this file cannot see. */
+.prev-nd{ flex:0 0 auto; width:776px; display:flex; flex-direction:column; gap:9px; }
+.prev-nd .nd-bar{ height:34px; border-bottom:0; border-radius:4px; }
+
 /* THE FILL IS INK ON PAPER, so the swatch is paper — the one preview that is
    not metal, because the one document it stands for is not about panels. */
 /* THE SWATCH IS NOW JUST THE DRAWING. The stock, the corner and the frame moved

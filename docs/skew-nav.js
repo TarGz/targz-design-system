@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════════════
    THE NAV — one registry, one bar, every page.
 
-   Loaded as the first thing inside <body> on all four documents. It writes
+   Loaded as the first thing inside <body> on all six pages. It writes
    the skip link, the scroll sentinel and the dock itself, so a page adds a
    nav by adding a script tag and nothing else. Adding a DOCUMENT is adding an
    entry to PAGES below: the bar and the home's card grid both read it, which
@@ -87,6 +87,21 @@
       parts: ['the contract', 'KIT', 'HANDS', 'HATCH', 'by hand', 'by machine',
               'the API', 'growing it'],
     },
+    /* AN EXPLORATION AGAIN, AND THE FIRST ONE THAT IS A SCREEN RATHER THAN AN
+       APP. PANELS and MACHINE redraw software that runs on a desktop, where
+       the window is whatever size you drag it to. This is 800×480 and no more,
+       on a 7" panel bolted to a plotter, and every argument on the page is a
+       consequence of that number. */
+    {
+      file: 'skew-nextdraw.html',
+      nav:  'NEXTDRAW',
+      name: 'NEXTDRAW',
+      no:   '04',
+      kick: 'exploration 03 · a panel',
+      line: 'The <b>panel</b> side. Six screens for the plotter\'s own 7&Prime; touchscreen, drawn '
+          + 'at 800&times;480 with real plotter geometry on the bed.',
+      parts: ['lock screen', 'files', 'plot gate', 'run', 'jog pad', 'settings'],
+    },
   ];
 
   /* NOT A PAGE, AND NOT A DESTINATION. The old light-palette document is
@@ -114,14 +129,15 @@
   /* ── THE PRESS IS THE CLICK, ON EVERY PAGE OF THE SITE ────────────────────
      A DUPLICATE, AND THE COMMENT IS THE POINT OF IT. `pressFix` lives in
      skew-kit.js and installs itself, which covers an adopting app and covers
-     SYSTEM, HATCH and MACHINE. It does NOT cover index.html or skew-panels.html
-     — those two carry their own inline copies of `el` and `pkey` and never load
-     the kit at all. This file is on all five pages, so it is the only place a
-     site-wide rule can go.
+     SYSTEM, HATCH, MACHINE and the home. It does NOT cover skew-panels.html,
+     which carries its own inline copies of `el` and `pkey` and never loads the
+     kit at all, nor skew-nextdraw.html, which is markup with nothing to press.
+     This file is on all six pages, so it is the only place a site-wide rule
+     can go.
 
      The flag is shared with the kit's copy, so whichever loads first wins and
-     the second one does nothing. If those two pages are ever made to load the
-     kit properly, this block deletes and nothing else changes. The kit's
+     the second one does nothing. If PANELS is ever made to load the kit
+     properly, this block deletes and nothing else changes. The kit's
      version is the canonical one — read the reasoning there, not here. */
   if (!document.__skewPressFix) {
     document.__skewPressFix = true;

@@ -1,0 +1,353 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   THE NEXTDRAW PANEL — skew-nextdraw.html, and the one card on the home that
+   shows a slice of it.
+
+   TWO READERS, WHICH IS WHY THIS IS A FILE AND NOT A <style> BLOCK. The page
+   draws six 800×480 screens with it; index.html draws the status bar and the
+   meter with it, at the same size, in the same metal. The same reason
+   skew-machine.css is linked from the home for the sake of one stick.
+
+   WHY THE PANEL IS NOT BUILT OUT OF THE KIT. This is the one page on the site
+   whose subject is a SCREEN rather than a part. 800×480 is a fixed pixel
+   budget and the whole argument is what fits in it, so the mockup is drawn at
+   the real size and nothing on it is a factory call. There is no part in the
+   language for a status bar or a plotter bed, and inventing six to draw a
+   picture would put six things in the kit that no app has asked for.
+
+   EVERY RULE HERE IS UNLAYERED, WHICH IS THE POINT. src/skew.css is entirely
+   inside `@layer skew`, so an unlayered rule beats it whatever the specificity
+   says — that is what the layer exists to give an adopter, and this page is
+   the site's own adopter.
+
+   AND THE NAMES STILL CARRY `nd-`, because winning the cascade is not the same
+   as not colliding. `.key`, `.row`, `.pkey`, `.on`, `.sw`, `.meter` and twenty
+   more are real classes in skew.css; a rule of mine only overrides the
+   properties it NAMES, and the kit's remaining forty would keep landing
+   underneath. A panel key wearing half a kit key is worse than either one.
+
+   NOTHING HERE IS OPERABLE. No hover, no :active, no transition — the panel is
+   single-touch with no pointer on it, and a mockup that lights up under a
+   mouse is lying about the hardware.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* THE FIVE VALUES THE LANGUAGE HAS NO TOKEN FOR. Phosphor, held-amber and the
+   lit far wall of an engraved cut are this panel's, not skew's — declared on
+   the document rather than :root so nothing here reads as a claim about the
+   design system. --room, --txt, --led, --led-hot, --grain all come from it. */
+body{
+  --etch:#5d626b;
+  --green:#7CFFB0;
+  --amber:#FFC400;
+  --mono:"Noto Sans Mono", var(--font);
+}
+
+/* THE PAGE FURNITURE ─────────────────────────────────────────────────────── */
+.lede em{ color:var(--led-hot); font-style:normal; }
+
+.nd-specs{
+  display:flex; flex-wrap:wrap; gap:7px; margin:22px 0 0; padding:0; list-style:none;
+  font-family:var(--mono);
+}
+.nd-specs li{
+  font-size:9.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:#8d929b; padding:6px 11px; border-radius:7px;
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.05);
+}
+.nd-specs li b{ color:var(--green); font-weight:700; text-shadow:0 0 6px rgba(124,255,176,.55); }
+
+.nd-legend{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(196px,1fr)); gap:9px;
+  margin:16px 0 0; font-family:var(--mono);
+}
+.nd-lg{ padding:12px 14px; border-radius:9px; }
+.nd-lg b{
+  display:block; font-size:8.5px; letter-spacing:.16em; color:#5d626b; font-weight:700;
+  text-transform:uppercase; text-shadow:0 1px 0 rgba(255,255,255,.07); margin-bottom:6px;
+}
+.nd-lg span{ font-size:11.5px; color:#c6cad2; }
+.nd-lg em{ color:var(--led-hot); font-style:normal; }
+.nd-sw{ display:flex; align-items:center; gap:8px; margin-top:5px; }
+.nd-chip{ width:15px; height:15px; border-radius:4px; flex:none;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.6); }
+.nd-hex{ font-size:9.5px; color:#6b7079; font-variant-numeric:tabular-nums; letter-spacing:.04em; }
+
+/* THE STAGE IS THE SITE'S, WITH THE AIR TAKEN OUT. Every other stage on this
+   site frames a part the size of a fist; this one frames an 800px slab, and
+   64px of padding around it pushed the panel off the bottom of the viewport
+   before you had read the caption. */
+.nd-stage{ padding:34px 28px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE DEVICE — 800×480, exactly. The bezel is the only thing here not to scale.
+   ══════════════════════════════════════════════════════════════════════════ */
+.nd-dev{
+  width:800px; max-width:100%; border-radius:16px; padding:12px;
+  font-family:var(--mono); font-size:13px; line-height:1.6; color:var(--txt);
+  background:linear-gradient(176deg,#26282d,#1b1c20 26%,#161719 78%,#1c1d21);
+  box-shadow:0 42px 60px -24px rgba(0,0,0,.9), 0 8px 14px -6px rgba(0,0,0,.75),
+    inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.9),
+    inset 0 -18px 26px -20px rgba(0,0,0,.8);
+}
+.nd-screen{
+  position:relative; width:776px; height:480px; overflow:hidden; border-radius:5px;
+  background:var(--room);
+  display:grid; grid-template-rows:34px minmax(0,1fr) 64px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.8), inset 0 2px 6px rgba(0,0,0,.7);
+}
+.nd-screen::after{
+  content:''; position:absolute; inset:0; background-image:var(--grain);
+  opacity:.04; pointer-events:none; mix-blend-mode:overlay;
+}
+/* 776 of panel + 24 of bezel + 56 of stage + 64 of wrap. Below that the screen
+   gives up its width and the fixed-size furniture inside it is CLIPPED rather
+   than reflowed — a 480px-tall panel whose columns wrap is no longer a picture
+   of the panel, and the honest small-screen answer is "you are seeing part of
+   it", which is what `overflow:hidden` already says. */
+@media (max-width:920px){
+  .nd-dev{ width:100%; padding:8px; }
+  .nd-screen{ width:100%; }
+  .nd-stage{ padding:22px 14px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SURFACES — the six recipes the Kivy bake has to reproduce
+   ══════════════════════════════════════════════════════════════════════════ */
+.nd-raised{
+  background:linear-gradient(180deg,#34373d,#232529 52%,#1a1c20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 -1px 0 rgba(0,0,0,.7),
+    0 2px 0 #0e0f11, 0 3px 5px rgba(0,0,0,.65);
+}
+.nd-pressed{
+  background:linear-gradient(180deg,#1a1c20,#232529); transform:translateY(2px);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.07),
+    0 1px 2px rgba(0,0,0,.6);
+}
+.nd-well{
+  background:linear-gradient(180deg,#17191d,#1e2126);
+  box-shadow:inset 0 3px 7px rgba(0,0,0,.85), inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.055);
+}
+.nd-glass{
+  background:linear-gradient(180deg,#080a09,#0f1211); color:var(--green);
+  text-shadow:0 0 6px rgba(124,255,176,.7); font-variant-numeric:tabular-nums;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.95), 0 1px 0 rgba(255,255,255,.06);
+}
+/* ENGRAVED: the 1px light line UNDER the glyph is the lit far wall of the cut. */
+.nd-etch{
+  color:var(--etch); text-shadow:0 1px 0 rgba(255,255,255,.09);
+  text-transform:uppercase; letter-spacing:.16em; font-weight:700; font-size:8.5px;
+}
+
+/* ══ STATUS BAR ═══════════════════════════════════════════════════════════ */
+.nd-bar{
+  display:flex; align-items:center; gap:10px; padding:0 10px;
+  background:linear-gradient(180deg,#101113,#08090a);
+  border-bottom:1px solid #000; box-shadow:inset 0 -1px 0 rgba(255,255,255,.05);
+}
+.nd-jewel{
+  width:11px; height:11px; border-radius:50%; flex:none;
+  background:radial-gradient(circle at 34% 28%,#fff,var(--lyr) 52%,#0006);
+  box-shadow:0 0 6px var(--lyr), 0 0 15px color-mix(in srgb,var(--lyr) 40%,transparent),
+    inset 0 -1px 2px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.55);
+}
+.nd-st{
+  font-size:11px; font-weight:700; letter-spacing:.15em; color:var(--lyr);
+  text-shadow:0 0 7px color-mix(in srgb,var(--lyr) 55%,transparent);
+}
+.nd-bar .nd-who{
+  font-size:9px; font-weight:700; letter-spacing:.14em; color:#5c616a; text-transform:uppercase;
+}
+.nd-bar .nd-sp{ margin-left:auto; }
+.nd-dro{ display:flex; align-items:center; gap:5px; }
+.nd-dro .nd-k{ font-size:8.5px; letter-spacing:.14em; color:#4a4e56; font-weight:700; }
+.nd-dro .nd-v{
+  font-size:11px; font-weight:700; color:var(--green); font-variant-numeric:tabular-nums;
+  text-shadow:0 0 6px rgba(124,255,176,.6);
+}
+.nd-lockglyph{ width:22px; height:22px; border-radius:5px; display:grid; place-items:center;
+  color:#8d929b; }
+.nd-lockglyph svg{ width:13px; height:13px; }
+
+/* ══ NAV ══════════════════════════════════════════════════════════════════ */
+.nd-nav{
+  display:flex; align-items:center; gap:7px; padding:0 10px;
+  background:linear-gradient(180deg,#1a1c1f,#141517);
+  border-top:1px solid #000; box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.nd-pk{
+  flex:1; height:46px; border-radius:8px; border:0; display:grid; place-items:center;
+  font-family:var(--mono); font-size:11.5px; font-weight:700; letter-spacing:.12em;
+  color:#8d929b; cursor:default;
+}
+.nd-pk.nd-on{ color:var(--led); text-shadow:0 0 7px rgba(255,106,0,.5); }
+.nd-estop{
+  width:56px; height:56px; flex:none; border-radius:50%; margin-left:4px;
+  background:radial-gradient(circle at 38% 30%,#d33,#8E1F1F 58%,#490F0F);
+  box-shadow:0 4px 0 #2c0808, 0 6px 10px rgba(0,0,0,.7),
+    inset 0 2px 3px rgba(255,255,255,.25), inset 0 -3px 6px rgba(0,0,0,.5);
+}
+
+/* ══ BODY LAYOUTS ═════════════════════════════════════════════════════════ */
+.nd-body{ padding:10px; display:grid; gap:10px; min-height:0; }
+.nd-col{ display:flex; flex-direction:column; gap:8px; min-height:0; min-width:0; }
+
+/* keys */
+.nd-key{
+  border:0; border-radius:8px; font-family:var(--mono); font-weight:700; color:#9aa0aa;
+  display:grid; place-items:center; cursor:default; letter-spacing:.1em; font-size:11px;
+}
+.nd-key.nd-big{ height:52px; font-size:12px; letter-spacing:.12em; }
+.nd-key.nd-go{
+  background:linear-gradient(180deg,#1E7A47,#12613A 55%,#0C4529); color:#CFFFE3;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 3px 0 #06301c, 0 4px 7px rgba(0,0,0,.6);
+}
+.nd-key.nd-halt{
+  background:linear-gradient(180deg,#8E1F1F,#661616 55%,#490F0F); color:#FFD6D6;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 3px 0 #2c0808, 0 4px 7px rgba(0,0,0,.6);
+}
+.nd-key.nd-dark{ opacity:.34; }
+.nd-key .nd-lens{
+  width:8px; height:8px; border-radius:50%; background:#0a0b0c;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.9); margin-right:8px;
+}
+.nd-key.nd-go .nd-lens{
+  background:radial-gradient(circle at 34% 28%,#fff,#7CFFB0 55%,#128C45);
+  box-shadow:0 0 7px rgba(124,255,176,.8);
+}
+.nd-krow{ display:flex; align-items:center; justify-content:center; }
+
+/* a caption with a rule running out to the right */
+.nd-cut{ display:flex; align-items:center; gap:8px; margin:2px 0 1px; }
+.nd-cut::after{ content:''; flex:1; height:1px; background:#0a0b0c;
+  box-shadow:0 1px 0 rgba(255,255,255,.05); }
+
+/* rows */
+.nd-rows{ border-radius:9px; padding:5px; display:flex; flex-direction:column; gap:4px;
+  overflow:hidden; min-height:0; }
+.nd-row{
+  min-height:44px; border-radius:7px; padding:0 10px; display:flex; align-items:center; gap:9px;
+  background:linear-gradient(180deg,#212328,#191a1e);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 1px 0 rgba(0,0,0,.6); font-size:11.5px;
+}
+.nd-row.nd-sel{
+  background:linear-gradient(180deg,#15171a,#1c1e22); color:var(--led-hot);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.85), inset 0 0 0 1px rgba(255,106,0,.4);
+}
+.nd-row .nd-nm{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#dfe2e7; }
+.nd-row.nd-sel .nd-nm{ color:var(--led-hot); }
+.nd-row .nd-sz{ font-size:9px; letter-spacing:.1em; color:#5c616a;
+  font-variant-numeric:tabular-nums; }
+.nd-row .nd-ic{ width:15px; height:15px; flex:none; color:#5c616a; }
+.nd-row.nd-dir .nd-ic{ color:#C99A5B; }
+.nd-seq{
+  min-width:20px; height:19px; padding:0 6px; border-radius:999px; background:var(--led);
+  color:#1a0d04; font-size:9px; font-weight:700; letter-spacing:.06em;
+  display:grid; place-items:center;
+}
+.nd-laynum{ font-size:11px; font-weight:700; color:#8d929b; min-width:12px; }
+.nd-row.nd-sel .nd-laynum{ color:var(--led); }
+
+/* METERS — 40 discrete segments, never a fill. The next one arriving is an
+   event; a fill creeping 0.3%/min looks stopped. */
+.nd-meter{
+  display:flex; gap:2px; height:22px; padding:4px; border-radius:7px;
+  background:linear-gradient(180deg,#0a0c0d,#121517);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.92), inset 0 -1px 0 rgba(255,255,255,.05),
+    0 1px 0 rgba(255,255,255,.06);
+}
+.nd-meter i{ flex:1; border-radius:1.5px; background:rgba(255,255,255,.05);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.7); }
+.nd-meter i.nd-on{ background:var(--led);
+  box-shadow:0 0 6px rgba(255,106,0,.75), inset 0 1px 0 rgba(255,255,255,.35); }
+.nd-meter.nd-sm{ height:13px; padding:3px; gap:1.5px; border-radius:5px; }
+.nd-meter.nd-sm i{ border-radius:1px; }
+
+/* stats */
+.nd-stats{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.nd-stat{ padding:5px 9px 6px; border-radius:7px; }
+.nd-stat b{ display:block; font-size:8px; letter-spacing:.16em; color:#5d626b; font-weight:700;
+  text-shadow:0 1px 0 rgba(255,255,255,.07); }
+.nd-stat span{ font-size:13px; font-weight:700; color:#c6cad2; font-variant-numeric:tabular-nums; }
+
+/* the bed */
+.nd-bedwrap{ border-radius:9px; padding:8px; position:relative; min-height:0; display:grid;
+  place-items:center; }
+.nd-bed{
+  position:relative; background:linear-gradient(180deg,#191a1d,#101113);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.05);
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:calc(100%*50/864.1) calc(100%*50/594.1);
+}
+.nd-paper{ position:absolute; background:#f2efe9; box-shadow:0 6px 18px -4px rgba(0,0,0,.75); }
+.nd-bedart{ position:absolute; inset:0; width:100%; height:100%; }
+.nd-bedart .nd-pu{ stroke:var(--led); stroke-opacity:.42; stroke-width:1.1; }
+.nd-bedart .nd-pending{ stroke:#3a3f47; stroke-width:1.7; }
+.nd-bedart .nd-drawn{ stroke:var(--green); stroke-width:1.7;
+  filter:drop-shadow(0 0 2px rgba(124,255,176,.5)); }
+.nd-bedart .nd-drop{ fill:var(--green); fill-opacity:.85; }
+.nd-bedart .nd-lift{ fill:var(--amber); fill-opacity:.7; }
+.nd-cross{
+  position:absolute; width:15px; height:15px; border:1.5px solid var(--led);
+  border-radius:50%; transform:translate(-50%,-50%);
+  box-shadow:0 0 9px rgba(255,106,0,.8), inset 0 0 5px rgba(255,106,0,.5);
+}
+.nd-bedcap{ position:absolute; left:10px; bottom:7px; font-size:8px; letter-spacing:.16em;
+  color:#4a4e56; font-weight:700; text-transform:uppercase; }
+.nd-bedempty{ position:absolute; inset:0; display:grid; place-items:center;
+  font-size:9.5px; letter-spacing:.2em; color:#454a52; font-weight:700; }
+
+/* readouts */
+.nd-pct{
+  font-size:38px; font-weight:700; color:var(--green); font-variant-numeric:tabular-nums;
+  text-shadow:0 0 9px rgba(124,255,176,.7), 0 0 22px rgba(124,255,176,.35); letter-spacing:-.02em;
+}
+.nd-note{ font-size:9px; letter-spacing:.13em; font-weight:700; color:#61666f;
+  text-transform:uppercase; }
+.nd-note.nd-warn{ color:var(--amber); }
+
+/* jog pad */
+.nd-pad{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:8px;
+  border-radius:9px; }
+.nd-jk{ height:52px; border-radius:9px; display:grid; place-items:center; font-size:12px;
+  font-weight:700; letter-spacing:.1em; color:#9aa0aa; }
+.nd-jk.nd-mid{ color:#5c616a; font-size:9px; letter-spacing:.14em; }
+.nd-piano{ display:flex; gap:5px; padding:4px; border-radius:9px; }
+.nd-pkey{ flex:1; height:30px; border-radius:7px; display:grid; place-items:center;
+  font-size:9.5px; font-weight:700; letter-spacing:.1em; color:#8d929b; }
+.nd-pkey.nd-on{ color:var(--led); text-shadow:0 0 6px rgba(255,106,0,.5); }
+
+/* keypad */
+.nd-pad3{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px 5px; }
+.nd-nk{ height:46px; border-radius:8px; display:grid; place-items:center; font-size:17px;
+  font-weight:700; color:#c6cad2; font-variant-numeric:tabular-nums; }
+.nd-dots{ display:flex; gap:11px; justify-content:center; padding:5px 0 2px; }
+.nd-dot{
+  width:11px; height:11px; border-radius:50%;
+  background:radial-gradient(circle at 34% 28%,#4a4f57,#26282c 70%);
+  box-shadow:inset 0 -1px 2px rgba(0,0,0,.6);
+}
+.nd-dot.nd-on{
+  background:radial-gradient(circle at 34% 28%,#fff,#B6FFD4 18%,#2BE07A 55%,#128C45);
+  box-shadow:0 0 7px rgba(124,255,176,.8), 0 0 15px rgba(124,255,176,.35);
+}
+
+/* settings rows */
+.nd-srow{
+  display:flex; align-items:center; gap:9px; min-height:44px; padding:0 6px 0 11px;
+  border-radius:7px; background:rgba(255,255,255,.018);
+}
+.nd-srow .nd-lb{ flex:1; font-size:11px; color:#c6cad2; }
+.nd-stp{ width:34px; height:32px; border-radius:7px; display:grid; place-items:center;
+  font-size:15px; font-weight:700; color:#9aa0aa; }
+.nd-sval{ min-width:62px; height:26px; border-radius:4px; display:grid; place-items:center;
+  font-size:11px; font-weight:700; }
+
+.nd-ticker{
+  display:flex; gap:9px; align-items:center; padding:0 9px; height:24px; border-radius:6px;
+  font-size:10px; overflow:hidden; white-space:nowrap;
+}
+.nd-ticker .nd-t{ color:#3f444b; font-variant-numeric:tabular-nums; }
+.nd-ticker .nd-m{ color:#6e757e; overflow:hidden; text-overflow:ellipsis; }

@@ -15,7 +15,7 @@ npm run dev          # http://localhost:2860
 ```
 src/      skew.css, skew-kit.js, skew-hatch.js, skew-machine.css   what you edit
 dist/     skew.css, skew-kit.js, skew-hatch.js                     what an app copies
-docs/     the five pages, plus their own CSS and nav
+docs/     the six pages, plus their own CSS and nav
 tools/    build-dist.mjs
 ```
 
@@ -63,7 +63,7 @@ downstream of this one.
 
 ---
 
-## The five pages
+## The six pages
 
 | | |
 |---|---|
@@ -72,6 +72,7 @@ downstream of this one.
 | **PANELS** | Portrait-Typo rebuilt as hardware, down to a hatch bay that plots in real millimetres |
 | **MACHINE** | TargzPenPlotterCtrl rebuilt, jog by keys against jog by stick |
 | **HATCH** | the fill engine. One contract, three layers, two specimens at 1:1, and how to add to it |
+| **NEXTDRAW** | the plotter's own 7&Prime; touchscreen. Six screens at 800&times;480, with real plotter geometry on the bed |
 
 Papers: [`CONTRIBUTING.md`](CONTRIBUTING.md) for changing any of it,
 [`HATCH-API.md`](HATCH-API.md) for the fill generators,

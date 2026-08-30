@@ -10,6 +10,11 @@
      is not built into dist/ because only a plotter panel wants it, and the
      MACHINE card is a plotter panel three inches wide. -->
 <link rel="stylesheet" href="../src/skew-machine.css">
+<!-- AND THE PANEL, for the same reason and by the same arrangement: the
+     NEXTDRAW card shows the real status bar and the real meter, so it wants
+     the sheet that draws them. This one is in docs/ rather than src/ because
+     it is a mockup's sheet and not a piece of the language. -->
+<link rel="stylesheet" href="skew-nextdraw.css">
 </head>
 <body>
 <script src="skew-nav.js"></script>
@@ -44,7 +49,7 @@
     <tbody>
       <tr><td>dist/</td><td><b>Yours.</b> The only folder an app copies from. Its path does not change when the repo is reorganised, which is the point of having it</td></tr>
       <tr><td>src/</td><td>Where the language is written. Read it, do not vendor it: <code>src/skew.css</code> still carries this site's own rules and <code>src/skew-kit.js</code> is a plain script that collides with p5</td></tr>
-      <tr><td>docs/</td><td>These four pages. They load <code>src/</code>, so the site cannot document a version of the language nobody ships</td></tr>
+      <tr><td>docs/</td><td>These six pages. They load <code>src/</code>, so the site cannot document a version of the language nobody ships</td></tr>
       <tr><td>tools/</td><td><code>build-dist.mjs</code>, which turns the first into the second</td></tr>
     </tbody>
   </table>
@@ -214,6 +219,50 @@ function preview(file) {
     Object.entries({ n: 'Y+', s: 'Y−', w: 'X−', e: 'X+' })
       .forEach(([d, t]) => st.append(el('span', 'stick-ax ' + d, t)));
     wrap.append(st);
+    return wrap;
+  }
+
+  if (file === 'skew-nextdraw.html') {
+    /* A STRIP OF THE PANEL, AT THE PANEL'S SIZE. Every other card here shows a
+       PART; this document's subject is a whole 800×480 screen, and there is no
+       part of it small enough to stand in for it. So the card shows the top
+       34px of the real thing and the meter under it, at 776px wide, running
+       off both edges of the window — the same crop-don't-shrink rule the stick
+       follows, and for the same reason: an object photographed running out of
+       frame reads as an object, one shrunk to fit reads as an icon.
+
+       AND IT IS THE TWO PIECES THE PAGE ARGUES ABOUT. The bar is where the
+       lamp lights a jewel rather than filling a button, and the meter is forty
+       discrete segments rather than a bar creeping 0.3%/min. Both claims are
+       in the legend at the top of that document; this is them.
+
+       MARKUP, NOT A FACTORY, because there is no factory: skew-nextdraw.css is
+       a mockup's sheet and the panel has no parts in the kit. The look is
+       entirely in that file, which the head links for this one card — the same
+       arrangement skew-machine.css has for the stick. */
+    const strip = el('div', 'prev-nd');
+
+    const bar = el('div', 'nd-bar');
+    bar.append(
+      el('i',    'nd-jewel', ''),
+      el('span', 'nd-st',    'PLOTTING'),
+      el('span', 'nd-who',   'NextDraw 2234'),
+      el('span', 'nd-sp',    ''),
+      el('span', 'nd-dro',   '<span class="nd-k">X</span><span class="nd-v">148.2</span>'
+                           + '<span class="nd-k">Y</span><span class="nd-v">104.6</span>'),
+      el('span', 'nd-dro',   '<span class="nd-k">DONE</span><span class="nd-v">62.4%</span>'),
+    );
+    bar.querySelector('.nd-jewel').style.setProperty('--lyr', '#FF6A00');
+    bar.querySelector('.nd-st').style.setProperty('--lyr', '#FF6A00');
+
+    /* 25 OF 40, WHICH IS 62.4% READ OFF THE SEGMENTS. The figure in the bar and
+       the count of lit segments are the same number or the preview is lying
+       about the one thing the meter is for. */
+    const meter = el('div', 'nd-meter');
+    for (let i = 0; i < 40; i++) meter.append(el('i', i < 25 ? 'nd-on' : ''));
+
+    strip.append(bar, meter);
+    wrap.append(strip);
     return wrap;
   }
 

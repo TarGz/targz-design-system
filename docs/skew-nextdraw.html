@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skew · NextDraw</title>
+<link rel="stylesheet" href="../src/skew.css">
+<link rel="stylesheet" href="skew-nextdraw.css">
+</head>
+<body>
+<script src="skew-nav.js"></script>
+
+<div class="wrap" id="main">
+
+  <div class="masthead">
+    <p class="kicker">skew · 04</p>
+    <h1>NextDraw</h1>
+  </div>
+
+  <p class="lede">Six screens for the 7&Prime; touchscreen on <b>screen-nextdraw2234</b>, drawn at
+  the real pixel size in the real Skew palette. Everything on the bed is <b>actual plotter
+  geometry</b> &mdash; a preflight the server ran on an A4 test drawing, parsed by the client's own
+  plan reader. Nothing here is a placeholder.</p>
+
+  <ul class="nd-specs">
+    <li>Panel <b>800&times;480</b></li>
+    <li>Bar <b>34px</b></li>
+    <li>Body <b>382px</b></li>
+    <li>Nav <b>64px</b></li>
+    <li>Keys <b>52px</b></li>
+    <li>Rows <b>44px</b></li>
+    <li>Touch <b>ft5x06, single</b></li>
+    <li>Type <b>Noto Sans Mono</b></li>
+  </ul>
+
+  <div class="nd-legend">
+    <div class="nd-lg nd-well"><b>The lamp is not a fill</b><span>Orange lights a glyph, a segment,
+      a jewel. There are no orange buttons.</span>
+      <div class="nd-sw"><i class="nd-chip" style="background:#FF6A00"></i><span class="nd-hex">#FF6A00 · led</span></div>
+      <div class="nd-sw"><i class="nd-chip" style="background:#FFB273"></i><span class="nd-hex">#FFB273 · hot</span></div></div>
+    <div class="nd-lg nd-well"><b>Numbers live behind glass</b><span>Every readout is a milled well
+      with phosphor in it, tabular figures, 6px halo.</span>
+      <div class="nd-sw"><i class="nd-chip" style="background:#7CFFB0"></i><span class="nd-hex">#7CFFB0 · phosphor</span></div>
+      <div class="nd-sw"><i class="nd-chip" style="background:#FFC400"></i><span class="nd-hex">#FFC400 · held</span></div></div>
+    <div class="nd-lg nd-well"><b>State is geometry</b><span>A latched key is pressed <em>in</em>, not
+      tinted. It reads in a greyscale photo.</span>
+      <div class="nd-sw"><i class="nd-chip" style="background:#232529"></i><span class="nd-hex">#232529 · plate</span></div>
+      <div class="nd-sw"><i class="nd-chip" style="background:#0e0f11"></i><span class="nd-hex">#0e0f11 · bay</span></div></div>
+    <div class="nd-lg nd-well"><b>Progress is 40 segments</b><span>The next one arriving is an event.
+      A fill creeping 0.3%/min looks stopped.</span>
+      <div class="nd-sw"><i class="nd-chip" style="background:#FF2D2D"></i><span class="nd-hex">#FF2D2D · alarm</span></div>
+      <div class="nd-sw"><i class="nd-chip" style="background:#0b0b0d"></i><span class="nd-hex">#0b0b0d · room</span></div></div>
+  </div>
+
+  <h2>01 <span>/</span> Locked</h2>
+  <p class="lede">Boots into this, and drops back to it after two idle minutes &mdash; <b>including
+  mid-plot</b>, because a long plot is exactly when you walk away. The plot stays fully readable:
+  bed, meter, percentage, time left. What is gone is not greyed out, it is <em>not in the widget
+  tree at all</em> &mdash; the lock is a screen, not an overlay, so unreachability is structural
+  rather than a flag sixty widgets have to remember. The E-STOP still works. Releasing it does not.</p>
+  <div class="stage nd-stage">
+    <div class="stage-note">what the room sees</div>
+    <div class="nd-dev"><div class="nd-screen">
+    <div class="nd-bar">
+      <i class="nd-jewel" style="--lyr:#FF6A00"></i>
+      <span class="nd-st" style="--lyr:#FF6A00">PLOTTING</span>
+      <span class="nd-who">NextDraw 2234</span>
+      <span class="nd-sp"></span>
+      <span class="nd-dro"><span class="nd-k">X</span><span class="nd-v">148.2</span>
+        <span class="nd-k">Y</span><span class="nd-v">104.6</span></span>
+      <span class="nd-dro"><span class="nd-k">PEN</span><span class="nd-v">DN</span></span>
+      <span class="nd-dro"><span class="nd-k">DONE</span><span class="nd-v">62.4%</span></span>
+      <span class="nd-lockglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+    </div>
+    <div class="nd-body" style="grid-template-columns:minmax(0,1fr) 268px">
+      <div class="nd-col">
+        <div class="nd-bedwrap nd-well" style="flex:1"><div class="nd-bed" style="width:462px;height:286px"><div class="nd-paper" style="left:0;top:0;width:34.371%;height:35.348%"></div><svg class="nd-bedart" viewBox="0 0 864 594" preserveAspectRatio="none"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="nd-pu" d="M0.0 0.0 9.0 9.7 89.0 95.3 98.0 105.0M160.0 105.0 148.9 97.8 13.6 9.8 2.5 2.5M0.0 0.0 13.0 2.7 177.1 37.3 190.0 40.0M190.0 170.0 190.2 156.8 191.8 53.2 192.0 40.0M192.0 170.0 192.3 156.8 193.9 53.2 194.1 40.0M194.1 170.0 194.3 156.8 195.9 53.2 196.1 40.0M196.1 170.0 196.3 156.7 198.0 53.2 198.2 40.0M198.2 170.0 198.4 156.7 200.0 53.2 200.3 40.0M200.3 170.0 200.5 156.8 202.1 53.2 202.3 40.0M202.3 170.0 202.5 156.8 204.1 53.2 204.4 40.0M204.4 170.0 204.6 156.7 206.2 53.2 206.4 40.0M206.4 170.0 206.6 156.7 208.3 53.2 208.5 40.0M208.5 170.0 208.7 156.7 210.3 53.2 210.5 40.0M210.5 170.0 210.7 156.8 212.3 53.2 212.6 40.0M212.6 170.0 212.8 156.8 214.4 53.2 214.6 40.0M214.6 170.0 214.8 156.8 216.5 53.2 216.7 40.0M216.7 170.0 216.9 156.7 218.5 53.2 218.7 40.0M218.7 170.0 218.9 156.8 220.5 53.2 220.8 40.0M220.8 170.0 221.0 156.8 222.6 53.2 222.8 40.0M222.8 170.0 223.0 156.7 224.7 53.2 224.9 40.0M224.9 170.0 225.1 156.8 226.7 53.2 226.9 40.0M226.9 170.0 227.1 156.7 228.8 53.2 229.0 40.0M229.0 170.0 229.2 156.7 230.8 53.2 231.0 40.0M231.0 170.0 231.2 156.8 232.9 53.2 233.1 40.0M233.1 170.0 233.3 156.8 234.9 53.2 235.1 40.0M235.1 170.0 235.3 156.8 237.0 53.2 237.2 40.0M237.2 170.0 237.4 156.7 239.0 53.2 239.2 40.0M239.2 170.0 239.4 156.7 241.1 53.2 241.3 40.0M241.3 170.0 241.5 156.8 243.1 53.2 243.3 40.0M243.3 170.0 243.5 156.7 245.2 53.2 245.4 40.0M245.4 170.0 245.6 156.7 247.2 53.2 247.4 40.0M247.4 170.0 247.6 156.8 249.3 53.2 249.5 40.0M249.5 170.0 249.7 156.8 251.3 53.2 251.5 40.0M251.5 170.0 251.7 156.8 253.4 53.2 253.6 40.0M253.6 170.0 253.8 156.7 255.4 53.2 255.7 40.0M255.6 170.0 255.8 156.7 257.5 53.2 257.7 40.0M257.7 170.0 257.9 156.8 259.5 53.2 259.7 40.0M259.8 170.0 259.9 156.8 261.6 53.2 261.8 40.0M261.8 170.0 262.0 156.8 263.6 53.2 263.9 40.0M263.9 170.0 264.1 156.7 265.7 53.2 265.9 40.0M265.9 170.0 266.1 156.7 267.7 53.2 267.9 40.0M267.9 170.0 268.1 156.8 269.8 53.2 270.0 40.0M270.0 170.0 258.8 163.0 13.7 9.6 2.5 2.5"/><path class="nd-pending" d="M204.4 165.4 204.4 170.0M206.4 40.0 206.4 44.6 206.4 165.4M206.4 165.4 206.4 170.0M208.5 40.0 208.5 44.6 208.5 165.4M208.5 165.4 208.5 170.0M210.5 40.0 210.5 44.6 210.5 165.4M210.5 165.4 210.5 170.0M212.6 40.0 212.6 44.6 212.5 165.4M212.5 165.4 212.6 170.0M214.6 40.0 214.6 44.6 214.6 165.4M214.6 165.4 214.6 170.0M216.7 40.0 216.7 44.6 216.7 165.4M216.7 165.4 216.7 170.0M218.7 40.0 218.7 44.6 218.7 165.4M218.7 165.4 218.7 170.0M220.8 40.0 220.8 44.6 220.8 165.4M220.8 165.4 220.8 170.0M222.8 40.0 222.8 44.6 222.8 165.4M222.8 165.4 222.8 170.0M224.9 40.0 224.9 44.6 224.9 165.4M224.9 165.4 224.9 170.0M226.9 40.0 226.9 44.6 226.9 165.4M226.9 165.4 226.9 170.0M229.0 40.0 229.0 44.6 229.0 165.4M229.0 165.4 229.0 170.0M231.0 40.0 231.0 44.6 231.0 165.4M231.0 165.4 231.0 170.0M233.1 40.0 233.1 44.6 233.1 165.4M233.1 165.4 233.1 170.0M235.1 40.0 235.1 44.6 235.1 165.4M235.1 165.4 235.1 170.0M237.2 40.0 237.2 44.6 237.2 165.4M237.2 165.4 237.2 170.0M239.2 40.0 239.2 44.6 239.2 165.4M239.2 165.4 239.2 170.0M241.3 40.0 241.3 44.6 241.3 165.4M241.3 165.4 241.3 170.0M243.3 40.0 243.3 44.6 243.3 165.4M243.3 165.4 243.3 170.0M245.4 40.0 245.4 44.6 245.4 165.4M245.4 165.4 245.4 170.0M247.4 40.0 247.4 44.6 247.4 165.4M247.4 165.4 247.4 170.0M249.5 40.0 249.5 44.6 249.5 165.4M249.5 165.4 249.5 170.0M251.5 40.0 251.5 44.6 251.5 165.4M251.5 165.4 251.5 170.0M253.6 40.0 253.6 44.6 253.6 165.4M253.6 165.4 253.6 170.0M255.7 40.0 255.7 44.6 255.6 165.4M255.6 165.4 255.6 170.0M257.7 40.0 257.7 44.6 257.7 165.4M257.7 165.4 257.7 170.0M259.7 40.0 259.7 44.6 259.7 165.4M259.7 165.4 259.8 170.0M261.8 40.0 261.8 44.6 261.8 165.4M261.8 165.4 261.8 170.0M263.9 40.0 263.9 44.6 263.9 165.4M263.9 165.4 263.9 170.0M265.9 40.0 265.9 44.6 265.9 165.4M265.9 165.4 265.9 170.0M267.9 40.0 267.9 44.6 267.9 165.4M267.9 165.4 267.9 170.0M270.0 40.0 270.0 44.6 270.0 165.4M270.0 165.4 270.0 170.0"/><path class="nd-drawn" d="M98.0 105.0 98.0 107.1 97.7 108.6 97.0 110.1 96.1 111.5 94.9 112.7 93.4 113.7 91.8 114.4 90.6 114.6 89.4 114.8 88.1 114.8 86.9 114.6 85.6 114.2 84.5 113.7 83.3 113.1 82.2 112.3 81.3 111.3 80.4 110.3 79.8 109.1 79.2 107.8 78.8 106.4 78.6 105.0 78.5 103.6 78.6 102.1 79.0 100.6 79.5 99.2 80.2 97.9 81.1 96.6 82.1 95.4 83.3 94.4 84.6 93.5 86.0 92.8 86.8 92.5M86.8 92.5 88.4 92.1 90.0 91.8 91.7 91.8 93.3 92.0 95.0 92.4 96.6 93.0 98.1 93.8 99.6 94.8 100.9 96.0 102.1 97.4 103.0 98.9 103.8 100.5 104.4 102.3 104.8 104.1 104.9 105.9 104.8 107.8 104.5 109.7 103.9 111.5 103.1 113.3 102.1 115.0 100.8 116.5 99.4 117.9 97.7 119.1 96.0 120.1 94.1 120.8 93.1 121.1M93.1 121.1 91.0 121.5 89.0 121.6 86.8 121.5 84.8 121.1 82.7 120.5 80.8 119.6 78.9 118.4 77.2 117.0 75.7 115.4 74.4 113.6 73.3 111.6 72.5 109.5 72.0 107.3 71.7 105.0 71.7 102.7 72.0 100.4 72.6 98.1 73.5 95.9 74.6 93.8 76.0 91.9 76.8 91.0 77.7 90.1M77.7 90.1 78.6 89.3 79.6 88.6 80.6 87.9 81.7 87.3 82.8 86.7 83.9 86.3 85.1 85.9 86.3 85.5 87.5 85.2 88.7 85.0 90.0 84.9 91.3 84.9 92.5 85.0 93.8 85.1 95.0 85.3 96.3 85.6 97.5 86.0 98.8 86.4 99.9 86.9 101.1 87.6 102.2 88.2 103.3 89.0 104.3 89.8 105.3 90.7 106.2 91.6 107.1 92.6 107.9 93.7 108.6 94.8 109.3 95.9 109.9 97.1 110.4 98.4 110.8 99.6 111.2 101.0 111.5 102.3 111.7 103.6 111.8 105.0M111.8 105.0 111.8 106.4 111.7 107.7 111.6 109.1 111.4 110.5 111.0 111.8 110.6 113.2 110.1 114.5 109.6 115.7 108.9 117.0 108.2 118.2 107.4 119.4 106.5 120.5 105.5 121.5 104.5 122.5 103.4 123.4 102.3 124.3 101.1 125.1 99.8 125.8 98.5 126.5 97.2 127.0 95.8 127.5 94.4 127.9 92.9 128.2 91.5 128.4 90.0 128.5 88.5 128.5 87.0 128.4 85.6 128.3 84.1 128.0 82.6 127.7 81.2 127.2 79.8 126.7 78.4 126.1M78.4 126.1 77.1 125.4 75.8 124.6 74.5 123.7 73.4 122.7 72.2 121.7 71.1 120.6 70.2 119.4 69.2 118.2 68.4 116.9 67.6 115.5 66.9 114.1 66.3 112.7 65.8 111.2 65.4 109.7 65.1 108.2 64.9 106.6 64.8 105.0 64.8 103.4 64.8 101.8 65.0 100.2 65.3 98.7 65.7 97.1 66.2 95.6 66.8 94.1 67.4 92.6 68.2 91.2 69.0 89.8 70.0 88.4 71.0 87.2 72.1 86.0M72.1 86.0 73.3 84.8 74.6 83.7 75.9 82.8 77.3 81.9 78.7 81.1 80.2 80.3 81.8 79.7 83.4 79.2 85.0 78.7 86.6 78.4 88.3 78.2 90.0 78.1 91.7 78.1 93.4 78.1 95.1 78.3 96.8 78.6 98.4 79.0 100.1 79.6 101.7 80.2 103.3 80.9 104.8 81.7 106.2 82.7 107.6 83.7 109.0 84.8 110.3 86.0 111.5 87.2 112.6 88.5 113.7 90.0M113.7 90.0 114.6 91.4 115.5 93.0 116.3 94.6 116.9 96.3 117.5 97.9 118.0 99.7 118.3 101.4 118.5 103.2 118.7 105.0 118.7 106.8 118.6 108.6 118.4 110.4 118.0 112.2 117.6 114.0 117.0 115.7 116.4 117.4 115.6 119.1 114.7 120.7 113.7 122.3 112.7 123.7 111.5 125.2 110.2 126.5 108.9 127.8 107.5 129.0 105.9 130.1 104.4 131.2M104.4 131.2 102.7 132.1 101.0 132.9 99.3 133.6 97.5 134.2 95.7 134.6 93.8 135.0 91.9 135.3 90.0 135.4 88.1 135.4 86.2 135.3 84.3 135.1 82.4 134.7 80.5 134.2 78.7 133.6 76.9 132.9 75.1 132.1 73.4 131.2 71.7 130.1 70.2 129.0 68.6 127.8 67.2 126.4 65.8 125.0 64.6 123.5 63.4 121.9 62.3 120.2M62.3 120.2 61.4 118.5 60.5 116.7 59.8 114.8 59.2 112.9 58.6 111.0 58.3 109.0 58.0 107.0 57.9 105.0 57.9 103.0 58.0 101.0 58.3 98.9 58.6 96.9 59.1 95.0 59.8 93.0 60.5 91.1 61.4 89.3 62.4 87.5 63.5 85.7 64.7 84.0 66.0 82.4 67.4 80.9 68.9 79.5 70.5 78.2M70.5 78.2 72.2 77.0 74.0 75.8 75.8 74.8 77.7 73.9 79.7 73.2 81.7 72.5 83.7 72.0 85.8 71.6 87.9 71.3 90.0 71.2 92.1 71.2 94.3 71.3 96.4 71.6 98.5 72.0 100.6 72.5 102.6 73.2 104.6 73.9 106.6 74.9 108.5 75.9 110.3 77.1 112.0 78.4 113.7 79.8M113.7 79.8 115.3 81.2 116.8 82.8 118.2 84.5 119.5 86.3 120.7 88.1 121.7 90.1 122.7 92.0 123.5 94.1 124.2 96.2 124.7 98.4 125.1 100.6 125.4 102.8 125.6 105.0 125.6 107.2 125.4 109.5 125.1 111.7 124.7 113.9 124.2 116.1 123.4 118.2 122.6 120.3 121.6 122.4M121.6 122.4 120.5 124.4 119.3 126.3 118.0 128.1 116.5 129.9 114.9 131.6 113.3 133.1 111.5 134.6 109.6 135.9 107.7 137.2 105.7 138.3 103.6 139.3 101.4 140.1 99.2 140.8 97.0 141.4 94.7 141.8 92.4 142.1 90.0 142.3 87.7 142.3 85.3 142.1 83.0 141.8 81.8 141.6M81.8 141.6 79.5 141.1 77.2 140.4 75.0 139.6 72.8 138.7 70.7 137.6 68.7 136.3 66.7 135.0 64.8 133.5 63.9 132.8 62.2 131.1 60.5 129.4 59.8 128.4 58.3 126.5 57.6 125.6 56.9 124.5 55.7 122.5 54.6 120.3 54.1 119.2 53.7 118.1 52.9 115.8 52.5 114.6 52.2 113.5 51.9 112.3 51.7 111.1 51.4 109.9M51.4 109.9 51.3 108.7 51.2 107.4 51.1 106.2 51.0 105.0 51.0 103.8 51.0 102.5 51.1 101.3 51.2 100.1 51.3 98.9 51.5 97.6 51.7 96.4 52.0 95.2 52.3 94.0 52.6 92.8 53.0 91.7 53.3 90.5 53.8 89.3 54.3 88.2 54.8 87.1 55.3 86.0 56.0 84.9 56.5 83.8 57.2 82.7 57.9 81.7 58.6 80.7 59.4 79.7 60.2 78.7 61.0 77.7 61.8 76.8 62.7 75.9 63.6 75.1 64.5 74.2 65.5 73.4 66.5 72.6 67.5 71.9 68.5 71.1 69.6 70.5 70.6 69.8M70.6 69.8 71.8 69.2 72.8 68.6 74.0 68.0 75.2 67.5 76.4 67.1 77.5 66.6 78.7 66.2 79.9 65.8 81.2 65.5 82.4 65.2 83.7 65.0 84.9 64.7 86.2 64.6 87.5 64.4 88.7 64.3 90.0 64.3 91.3 64.3 92.6 64.3 93.9 64.4 95.1 64.5 96.4 64.6 97.7 64.8 98.9 65.0 100.2 65.3 101.4 65.6 102.7 65.9 103.9 66.3 105.2 66.8 106.3 67.2 107.5 67.7 108.7 68.3 109.9 68.8 111.0 69.5 112.2 70.1 113.3 70.8 114.3 71.5 115.4 72.3M115.4 72.3 116.4 73.0 117.4 73.9 118.4 74.7 119.4 75.6 120.3 76.5 121.2 77.5 122.1 78.4 122.9 79.5 123.8 80.4 124.5 81.5 125.3 82.6 126.0 83.7 126.7 84.8 127.3 86.0 128.0 87.1 128.5 88.3 129.1 89.5 129.6 90.8 130.0 92.0 130.4 93.2 130.8 94.5 131.2 95.8 131.5 97.1 131.7 98.4 132.0 99.7 132.1 101.0 132.3 102.3 132.4 103.7 132.5 105.0 132.4 106.3 132.4 107.7 132.3 109.0 132.3 110.3 132.1 111.7 131.9 113.0 131.6 114.3M131.6 114.3 131.4 115.6 131.0 116.9 130.7 118.2 130.3 119.5 129.8 120.8 129.4 122.0 128.8 123.3 128.3 124.5 127.7 125.7 127.0 126.9 126.4 128.1 125.6 129.2 124.9 130.4 124.1 131.4 123.3 132.5 122.4 133.6 121.5 134.6 120.6 135.6 119.7 136.6 118.7 137.5 117.7 138.5 116.6 139.3 115.5 140.2 114.5 141.0 113.3 141.8 112.2 142.5 111.0 143.2 109.8 143.9 108.6 144.5 107.3 145.1 106.1 145.7 104.8 146.2 103.6 146.7 102.2 147.1 100.9 147.5M100.9 147.5 99.6 147.9 98.2 148.2 96.9 148.4 95.5 148.7 94.1 148.8 92.8 149.0 91.4 149.1 90.0 149.2 88.6 149.1 87.2 149.1 85.8 149.0 84.5 148.9 83.1 148.8 81.7 148.6 80.3 148.3 79.0 148.0 77.6 147.7 76.2 147.3 74.9 146.9 73.6 146.5 72.3 145.9 71.0 145.4 69.7 144.8 68.5 144.2 67.2 143.5 66.0 142.8 64.8 142.0 63.6 141.3 62.5 140.5 61.4 139.6 60.3 138.7 59.2 137.8 58.2 136.8 57.2 135.8M57.2 135.8 56.2 134.8 55.2 133.8 54.3 132.7 53.4 131.6 52.6 130.4 51.8 129.3 51.0 128.0 50.3 126.8 49.6 125.6 48.9 124.3 48.3 123.0 47.7 121.7 47.2 120.4 46.7 119.1 46.3 117.7 45.8 116.3 45.5 115.0 45.1 113.6 44.9 112.1 44.6 110.7 44.5 109.3 44.3 107.9 44.2 106.4 44.1 105.0 44.1 103.6 44.1 102.1 44.2 100.7 44.3 99.2 44.5 97.8 44.7 96.4 45.0 94.9 45.3 93.5 45.6 92.1M45.6 92.1 46.0 90.7 46.5 89.3 47.0 88.0 47.5 86.6 48.0 85.2 48.7 83.9 49.3 82.6 50.0 81.4 50.7 80.1 51.5 78.8 52.3 77.6 53.2 76.5 54.1 75.3 55.0 74.1 56.0 73.0 57.0 72.0 58.0 70.9 59.1 69.9 60.1 68.9 61.3 68.0 62.4 67.1 63.6 66.2 64.8 65.3 66.1 64.5 67.3 63.8 68.6 63.1 69.9 62.4 71.3 61.7 72.6 61.1 74.0 60.6 75.4 60.0 76.8 59.6M76.8 59.6 78.2 59.2 79.7 58.8 81.1 58.4 82.6 58.2 84.0 57.9 85.5 57.7 87.0 57.6 88.5 57.5 90.0 57.4 91.5 57.4 93.0 57.4 94.5 57.5 96.0 57.6 97.5 57.8 99.0 58.0 100.4 58.3 101.9 58.6 103.4 59.0 104.8 59.4 106.2 59.9 107.7 60.4 109.1 60.9 110.5 61.5 111.8 62.2 113.2 62.8 114.5 63.5 115.8 64.3 117.1 65.1 118.4 65.9 119.6 66.8 120.8 67.7M120.8 67.7 122.0 68.7 123.1 69.7 124.3 70.7 125.3 71.8 126.4 72.9 127.4 74.0 128.4 75.2 129.4 76.4 130.2 77.6 131.1 78.9 132.0 80.2 132.8 81.5 133.5 82.9 134.2 84.2 134.8 85.6 135.5 87.0 136.0 88.4 136.6 89.9 137.1 91.3 137.5 92.8 137.9 94.3 138.3 95.8 138.5 97.3 138.8 98.8 139.0 100.4 139.2 101.9 139.2 103.5 139.3 105.0 139.3 106.6 139.3 108.1 139.2 109.7M139.2 109.7 139.1 111.2 138.9 112.8 138.7 114.3 138.4 115.8 138.0 117.3 137.6 118.8 137.2 120.3 136.8 121.8 136.2 123.3 135.7 124.8 135.1 126.2 134.4 127.6 133.7 129.0 132.9 130.4 132.2 131.8 131.3 133.1 130.5 134.4 129.5 135.7 128.6 136.9 127.6 138.1 126.6 139.3 125.5 140.5 124.4 141.6 123.2 142.7 122.0 143.8 120.8 144.8 119.6 145.7 118.3 146.7 117.0 147.6 115.7 148.4M115.7 148.4 114.3 149.3 112.9 150.0 111.5 150.7 110.1 151.4 108.6 152.1 107.2 152.7 105.7 153.2 104.1 153.7 102.6 154.2 101.1 154.6 99.5 154.9 98.0 155.2 96.4 155.5 94.8 155.7 93.2 155.9 91.6 156.0 90.0 156.1 88.4 156.0 86.8 156.0 85.2 155.9 83.6 155.8 82.0 155.6 80.4 155.4 78.8 155.0 77.2 154.7 75.7 154.3 74.1 153.9 72.6 153.4 71.0 152.9M71.0 152.9 69.5 152.2 68.1 151.6 66.6 150.9 65.1 150.2 63.7 149.4 62.3 148.6 61.0 147.8 59.6 146.9 58.3 145.9 57.0 144.9 55.7 143.9 54.5 142.8 53.3 141.7 52.1 140.6 51.0 139.3 49.9 138.2 48.9 136.9 47.9 135.6 46.9 134.3 46.0 132.9 45.1 131.5 44.2 130.2 43.5 128.7 42.7 127.3 42.0 125.8 41.3 124.3 40.7 122.7 40.1 121.2 39.6 119.6M39.6 119.6 39.1 118.1 38.8 116.5 38.4 114.8 38.1 113.2 37.8 111.6 37.6 110.0 37.4 108.3 37.3 106.7 37.2 105.0 37.2 103.3 37.3 101.7 37.4 100.0 37.5 98.4 37.7 96.7 37.9 95.1 38.3 93.4 38.6 91.8 39.0 90.2 39.5 88.6 40.0 87.0 40.5 85.4 41.2 83.9 41.8 82.3 42.5 80.8 43.3 79.3 44.1 77.9 44.9 76.4 45.8 75.0M45.8 75.0 46.7 73.6 47.8 72.2 48.7 70.9 49.8 69.6 50.9 68.3 52.1 67.1 53.3 65.9 54.5 64.7 55.8 63.6 57.0 62.5 58.4 61.5 59.7 60.5 61.1 59.5 62.6 58.6 64.0 57.7 65.5 56.9 67.0 56.1 68.6 55.4 70.1 54.7 71.7 54.1 73.3 53.5 74.9 53.0 76.5 52.5 78.2 52.1 79.8 51.7 81.5 51.4 83.2 51.1 84.9 50.9M84.9 50.9 86.6 50.7 88.3 50.6 90.0 50.5 91.7 50.5 93.4 50.5 95.1 50.7 96.9 50.8 98.6 51.0 100.3 51.3 101.9 51.6 103.6 51.9 105.3 52.4 107.0 52.8 108.6 53.4 110.2 53.9 111.8 54.6 113.4 55.2 115.0 56.0 116.5 56.7 118.0 57.6 119.5 58.5 121.0 59.4 122.4 60.4 123.8 61.4 125.2 62.4 126.5 63.6 127.9 64.7M127.9 64.7 129.1 65.9 130.4 67.1 131.6 68.4 132.7 69.6 133.8 71.0 134.9 72.3 135.9 73.8 136.9 75.2 137.9 76.7 138.8 78.2 139.6 79.7 140.4 81.3 141.2 82.9 141.9 84.5 142.5 86.1 143.2 87.7 143.7 89.4 144.2 91.1 144.6 92.8 145.0 94.5 145.3 96.2 145.6 98.0 145.8 99.7 146.1 101.5 146.1 103.2 146.2 105.0 146.2 106.8M146.2 106.8 146.2 108.5 146.1 110.3 145.9 112.1 145.7 113.8 145.4 115.6 145.1 117.3 144.7 119.0 144.2 120.8 143.8 122.5 143.2 124.2 142.6 125.9 142.0 127.5 141.3 129.1 140.5 130.7 139.8 132.4 138.9 133.9 138.0 135.5 137.0 137.0 136.0 138.5 135.0 139.9 133.9 141.3 132.7 142.7 131.6 144.0 130.4 145.3 129.1 146.6 127.8 147.9M127.8 147.9 126.4 149.1 125.0 150.2 123.6 151.3 122.2 152.4 120.7 153.4 119.2 154.4 117.6 155.3 116.1 156.1 114.5 157.0 112.8 157.7 111.2 158.5 109.5 159.1 107.8 159.8 106.1 160.3 104.3 160.9 102.6 161.3 100.8 161.7 99.0 162.0 97.2 162.4 95.5 162.6 93.6 162.8 91.8 162.9 90.0 162.9 88.2 162.9 86.4 162.9 84.5 162.8M84.5 162.8 82.7 162.6 80.9 162.4 79.1 162.1 77.3 161.8 75.5 161.4 73.8 160.9 72.0 160.4 70.3 159.8 68.5 159.3 66.8 158.6 65.1 157.9 63.5 157.1 61.8 156.3 60.2 155.3 58.6 154.4 57.1 153.4 55.5 152.4 54.1 151.3 52.6 150.2 51.2 149.0 49.8 147.9 48.4 146.6 47.1 145.3 45.8 143.9 44.6 142.5 43.5 141.1M43.5 141.1 42.3 139.6 41.2 138.2 40.2 136.7 39.2 135.1 38.2 133.5 37.3 131.9 36.4 130.2 35.7 128.5 34.9 126.8 34.2 125.1 33.6 123.3 33.0 121.5 32.5 119.8 32.0 118.0 31.6 116.2 31.3 114.3 30.9 112.4 30.7 110.6 30.5 108.7 30.4 106.9 30.3 105.0 30.4 103.1 30.4 101.2 30.5 99.4 30.7 97.5M30.7 97.5 30.9 95.7 31.2 93.8 31.6 91.9 32.0 90.1 32.4 88.3 32.9 86.5 33.5 84.7 34.1 82.9 34.8 81.1 35.6 79.4 36.4 77.7 37.2 76.0 38.2 74.3 39.1 72.7 40.1 71.1 41.2 69.5 42.3 68.0 43.4 66.5 44.7 65.0 45.9 63.6 47.2 62.2 48.5 60.9 50.0 59.6 51.4 58.3 52.8 57.1M52.8 57.1 54.3 55.9 55.9 54.8 57.4 53.7 59.1 52.7 60.7 51.7 62.4 50.8 64.1 49.9 65.8 49.1 67.6 48.3 69.3 47.6 71.1 46.9 73.0 46.4 74.8 45.8 76.7 45.3 78.5 44.9 80.4 44.6 82.3 44.2 84.2 44.0 86.2 43.8 88.1 43.7 90.0 43.6 91.9 43.6 93.9 43.7 95.8 43.8 97.7 44.0M97.7 44.0 99.6 44.2 101.5 44.5 103.4 44.9 105.3 45.3 107.2 45.8 109.1 46.3 110.9 46.9 112.8 47.5 114.6 48.3 116.3 49.0 118.1 49.9 119.8 50.7 121.5 51.7 123.2 52.6 124.9 53.7 126.5 54.8 128.0 56.0 129.6 57.1 131.1 58.4 132.6 59.6 134.0 61.0 135.4 62.4 136.7 63.8 138.0 65.3M138.0 65.3 139.3 66.8 140.5 68.3 141.6 69.9 142.8 71.5 143.8 73.2 144.8 74.9 145.7 76.6 146.7 78.3 147.5 80.1 148.3 81.9 149.0 83.7 149.7 85.6 150.3 87.5 150.9 89.4 151.3 91.3 151.8 93.2 152.1 95.1 152.5 97.1 152.7 99.1 152.9 101.0 153.0 103.0 153.1 105.0 153.1 107.0 153.1 109.0M153.1 109.0 152.9 110.9 152.8 112.9 152.5 114.9 152.2 116.9 151.8 118.8 151.4 120.8 150.9 122.7 150.3 124.6 149.7 126.5 149.1 128.4 148.3 130.2 147.5 132.1 146.7 133.9 145.8 135.7 144.8 137.4 143.8 139.1 142.7 140.8 141.6 142.5 140.4 144.1 139.2 145.7 137.9 147.2 136.6 148.8 135.2 150.2 133.8 151.7M133.8 151.7 132.3 153.0 130.8 154.4 129.3 155.6 127.7 156.9 126.1 158.1 124.4 159.2 122.7 160.3 121.0 161.3 119.2 162.3 117.4 163.2 115.5 164.1 113.7 164.9 111.8 165.6 109.9 166.3 108.0 166.9 106.1 167.5 104.1 168.0 102.1 168.5 100.1 168.8 98.1 169.2 96.1 169.4 94.1 169.6 92.0 169.7M92.0 169.7 90.0 169.8 88.0 169.8 85.9 169.8 83.9 169.6 81.8 169.4 79.8 169.2 77.8 168.9 75.8 168.5 73.8 168.1 71.8 167.5 69.9 167.0 67.9 166.3 66.0 165.7 64.1 164.9 62.2 164.1 60.4 163.2 58.5 162.3 56.7 161.3 54.9 160.3 53.2 159.1 51.5 158.0 49.8 156.8 48.2 155.5M48.2 155.5 46.6 154.2 45.1 152.9 43.6 151.4 42.1 150.0 40.7 148.5 39.3 146.9 38.0 145.3 36.7 143.7 35.5 142.0 34.3 140.3 33.2 138.6 32.2 136.8 31.2 135.0 30.2 133.1 29.4 131.2 28.5 129.4 27.8 127.4 27.0 125.5 26.4 123.5 25.8 121.5 25.3 119.5 24.8 117.4 24.5 115.4M24.5 115.4 24.1 113.3 23.9 111.3 23.6 109.2 23.5 107.1 23.4 105.0 23.5 102.9 23.5 100.8 23.7 98.7 23.8 96.6 24.1 94.6 24.4 92.5 24.8 90.4 25.3 88.4 25.8 86.4 26.4 84.3 27.1 82.3 27.7 80.3 28.5 78.4 29.4 76.5 30.3 74.6 31.2 72.7 32.2 70.8 33.3 69.0M33.3 69.0 34.4 67.2 35.6 65.5 36.9 63.8 38.1 62.1 39.5 60.5 40.9 58.9 42.3 57.4 43.8 55.8 45.4 54.4 47.0 53.0 48.6 51.6 50.3 50.3 52.0 49.1 53.7 47.9 55.6 46.8 57.4 45.6 59.3 44.7 61.1 43.7 63.1 42.8 65.0 41.9 67.0 41.1 69.0 40.4M69.0 40.4 71.0 39.8 73.1 39.1 75.2 38.6 77.2 38.1 79.3 37.8 81.5 37.4 83.6 37.2 85.7 36.9 87.9 36.8 90.0 36.7 92.2 36.8 94.3 36.8 96.4 37.0 98.6 37.1 100.7 37.4 102.8 37.7 105.0 38.2 107.1 38.6 109.1 39.2 111.2 39.7 113.3 40.4 115.3 41.1M115.3 41.1 117.3 42.0 119.3 42.8 121.2 43.7 123.2 44.7 125.0 45.8 126.9 46.8 128.7 48.0 130.5 49.2 132.3 50.5 134.0 51.8 135.7 53.2 137.3 54.6 138.9 56.1 140.4 57.7 141.9 59.3 143.3 60.9 144.7 62.6 146.1 64.3 147.3 66.0 148.6 67.8 149.7 69.7 150.9 71.5M150.9 71.5 151.9 73.5 152.9 75.4 153.8 77.4 154.7 79.4 155.5 81.4 156.2 83.5 156.9 85.6 157.5 87.7 158.0 89.8 158.5 91.9 158.9 94.1 159.3 96.2 159.6 98.4 159.8 100.6 160.0 105.0M190.0 40.0 190.0 44.6 190.0 165.4M190.0 165.4 190.0 170.0M192.0 40.0 192.0 44.6 192.0 165.4M192.0 165.4 192.0 170.0M194.1 40.0 194.1 44.6 194.1 165.4M194.1 165.4 194.1 170.0M196.1 40.0 196.1 44.6 196.1 165.4M196.1 165.4 196.1 170.0M198.2 40.0 198.2 44.6 198.2 165.4M198.2 165.4 198.2 170.0M200.3 40.0 200.3 44.6 200.3 165.4M200.3 165.4 200.3 170.0M202.3 40.0 202.3 44.6 202.3 165.4M202.3 165.4 202.3 170.0M204.4 40.0 204.4 44.6 204.4 165.4"/></g><g class="nd-lift"><circle cx="160.0" cy="105.0" r="2.6"/><circle cx="190.0" cy="170.0" r="2.6"/><circle cx="192.0" cy="170.0" r="2.6"/><circle cx="194.1" cy="170.0" r="2.6"/><circle cx="196.1" cy="170.0" r="2.6"/><circle cx="198.2" cy="170.0" r="2.6"/><circle cx="200.3" cy="170.0" r="2.6"/><circle cx="202.3" cy="170.0" r="2.6"/><circle cx="204.4" cy="170.0" r="2.6"/><circle cx="206.4" cy="170.0" r="2.6"/><circle cx="208.5" cy="170.0" r="2.6"/><circle cx="210.5" cy="170.0" r="2.6"/><circle cx="212.6" cy="170.0" r="2.6"/><circle cx="214.6" cy="170.0" r="2.6"/><circle cx="216.7" cy="170.0" r="2.6"/><circle cx="218.7" cy="170.0" r="2.6"/><circle cx="220.8" cy="170.0" r="2.6"/><circle cx="222.8" cy="170.0" r="2.6"/><circle cx="224.9" cy="170.0" r="2.6"/><circle cx="226.9" cy="170.0" r="2.6"/><circle cx="229.0" cy="170.0" r="2.6"/><circle cx="231.0" cy="170.0" r="2.6"/><circle cx="233.1" cy="170.0" r="2.6"/><circle cx="235.1" cy="170.0" r="2.6"/><circle cx="237.2" cy="170.0" r="2.6"/><circle cx="239.2" cy="170.0" r="2.6"/><circle cx="241.3" cy="170.0" r="2.6"/><circle cx="243.3" cy="170.0" r="2.6"/><circle cx="245.4" cy="170.0" r="2.6"/><circle cx="247.4" cy="170.0" r="2.6"/><circle cx="249.5" cy="170.0" r="2.6"/><circle cx="251.5" cy="170.0" r="2.6"/><circle cx="253.6" cy="170.0" r="2.6"/><circle cx="255.6" cy="170.0" r="2.6"/><circle cx="257.7" cy="170.0" r="2.6"/><circle cx="259.8" cy="170.0" r="2.6"/><circle cx="261.8" cy="170.0" r="2.6"/><circle cx="263.9" cy="170.0" r="2.6"/><circle cx="265.9" cy="170.0" r="2.6"/><circle cx="267.9" cy="170.0" r="2.6"/><circle cx="270.0" cy="170.0" r="2.6"/></g><g class="nd-drop"><circle cx="98.0" cy="105.0" r="2.6"/><circle cx="190.0" cy="40.0" r="2.6"/><circle cx="192.0" cy="40.0" r="2.6"/><circle cx="194.1" cy="40.0" r="2.6"/><circle cx="196.1" cy="40.0" r="2.6"/><circle cx="198.2" cy="40.0" r="2.6"/><circle cx="200.3" cy="40.0" r="2.6"/><circle cx="202.3" cy="40.0" r="2.6"/><circle cx="204.4" cy="40.0" r="2.6"/><circle cx="206.4" cy="40.0" r="2.6"/><circle cx="208.5" cy="40.0" r="2.6"/><circle cx="210.5" cy="40.0" r="2.6"/><circle cx="212.6" cy="40.0" r="2.6"/><circle cx="214.6" cy="40.0" r="2.6"/><circle cx="216.7" cy="40.0" r="2.6"/><circle cx="218.7" cy="40.0" r="2.6"/><circle cx="220.8" cy="40.0" r="2.6"/><circle cx="222.8" cy="40.0" r="2.6"/><circle cx="224.9" cy="40.0" r="2.6"/><circle cx="226.9" cy="40.0" r="2.6"/><circle cx="229.0" cy="40.0" r="2.6"/><circle cx="231.0" cy="40.0" r="2.6"/><circle cx="233.1" cy="40.0" r="2.6"/><circle cx="235.1" cy="40.0" r="2.6"/><circle cx="237.2" cy="40.0" r="2.6"/><circle cx="239.2" cy="40.0" r="2.6"/><circle cx="241.3" cy="40.0" r="2.6"/><circle cx="243.3" cy="40.0" r="2.6"/><circle cx="245.4" cy="40.0" r="2.6"/><circle cx="247.4" cy="40.0" r="2.6"/><circle cx="249.5" cy="40.0" r="2.6"/><circle cx="251.5" cy="40.0" r="2.6"/><circle cx="253.6" cy="40.0" r="2.6"/><circle cx="255.7" cy="40.0" r="2.6"/><circle cx="257.7" cy="40.0" r="2.6"/><circle cx="259.7" cy="40.0" r="2.6"/><circle cx="261.8" cy="40.0" r="2.6"/><circle cx="263.9" cy="40.0" r="2.6"/><circle cx="265.9" cy="40.0" r="2.6"/><circle cx="267.9" cy="40.0" r="2.6"/><circle cx="270.0" cy="40.0" r="2.6"/></g></svg><div class="nd-cross" style="left:23.65%;top:27.84%"></div><div class="nd-bedcap">BED 864 &times; 594 MM &nbsp;·&nbsp; PAGE 297 &times; 210</div></div></div>
+        <div class="nd-stats" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="nd-stat nd-well"><b>Elapsed</b><span>01:34</span></div>
+          <div class="nd-stat nd-well"><b>Remaining</b><span>00:57</span></div>
+          <div class="nd-stat nd-well"><b>Layer</b><span>1 &rarr; 2</span></div>
+        </div>
+      </div>
+      <div class="nd-col">
+        <div class="nd-well" style="padding:8px 10px;border-radius:9px;display:flex;flex-direction:column;gap:5px">
+          <div class="nd-etch">Plotting &middot; locked</div>
+          <div style="font-size:11px;color:#dfe2e7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">plan_probe.svg</div>
+          <div class="nd-meter"><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="nd-dots"><i class="nd-dot nd-on"></i><i class="nd-dot nd-on"></i><i class="nd-dot nd-on"></i><i class="nd-dot"></i></div>
+        <div class="nd-pad3" style="grid-template-columns:repeat(4,1fr);flex:1">
+          <div class="nd-nk nd-raised">1</div><div class="nd-nk nd-raised">2</div><div class="nd-nk nd-raised">3</div><div class="nd-nk nd-raised">4</div>
+          <div class="nd-nk nd-raised">5</div><div class="nd-nk nd-raised">6</div><div class="nd-nk nd-raised">7</div><div class="nd-nk nd-raised">8</div>
+          <div class="nd-nk nd-raised">9</div><div class="nd-nk nd-raised">0</div>
+          <div class="nd-nk nd-raised" style="font-size:10px;letter-spacing:.1em">CLR</div>
+          <div class="nd-nk nd-go" style="font-size:10px;letter-spacing:.1em">OK</div>
+        </div>
+      </div>
+    </div>
+    <div class="nd-nav">
+      <div style="flex:1" class="nd-etch">Enter the code to unlock &nbsp;&middot;&nbsp; the stop still works</div>
+      <div class="nd-estop"></div>
+    </div>
+  </div></div>
+  </div>
+
+  <h2>02 <span>/</span> Files</h2>
+  <p class="lede">Browse and arm. That is all. <b>No upload, rename, move or delete</b> — every one
+  of those is destructive, awkward without a keyboard, and already better on the laptop, because
+  the web UI is running on this same server the whole time. Drop files in over SSH or from the
+  browser and they appear here on the next poll. With nothing armed, the right card shows the
+  last eight plots instead.</p>
+  <div class="stage nd-stage">
+    <div class="stage-note">a runner, not a file manager</div>
+    <div class="nd-dev"><div class="nd-screen">
+    <div class="nd-bar">
+      <i class="nd-jewel" style="--lyr:#7CFFB0"></i>
+      <span class="nd-st" style="--lyr:#7CFFB0">IDLE</span>
+      <span class="nd-who">NextDraw 2234</span>
+      <span class="nd-sp"></span>
+      <span class="nd-dro"><span class="nd-k">X</span><span class="nd-v">148.2</span>
+        <span class="nd-k">Y</span><span class="nd-v">104.6</span></span>
+      <span class="nd-dro"><span class="nd-k">PEN</span><span class="nd-v">UP</span></span>
+      
+      <span class="nd-lockglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+    </div>
+    <div class="nd-body" style="grid-template-columns:342px minmax(0,1fr)">
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">plots / _selftest</span></div>
+        <div class="nd-rows nd-well" style="flex:1">
+          <div class="nd-row nd-dir"><svg class="nd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h6l2 2h8v10H4z"/></svg><span class="nd-nm">..</span></div>
+          <div class="nd-row nd-dir"><svg class="nd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h6l2 2h8v10H4z"/></svg><span class="nd-nm">behind_the_line</span><span class="nd-sz">11</span></div>
+          <div class="nd-row nd-sel"><svg class="nd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l4 4v14H6z"/></svg><span class="nd-nm">plan_probe.svg</span><span class="nd-sz">15.8 K</span></div>
+          <div class="nd-row"><svg class="nd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l4 4v14H6z"/></svg><span class="nd-nm">spaceman_A.svg</span><span class="nd-sz">86.4 K</span></div>
+          <div class="nd-row"><svg class="nd-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l4 4v14H6z"/></svg><span class="nd-nm">pen_test_a4.svg</span><span class="nd-sz">26.6 K</span></div>
+        </div>
+      </div>
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">File</span></div>
+        <div class="nd-well" style="padding:11px;border-radius:9px;display:flex;flex-direction:column;gap:8px;flex:1">
+          <div style="font-size:12.5px;font-weight:700;color:#dfe2e7">plan_probe.svg</div>
+          <div class="nd-stats" style="grid-template-columns:1fr 1fr">
+            <div class="nd-stat"><b>Page</b><span>297 &times; 210</span></div>
+            <div class="nd-stat"><b>On the bed</b><span style="color:var(--green)">Fits</span></div>
+            <div class="nd-stat"><b>Layers</b><span>2</span></div>
+            <div class="nd-stat"><b>Selectable</b><span>2</span></div>
+          </div>
+          <div class="nd-note">1 · spiral &nbsp; 2 · comb</div>
+        </div>
+        <button class="nd-key nd-big nd-go nd-krow"><span class="nd-lens"></span>ARM THIS FILE</button>
+      </div>
+    </div>
+    <div class="nd-nav"><div class="nd-pk nd-pressed nd-on">FILES</div><div class="nd-pk nd-raised">PLOT</div><div class="nd-pk nd-raised">JOG</div><div class="nd-pk nd-raised">SET</div><div class="nd-estop"></div></div>
+  </div></div>
+  </div>
+
+  <h2>03 <span>/</span> Plot</h2>
+  <p class="lede">Pick layers as an <b>ordered sequence</b> &mdash; the badges say <em>1 &rarr; 2</em>
+  is a plan, not a set &mdash; then OPTIMIZE, then START. The preflight is mandatory and the server
+  enforces it, so rather than hide that, the bed is <b>empty until you press OPTIMIZE</b> and says so.
+  Pressing it is how you get to see the picture, which turns the one unavoidable gate into the
+  reward for passing it. START stays dark with the reason engraved under it.</p>
+  <div class="stage nd-stage">
+    <div class="stage-note">the gate, on one screen</div>
+    <div class="nd-dev"><div class="nd-screen">
+    <div class="nd-bar">
+      <i class="nd-jewel" style="--lyr:#7CFFB0"></i>
+      <span class="nd-st" style="--lyr:#7CFFB0">IDLE</span>
+      <span class="nd-who">NextDraw 2234</span>
+      <span class="nd-sp"></span>
+      <span class="nd-dro"><span class="nd-k">X</span><span class="nd-v">148.2</span>
+        <span class="nd-k">Y</span><span class="nd-v">104.6</span></span>
+      <span class="nd-dro"><span class="nd-k">PEN</span><span class="nd-v">UP</span></span>
+      
+      <span class="nd-lockglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+    </div>
+    <div class="nd-body" style="grid-template-columns:248px minmax(0,1fr) 208px">
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">Layers &middot; order</span></div>
+        <div class="nd-rows nd-well" style="flex:1">
+          <div class="nd-row"><span class="nd-laynum">&lowast;</span><span class="nd-nm">Everything</span></div>
+          <div class="nd-row nd-sel"><span class="nd-laynum">1</span><span class="nd-nm">spiral</span><span class="nd-seq">1</span></div>
+          <div class="nd-row nd-sel"><span class="nd-laynum">2</span><span class="nd-nm">comb</span><span class="nd-seq">2</span></div>
+          <div class="nd-row" style="opacity:.45"><span class="nd-laynum">%</span><span class="nd-nm">registration</span></div>
+        </div>
+      </div>
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">plan_probe.svg</span></div>
+        <div class="nd-bedwrap nd-well" style="flex:1;min-height:0"><div class="nd-bed" style="width:280px;height:192px"><div class="nd-paper" style="left:0;top:0;width:34.371%;height:35.348%"></div><div class="nd-bedempty">OPTIMIZE TO SEE THE PLOT</div><div class="nd-bedcap">BED 864 &times; 594 MM &nbsp;·&nbsp; PAGE 297 &times; 210</div></div></div>
+      </div>
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">Path order</span></div>
+        <div class="nd-piano nd-well">
+          <div class="nd-pkey nd-pressed nd-on">CONN</div>
+          <div class="nd-pkey nd-pressed nd-on">SORT</div>
+          <div class="nd-pkey nd-raised">REV</div>
+        </div>
+        <button class="nd-key nd-big nd-go nd-krow"><span class="nd-lens"></span>OPTIMIZE</button>
+        <div class="nd-meter nd-sm"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="nd-note">Optimise before plotting</div>
+        <div style="flex:1"></div>
+        <button class="nd-key nd-big nd-raised nd-dark nd-krow">START</button>
+        <div class="nd-note nd-warn">Press OPTIMIZE first</div>
+      </div>
+    </div>
+    <div class="nd-nav"><div class="nd-pk nd-raised">FILES</div><div class="nd-pk nd-pressed nd-on">PLOT</div><div class="nd-pk nd-raised">JOG</div><div class="nd-pk nd-raised">SET</div><div class="nd-estop"></div></div>
+  </div></div>
+  </div>
+
+  <h2>04 <span>/</span> Run</h2>
+  <p class="lede">The app comes here by itself the moment the machine starts moving. The whole
+  drawing sits on the sheet in <b>dim grey</b>, and each stroke lights <b>phosphor green</b> as the
+  pen actually lays it down — the plan is cut into 87 pieces of equal <em>drawn length</em>, so the
+  fill tracks the pen instead of stalling and jumping. Orange is the pen-up travel between
+  strokes; green and amber dots are where the pen lands and leaves. HOLD and RESUME are one key
+  in two positions. STOP asks twice, because it throws the resume point away for good.</p>
+  <div class="stage nd-stage">
+    <div class="stage-note">the picture fills in behind the head</div>
+    <div class="nd-dev"><div class="nd-screen">
+    <div class="nd-bar">
+      <i class="nd-jewel" style="--lyr:#FF6A00"></i>
+      <span class="nd-st" style="--lyr:#FF6A00">PLOTTING</span>
+      <span class="nd-who">NextDraw 2234</span>
+      <span class="nd-sp"></span>
+      <span class="nd-dro"><span class="nd-k">X</span><span class="nd-v">148.2</span>
+        <span class="nd-k">Y</span><span class="nd-v">104.6</span></span>
+      <span class="nd-dro"><span class="nd-k">PEN</span><span class="nd-v">DN</span></span>
+      <span class="nd-dro"><span class="nd-k">DONE</span><span class="nd-v">62.4%</span></span>
+      <span class="nd-lockglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+    </div>
+    <div class="nd-body" style="grid-template-columns:minmax(0,1fr) 262px">
+      <div class="nd-col">
+        <div class="nd-bedwrap nd-well" style="flex:1"><div class="nd-bed" style="width:456px;height:314px"><div class="nd-paper" style="left:0;top:0;width:34.371%;height:35.348%"></div><svg class="nd-bedart" viewBox="0 0 864 594" preserveAspectRatio="none"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="nd-pu" d="M0.0 0.0 9.0 9.7 89.0 95.3 98.0 105.0M160.0 105.0 148.9 97.8 13.6 9.8 2.5 2.5M0.0 0.0 13.0 2.7 177.1 37.3 190.0 40.0M190.0 170.0 190.2 156.8 191.8 53.2 192.0 40.0M192.0 170.0 192.3 156.8 193.9 53.2 194.1 40.0M194.1 170.0 194.3 156.8 195.9 53.2 196.1 40.0M196.1 170.0 196.3 156.7 198.0 53.2 198.2 40.0M198.2 170.0 198.4 156.7 200.0 53.2 200.3 40.0M200.3 170.0 200.5 156.8 202.1 53.2 202.3 40.0M202.3 170.0 202.5 156.8 204.1 53.2 204.4 40.0M204.4 170.0 204.6 156.7 206.2 53.2 206.4 40.0M206.4 170.0 206.6 156.7 208.3 53.2 208.5 40.0M208.5 170.0 208.7 156.7 210.3 53.2 210.5 40.0M210.5 170.0 210.7 156.8 212.3 53.2 212.6 40.0M212.6 170.0 212.8 156.8 214.4 53.2 214.6 40.0M214.6 170.0 214.8 156.8 216.5 53.2 216.7 40.0M216.7 170.0 216.9 156.7 218.5 53.2 218.7 40.0M218.7 170.0 218.9 156.8 220.5 53.2 220.8 40.0M220.8 170.0 221.0 156.8 222.6 53.2 222.8 40.0M222.8 170.0 223.0 156.7 224.7 53.2 224.9 40.0M224.9 170.0 225.1 156.8 226.7 53.2 226.9 40.0M226.9 170.0 227.1 156.7 228.8 53.2 229.0 40.0M229.0 170.0 229.2 156.7 230.8 53.2 231.0 40.0M231.0 170.0 231.2 156.8 232.9 53.2 233.1 40.0M233.1 170.0 233.3 156.8 234.9 53.2 235.1 40.0M235.1 170.0 235.3 156.8 237.0 53.2 237.2 40.0M237.2 170.0 237.4 156.7 239.0 53.2 239.2 40.0M239.2 170.0 239.4 156.7 241.1 53.2 241.3 40.0M241.3 170.0 241.5 156.8 243.1 53.2 243.3 40.0M243.3 170.0 243.5 156.7 245.2 53.2 245.4 40.0M245.4 170.0 245.6 156.7 247.2 53.2 247.4 40.0M247.4 170.0 247.6 156.8 249.3 53.2 249.5 40.0M249.5 170.0 249.7 156.8 251.3 53.2 251.5 40.0M251.5 170.0 251.7 156.8 253.4 53.2 253.6 40.0M253.6 170.0 253.8 156.7 255.4 53.2 255.7 40.0M255.6 170.0 255.8 156.7 257.5 53.2 257.7 40.0M257.7 170.0 257.9 156.8 259.5 53.2 259.7 40.0M259.8 170.0 259.9 156.8 261.6 53.2 261.8 40.0M261.8 170.0 262.0 156.8 263.6 53.2 263.9 40.0M263.9 170.0 264.1 156.7 265.7 53.2 265.9 40.0M265.9 170.0 266.1 156.7 267.7 53.2 267.9 40.0M267.9 170.0 268.1 156.8 269.8 53.2 270.0 40.0M270.0 170.0 258.8 163.0 13.7 9.6 2.5 2.5"/><path class="nd-pending" d="M204.4 165.4 204.4 170.0M206.4 40.0 206.4 44.6 206.4 165.4M206.4 165.4 206.4 170.0M208.5 40.0 208.5 44.6 208.5 165.4M208.5 165.4 208.5 170.0M210.5 40.0 210.5 44.6 210.5 165.4M210.5 165.4 210.5 170.0M212.6 40.0 212.6 44.6 212.5 165.4M212.5 165.4 212.6 170.0M214.6 40.0 214.6 44.6 214.6 165.4M214.6 165.4 214.6 170.0M216.7 40.0 216.7 44.6 216.7 165.4M216.7 165.4 216.7 170.0M218.7 40.0 218.7 44.6 218.7 165.4M218.7 165.4 218.7 170.0M220.8 40.0 220.8 44.6 220.8 165.4M220.8 165.4 220.8 170.0M222.8 40.0 222.8 44.6 222.8 165.4M222.8 165.4 222.8 170.0M224.9 40.0 224.9 44.6 224.9 165.4M224.9 165.4 224.9 170.0M226.9 40.0 226.9 44.6 226.9 165.4M226.9 165.4 226.9 170.0M229.0 40.0 229.0 44.6 229.0 165.4M229.0 165.4 229.0 170.0M231.0 40.0 231.0 44.6 231.0 165.4M231.0 165.4 231.0 170.0M233.1 40.0 233.1 44.6 233.1 165.4M233.1 165.4 233.1 170.0M235.1 40.0 235.1 44.6 235.1 165.4M235.1 165.4 235.1 170.0M237.2 40.0 237.2 44.6 237.2 165.4M237.2 165.4 237.2 170.0M239.2 40.0 239.2 44.6 239.2 165.4M239.2 165.4 239.2 170.0M241.3 40.0 241.3 44.6 241.3 165.4M241.3 165.4 241.3 170.0M243.3 40.0 243.3 44.6 243.3 165.4M243.3 165.4 243.3 170.0M245.4 40.0 245.4 44.6 245.4 165.4M245.4 165.4 245.4 170.0M247.4 40.0 247.4 44.6 247.4 165.4M247.4 165.4 247.4 170.0M249.5 40.0 249.5 44.6 249.5 165.4M249.5 165.4 249.5 170.0M251.5 40.0 251.5 44.6 251.5 165.4M251.5 165.4 251.5 170.0M253.6 40.0 253.6 44.6 253.6 165.4M253.6 165.4 253.6 170.0M255.7 40.0 255.7 44.6 255.6 165.4M255.6 165.4 255.6 170.0M257.7 40.0 257.7 44.6 257.7 165.4M257.7 165.4 257.7 170.0M259.7 40.0 259.7 44.6 259.7 165.4M259.7 165.4 259.8 170.0M261.8 40.0 261.8 44.6 261.8 165.4M261.8 165.4 261.8 170.0M263.9 40.0 263.9 44.6 263.9 165.4M263.9 165.4 263.9 170.0M265.9 40.0 265.9 44.6 265.9 165.4M265.9 165.4 265.9 170.0M267.9 40.0 267.9 44.6 267.9 165.4M267.9 165.4 267.9 170.0M270.0 40.0 270.0 44.6 270.0 165.4M270.0 165.4 270.0 170.0"/><path class="nd-drawn" d="M98.0 105.0 98.0 107.1 97.7 108.6 97.0 110.1 96.1 111.5 94.9 112.7 93.4 113.7 91.8 114.4 90.6 114.6 89.4 114.8 88.1 114.8 86.9 114.6 85.6 114.2 84.5 113.7 83.3 113.1 82.2 112.3 81.3 111.3 80.4 110.3 79.8 109.1 79.2 107.8 78.8 106.4 78.6 105.0 78.5 103.6 78.6 102.1 79.0 100.6 79.5 99.2 80.2 97.9 81.1 96.6 82.1 95.4 83.3 94.4 84.6 93.5 86.0 92.8 86.8 92.5M86.8 92.5 88.4 92.1 90.0 91.8 91.7 91.8 93.3 92.0 95.0 92.4 96.6 93.0 98.1 93.8 99.6 94.8 100.9 96.0 102.1 97.4 103.0 98.9 103.8 100.5 104.4 102.3 104.8 104.1 104.9 105.9 104.8 107.8 104.5 109.7 103.9 111.5 103.1 113.3 102.1 115.0 100.8 116.5 99.4 117.9 97.7 119.1 96.0 120.1 94.1 120.8 93.1 121.1M93.1 121.1 91.0 121.5 89.0 121.6 86.8 121.5 84.8 121.1 82.7 120.5 80.8 119.6 78.9 118.4 77.2 117.0 75.7 115.4 74.4 113.6 73.3 111.6 72.5 109.5 72.0 107.3 71.7 105.0 71.7 102.7 72.0 100.4 72.6 98.1 73.5 95.9 74.6 93.8 76.0 91.9 76.8 91.0 77.7 90.1M77.7 90.1 78.6 89.3 79.6 88.6 80.6 87.9 81.7 87.3 82.8 86.7 83.9 86.3 85.1 85.9 86.3 85.5 87.5 85.2 88.7 85.0 90.0 84.9 91.3 84.9 92.5 85.0 93.8 85.1 95.0 85.3 96.3 85.6 97.5 86.0 98.8 86.4 99.9 86.9 101.1 87.6 102.2 88.2 103.3 89.0 104.3 89.8 105.3 90.7 106.2 91.6 107.1 92.6 107.9 93.7 108.6 94.8 109.3 95.9 109.9 97.1 110.4 98.4 110.8 99.6 111.2 101.0 111.5 102.3 111.7 103.6 111.8 105.0M111.8 105.0 111.8 106.4 111.7 107.7 111.6 109.1 111.4 110.5 111.0 111.8 110.6 113.2 110.1 114.5 109.6 115.7 108.9 117.0 108.2 118.2 107.4 119.4 106.5 120.5 105.5 121.5 104.5 122.5 103.4 123.4 102.3 124.3 101.1 125.1 99.8 125.8 98.5 126.5 97.2 127.0 95.8 127.5 94.4 127.9 92.9 128.2 91.5 128.4 90.0 128.5 88.5 128.5 87.0 128.4 85.6 128.3 84.1 128.0 82.6 127.7 81.2 127.2 79.8 126.7 78.4 126.1M78.4 126.1 77.1 125.4 75.8 124.6 74.5 123.7 73.4 122.7 72.2 121.7 71.1 120.6 70.2 119.4 69.2 118.2 68.4 116.9 67.6 115.5 66.9 114.1 66.3 112.7 65.8 111.2 65.4 109.7 65.1 108.2 64.9 106.6 64.8 105.0 64.8 103.4 64.8 101.8 65.0 100.2 65.3 98.7 65.7 97.1 66.2 95.6 66.8 94.1 67.4 92.6 68.2 91.2 69.0 89.8 70.0 88.4 71.0 87.2 72.1 86.0M72.1 86.0 73.3 84.8 74.6 83.7 75.9 82.8 77.3 81.9 78.7 81.1 80.2 80.3 81.8 79.7 83.4 79.2 85.0 78.7 86.6 78.4 88.3 78.2 90.0 78.1 91.7 78.1 93.4 78.1 95.1 78.3 96.8 78.6 98.4 79.0 100.1 79.6 101.7 80.2 103.3 80.9 104.8 81.7 106.2 82.7 107.6 83.7 109.0 84.8 110.3 86.0 111.5 87.2 112.6 88.5 113.7 90.0M113.7 90.0 114.6 91.4 115.5 93.0 116.3 94.6 116.9 96.3 117.5 97.9 118.0 99.7 118.3 101.4 118.5 103.2 118.7 105.0 118.7 106.8 118.6 108.6 118.4 110.4 118.0 112.2 117.6 114.0 117.0 115.7 116.4 117.4 115.6 119.1 114.7 120.7 113.7 122.3 112.7 123.7 111.5 125.2 110.2 126.5 108.9 127.8 107.5 129.0 105.9 130.1 104.4 131.2M104.4 131.2 102.7 132.1 101.0 132.9 99.3 133.6 97.5 134.2 95.7 134.6 93.8 135.0 91.9 135.3 90.0 135.4 88.1 135.4 86.2 135.3 84.3 135.1 82.4 134.7 80.5 134.2 78.7 133.6 76.9 132.9 75.1 132.1 73.4 131.2 71.7 130.1 70.2 129.0 68.6 127.8 67.2 126.4 65.8 125.0 64.6 123.5 63.4 121.9 62.3 120.2M62.3 120.2 61.4 118.5 60.5 116.7 59.8 114.8 59.2 112.9 58.6 111.0 58.3 109.0 58.0 107.0 57.9 105.0 57.9 103.0 58.0 101.0 58.3 98.9 58.6 96.9 59.1 95.0 59.8 93.0 60.5 91.1 61.4 89.3 62.4 87.5 63.5 85.7 64.7 84.0 66.0 82.4 67.4 80.9 68.9 79.5 70.5 78.2M70.5 78.2 72.2 77.0 74.0 75.8 75.8 74.8 77.7 73.9 79.7 73.2 81.7 72.5 83.7 72.0 85.8 71.6 87.9 71.3 90.0 71.2 92.1 71.2 94.3 71.3 96.4 71.6 98.5 72.0 100.6 72.5 102.6 73.2 104.6 73.9 106.6 74.9 108.5 75.9 110.3 77.1 112.0 78.4 113.7 79.8M113.7 79.8 115.3 81.2 116.8 82.8 118.2 84.5 119.5 86.3 120.7 88.1 121.7 90.1 122.7 92.0 123.5 94.1 124.2 96.2 124.7 98.4 125.1 100.6 125.4 102.8 125.6 105.0 125.6 107.2 125.4 109.5 125.1 111.7 124.7 113.9 124.2 116.1 123.4 118.2 122.6 120.3 121.6 122.4M121.6 122.4 120.5 124.4 119.3 126.3 118.0 128.1 116.5 129.9 114.9 131.6 113.3 133.1 111.5 134.6 109.6 135.9 107.7 137.2 105.7 138.3 103.6 139.3 101.4 140.1 99.2 140.8 97.0 141.4 94.7 141.8 92.4 142.1 90.0 142.3 87.7 142.3 85.3 142.1 83.0 141.8 81.8 141.6M81.8 141.6 79.5 141.1 77.2 140.4 75.0 139.6 72.8 138.7 70.7 137.6 68.7 136.3 66.7 135.0 64.8 133.5 63.9 132.8 62.2 131.1 60.5 129.4 59.8 128.4 58.3 126.5 57.6 125.6 56.9 124.5 55.7 122.5 54.6 120.3 54.1 119.2 53.7 118.1 52.9 115.8 52.5 114.6 52.2 113.5 51.9 112.3 51.7 111.1 51.4 109.9M51.4 109.9 51.3 108.7 51.2 107.4 51.1 106.2 51.0 105.0 51.0 103.8 51.0 102.5 51.1 101.3 51.2 100.1 51.3 98.9 51.5 97.6 51.7 96.4 52.0 95.2 52.3 94.0 52.6 92.8 53.0 91.7 53.3 90.5 53.8 89.3 54.3 88.2 54.8 87.1 55.3 86.0 56.0 84.9 56.5 83.8 57.2 82.7 57.9 81.7 58.6 80.7 59.4 79.7 60.2 78.7 61.0 77.7 61.8 76.8 62.7 75.9 63.6 75.1 64.5 74.2 65.5 73.4 66.5 72.6 67.5 71.9 68.5 71.1 69.6 70.5 70.6 69.8M70.6 69.8 71.8 69.2 72.8 68.6 74.0 68.0 75.2 67.5 76.4 67.1 77.5 66.6 78.7 66.2 79.9 65.8 81.2 65.5 82.4 65.2 83.7 65.0 84.9 64.7 86.2 64.6 87.5 64.4 88.7 64.3 90.0 64.3 91.3 64.3 92.6 64.3 93.9 64.4 95.1 64.5 96.4 64.6 97.7 64.8 98.9 65.0 100.2 65.3 101.4 65.6 102.7 65.9 103.9 66.3 105.2 66.8 106.3 67.2 107.5 67.7 108.7 68.3 109.9 68.8 111.0 69.5 112.2 70.1 113.3 70.8 114.3 71.5 115.4 72.3M115.4 72.3 116.4 73.0 117.4 73.9 118.4 74.7 119.4 75.6 120.3 76.5 121.2 77.5 122.1 78.4 122.9 79.5 123.8 80.4 124.5 81.5 125.3 82.6 126.0 83.7 126.7 84.8 127.3 86.0 128.0 87.1 128.5 88.3 129.1 89.5 129.6 90.8 130.0 92.0 130.4 93.2 130.8 94.5 131.2 95.8 131.5 97.1 131.7 98.4 132.0 99.7 132.1 101.0 132.3 102.3 132.4 103.7 132.5 105.0 132.4 106.3 132.4 107.7 132.3 109.0 132.3 110.3 132.1 111.7 131.9 113.0 131.6 114.3M131.6 114.3 131.4 115.6 131.0 116.9 130.7 118.2 130.3 119.5 129.8 120.8 129.4 122.0 128.8 123.3 128.3 124.5 127.7 125.7 127.0 126.9 126.4 128.1 125.6 129.2 124.9 130.4 124.1 131.4 123.3 132.5 122.4 133.6 121.5 134.6 120.6 135.6 119.7 136.6 118.7 137.5 117.7 138.5 116.6 139.3 115.5 140.2 114.5 141.0 113.3 141.8 112.2 142.5 111.0 143.2 109.8 143.9 108.6 144.5 107.3 145.1 106.1 145.7 104.8 146.2 103.6 146.7 102.2 147.1 100.9 147.5M100.9 147.5 99.6 147.9 98.2 148.2 96.9 148.4 95.5 148.7 94.1 148.8 92.8 149.0 91.4 149.1 90.0 149.2 88.6 149.1 87.2 149.1 85.8 149.0 84.5 148.9 83.1 148.8 81.7 148.6 80.3 148.3 79.0 148.0 77.6 147.7 76.2 147.3 74.9 146.9 73.6 146.5 72.3 145.9 71.0 145.4 69.7 144.8 68.5 144.2 67.2 143.5 66.0 142.8 64.8 142.0 63.6 141.3 62.5 140.5 61.4 139.6 60.3 138.7 59.2 137.8 58.2 136.8 57.2 135.8M57.2 135.8 56.2 134.8 55.2 133.8 54.3 132.7 53.4 131.6 52.6 130.4 51.8 129.3 51.0 128.0 50.3 126.8 49.6 125.6 48.9 124.3 48.3 123.0 47.7 121.7 47.2 120.4 46.7 119.1 46.3 117.7 45.8 116.3 45.5 115.0 45.1 113.6 44.9 112.1 44.6 110.7 44.5 109.3 44.3 107.9 44.2 106.4 44.1 105.0 44.1 103.6 44.1 102.1 44.2 100.7 44.3 99.2 44.5 97.8 44.7 96.4 45.0 94.9 45.3 93.5 45.6 92.1M45.6 92.1 46.0 90.7 46.5 89.3 47.0 88.0 47.5 86.6 48.0 85.2 48.7 83.9 49.3 82.6 50.0 81.4 50.7 80.1 51.5 78.8 52.3 77.6 53.2 76.5 54.1 75.3 55.0 74.1 56.0 73.0 57.0 72.0 58.0 70.9 59.1 69.9 60.1 68.9 61.3 68.0 62.4 67.1 63.6 66.2 64.8 65.3 66.1 64.5 67.3 63.8 68.6 63.1 69.9 62.4 71.3 61.7 72.6 61.1 74.0 60.6 75.4 60.0 76.8 59.6M76.8 59.6 78.2 59.2 79.7 58.8 81.1 58.4 82.6 58.2 84.0 57.9 85.5 57.7 87.0 57.6 88.5 57.5 90.0 57.4 91.5 57.4 93.0 57.4 94.5 57.5 96.0 57.6 97.5 57.8 99.0 58.0 100.4 58.3 101.9 58.6 103.4 59.0 104.8 59.4 106.2 59.9 107.7 60.4 109.1 60.9 110.5 61.5 111.8 62.2 113.2 62.8 114.5 63.5 115.8 64.3 117.1 65.1 118.4 65.9 119.6 66.8 120.8 67.7M120.8 67.7 122.0 68.7 123.1 69.7 124.3 70.7 125.3 71.8 126.4 72.9 127.4 74.0 128.4 75.2 129.4 76.4 130.2 77.6 131.1 78.9 132.0 80.2 132.8 81.5 133.5 82.9 134.2 84.2 134.8 85.6 135.5 87.0 136.0 88.4 136.6 89.9 137.1 91.3 137.5 92.8 137.9 94.3 138.3 95.8 138.5 97.3 138.8 98.8 139.0 100.4 139.2 101.9 139.2 103.5 139.3 105.0 139.3 106.6 139.3 108.1 139.2 109.7M139.2 109.7 139.1 111.2 138.9 112.8 138.7 114.3 138.4 115.8 138.0 117.3 137.6 118.8 137.2 120.3 136.8 121.8 136.2 123.3 135.7 124.8 135.1 126.2 134.4 127.6 133.7 129.0 132.9 130.4 132.2 131.8 131.3 133.1 130.5 134.4 129.5 135.7 128.6 136.9 127.6 138.1 126.6 139.3 125.5 140.5 124.4 141.6 123.2 142.7 122.0 143.8 120.8 144.8 119.6 145.7 118.3 146.7 117.0 147.6 115.7 148.4M115.7 148.4 114.3 149.3 112.9 150.0 111.5 150.7 110.1 151.4 108.6 152.1 107.2 152.7 105.7 153.2 104.1 153.7 102.6 154.2 101.1 154.6 99.5 154.9 98.0 155.2 96.4 155.5 94.8 155.7 93.2 155.9 91.6 156.0 90.0 156.1 88.4 156.0 86.8 156.0 85.2 155.9 83.6 155.8 82.0 155.6 80.4 155.4 78.8 155.0 77.2 154.7 75.7 154.3 74.1 153.9 72.6 153.4 71.0 152.9M71.0 152.9 69.5 152.2 68.1 151.6 66.6 150.9 65.1 150.2 63.7 149.4 62.3 148.6 61.0 147.8 59.6 146.9 58.3 145.9 57.0 144.9 55.7 143.9 54.5 142.8 53.3 141.7 52.1 140.6 51.0 139.3 49.9 138.2 48.9 136.9 47.9 135.6 46.9 134.3 46.0 132.9 45.1 131.5 44.2 130.2 43.5 128.7 42.7 127.3 42.0 125.8 41.3 124.3 40.7 122.7 40.1 121.2 39.6 119.6M39.6 119.6 39.1 118.1 38.8 116.5 38.4 114.8 38.1 113.2 37.8 111.6 37.6 110.0 37.4 108.3 37.3 106.7 37.2 105.0 37.2 103.3 37.3 101.7 37.4 100.0 37.5 98.4 37.7 96.7 37.9 95.1 38.3 93.4 38.6 91.8 39.0 90.2 39.5 88.6 40.0 87.0 40.5 85.4 41.2 83.9 41.8 82.3 42.5 80.8 43.3 79.3 44.1 77.9 44.9 76.4 45.8 75.0M45.8 75.0 46.7 73.6 47.8 72.2 48.7 70.9 49.8 69.6 50.9 68.3 52.1 67.1 53.3 65.9 54.5 64.7 55.8 63.6 57.0 62.5 58.4 61.5 59.7 60.5 61.1 59.5 62.6 58.6 64.0 57.7 65.5 56.9 67.0 56.1 68.6 55.4 70.1 54.7 71.7 54.1 73.3 53.5 74.9 53.0 76.5 52.5 78.2 52.1 79.8 51.7 81.5 51.4 83.2 51.1 84.9 50.9M84.9 50.9 86.6 50.7 88.3 50.6 90.0 50.5 91.7 50.5 93.4 50.5 95.1 50.7 96.9 50.8 98.6 51.0 100.3 51.3 101.9 51.6 103.6 51.9 105.3 52.4 107.0 52.8 108.6 53.4 110.2 53.9 111.8 54.6 113.4 55.2 115.0 56.0 116.5 56.7 118.0 57.6 119.5 58.5 121.0 59.4 122.4 60.4 123.8 61.4 125.2 62.4 126.5 63.6 127.9 64.7M127.9 64.7 129.1 65.9 130.4 67.1 131.6 68.4 132.7 69.6 133.8 71.0 134.9 72.3 135.9 73.8 136.9 75.2 137.9 76.7 138.8 78.2 139.6 79.7 140.4 81.3 141.2 82.9 141.9 84.5 142.5 86.1 143.2 87.7 143.7 89.4 144.2 91.1 144.6 92.8 145.0 94.5 145.3 96.2 145.6 98.0 145.8 99.7 146.1 101.5 146.1 103.2 146.2 105.0 146.2 106.8M146.2 106.8 146.2 108.5 146.1 110.3 145.9 112.1 145.7 113.8 145.4 115.6 145.1 117.3 144.7 119.0 144.2 120.8 143.8 122.5 143.2 124.2 142.6 125.9 142.0 127.5 141.3 129.1 140.5 130.7 139.8 132.4 138.9 133.9 138.0 135.5 137.0 137.0 136.0 138.5 135.0 139.9 133.9 141.3 132.7 142.7 131.6 144.0 130.4 145.3 129.1 146.6 127.8 147.9M127.8 147.9 126.4 149.1 125.0 150.2 123.6 151.3 122.2 152.4 120.7 153.4 119.2 154.4 117.6 155.3 116.1 156.1 114.5 157.0 112.8 157.7 111.2 158.5 109.5 159.1 107.8 159.8 106.1 160.3 104.3 160.9 102.6 161.3 100.8 161.7 99.0 162.0 97.2 162.4 95.5 162.6 93.6 162.8 91.8 162.9 90.0 162.9 88.2 162.9 86.4 162.9 84.5 162.8M84.5 162.8 82.7 162.6 80.9 162.4 79.1 162.1 77.3 161.8 75.5 161.4 73.8 160.9 72.0 160.4 70.3 159.8 68.5 159.3 66.8 158.6 65.1 157.9 63.5 157.1 61.8 156.3 60.2 155.3 58.6 154.4 57.1 153.4 55.5 152.4 54.1 151.3 52.6 150.2 51.2 149.0 49.8 147.9 48.4 146.6 47.1 145.3 45.8 143.9 44.6 142.5 43.5 141.1M43.5 141.1 42.3 139.6 41.2 138.2 40.2 136.7 39.2 135.1 38.2 133.5 37.3 131.9 36.4 130.2 35.7 128.5 34.9 126.8 34.2 125.1 33.6 123.3 33.0 121.5 32.5 119.8 32.0 118.0 31.6 116.2 31.3 114.3 30.9 112.4 30.7 110.6 30.5 108.7 30.4 106.9 30.3 105.0 30.4 103.1 30.4 101.2 30.5 99.4 30.7 97.5M30.7 97.5 30.9 95.7 31.2 93.8 31.6 91.9 32.0 90.1 32.4 88.3 32.9 86.5 33.5 84.7 34.1 82.9 34.8 81.1 35.6 79.4 36.4 77.7 37.2 76.0 38.2 74.3 39.1 72.7 40.1 71.1 41.2 69.5 42.3 68.0 43.4 66.5 44.7 65.0 45.9 63.6 47.2 62.2 48.5 60.9 50.0 59.6 51.4 58.3 52.8 57.1M52.8 57.1 54.3 55.9 55.9 54.8 57.4 53.7 59.1 52.7 60.7 51.7 62.4 50.8 64.1 49.9 65.8 49.1 67.6 48.3 69.3 47.6 71.1 46.9 73.0 46.4 74.8 45.8 76.7 45.3 78.5 44.9 80.4 44.6 82.3 44.2 84.2 44.0 86.2 43.8 88.1 43.7 90.0 43.6 91.9 43.6 93.9 43.7 95.8 43.8 97.7 44.0M97.7 44.0 99.6 44.2 101.5 44.5 103.4 44.9 105.3 45.3 107.2 45.8 109.1 46.3 110.9 46.9 112.8 47.5 114.6 48.3 116.3 49.0 118.1 49.9 119.8 50.7 121.5 51.7 123.2 52.6 124.9 53.7 126.5 54.8 128.0 56.0 129.6 57.1 131.1 58.4 132.6 59.6 134.0 61.0 135.4 62.4 136.7 63.8 138.0 65.3M138.0 65.3 139.3 66.8 140.5 68.3 141.6 69.9 142.8 71.5 143.8 73.2 144.8 74.9 145.7 76.6 146.7 78.3 147.5 80.1 148.3 81.9 149.0 83.7 149.7 85.6 150.3 87.5 150.9 89.4 151.3 91.3 151.8 93.2 152.1 95.1 152.5 97.1 152.7 99.1 152.9 101.0 153.0 103.0 153.1 105.0 153.1 107.0 153.1 109.0M153.1 109.0 152.9 110.9 152.8 112.9 152.5 114.9 152.2 116.9 151.8 118.8 151.4 120.8 150.9 122.7 150.3 124.6 149.7 126.5 149.1 128.4 148.3 130.2 147.5 132.1 146.7 133.9 145.8 135.7 144.8 137.4 143.8 139.1 142.7 140.8 141.6 142.5 140.4 144.1 139.2 145.7 137.9 147.2 136.6 148.8 135.2 150.2 133.8 151.7M133.8 151.7 132.3 153.0 130.8 154.4 129.3 155.6 127.7 156.9 126.1 158.1 124.4 159.2 122.7 160.3 121.0 161.3 119.2 162.3 117.4 163.2 115.5 164.1 113.7 164.9 111.8 165.6 109.9 166.3 108.0 166.9 106.1 167.5 104.1 168.0 102.1 168.5 100.1 168.8 98.1 169.2 96.1 169.4 94.1 169.6 92.0 169.7M92.0 169.7 90.0 169.8 88.0 169.8 85.9 169.8 83.9 169.6 81.8 169.4 79.8 169.2 77.8 168.9 75.8 168.5 73.8 168.1 71.8 167.5 69.9 167.0 67.9 166.3 66.0 165.7 64.1 164.9 62.2 164.1 60.4 163.2 58.5 162.3 56.7 161.3 54.9 160.3 53.2 159.1 51.5 158.0 49.8 156.8 48.2 155.5M48.2 155.5 46.6 154.2 45.1 152.9 43.6 151.4 42.1 150.0 40.7 148.5 39.3 146.9 38.0 145.3 36.7 143.7 35.5 142.0 34.3 140.3 33.2 138.6 32.2 136.8 31.2 135.0 30.2 133.1 29.4 131.2 28.5 129.4 27.8 127.4 27.0 125.5 26.4 123.5 25.8 121.5 25.3 119.5 24.8 117.4 24.5 115.4M24.5 115.4 24.1 113.3 23.9 111.3 23.6 109.2 23.5 107.1 23.4 105.0 23.5 102.9 23.5 100.8 23.7 98.7 23.8 96.6 24.1 94.6 24.4 92.5 24.8 90.4 25.3 88.4 25.8 86.4 26.4 84.3 27.1 82.3 27.7 80.3 28.5 78.4 29.4 76.5 30.3 74.6 31.2 72.7 32.2 70.8 33.3 69.0M33.3 69.0 34.4 67.2 35.6 65.5 36.9 63.8 38.1 62.1 39.5 60.5 40.9 58.9 42.3 57.4 43.8 55.8 45.4 54.4 47.0 53.0 48.6 51.6 50.3 50.3 52.0 49.1 53.7 47.9 55.6 46.8 57.4 45.6 59.3 44.7 61.1 43.7 63.1 42.8 65.0 41.9 67.0 41.1 69.0 40.4M69.0 40.4 71.0 39.8 73.1 39.1 75.2 38.6 77.2 38.1 79.3 37.8 81.5 37.4 83.6 37.2 85.7 36.9 87.9 36.8 90.0 36.7 92.2 36.8 94.3 36.8 96.4 37.0 98.6 37.1 100.7 37.4 102.8 37.7 105.0 38.2 107.1 38.6 109.1 39.2 111.2 39.7 113.3 40.4 115.3 41.1M115.3 41.1 117.3 42.0 119.3 42.8 121.2 43.7 123.2 44.7 125.0 45.8 126.9 46.8 128.7 48.0 130.5 49.2 132.3 50.5 134.0 51.8 135.7 53.2 137.3 54.6 138.9 56.1 140.4 57.7 141.9 59.3 143.3 60.9 144.7 62.6 146.1 64.3 147.3 66.0 148.6 67.8 149.7 69.7 150.9 71.5M150.9 71.5 151.9 73.5 152.9 75.4 153.8 77.4 154.7 79.4 155.5 81.4 156.2 83.5 156.9 85.6 157.5 87.7 158.0 89.8 158.5 91.9 158.9 94.1 159.3 96.2 159.6 98.4 159.8 100.6 160.0 105.0M190.0 40.0 190.0 44.6 190.0 165.4M190.0 165.4 190.0 170.0M192.0 40.0 192.0 44.6 192.0 165.4M192.0 165.4 192.0 170.0M194.1 40.0 194.1 44.6 194.1 165.4M194.1 165.4 194.1 170.0M196.1 40.0 196.1 44.6 196.1 165.4M196.1 165.4 196.1 170.0M198.2 40.0 198.2 44.6 198.2 165.4M198.2 165.4 198.2 170.0M200.3 40.0 200.3 44.6 200.3 165.4M200.3 165.4 200.3 170.0M202.3 40.0 202.3 44.6 202.3 165.4M202.3 165.4 202.3 170.0M204.4 40.0 204.4 44.6 204.4 165.4"/></g><g class="nd-lift"><circle cx="160.0" cy="105.0" r="2.6"/><circle cx="190.0" cy="170.0" r="2.6"/><circle cx="192.0" cy="170.0" r="2.6"/><circle cx="194.1" cy="170.0" r="2.6"/><circle cx="196.1" cy="170.0" r="2.6"/><circle cx="198.2" cy="170.0" r="2.6"/><circle cx="200.3" cy="170.0" r="2.6"/><circle cx="202.3" cy="170.0" r="2.6"/><circle cx="204.4" cy="170.0" r="2.6"/><circle cx="206.4" cy="170.0" r="2.6"/><circle cx="208.5" cy="170.0" r="2.6"/><circle cx="210.5" cy="170.0" r="2.6"/><circle cx="212.6" cy="170.0" r="2.6"/><circle cx="214.6" cy="170.0" r="2.6"/><circle cx="216.7" cy="170.0" r="2.6"/><circle cx="218.7" cy="170.0" r="2.6"/><circle cx="220.8" cy="170.0" r="2.6"/><circle cx="222.8" cy="170.0" r="2.6"/><circle cx="224.9" cy="170.0" r="2.6"/><circle cx="226.9" cy="170.0" r="2.6"/><circle cx="229.0" cy="170.0" r="2.6"/><circle cx="231.0" cy="170.0" r="2.6"/><circle cx="233.1" cy="170.0" r="2.6"/><circle cx="235.1" cy="170.0" r="2.6"/><circle cx="237.2" cy="170.0" r="2.6"/><circle cx="239.2" cy="170.0" r="2.6"/><circle cx="241.3" cy="170.0" r="2.6"/><circle cx="243.3" cy="170.0" r="2.6"/><circle cx="245.4" cy="170.0" r="2.6"/><circle cx="247.4" cy="170.0" r="2.6"/><circle cx="249.5" cy="170.0" r="2.6"/><circle cx="251.5" cy="170.0" r="2.6"/><circle cx="253.6" cy="170.0" r="2.6"/><circle cx="255.6" cy="170.0" r="2.6"/><circle cx="257.7" cy="170.0" r="2.6"/><circle cx="259.8" cy="170.0" r="2.6"/><circle cx="261.8" cy="170.0" r="2.6"/><circle cx="263.9" cy="170.0" r="2.6"/><circle cx="265.9" cy="170.0" r="2.6"/><circle cx="267.9" cy="170.0" r="2.6"/><circle cx="270.0" cy="170.0" r="2.6"/></g><g class="nd-drop"><circle cx="98.0" cy="105.0" r="2.6"/><circle cx="190.0" cy="40.0" r="2.6"/><circle cx="192.0" cy="40.0" r="2.6"/><circle cx="194.1" cy="40.0" r="2.6"/><circle cx="196.1" cy="40.0" r="2.6"/><circle cx="198.2" cy="40.0" r="2.6"/><circle cx="200.3" cy="40.0" r="2.6"/><circle cx="202.3" cy="40.0" r="2.6"/><circle cx="204.4" cy="40.0" r="2.6"/><circle cx="206.4" cy="40.0" r="2.6"/><circle cx="208.5" cy="40.0" r="2.6"/><circle cx="210.5" cy="40.0" r="2.6"/><circle cx="212.6" cy="40.0" r="2.6"/><circle cx="214.6" cy="40.0" r="2.6"/><circle cx="216.7" cy="40.0" r="2.6"/><circle cx="218.7" cy="40.0" r="2.6"/><circle cx="220.8" cy="40.0" r="2.6"/><circle cx="222.8" cy="40.0" r="2.6"/><circle cx="224.9" cy="40.0" r="2.6"/><circle cx="226.9" cy="40.0" r="2.6"/><circle cx="229.0" cy="40.0" r="2.6"/><circle cx="231.0" cy="40.0" r="2.6"/><circle cx="233.1" cy="40.0" r="2.6"/><circle cx="235.1" cy="40.0" r="2.6"/><circle cx="237.2" cy="40.0" r="2.6"/><circle cx="239.2" cy="40.0" r="2.6"/><circle cx="241.3" cy="40.0" r="2.6"/><circle cx="243.3" cy="40.0" r="2.6"/><circle cx="245.4" cy="40.0" r="2.6"/><circle cx="247.4" cy="40.0" r="2.6"/><circle cx="249.5" cy="40.0" r="2.6"/><circle cx="251.5" cy="40.0" r="2.6"/><circle cx="253.6" cy="40.0" r="2.6"/><circle cx="255.7" cy="40.0" r="2.6"/><circle cx="257.7" cy="40.0" r="2.6"/><circle cx="259.7" cy="40.0" r="2.6"/><circle cx="261.8" cy="40.0" r="2.6"/><circle cx="263.9" cy="40.0" r="2.6"/><circle cx="265.9" cy="40.0" r="2.6"/><circle cx="267.9" cy="40.0" r="2.6"/><circle cx="270.0" cy="40.0" r="2.6"/></g></svg><div class="nd-cross" style="left:23.65%;top:27.84%"></div><div class="nd-bedcap">BED 864 &times; 594 MM &nbsp;·&nbsp; PAGE 297 &times; 210</div></div></div>
+        <div class="nd-ticker nd-well"><span class="nd-t">13:07:41</span><span class="nd-m">layer 2 &middot; 2 of 2</span></div>
+      </div>
+      <div class="nd-col">
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <span class="nd-pct">62.4</span><span class="nd-note">%</span>
+        </div>
+        <div class="nd-meter"><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i class="nd-on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="nd-stats">
+          <div class="nd-stat nd-well"><b>Elapsed</b><span>01:34</span></div>
+          <div class="nd-stat nd-well"><b>Remaining</b><span>00:57</span></div>
+          <div class="nd-stat nd-well"><b>Estimate</b><span>02:31</span></div>
+          <div class="nd-stat nd-well"><b>Layer</b><span>1 &rarr; 2</span></div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="nd-key nd-big nd-halt nd-krow">HOLD</button>
+        <button class="nd-key nd-big nd-raised nd-krow">STOP</button>
+      </div>
+    </div>
+    <div class="nd-nav">
+      <div class="nd-pk nd-raised">FILES</div>
+      <div class="nd-pk nd-pressed nd-on">RUN</div>
+      <div class="nd-pk nd-raised">JOG</div>
+      <div class="nd-pk nd-raised">SET</div>
+      <div class="nd-estop"></div>
+    </div>
+  </div></div>
+  </div>
+
+  <h2>05 <span>/</span> Jog</h2>
+  <p class="lede">52px keys, and the arrangement <em>is</em> the axis, so it needs no legend. The
+  3D joystick from the web UI is <b>gone</b> — on a 7&Prime; screen your finger covers the cap, and it
+  was sixteen barrel slices of CSS that Kivy cannot do anyway. Press and hold a pad key instead
+  and it posts the same continuous stick vector, at the same 120ms, released seven different
+  ways. Jogging stays live while a plot is <b>held</b>: pause, change the pen, resume.</p>
+  <div class="stage nd-stage">
+    <div class="stage-note">a thumb, not a mouse</div>
+    <div class="nd-dev"><div class="nd-screen">
+    <div class="nd-bar">
+      <i class="nd-jewel" style="--lyr:#7CFFB0"></i>
+      <span class="nd-st" style="--lyr:#7CFFB0">IDLE</span>
+      <span class="nd-who">NextDraw 2234</span>
+      <span class="nd-sp"></span>
+      <span class="nd-dro"><span class="nd-k">X</span><span class="nd-v">148.2</span>
+        <span class="nd-k">Y</span><span class="nd-v">104.6</span></span>
+      <span class="nd-dro"><span class="nd-k">PEN</span><span class="nd-v">UP</span></span>
+      
+      <span class="nd-lockglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+    </div>
+    <div class="nd-body" style="grid-template-columns:300px minmax(0,1fr)">
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">Move</span></div>
+        <div class="nd-pad nd-well">
+          <div class="nd-jk nd-raised">PEN&nbsp;&uarr;</div>
+          <div class="nd-jk nd-raised">Y+</div>
+          <div class="nd-jk nd-raised">PEN&nbsp;&darr;</div>
+          <div class="nd-jk nd-raised">X&minus;</div>
+          <div class="nd-jk nd-mid nd-pressed">GO&nbsp;0,0</div>
+          <div class="nd-jk nd-raised">X+</div>
+          <div class="nd-jk nd-raised" style="visibility:hidden"></div>
+          <div class="nd-jk nd-raised">Y&minus;</div>
+          <div class="nd-jk nd-raised" style="visibility:hidden"></div>
+        </div>
+        <div class="nd-piano nd-well">
+          <div class="nd-pkey nd-raised">0.1</div><div class="nd-pkey nd-pressed nd-on">1</div>
+          <div class="nd-pkey nd-raised">10</div><div class="nd-pkey nd-raised">50</div>
+        </div>
+      </div>
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">Position</span></div>
+        <div class="nd-stats" style="grid-template-columns:1fr 1fr">
+          <div class="nd-stat nd-glass" style="box-shadow:inset 0 2px 5px rgba(0,0,0,.9)"><b>X&nbsp;mm</b><span style="font-size:19px;color:var(--green)">148.2</span></div>
+          <div class="nd-stat nd-glass" style="box-shadow:inset 0 2px 5px rgba(0,0,0,.9)"><b>Y&nbsp;mm</b><span style="font-size:19px;color:var(--green)">104.6</span></div>
+        </div>
+        <div class="nd-cut"><span class="nd-etch">Machine</span></div>
+        <button class="nd-key nd-big nd-pressed nd-krow" style="color:var(--led)"><span class="nd-lens" style="background:radial-gradient(circle at 34% 28%,#fff,#FFB273 55%,#c24e00);box-shadow:0 0 7px rgba(255,106,0,.8)"></span>DISCONNECT</button>
+        <div style="display:flex;gap:7px">
+          <button class="nd-key nd-raised" style="flex:1;height:44px">HOMING CYCLE</button>
+          <button class="nd-key nd-raised" style="flex:1;height:44px">SET 0,0</button>
+        </div>
+        <button class="nd-key nd-raised nd-krow" style="height:44px">MOTORS OFF</button>
+        <div class="nd-note">Homed &middot; the readout is a measurement</div>
+      </div>
+    </div>
+    <div class="nd-nav"><div class="nd-pk nd-raised">FILES</div><div class="nd-pk nd-raised">PLOT</div><div class="nd-pk nd-pressed nd-on">JOG</div><div class="nd-pk nd-raised">SET</div><div class="nd-estop"></div></div>
+  </div></div>
+  </div>
+
+  <h2>06 <span>/</span> Set</h2>
+  <p class="lede">A rotary knob is a lovely object and a poor touch target — you cannot twist
+  something your fingertip is sitting on. Every setting is <b>label, minus, value, plus</b> at 44px,
+  with hold-to-repeat, debounced 280ms so a held key does not fire twenty POSTs. Changing any of
+  the four settings that affect the path invalidates the preflight, and the server says so by
+  marking it stale — which is why START goes dark again the moment you touch GAP.</p>
+  <div class="stage nd-stage">
+    <div class="stage-note">steppers, not knobs</div>
+    <div class="nd-dev"><div class="nd-screen">
+    <div class="nd-bar">
+      <i class="nd-jewel" style="--lyr:#7CFFB0"></i>
+      <span class="nd-st" style="--lyr:#7CFFB0">IDLE</span>
+      <span class="nd-who">NextDraw 2234</span>
+      <span class="nd-sp"></span>
+      <span class="nd-dro"><span class="nd-k">X</span><span class="nd-v">148.2</span>
+        <span class="nd-k">Y</span><span class="nd-v">104.6</span></span>
+      <span class="nd-dro"><span class="nd-k">PEN</span><span class="nd-v">UP</span></span>
+      
+      <span class="nd-lockglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+    </div>
+    <div class="nd-body" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">Pen</span></div>
+        <div class="nd-srow"><span class="nd-lb">Up position</span><div class="nd-stp nd-raised">&minus;</div><div class="nd-sval nd-glass">50 %</div><div class="nd-stp nd-raised">+</div></div>
+        <div class="nd-srow"><span class="nd-lb">Down position</span><div class="nd-stp nd-raised">&minus;</div><div class="nd-sval nd-glass">5 %</div><div class="nd-stp nd-raised">+</div></div>
+        <div class="nd-cut"><span class="nd-etch">Speed</span></div>
+        <div class="nd-srow"><span class="nd-lb">Draw</span><div class="nd-stp nd-raised">&minus;</div><div class="nd-sval nd-glass">40 %</div><div class="nd-stp nd-raised">+</div></div>
+        <div class="nd-srow"><span class="nd-lb">Travel</span><div class="nd-stp nd-raised">&minus;</div><div class="nd-sval nd-glass">70 %</div><div class="nd-stp nd-raised">+</div></div>
+      </div>
+      <div class="nd-col">
+        <div class="nd-cut"><span class="nd-etch">Plotting</span></div>
+        <div class="nd-srow"><span class="nd-lb">Merge gap</span><div class="nd-stp nd-raised">&minus;</div><div class="nd-sval nd-glass">0.15 mm</div><div class="nd-stp nd-raised">+</div></div>
+        <div class="nd-srow"><span class="nd-lb">Jog speed</span><div class="nd-stp nd-raised">&minus;</div><div class="nd-sval nd-glass">40 mm/s</div><div class="nd-stp nd-raised">+</div></div>
+        <div class="nd-cut"><span class="nd-etch">Panel</span></div>
+        <div class="nd-srow"><span class="nd-lb">Lock after</span><div class="nd-stp nd-raised">&minus;</div><div class="nd-sval nd-glass">120 s</div><div class="nd-stp nd-raised">+</div></div>
+        <div style="flex:1"></div>
+        <div class="nd-ticker nd-well"><span class="nd-t">panel</span><span class="nd-m">0.10.0 &nbsp;·&nbsp; server 0.9.0</span></div>
+      </div>
+    </div>
+    <div class="nd-nav"><div class="nd-pk nd-raised">FILES</div><div class="nd-pk nd-raised">PLOT</div><div class="nd-pk nd-raised">JOG</div><div class="nd-pk nd-pressed nd-on">SET</div><div class="nd-estop"></div></div>
+  </div></div>
+  </div>
+
+  <h2>07 <span>/</span> What is deliberately not here</h2>
+  <p class="lede">No file management, no rotary knobs, no 3D joystick, no pinch-zoom on the bed
+  &mdash; the panel is single-touch. No hover states, because there is no pointer. No transitions:
+  three frames at 30fps reads as a stutter, and a snap reads as more mechanical, not less. The
+  screws, the brushed anodising and the panel sounds are all in the design system and all left out,
+  because each one costs a texture or a thread and none of them is the reason you look at this
+  screen.</p>
+
+</div>
+</body>
+</html>

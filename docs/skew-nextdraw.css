@@ -351,3 +351,112 @@ body{
 }
 .nd-ticker .nd-t{ color:#3f444b; font-variant-numeric:tabular-nums; }
 .nd-ticker .nd-m{ color:#6e757e; overflow:hidden; text-overflow:ellipsis; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE PART THAT MOVES
+
+   The shots are live now, and the six of them are six SCREENS rather than one
+   panel you navigate: the bottom bar in each stays a legend, because the thing
+   it would switch is the shot below it. What is operable is everything INSIDE
+   one screen — the keypad, the rows, the layer order, the run, the jog pad,
+   the steppers.
+
+   NO HOVER STATE, STILL, AND THAT IS NOT AN OVERSIGHT. The panel is a
+   single-touch screen with no pointer anywhere near it, and a key that lights
+   because a mouse passed over it is a key that will never light on the
+   hardware. The CURSOR is a different thing — it belongs to the browser, not
+   to the panel — so an operable part gets `cursor:pointer` and nothing else.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.nd-live{ cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+.nd-live.nd-dark{ cursor:default; }
+
+/* THE PRESS IS THE POINTERDOWN, WHICH IS THE RULE THE WHOLE SITE KEEPS. A key
+   that waits for the release to move has already lost the argument: a real cap
+   is down the instant the finger reaches it.
+
+   IT IS KEYED ON THE SURFACE AND NOT ON THE KEY, and that is the whole reason
+   this is five rules instead of one. `.nd-raised` IS the raised plate, so
+   pressing one turns it into a pressed plate and the recipe is already
+   written. A blanket rule would have painted that grey plate over the E-STOP's
+   red dome and over the two lit caps as well, because an override only
+   replaces the properties it names and `background` was one of them. A green
+   key that turns grey under the thumb reads as a key that broke, not one that
+   worked.
+
+   AND NOTHING DOUBLES. `.nd-pressed` already stands 2px in; `.nd-down` names
+   the same 2px rather than adding to it, because transforms from two rules do
+   not accumulate — the later declaration simply wins. */
+.nd-live.nd-down{ transform:translateY(2px); }
+.nd-raised.nd-down{
+  background:linear-gradient(180deg,#1a1c20,#232529);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.07),
+    0 1px 2px rgba(0,0,0,.6);
+}
+/* a cap that is already in, and the two that carry their own face: the skirt
+   shortens because the cap has travelled, and the face brightens because that
+   is what a lit key does when it takes the load */
+.nd-pressed.nd-down, .nd-go.nd-down, .nd-halt.nd-down{ filter:brightness(1.14); }
+.nd-go.nd-down{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 1px 0 #06301c, 0 2px 4px rgba(0,0,0,.6);
+}
+.nd-halt.nd-down{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18), 0 1px 0 #2c0808, 0 2px 4px rgba(0,0,0,.6);
+}
+/* THE MUSHROOM TRAVELS FURTHER THAN ANYTHING ELSE ON THE PANEL, because it is
+   the one control meant to be hit with a palm rather than aimed at with a
+   fingertip. 4mm of it, and the dome keeps its own colour throughout. */
+.nd-estop.nd-down{
+  transform:translateY(3px);
+  box-shadow:0 1px 0 #2c0808, 0 2px 5px rgba(0,0,0,.7), inset 0 2px 4px rgba(0,0,0,.45);
+}
+.nd-estop.nd-latched.nd-down{ transform:translateY(4px); }
+/* A ROW IS NOT A CAP. It sits in a well and has nowhere to travel to, so the
+   press is the well getting deeper — the same mark `.nd-sel` makes, which is
+   correct: pressing a row IS selecting it. */
+.nd-row.nd-down{
+  transform:none; background:linear-gradient(180deg,#15171a,#1c1e22);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.85);
+}
+
+/* AND A KEYBOARD GETS A RING, WHICH THE PANEL ITSELF NEVER WOULD. skew.css
+   paints no focus ring anywhere and says so at length, because a machined
+   control has nothing to draw one on. This is a WEB PAGE showing a panel, and
+   a page you cannot tab through is a page half its readers cannot use. Only
+   `:focus-visible`, so it never appears for the finger or the mouse. */
+.nd-live:focus-visible{ outline:2px solid var(--led); outline-offset:2px; }
+
+/* THE MUSHROOM LATCHES IN AND STAYS THERE — the one control on the panel whose
+   state you can read from across the room, which is the whole reason it is
+   40mm of red plastic standing 6mm proud. Down, lit from inside, and it needs
+   a twist rather than a press to come back up. */
+.nd-estop.nd-latched{
+  background:radial-gradient(circle at 38% 30%,#f55,#a52222 58%,#5a1010);
+  transform:translateY(4px);
+  box-shadow:0 0 0 #2c0808, inset 0 3px 7px rgba(0,0,0,.6), 0 0 18px rgba(255,45,45,.5);
+}
+
+/* A READOUT THE MACHINE CAN NO LONGER STAND BEHIND. With the motors off the
+   carriage can be pushed by hand, so the last number the controller wrote is a
+   MEMORY, not a measurement — amber says the difference. Written in the
+   original mockup and unused there, because a still picture has no way to get
+   into the state. */
+.nd-dro.nd-unsure .nd-v{ color:var(--amber); text-shadow:0 0 6px rgba(255,196,0,.5); }
+.nd-stat.nd-unsure span{ color:var(--amber) !important; text-shadow:0 0 6px rgba(255,196,0,.5); }
+
+.nd-note.nd-good{ color:var(--green); }
+.nd-note.nd-bad{ color:#FF6B6B; }
+
+/* A REJECTED CODE, AND IT IS THE DOTS THAT SAY SO RATHER THAN A MESSAGE. Four
+   lamps going red is readable with the panel at arm's length and in the corner
+   of an eye; a line of 9px type under them is not. */
+.nd-dot.nd-bad{
+  background:radial-gradient(circle at 34% 28%,#fff,#FFB6B6 18%,#FF2D2D 55%,#7a1010);
+  box-shadow:0 0 7px rgba(255,45,45,.8), 0 0 15px rgba(255,45,45,.35);
+}
+
+/* THE LOCK IS OPEN, AND THE GLYPH IS THE ONLY THING THAT SAYS SO. Green
+   because every other true-and-checked thing on this panel is green, and the
+   shackle swings because a padlock drawn shut with the word UNLOCKED beside it
+   is two claims and one of them is wrong. */
+.nd-lockglyph.nd-on{ color:var(--green); }

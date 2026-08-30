@@ -250,16 +250,20 @@ function preview(file) {
       el('span', 'nd-sp',    ''),
       el('span', 'nd-dro',   '<span class="nd-k">X</span><span class="nd-v">148.2</span>'
                            + '<span class="nd-k">Y</span><span class="nd-v">104.6</span>'),
-      el('span', 'nd-dro',   '<span class="nd-k">DONE</span><span class="nd-v">62.4%</span>'),
+      el('span', 'nd-dro',   '<span class="nd-k">DONE</span><span class="nd-v">43.8%</span>'),
     );
     bar.querySelector('.nd-jewel').style.setProperty('--lyr', '#FF6A00');
     bar.querySelector('.nd-st').style.setProperty('--lyr', '#FF6A00');
 
-    /* 25 OF 40, WHICH IS 62.4% READ OFF THE SEGMENTS. The figure in the bar and
+    /* 18 OF 40, WHICH IS 43.8% READ OFF THE SEGMENTS. The figure in the bar and
        the count of lit segments are the same number or the preview is lying
-       about the one thing the meter is for. */
+       about the one thing the meter is for — and 43.8 is the fraction of the
+       plan the page's own bed has actually drawn, measured off the geometry
+       rather than typed. NEXTDRAW's script does that measurement on load; this
+       card is a still, so it carries the answer. Both move together or neither
+       should be trusted. */
     const meter = el('div', 'nd-meter');
-    for (let i = 0; i < 40; i++) meter.append(el('i', i < 25 ? 'nd-on' : ''));
+    for (let i = 0; i < 40; i++) meter.append(el('i', i < 18 ? 'nd-on' : ''));
 
     strip.append(bar, meter);
     wrap.append(strip);

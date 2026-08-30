@@ -20,7 +20,7 @@ npm run dev          # http://localhost:2860
 | `src/skew-kit.js` | The control factories: `knob`, `fader`, `key`, `pkey`, `drum`, `rotary`, `swBtn`, `openPicker`, `windowise`, `navBar` | **yes** |
 | `src/skew-hatch.js` | The fill engine: `KIT`, `HANDS`, `HATCH`. No DOM | **yes** |
 | `src/skew-machine.css` | The plotter console's own parts | **yes** |
-| `docs/*.html` | The six pages. Each is markup + one inline `<script>`, except NEXTDRAW, which is markup and a sheet | **yes** |
+| `docs/*.html` | The six pages. Each is markup + one inline `<script>`; NEXTDRAW adds a sheet of its own | **yes** |
 | `docs/skew-nav.js` | The nav bar and the page registry | **yes** |
 | `dist/*` | What an app copies | **NO — generated** |
 | `old/index.html` | The discontinued light-palette document | **no — kept as a record** |

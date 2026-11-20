@@ -1,3 +1,28 @@
+/* THE DISPLAY FACE IS IN THIS REPOSITORY AND NOTHING IS FETCHED. Silkscreen
+   is a BITMAP face: a readout made of visible pixels is a dot-matrix module,
+   which is the part an e-paper or character display actually is. No outline
+   font imitates that — the pixels have to be real.
+
+   SELF-HOSTED RATHER THAN IMPORTED, because an @import is a promise that the
+   network will be there, and this sheet has never made one. Two latin woff2
+   at 6.7KB for the pair, beside this file: a copy of `src/` carries its own
+   font, works offline, and tells nobody it was opened. Latin only — a readout
+   is digits and uppercase.
+
+   `--font-read` keeps the system mono behind it, so a sheet copied WITHOUT
+   `fonts/` loses the pixels and keeps the layout. SIL Open Font License 1.1,
+   full text in `fonts/OFL.txt`. */
+@font-face{
+  font-family:'Silkscreen';
+  font-style:normal; font-weight:400; font-display:swap;
+  src:url('fonts/silkscreen-400-latin.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Silkscreen';
+  font-style:normal; font-weight:700; font-display:swap;
+  src:url('fonts/silkscreen-700-latin.woff2') format('woff2');
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    EVERYTHING BELOW IS IN @layer skew, AND THAT IS THE ONE LINE AN ADOPTER
    CARES ABOUT.
@@ -6916,15 +6941,59 @@ span.nav-link{ cursor:default; }
   box-shadow:0 1px 2px rgba(0,0,0,.14);
 }
 
-/* ── the number field: cream, sunk, mono ink, right-aligned ──────────────── */
+/* ── THE NUMBER FIELD IS AN E-PAPER MODULE ───────────────────────────────
+   It was a cream lozenge with a hairline, which is a TAG: the same value as
+   the chassis, a 10px radius, and nothing to say it was a display rather than
+   a label with a number in it. The dark theme does not have this problem
+   because its readout is lit, and lit is self-evidently a display.
+
+   A light panel cannot glow, so it has to be the other real part: electronic
+   paper. Three things make that read, and none of them is the typeface —
+     1. THE GROUND IS NOT THE CHASSIS. E-ink is a warm grey a clear step below
+        the case it is set into, never white. Pure white is the one value an
+        e-paper panel physically cannot reach.
+     2. IT IS ABSOLUTELY MATTE. No gradient, no bloom, no inner glow. The
+        whole point of the material is that it does not emit.
+     3. IT SITS BEHIND A BEZEL. A module is dropped into a cut-out, so there
+        is a frame darker than both the glass and the case, a shadow where the
+        frame overhangs the glass, and a lit lip along the bottom edge.
+   The corner goes to 3px because a panel is cut square and the radius belongs
+   to the frame, not to the glass. */
+[data-skin="light"]{
+  --epaper:       #D0CBC1;   /* the glass — 1.40:1 under the case, never white */
+  --epaper-ink:   #23211C;   /* 9.95:1 on the glass */
+  --epaper-bezel: #A9A49A;   /* the frame — 2.14:1 against the case */
+  /* THE DISPLAY FACE. Silkscreen first, system mono behind it — see the
+     @font-face at the head of this file. Swap this one value to change it. */
+  --font-read: "Silkscreen", var(--font);
+}
 [data-skin="light"] :is(.lcd, .readout, .kval, .kr-val-box, .pk-lcd){
-  background-color:var(--paper);
-  border:1px solid var(--edge-ctl);
+  background-color:var(--epaper);
   background-image:none;
-  color:var(--ink);
-  border-radius:var(--r-sm);
-  box-shadow:var(--recess);
+  border:1px solid var(--epaper-bezel);
+  color:var(--epaper-ink);
+  border-radius:3px;
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.16),
+    0 1px 0 rgba(255,255,255,.9);
   text-shadow:none;
+  font-variant-numeric:tabular-nums;
+  /* A BITMAP FACE MUST NOT BE SMOOTHED. Antialiasing a 5px grid is the one
+     thing that destroys the only reason to use it: the edges ARE the font.
+     The size is up from 10.5 because Silkscreen's cap-height is small against
+     its em — at the mono's size it reads as a smudge rather than as dots. */
+  font-family:var(--font-read);
+  font-size:12px;
+  line-height:1;
+  letter-spacing:.06em;
+  -webkit-font-smoothing:none;
+  -moz-osx-font-smoothing:grayscale;
+}
+/* THE DIM STATE IS A GHOST, NOT A FADE. E-ink holds the last frame it was
+   given, so a stale or inactive reading is a partial refresh left on the
+   glass rather than a dimmed lamp. */
+[data-skin="light"] :is(.lcd, .readout, .kval).dim{
+  color:#8A867D; text-shadow:none;
 }
 /* THE NAV'S VERSION LAMP IS NOT A FIELD. It is a lit window, the same object
    as every `.screen` in this skin, and it stays dark for the reason they do:
@@ -7214,7 +7283,7 @@ span.nav-link{ cursor:default; }
                         .hb-deep, .hb-field, .bay-field, .bay-cap, .bay-deep,
                         .drum-bay, .menu-cut, .modal-well, .gate-slot, .ld-well,
                         .pk-well, .pk-field, .oc, .oc-bar, .oc-field, .oc-tab,
-                        .api, .api-more, .kwrap, .sliders, .fticks, .fslot,
+                        .api, .api-more, .kwrap, .sliders,
                         .demo-well, .demo-stage, .intcell, .lens, .tear,
                         .set-bay, .set-adv, .set-advbody, .con-log, .con-foot,
                         .drawer-head, .mod-tags, .rig-cells, .togcell, .tab-cell){
@@ -7222,6 +7291,64 @@ span.nav-link{ cursor:default; }
   background-image:none;
   box-shadow:inset 0 0 0 1px var(--edge);
   color:var(--ink);
+}
+
+/* `.fslot` AND `.fticks` WERE IN THAT LIST AND NEITHER IS A HOLE. A slot is
+   the box a track is positioned inside — the track carries its own recess, so
+   framing the box as well draws a rectangle round every fader that nothing in
+   the object actually has. The tick strip is a SCALE: marks printed on the
+   chassis, not a channel cut into it. Both were getting a hairline, and the
+   tick strip was getting `background-image:none` on top of that, which in the
+   horizontal fader deleted the graduations outright — the vertical one only
+   survived because `.fader.vert .fticks` is (0,3,0) and the list is (0,2,0).
+   The list is still one declaration for everything that IS a hole. */
+[data-skin="light"] :is(.fslot, .fticks){
+  background-color:transparent;
+  box-shadow:none;
+}
+
+/* ── THE SCALE GETS SUB-GRADUATIONS ──────────────────────────────────────
+   Four marks over a 136px travel is a scale you can read to the quarter and
+   no further, which on a fader is the difference between seeing a value and
+   seeing roughly where the thing is. The minors go in at a fifth of the major
+   pitch, shorter and lighter: a ruler is a hierarchy of two lengths and two
+   values, and the hierarchy is what lets you count without reading.
+
+   The major is `--ink-2` rather than black, because a printed mark on cream
+   is ink on paper and ink on paper is not #000. */
+[data-skin="light"]{
+  --tick:     var(--ink-2);  /* the quarter marks */
+  --tick-sub: #C9C3BA;       /* the fifths between them */
+}
+[data-skin="light"] .fticks{
+  opacity:1;
+  box-shadow:none;
+  background-repeat:repeat-x, repeat-x;
+  background-image:
+    linear-gradient(90deg, var(--tick) 0 1px, transparent 1px),
+    linear-gradient(90deg, var(--tick-sub) 0 1px, transparent 1px);
+  background-size:
+    calc(25% - .25px) 3px,
+    calc(5% - .05px) 2px;
+}
+[data-skin="light"] .fader.vert .fticks{
+  background-repeat:repeat-y, repeat-y;
+  background-image:
+    linear-gradient(180deg, var(--tick) 0 1px, transparent 1px),
+    linear-gradient(180deg, var(--tick-sub) 0 1px, transparent 1px);
+  background-size:
+    4px calc(25% - .25px),
+    2px calc(5% - .05px);
+  background-position:right top, right top;
+}
+/* the END mark closes the scale, and it is a major */
+[data-skin="light"] .fticks::after{
+  background:var(--tick);
+  box-shadow:none;
+}
+[data-skin="light"] .fader.vert .fticks::after{ left:auto; right:0; }
+[data-skin="light"] .fader.vert.bi .fticks::before{
+  background:var(--tick); box-shadow:none;
 }
 
 /* THE TOGGLE'S BED IS A WELL TOO, and its actuator is the part standing in

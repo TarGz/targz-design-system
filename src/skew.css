@@ -6926,6 +6926,25 @@ span.nav-link{ cursor:default; }
   box-shadow:inset 0 0 0 1px var(--edge-ctl);
   border-radius:var(--r-pill);
 }
+/* THE EMPTY PART OF THE TRAVEL IS A TRENCH, NOT AN ABSENCE. The fill stops at
+   the cap and above it there was nothing — the chassis seen through a pale
+   outline — so the bar read as a mark drawn ON the case rather than as a part
+   RIDING IN it. A real fader has one continuous channel and the cap divides
+   it into the length that has been used and the length that has not.
+
+   Same geometry as `.ffill` exactly: inset 2px, 3px corner, which is why it
+   needs no orientation of its own — the fill is inset 2px vertical and
+   horizontal both. `::before` is the first box in the track, so the fill
+   paints over it with no z-index. */
+[data-skin="light"] .ftrack::before{
+  content:'';
+  position:absolute;
+  inset:2px;
+  border-radius:3px;
+  background:var(--card);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.05);
+  pointer-events:none;
+}
 /* THE FILL IS INK, NOT ORANGE, AND THE REFERENCE IS WHY. With an orange thumb
    on an orange fill the handle disappears into its own travel; the dark fill
    is what makes the thumb's position readable at a glance. */
@@ -6989,6 +7008,75 @@ span.nav-link{ cursor:default; }
   -webkit-font-smoothing:none;
   -moz-osx-font-smoothing:grayscale;
 }
+/* ── AND THERE IS A SHEET OF GLASS OVER IT ───────────────────────────────
+   This is not a contradiction of "the panel does not emit". The PANEL does
+   not — the cover over it is another material entirely, and a hard clear
+   cover is the one part of a display module that is glossy. The reflection
+   belongs to the room, not to the device: it is there with the power off.
+
+   Two things, because a real reflection is two things. A broad sheen where
+   the top of the glass catches the ceiling, and ONE hard diagonal streak —
+   a window, an edge, a lamp. One streak reads as glass; three read as a
+   shine effect, which is the difference between the thing and the sticker.
+
+   Safe for the ink by construction: every layer is white, so the ground only
+   gets lighter and the 9.95:1 can only go up. */
+[data-skin="light"] :is(.lcd, .readout, .kval, .kr-val-box, .pk-lcd){
+  position:relative;
+  overflow:hidden;
+}
+[data-skin="light"] :is(.lcd, .readout, .kval, .kr-val-box, .pk-lcd)::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    /* the bright pane — the window's near edge. The angle is nearly flat
+       because the glass is WIDE and SHORT: a band at 120 degrees across a
+       50x18 cell is read as a vertical slash, which is a gradient. It has
+       to lie down before it reads as something lying ON the surface. */
+    linear-gradient(148deg,
+      transparent   0    26%,
+      rgba(255,255,255,.10) 33%,
+      rgba(255,255,255,.26) 39%,
+      rgba(255,255,255,.07) 45%,
+      transparent   52%  100%),
+    /* the far pane, thinner and dimmer, at its own angle — a window has a
+       mullion, and two edges that do not agree is what says the reflection
+       is of something rather than being a shine applied to something */
+    linear-gradient(163deg,
+      transparent   0    60%,
+      rgba(255,255,255,.06) 65%,
+      rgba(255,255,255,.13) 69%,
+      rgba(255,255,255,.04) 73%,
+      transparent   78%  100%),
+    /* the ceiling on the top of the glass */
+    linear-gradient(180deg,
+      rgba(255,255,255,.15) 0%,
+      rgba(255,255,255,.04) 40%,
+      transparent 64%);
+}
+
+/* ── A DISPLAY DOES NOT GROW WHEN ITS VALUE DOES ─────────────────────────
+   A module is cut to a size and holds a fixed number of character cells;
+   `-167°` does not make the glass wider. Every readout in this file ALREADY
+   declares its width — as a `min-width`, which is a floor and not a size, so
+   a longer value pushed it open. The skin converts each of those declared
+   minimums into the size it should have been. No new numbers: these are the
+   file's own, read back as widths.
+
+   Stacked, the knob sets the column and the display fills it — which is what
+   `.hb-knobs .kval` already did, and the reason it never showed this. */
+[data-skin="light"] .kwrap .kval{ width:100%; }
+[data-skin="light"] .kval.wide{ width:78px; flex:0 0 78px; }
+[data-skin="light"] .kwrap.inline .kval{ width:58px; flex:0 0 58px; }
+[data-skin="light"] .kwrap.compact .kval{ width:52px; flex:0 0 52px; }
+[data-skin="light"] .gridrow .kwrap.compact .kval{ width:46px; flex:0 0 46px; }
+[data-skin="light"] .placebay .kwrap.inline .kval{ width:52px; flex:0 0 52px; }
+[data-skin="light"] .hb-stack .kwrap.inline .kval{ width:52px; flex:0 0 52px; }
+/* and the one that was already right stays right — it is last so the `.wide`
+   rule above cannot take its cell away */
+[data-skin="light"] .hb-knobs .kval{ width:100%; flex:0 1 auto; }
 /* THE DIM STATE IS A GHOST, NOT A FADE. E-ink holds the last frame it was
    given, so a stale or inactive reading is a partial refresh left on the
    glass rather than a dimmed lamp. */

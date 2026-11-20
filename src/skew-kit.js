@@ -3394,6 +3394,73 @@ function bodyAt(oy) {
 }
 const hexOf = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
 
+/* ── THE BALL IS MOULDED IN TWO PLASTICS AND THE SKIN PICKS ONE ─────────────
+   EVERY OTHER PART IN THIS LANGUAGE IS RESKINNED IN CSS, and this one cannot
+   be: the ball is not drawn, it is RENDERED — a lamp, a normal and a material
+   per pixel — so its colour is a number in a shading loop and no stylesheet
+   can reach it. A filter over the canvas is not an answer either; inverting a
+   lit sphere inverts the LIGHTING, which turns the highlight into a hole.
+
+   SO THE KIT READS THE SKIN, once per material build, and swaps the pigments.
+   The geometry, the lamp, the vignette, the wells and all three grooves are
+   untouched: the same ball moulded in a pale plastic instead of a dark one.
+
+   AND IT IS THE SAME TWO-PART SPLIT. North is the lighter half and south the
+   darker one in both skins, for the reason the seam exists at all — the two
+   mouldings meet inside the equator groove and the step hides in the floor of
+   the cut. Inverting the ball does not change which half is which.
+
+   THE SOUTH WELL'S FLOOR TURNS OVER WITH THE BODY. It was bone white, which
+   is the one thing that disappears on a pale ball, and it is also half of the
+   only cue that says which pole you are looking at. Dark down, orange up —
+   the orange stays, because it is the accent and reads on either material. */
+const ORBIT_DARK = {
+  n: [26, 36, 58], s: [24, 27, 32],
+  grat: 'rgba(198,214,236,.13)',
+  up: '#e07b1c', down: '#d5d9df',
+};
+/* A HIGHER ALPHA ON THE GRATICULE, AND IT IS NOT A TASTE CALL. A faint light
+   line on dark and a faint dark line on light are not the same mark: the eye
+   gains on a dark field and compresses on a bright one, so .13 that reads as
+   an engraved grid on navy reads as dirt on beige. */
+const ORBIT_LIGHT = {
+  n: [214, 206, 192], s: [196, 187, 173],
+  grat: 'rgba(26,26,26,.22)',
+  up: '#e07b1c', down: '#2b2824',
+};
+const orbitSkin = () =>
+  (typeof document !== 'undefined' &&
+   document.documentElement.dataset.skin === 'light') ? 'light' : 'dark';
+/* THE TWO BODY COLOURS ARE WRITTEN IN PLACE rather than rebound, because
+   `bodyAt` holds these arrays and runs ONCE PER PIXEL — it cannot ask which
+   skin is on, and it must not have to. */
+function orbitPalette(skin) {
+  const p = skin === 'light' ? ORBIT_LIGHT : ORBIT_DARK;
+  BODY_N[0] = p.n[0]; BODY_N[1] = p.n[1]; BODY_N[2] = p.n[2];
+  BODY_S[0] = p.s[0]; BODY_S[1] = p.s[1]; BODY_S[2] = p.s[2];
+  return p;
+}
+/* ── AND A LIVE BALL HAS TO HEAR THE SWITCH ────────────────────────────────
+   The skin is one attribute on <html> and nothing in this file watched it,
+   because nothing in this file had ever needed to. A ball is painted on
+   demand, so without this the chip flips, every panel around it changes, and
+   the ball sits there in the other theme's plastic until something else makes
+   it repaint. One observer for all of them; entries drop themselves when
+   their wrapper leaves the document. */
+const ORBIT_LIVE = new Set();
+let orbitSkinObs = null;
+function orbitWatch(wrap, paint) {
+  ORBIT_LIVE.add({ wrap, paint });
+  if (orbitSkinObs || typeof MutationObserver === 'undefined') return;
+  orbitSkinObs = new MutationObserver(() => {
+    for (const e of [...ORBIT_LIVE]) {
+      if (!e.wrap.isConnected) { ORBIT_LIVE.delete(e); continue; }
+      e.paint();
+    }
+  });
+  orbitSkinObs.observe(document.documentElement, { attributeFilter: ['data-skin'] });
+}
+
 /* AND THEY RUN INTO THE WELLS RATHER THAN STOPPING AT THEM. Clipping them at
    the lip left a little wall across the mouth of every groove where it met a
    well — a piece of un-cut material standing between two cuts, which is not
@@ -3648,10 +3715,15 @@ const bandClip = c => {
    COLOUR AND SURFACE, BUILT ONCE. Neither depends on which ring is held any
    more — that moved into the ink mask below, which is a tenth of the work —
    so the two expensive sheets are built on the first paint and never again. */
-let orbitBase = null;
+let orbitBase = null, orbitBaseSkin = null;
 
 function orbitMaterial() {
-  if (orbitBase) return orbitBase;
+  /* KEYED BY SKIN, not built once. The sheet is the expensive thing in this
+     file and caching it is the whole reason it is fast — but a cache with one
+     slot and no key is just the first skin, forever. */
+  const SKIN = orbitSkin();
+  if (orbitBase && orbitBaseSkin === SKIN) return orbitBase;
+  const PAL = orbitPalette(SKIN);
 
   /* ── COLOUR ──────────────────────────────────────────────────────────────
      LIGHTER THAN IT WAS. The body was #0e1013, which is a black that has
@@ -3690,11 +3762,11 @@ function orbitMaterial() {
      down, so what you see is a dark bore with a coloured bottom and how much
      of that bottom you get is the angle you are looking from. */
   const FLOOR_LAT = Math.asin(S_FLOOR) * 180 / Math.PI;
-  g.fillStyle = '#e07b1c'; g.fillRect(0, 0, TEX_W, TY(FLOOR_LAT));
-  g.fillStyle = '#d5d9df'; g.fillRect(0, TY(-FLOOR_LAT), TEX_W, TEX_H - TY(-FLOOR_LAT));
+  g.fillStyle = PAL.up;   g.fillRect(0, 0, TEX_W, TY(FLOOR_LAT));
+  g.fillStyle = PAL.down; g.fillRect(0, TY(-FLOOR_LAT), TEX_W, TEX_H - TY(-FLOOR_LAT));
 
   g.save(); bandClip(g);
-  g.strokeStyle = 'rgba(198,214,236,.13)'; g.lineWidth = 4;
+  g.strokeStyle = PAL.grat; g.lineWidth = 4;
   /* A COUNT, NOT A STEP, FOR THE MERIDIANS. They close on themselves, so the
      spacing has to divide 360 exactly or the seam gets a double line — say how
      many there are and let the arithmetic find the angle. */
@@ -3740,6 +3812,7 @@ function orbitMaterial() {
      bevel — and the rings are geometry now, differentiated in closed form like
      the wells' walls. A uniform sheet is eight megabytes of the same number
      and a texture fetch per pixel to read it back. */
+  orbitBaseSkin = SKIN;
   orbitBase = { col };
   return orbitBase;
 }
@@ -5952,6 +6025,8 @@ function orbit({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
   });
 
   paint();
+  /* AND IT REPAINTS WHEN THE SKIN FLIPS — see `orbitWatch`. */
+  orbitWatch(wrap, paint);
   /* SILENT, like every other `.set` in this file: a host pushing a value in is
      syncing, not turning the ball. */
   wrap.set = (v = {}) => {

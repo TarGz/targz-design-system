@@ -6780,11 +6780,11 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.key, .pkey, .chip){
   background-color:var(--card);
   background-image:none;
-  border:1px solid var(--edge-ctl);
+  border:1px solid var(--edge);
   border-radius:var(--r-sm);
   color:var(--ink);
   text-shadow:none;
-  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  box-shadow:var(--lift);
 }
 [data-skin="light"] :is(.key, .pkey, .chip):hover{
   background-color:var(--card-hover);
@@ -6795,8 +6795,8 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.key, .pkey, .chip):active{
   background-color:var(--paper);
   background-image:none;
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.10);
-  transform:translateY(1px);
+  box-shadow:var(--sink);
+  transform:translateY(3px);
 }
 /* A LATCHED KEY SAT IN A WELL THE SAME COLOUR AS ITSELF. Pressed was `--paper`
    and the piano floor is `--paper`, so the one key that was ON dissolved into
@@ -6808,8 +6808,8 @@ span.nav-link{ cursor:default; }
   background-color:var(--primary-subtle);
   background-image:none;
   border-color:#F0D3BC;
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.08);
-  transform:translateY(1px);
+  box-shadow:var(--sink);
+  transform:translateY(3px);
 }
 /* THE LATCHED KEY IS ORANGE INK ON WHITE, AND THE GLOW IS GONE. A text-shadow
    bloom is a lamp behind glass; there is no glass here and a bloom on white
@@ -6850,7 +6850,7 @@ span.nav-link{ cursor:default; }
    the value a light chassis would cut it from. */
 [data-skin="light"] .piano.sm .pkey:not(.is-down):not(:active),
 [data-skin="light"] .keypad .pkey:not(.is-down):not(:active){
-  box-shadow:0 1px 0 var(--edge-ctl), 0 1px 3px rgba(0,0,0,.05);
+  box-shadow:var(--lift);
 }
 /* a pale grey label on a white chip, left over from dark-mode hover */
 [data-skin="light"] .chip.new:hover{
@@ -6870,23 +6870,44 @@ span.nav-link{ cursor:default; }
   color:#fff;
   font-weight:700;
   text-shadow:none;
-  box-shadow:0 1px 2px rgba(0,0,0,.06);
+  --wall:var(--primary-ink);
+  --chamf:transparent;
+  box-shadow:var(--lift);
 }
+/* THE BORDER HAD TO BE SAID AGAIN, AND THIS IS THE TRAP THIS FILE NAMES.
+   `:is(.act, .chev, .add, .win-btn):hover` sets `border-color:#C4BDB2` for
+   the quiet keys, and it is the same (0,2,0) as everything here — so an
+   orange cap took a GREY rim the moment the pointer touched it, because the
+   loud rule changed the fill and said nothing about the edge. A rest rule
+   that overrides a colour has to override every channel of it; leaving one
+   out means the other theme's value is still in force on that channel. */
 [data-skin="light"] :is(.act, .key).go:hover,
 [data-skin="light"] :is(.act, .key).fire:hover,
 [data-skin="light"] .act.primary:hover{
   background-color:var(--primary-light); background-image:none; color:#fff;
+  border-color:var(--primary-light);
 }
 [data-skin="light"] :is(.act, .key).go:active,
 [data-skin="light"] :is(.act, .key).fire:active,
 [data-skin="light"] .act.primary:active{
-  background-color:#E85F00; background-image:none; transform:translateY(1px);
+  background-color:#E85F00; background-image:none;
+  border-color:#E85F00;
+  box-shadow:var(--sink);
+  transform:translateY(3px);
 }
 [data-skin="light"] .act.halt{
   background-color:var(--no); background-image:none;
   border-color:var(--no); color:#fff; text-shadow:none;
+  --wall:var(--no-ink);
+  --chamf:transparent;
+  box-shadow:var(--lift);
 }
-[data-skin="light"] .act.halt:hover{ background-color:#DC2626; background-image:none; }
+[data-skin="light"] .act.halt:active{
+  box-shadow:var(--sink); transform:translateY(3px);
+}
+[data-skin="light"] .act.halt:hover{
+  background-color:#DC2626; background-image:none; border-color:#DC2626;
+}
 
 /* ── the select: a solid orange field with a chevron ─────────────────────── */
 [data-skin="light"] .sel{
@@ -6897,14 +6918,17 @@ span.nav-link{ cursor:default; }
   color:#fff;
   font-weight:700;
   text-shadow:none;
-  box-shadow:none;
+  --wall:var(--primary-ink);
+  --chamf:transparent;
+  box-shadow:var(--lift);
 }
 [data-skin="light"] .sel:hover{ background-color:var(--primary-light); background-image:none; color:#fff; }
 [data-skin="light"] .sel .sel-chev,
 [data-skin="light"] .sel:hover .sel-chev{ color:#fff; }
 [data-skin="light"] .sel.is-down{
   background-color:var(--primary-light); background-image:none;
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.18);
+  box-shadow:var(--sink);
+  transform:translateY(3px);
 }
 [data-skin="light"] .sel.is-down .sel-chev{ color:#fff; }
 /* the open list is a white popover, not an orange one — it is a menu */
@@ -6953,11 +6977,52 @@ span.nav-link{ cursor:default; }
   background-image:none;
   box-shadow:none;
 }
-[data-skin="light"] :is(.fcap, .fend, .knob-cap, .ld-puck){
+/* AND A CAP IS A MOULDING WHEREVER IT IS. A horizontal fader's cap and a
+   range fader's jaws were in this list and a vertical fader's cap was not —
+   not a decision, an accident of specificity: `.fader.vert .fcap` is three
+   classes and out-ranked the skin, so the vertical bank kept the dark knurled
+   part while every other cap on the page went flat orange. The accident drew
+   the better control. A grip is dark and knurled, its indicator is the lit
+   mark, and `.fend` is worse still — it is a bare box whose three children do
+   all the painting, so colouring it only put an orange rectangle BEHIND the
+   jaws. Both come out; the geometry rules that made vertical different stay
+   exactly as they are. */
+[data-skin="light"] .ld-puck{
   background-color:var(--primary);
   background-image:none;
   border:none;
   box-shadow:0 1px 2px rgba(0,0,0,.14);
+}
+
+/* ── A KNOB'S CAP IS A MOULDING, NOT A FACE ──────────────────────────────
+   IT WAS FLATTENED TO A SOLID ORANGE DISC, which puts the brightest value in
+   the panel on the one part you rest your FINGERS on, and then asks the
+   pointer — a dark CUT — to be read against it. That is backwards twice: the
+   grip is shouting and the readout is whispering.
+
+   A fader's cap already answers this and the knob is the same part. It is
+   plastic you hold, so it is dark and KNURLED, because the knurl is what
+   tells a hand that this piece turns; and the value arrives as ONE LIT MARK
+   on that dark body, which is then the brightest thing on the part and the
+   only thing the eye goes to. Same material, same mark, same tokens as
+   `.fcap::after` — a knob and a fader cap are one component in two shapes.
+
+   So the cap drops out of the cut list above and keeps the moulding the dark
+   theme already draws: the collar it sits in is on the short list of parts
+   that stay dark, and a bright disc inside a black collar was the one thing
+   making that collar look like a mistake. */
+[data-skin="light"] .knob-cap::after{
+  background:var(--led-hot);
+  box-shadow:0 0 5px var(--led), 0 0 10px rgba(255,106,0,.55), 0 1px 0 rgba(0,0,0,.8);
+}
+/* AN ENDLESS KNOB'S POINTER IS ITS TRACE, so it keeps its own `--arc`: there
+   is no ring to paint on a closed dial, and that is the whole reason the
+   colour moved onto the pointer in the first place. Restated here only
+   because the rule above is later in the file and would otherwise take it. */
+[data-skin="light"] .knob.endless .knob-cap::after{
+  background:var(--arc);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--arc) 40%, transparent),
+             0 0 5px color-mix(in srgb, var(--arc) 70%, transparent);
 }
 
 /* ── THE NUMBER FIELD IS AN E-PAPER MODULE ───────────────────────────────
@@ -6979,6 +7044,73 @@ span.nav-link{ cursor:default; }
    The corner goes to 3px because a panel is cut square and the radius belongs
    to the frame, not to the glass. */
 [data-skin="light"]{
+/* ── THE LIFT: WHAT MAKES A CAP A CAP ────────────────────────────────────
+   A KEY AT REST WAS A RECTANGLE WITH A LINE ROUND IT. `0 1px 2px` at four per
+   cent is a shadow you can only find by looking for it, so the whole family
+   was flat until you pressed it — and the press animation was the first time
+   the control admitted it had a height. A button that is only three-
+   dimensional while being used is a picture of a button the rest of the time.
+
+   THREE LAYERS, AND EACH ONE IS A SURFACE RATHER THAN AN EFFECT:
+     1. A LIT TOP FACE. The cap is moulded plastic and the room is above it,
+        so the first millimetre of the top catches the light. One inset white
+        line, inside the border, which is the chamfer.
+     2. A SIDE WALL, AND THREE PIXELS OF IT. A wall is a band of the cap's
+        own edge, so its height is the cap's thickness — the one number the
+        eye reads as "how chunky". Two was flat, four was a plinth, three is
+        a cap. It was briefly `#C4BDB2`, a long step below the face, and that
+        was wrong the other way: a wall that far down stops being the same
+        moulding seen edge on and becomes a STROKE drawn round the bottom.
+
+        AND A SATURATED CAP HAS NO CHAMFER AT ALL. It went .28, then .15,
+        and it was still the first thing you saw: a light band following the
+        top curve, reading as a separate piece rather than as an edge. The
+        reason is the CURVE — a 1px inset on a tight radius is one pixel
+        across the straight and two or three diagonally through the corner,
+        so it thickens exactly where the eye lands. On a near-white cap that
+        does not matter, because the chamfer is white on white and only
+        shows where it has to. On orange any amount of it is visible all the
+        way round. `transparent`, and the wall does the whole job.
+
+        AND THE OUTLINE DROPS TO `--edge` WITH IT. A white cap was carrying
+        three greys — face, border, wall — and the border is the one with no
+        job: the wall already separates the cap from the panel, so an outline
+        a visible step off the face only draws the shape twice. The orange
+        cap never had this, because its border IS its fill.
+     3. A CONTACT SHADOW. Short and soft, because the cap is a millimetre off
+        the panel and not an inch.
+   Press collapses all three: every active and latched rule replaces the whole
+   stack with an inset and drops the cap a pixel, so the wall disappears under
+   it the way a real one does. */
+/* AND THE SINK IS THE LIFT'S OPPOSITE, WRITTEN ONCE. Every pressed rule had
+   been inventing its own inset, which is how `.act` ended up with no travel
+   at all while `.key` dropped a pixel — the same gesture on two parts of the
+   same family, animated differently. A key that is 2px proud has to travel
+   2px, or the cap lands below the panel it was standing on. */
+/* AND IT IS A SHALLOW ONE. .17 of black inside a cream cap is not a recess,
+   it is a bruise: the cap's own fill is two per cent off white, so any inset
+   dark enough to see on a dark theme turns the whole top face grey here. The
+   depth is carried by the cap DROPPING and by the wall disappearing under it;
+   the inset only has to say which edge the light is no longer reaching. */
+  --sink:
+    inset 0 2px 3px rgba(0,0,0,.09),
+    inset 0 -1px 0 rgba(255,255,255,.6);
+/* ── AND A COLOURED CAP IS THE SAME CAP ─────────────────────────────────
+   IT HAD A SECOND SHADOW STACK OF ITS OWN, and a second release keyframe to
+   go with it. Every one of the last five faults came out of that pair: the
+   grey wall under an orange face, the chamfer that went transparent on
+   release, two walls that drifted to different heights, a border restated on
+   one of them and not the other. Two descriptions of one part cannot be kept
+   in agreement by hand, and the part was never two parts.
+
+   SO THERE IS ONE CAP AND IT TAKES TWO VARIABLES. `--wall` is the band of
+   its own edge you see below it; `--chamf` is the light landing on the top
+   of that edge. Everything else — the height, the travel, the contact
+   shadow, the release — is one declaration for every button on the page,
+   and a colour sets two custom properties and changes nothing else.
+
+   THE DEFAULTS ARE THE WHITE CAP, which is the common case, so a button that
+   says nothing is already right. */
   --epaper:       #D0CBC1;   /* the glass — 1.40:1 under the case, never white */
   --epaper-ink:   #23211C;   /* 9.95:1 on the glass */
   --epaper-bezel: #A9A49A;   /* the frame — 2.14:1 against the case */
@@ -7004,7 +7136,13 @@ span.nav-link{ cursor:default; }
   font-family:var(--font-read);
   font-size:12px;
   line-height:1;
-  letter-spacing:.06em;
+  /* TIGHT, BECAUSE A BITMAP FACE IS ALREADY SPACED. .06em was the dark
+     theme's tracking carried over, and it was written for a proportional
+     face whose glyphs sit close. Silkscreen draws every character on a fixed
+     cell with its own clear space built in, so tracking on top of that is
+     spacing applied twice — which is how `-103°` came to touch both walls of
+     a box with room in it. */
+  letter-spacing:.02em;
   -webkit-font-smoothing:none;
   -moz-osx-font-smoothing:grayscale;
 }
@@ -7068,7 +7206,16 @@ span.nav-link{ cursor:default; }
    Stacked, the knob sets the column and the display fills it — which is what
    `.hb-knobs .kval` already did, and the reason it never showed this. */
 [data-skin="light"] .kwrap .kval{ width:100%; }
-[data-skin="light"] .kval.wide{ width:78px; flex:0 0 78px; }
+/* NINE CHARACTERS, STATED IN CHARACTERS. 78px was the file's own minimum and
+   it was a minimum for the SYSTEM face; the display face is a bitmap and
+   wider per glyph, so `0.32−0.78` no longer fit and wrapped to a second line
+   that the fixed height then cut in half. A dot-matrix module is specified in
+   digits, not millimetres — `ch` is the advance of `0` in whatever face is
+   loaded, so this is nine cells plus the padding and it stays right if the
+   face is ever changed. `nowrap` is the belt: a readout that overruns should
+   CLIP, because a clipped number looks wrong and a wrapped one looks fine. */
+[data-skin="light"] .kval.wide{ width:calc(9ch + 16px); flex:0 0 auto; }
+[data-skin="light"] :is(.lcd, .readout, .kval, .pk-lcd){ white-space:nowrap; }
 [data-skin="light"] .kwrap.inline .kval{ width:58px; flex:0 0 58px; }
 [data-skin="light"] .kwrap.compact .kval{ width:52px; flex:0 0 52px; }
 [data-skin="light"] .gridrow .kwrap.compact .kval{ width:46px; flex:0 0 46px; }
@@ -7169,7 +7316,7 @@ span.nav-link{ cursor:default; }
   box-shadow:var(--shadow-lg);
 }
 [data-skin="light"] :is(.plate, .demo-plate, .tab-demo, .gizmo, .pencap, .pencap.on,
-                        .win-floor, .box.bulge, .gate-lever, .skip){
+                        .win-floor, .box.bulge, .skip){
   box-shadow:0 1px 2px rgba(0,0,0,.05);
 }
 [data-skin="light"] .bulge-wrap{
@@ -7212,9 +7359,16 @@ span.nav-link{ cursor:default; }
    What does not survive is the SEAT: a 74px dark disc behind it, which on this
    ground stopped being a shadowed recess and became a white halo with a black
    ring in it. It is the case, so it takes the case's colour. */
+/* AND IN THE END THE SEAT GOES. Painting it `--paper` with a hairline was
+   still painting it: a 74px tinted patch behind a 62px dial, which is a
+   backing plate the object does not have. The dark theme needs the disc
+   because the dial is dark on a dark panel and the recess is the only thing
+   separating them; on cream the dial is already the one dark part for ninety
+   levels in every direction and needs nothing behind it at all. The case is
+   the case, all the way up to the knob. */
 [data-skin="light"] .rot-seat{
-  background:var(--paper);
-  box-shadow:inset 0 0 0 1px var(--edge);
+  background:none;
+  box-shadow:none;
 }
 [data-skin="light"] .rot-lead{ background:var(--edge); }
 [data-skin="light"] .rot-lab{ color:var(--ink-2); }
@@ -7303,9 +7457,9 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.act, .chev, .add, .win-btn, .drawer-tab, .menu-ico){
   background-color:var(--card);
   background-image:none;
-  border:1px solid var(--edge-ctl);
+  border:1px solid var(--edge);
   color:var(--ink);
-  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  box-shadow:var(--lift);
   text-shadow:none;
 }
 [data-skin="light"] :is(.act, .chev, .add, .win-btn):hover{
@@ -7317,7 +7471,8 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.act, .chev, .add, .win-btn):active{
   background-color:var(--paper);
   background-image:none;
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.10);
+  box-shadow:var(--sink);
+  transform:translateY(3px);
 }
 [data-skin="light"] :is(.act, .chev, .add, .win-btn):disabled{
   opacity:1; color:var(--ink-2);
@@ -7333,12 +7488,12 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.act, .chev)::after{ display:none; }
 
 /* ── THE HATCH BAY AND THE DRAWER ARE PANELS TOO ─────────────────────────── */
-[data-skin="light"] :is(.hatchbay, .drawer, .drawer-body, .oc-drawer, .lwrap, .lfield){
+[data-skin="light"] :is(.hatchbay, .drawer, .drawer-body, .oc-drawer, .lfield){
   background-color:var(--card);
   background-image:none;
   color:var(--ink);
 }
-[data-skin="light"] :is(.lrow, .filmrow, .drum-item){
+[data-skin="light"] :is(.lrow, .filmrow){
   background-color:var(--card);
   background-image:none;
   border:1px solid var(--edge);
@@ -7369,9 +7524,9 @@ span.nav-link{ cursor:default; }
    ══════════════════════════════════════════════════════════════════════════ */
 [data-skin="light"] :is(.gap, .slot, .chan, .sep, .port, .empty,
                         .hb-deep, .hb-field, .bay-field, .bay-cap, .bay-deep,
-                        .drum-bay, .menu-cut, .modal-well, .gate-slot, .ld-well,
+                        .drum-bay, .menu-cut, .modal-well, .ld-well,
                         .pk-well, .pk-field, .oc, .oc-bar, .oc-field, .oc-tab,
-                        .api, .api-more, .kwrap, .sliders,
+                        .api, .api-more, .sliders,
                         .demo-well, .demo-stage, .intcell, .lens, .tear,
                         .set-bay, .set-adv, .set-advbody, .con-log, .con-foot,
                         .drawer-head, .mod-tags, .rig-cells, .togcell, .tab-cell){
@@ -7497,19 +7652,42 @@ span.nav-link{ cursor:default; }
    background", not "is it mentioned". The TOOL palette is the one Julien
    photographed and it is first.
    ══════════════════════════════════════════════════════════════════════════ */
-[data-skin="light"] :is(.palette, .plate, .loupe, .win-floor, .drum-win,
+[data-skin="light"] :is(.palette, .plate, .loupe, .win-floor,
                         .box.bulge, .demo-plate, .tab-demo){
   background-color:var(--card);
   background-image:none;
   border:1px solid var(--edge);
   color:var(--ink);
 }
-[data-skin="light"] :is(.gizmo, .pencap, .gate-lever, .sel-tick, .thumb.empty,
+[data-skin="light"] :is(.gizmo, .pencap, .sel-tick, .thumb.empty,
                         .row.all, .slide.rocker, .fader.vert .ftrack){
   background-color:var(--paper);
   background-image:none;
   box-shadow:inset 0 0 0 1px var(--edge-ctl);
   color:var(--ink);
+}
+/* ── A SLOT IS A CUT, AND IT WAS A PILL ──────────────────────────────────
+   IT WENT INTO THE LIST OF HOLES AND CAME OUT A SHAPE. A hairline round a
+   tinted rounded rectangle says "there is a region here"; it does not say
+   there is MATERIAL MISSING. On the dark theme the same cut is believed
+   instantly, and not because it is dark — because it has the three things a
+   cut has and this one had none of them: a shadow cast by the near wall
+   across the floor, a lit lip where the far wall comes back up to the
+   surface, and a floor a clear step below the panel.
+
+   SAME THREE THE E-PAPER MODULE USES, for the same reason — a module dropped
+   into a cut-out and a lever running in a slot are the same event seen from
+   two sides. The lever is a MOULDING and comes off the flatten list with it:
+   a grip is dark and knurled wherever it is, which is the sentence the fader
+   cap and the knob cap already settled. */
+[data-skin="light"] .gate-slot{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.16),
+    inset 0 0 0 1px var(--edge-ctl),
+    inset 0 -1px 0 rgba(255,255,255,.75),
+    0 1px 0 rgba(255,255,255,.9);
 }
 [data-skin="light"] .slide.pill .sl-act{
   background-color:var(--card); background-image:none;
@@ -7543,7 +7721,7 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.klab, .kicker, .hb-legend, .set-dlab, .oc-tab,
                         .gate-nm, .mod-name, .con-t, .bay-t, .mat-t, .hh-sub,
                         .ruler-label, .micro, .eng, .stage-note, .detail-n,
-                        .tab-sub, .drum-item, .sel-nm, .prog-nm, .kval, .name){
+                        .tab-sub, .sel-nm, .prog-nm, .kval, .name){
   color:var(--ink-2);
   text-shadow:none;
 }
@@ -7552,6 +7730,16 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.mod-name, .box-head .name, .win-head .t){
   color:var(--ink);
   font-weight:700;
+  text-shadow:none;
+}
+/* AND `.nm` IS A TITLE TOO. It is the name on a `.box-head` and it was the
+   one that got missed — the list above has `.t`, `.name` and `.mod-name` and
+   this is the fourth spelling. It kept #e3e6eb with a hard black shadow under
+   it, which is a pale letter lit from above on a dark wall: on cream it is a
+   grey word with a drop shadow, and the only thing on the panel still
+   pretending to be lit from inside. */
+[data-skin="light"] .box-head .nm{
+  color:var(--ink);
   text-shadow:none;
 }
 /* THE BLANKET: any engraved text-shadow left anywhere in a light panel. There
@@ -7584,6 +7772,96 @@ span.nav-link{ cursor:default; }
    is a pale blue hairline over a pale warm card and it disappears, which
    takes the keyboard path with it. Two pixels of the brand orange, offset so
    it never eats the control's own edge. */
+/* ── AND `--lift` IS DECLARED ON THE ELEMENT, NOT ON THE ROOT ────────────
+   A CUSTOM PROPERTY RESOLVES THE `var()`s INSIDE IT WHERE IT IS DECLARED,
+   not where it is used. Written in the token block, `--lift` computed once
+   on <html> — and <html> has no `--chamf` and no `--wall`, so both fell
+   straight through to their defaults and every cap on the page inherited a
+   finished shadow with a 95% white chamfer and a grey wall already baked
+   into it. The orange button set its two variables correctly and nothing
+   read them: that is the bright white line along its top.
+
+   DECLARED ON `*`, the same token is computed again on every element, so
+   each one resolves the pair it actually carries. It costs one custom
+   property per element and it is the only construction that lets a value
+   with holes in it be filled by the thing using it. */
+[data-skin="light"] *{
+  --lift:
+    inset 0 1px 0 var(--chamf, rgba(255,255,255,.95)),
+    inset 0 -1px 0 rgba(0,0,0,.05),
+    0 3px 0 var(--wall, var(--edge-ctl)),
+    0 4px 4px rgba(0,0,0,.07),
+    0 7px 10px -5px rgba(0,0,0,.07);
+}
+
+/* ── THE PULSE LANDED IN THE DARK THEME'S SHADOW ─────────────────────────
+   `@keyframes actuate` is the 260ms surge a momentary key plays ON RELEASE,
+   and it is the one place in this file where a raised cap is written as
+   LITERAL VALUES rather than as the token every other rule uses — a solid
+   `#0e0f11` wall and a seventy-per-cent black throw, because that is what a
+   cap standing on a near-black panel looks like. A skin cannot reach inside a
+   keyframe: `--recess` is a variable and gets re-pointed, but these numbers
+   are not, so for a quarter of a second after every click the key grew the
+   dark theme's shadow and then snapped back to the light one.
+
+   THE ANSWER IS A SECOND KEYFRAME AND A NAME SWAP, not an edit to the first.
+   The dark theme ships and this skin is a guest in its file; re-pointing
+   `animation-name` changes what the light skin plays and leaves the original
+   exactly as it was.
+
+   AND THE LAMP IS A RING, NOT A BLOOM. The original's 16px orange halo is a
+   lamp behind a cutout. There is no cutout on paper, so the surge is a hard
+   accent ring that tightens as it dies — the same event, reported by an edge
+   instead of by light in the air. */
+/* AND THE TWO FRAMES ARE WRITTEN OUT, LAYER FOR LAYER, WHICH IS THE WHOLE
+   REASON THIS LOOKS SMOOTH. A box-shadow list only interpolates against
+   another list of the SAME LENGTH; where the counts differ the browser gives
+   up and swaps them discretely at the halfway point. `--sink` is two layers
+   and `--lift` is five, so the first version of this keyframe held the
+   pressed shadow for 130ms and then produced the raised one all at once —
+   which is exactly "the top shadow arrives late". It was not late, it was
+   instantaneous, in the middle.
+
+   So both frames carry the same five layers in the same order and only the
+   values move. Nothing is dropped; a layer that is not wanted yet is present
+   at zero alpha. The tokens cannot be used here for that reason — they are
+   the right values but the wrong SHAPE — so the two of them are spelled out,
+   and the comment on `--lift` is what explains what each layer is.
+
+   READ DOWN A COLUMN AND IT IS ONE MOVEMENT: the chamfer lights, the inner
+   shadow drains, THE ACCENT RING BECOMES THE SIDE WALL, and the cap settles
+   onto its own shadow. The ring turning into the wall is the nicest part and
+   it is free — same layer, same slot, two different ends. */
+@keyframes actuate-light{
+  0%{
+    box-shadow:
+      inset 0 1px 0 var(--chamf, rgba(255,255,255,.95)),
+      inset 0 2px 3px rgba(0,0,0,.09),
+      0 0 0 2px var(--primary),
+      0 4px 4px rgba(0,0,0,0),
+      0 7px 10px -5px rgba(0,0,0,0);
+  }
+  100%{
+    box-shadow:
+      inset 0 1px 0 var(--chamf, rgba(255,255,255,.95)),
+      inset 0 2px 3px rgba(0,0,0,0),
+      0 3px 0 var(--wall, var(--edge-ctl)),
+      0 4px 4px rgba(0,0,0,.07),
+      0 7px 10px -5px rgba(0,0,0,.07);
+  }
+}
+[data-skin="light"] .key.flash{ animation-name:actuate-light; }
+
+/* AND EVERY COLOUR PLAYS IT, because `--wall` and `--chamf` are read off
+   the element the animation is running on: one set of frames, whatever cap
+   it lands on. The chamfer holds its own value across both frames — the
+   light on the top of a part is the room, and the room does not blink when
+   you let go of a button. */
+[data-skin="light"] :is(.act, .key).go.flash,
+[data-skin="light"] :is(.act, .key).fire.flash,
+[data-skin="light"] .act.primary.flash,
+[data-skin="light"] .act.halt.flash{ animation-name:actuate-light; }
+
 [data-skin="light"] :is(.key, .pkey, .chip, .sel, .sw, .act, .tog, .sel-row):focus-visible{
   outline:2px solid var(--primary-ink);
   outline-offset:2px;

@@ -1,6 +1,18 @@
-export const version = '1.105.0';
+export const version = '1.106.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.106.0',
+    date: '2026-11-20',
+    changes: [
+      "A LATCHED KEY IS A WELL, NOT A TINT. It was filled with pale orange, which is the dark theme's idea translated wrongly: on black a key that is ON glows, the cap is lit from inside and the light spills onto the case round it, so a wash of accent IS the state. Nothing on paper glows, and the same wash on cream is a coloured SWATCH — which says this one is a different colour, not this one is held down. A light panel reports a latch the way a machine does: the cap is below the others and you can see down onto the shadow its own walls throw. Milled fill, control edge, and the whole state in a deep triple inset — darker and twice as far across as the momentary press, because a latch is a key that has STOPPED at the bottom of its travel rather than one passing through.",
+      "AND THE LEGEND IN IT IS THE ONE LAMP THIS SKIN ALLOWS. Every other glow came out because there is no far wall on paper and nothing for a bloom to describe. This one has somewhere to spill: the key is a recess now, it has walls, and the thing you are looking at is down inside it. `--primary-deep` rather than `--primary-ink`, because the ink value exists to carry 4.5:1 as flat text on white and this is not that — it is a lit legend at the bottom of a hole, with the cap's position and its shadow carrying the state alongside it. Said AFTER the blanket that strips every remaining text-shadow, or the blanket takes it straight back off.",
+      "AN ACTUATOR IS A GRIP AND IT WAS FILED AS A FILL. `.sl-act` sat in the list that turns a fader's fill to ink, and the pill variant then overrode that with a white cap. Neither is the part: a FILL is a length that has been used and takes the track's value, an ACTUATOR is the thing your thumb pushes, and in this language a grip is a dark knurled moulding wherever it appears — the fader's cap, the range fader's jaws, the knob's cap, the gate's lever. The fifth spelling of one part and the last still wearing paint. A white one also broke the reading twice: on a pill the legend is what the actuator UNCOVERS, so a white grip beside a white OFF panel left nothing to say which half was the grip, and the lit state washes the actuator's inboard edge with the accent, which needs a dark edge to wash.",
+      "A SWITCH'S BED IS A CUT WITH A LAMP IN IT, and it was painted the case's colour. `.slide.on .sl-bed` lights the floor, and a floor that lights has to be dark when it does not: a pale bed turning pale orange is a swatch changing colour, where a dark one coming up to a lit accent is a lamp behind a window. It also has to lose to the actuator — the grip is a dark moulding in both skins, so a cream bed put the one dark thing on the control against the one bright thing and the eye read the TRACK as the object and the grip as a hole in it.",
+      "IT DOES NOT TAKE THE DARK THEME'S FLOOR UNCHANGED EITHER. That one is near-black because it sits in a near-black case and a slot has to be darker than what it is cut into; the same hole in a cream case is a hole in cream, which is a DARK GREY and not a void. The vignette is the WALLS and the gradient is the FLOOR, and they are two statements about one channel: the radial starts earlier and ends harder, because the dark at the ends of a slot is the near wall standing between the lamp and the floor and that edge is short and steep, and the floor then has room to come right up in the middle where nothing is in the way. The distance between the two IS the depth.",
+      "AND HOVERING A HELD KEY DOES NOT LIFT IT. `.is-down:hover` was putting the orange wash back the moment the pointer arrived, which would have undone the well on contact.",
+    ],
+  },
   {
     version: '1.105.0',
     date: '2026-11-20',

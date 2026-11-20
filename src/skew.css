@@ -6804,11 +6804,32 @@ span.nav-link{ cursor:default; }
    selection read as the gap, not as the choice. The fill goes to the warm tint
    instead: still darker than the raised caps, still obviously IN, but now a
    colour that belongs to the accent rather than to the floor. */
+/* ── AND A LATCHED KEY IS A WELL, NOT A TINT ─────────────────────────────
+   IT WAS FILLED WITH PALE ORANGE, which is the dark theme's idea translated
+   wrongly. On black, a key that is ON glows: the cap is lit from inside and
+   the light spills onto the case round it, so a wash of accent IS the state.
+   Nothing on paper glows. The same wash on cream is a coloured swatch, and
+   a swatch says "this one is a different colour", not "this one is held
+   down" — which is why it read as decoration rather than as position.
+
+   A LIGHT PANEL REPORTS A LATCH THE WAY A MACHINE DOES: the cap is BELOW
+   the others and you can see down onto the shadow its own walls throw. So
+   the fill goes back to the milled value, the border to the control edge,
+   and the whole of the state is carried by a deep inset — darker and twice
+   as far across as the momentary press, because a latch is a key that has
+   stopped at the bottom of its travel rather than one passing through.
+
+   THE ORANGE STAYS IN THE INK. The legend is the accent and that is the one
+   place a light panel can use colour for state without pretending to emit —
+   `.is-down` sets it two rules down and is untouched. */
 [data-skin="light"] :is(.key.pressed, .key.skirt.is-down, .pkey.is-down, .chip.is-down){
-  background-color:var(--primary-subtle);
+  background-color:var(--paper);
   background-image:none;
-  border-color:#F0D3BC;
-  box-shadow:var(--sink);
+  border-color:var(--edge-ctl);
+  box-shadow:
+    inset 0 3px 5px rgba(0,0,0,.18),
+    inset 0 1px 2px rgba(0,0,0,.10),
+    inset 0 -1px 0 rgba(255,255,255,.5);
   transform:translateY(3px);
 }
 /* THE LATCHED KEY IS ORANGE INK ON WHITE, AND THE GLOW IS GONE. A text-shadow
@@ -6819,9 +6840,11 @@ span.nav-link{ cursor:default; }
   color:var(--primary-ink);
   text-shadow:none;
 }
+/* AND HOVERING A HELD KEY DOES NOT LIFT IT. The wash came back here, which
+   would have put the swatch straight back the moment the pointer arrived. */
 [data-skin="light"] :is(.key, .pkey, .chip).is-down:hover{
   color:var(--primary-ink);
-  background-color:var(--primary-subtle);
+  background-color:var(--paper);
   background-image:none;
 }
 [data-skin="light"] .key.is-down svg,
@@ -6944,7 +6967,7 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] .sel-row.is-cur:focus-visible{ color:var(--primary-ink); background:var(--primary-subtle); }
 
 /* ── the slider: cream track, dark fill, a square orange thumb ───────────── */
-[data-skin="light"] :is(.ftrack, .kr-track, .sl-bed){
+[data-skin="light"] :is(.ftrack, .kr-track){
   background-color:var(--paper);
   background-image:none;
   box-shadow:inset 0 0 0 1px var(--edge-ctl);
@@ -6972,7 +6995,7 @@ span.nav-link{ cursor:default; }
 /* THE FILL IS INK, NOT ORANGE, AND THE REFERENCE IS WHY. With an orange thumb
    on an orange fill the handle disappears into its own travel; the dark fill
    is what makes the thumb's position readable at a glance. */
-[data-skin="light"] :is(.ffill, .kr-val, .sl-act){
+[data-skin="light"] :is(.ffill, .kr-val){
   background-color:var(--ink);
   background-image:none;
   box-shadow:none;
@@ -7596,7 +7619,71 @@ span.nav-link{ cursor:default; }
 
 /* THE TOGGLE'S BED IS A WELL TOO, and its actuator is the part standing in
    it. `--recess` is already redefined, so the bed only needs its fill. */
-[data-skin="light"] .sl-bed{ background-color:var(--paper); background-image:none; }
+/* ── A SWITCH'S BED IS A CUT WITH A LAMP IN IT ───────────────────────────
+   IT WAS PAINTED THE CASE'S COLOUR and it is the one part here that cannot
+   be: `.slide.on .sl-bed` lights the floor, and a floor that lights has to
+   be dark when it does not. A pale bed turning pale orange is a swatch
+   changing colour; a near-black one coming up to a lit accent is a lamp
+   behind a window, which is what the part is.
+
+   IT ALSO HAS TO LOSE TO THE ACTUATOR. The grip is a dark knurled moulding
+   in both skins — the same decision the fader cap and the knob cap took —
+   so a cream bed put the one dark thing on the control against the one
+   bright thing, and the eye read the TRACK as the object and the grip as a
+   hole in it. Dark bed, grey grip: the moulding is in front, where it is.
+
+   SO IT COMES OFF THE TRACK LIST — but it does not take the dark theme's
+   floor unchanged either. That one is near-black because it sits in a
+   near-black case and a slot has to be darker than what it is cut into; in a
+   cream case the same hole is a hole in cream, which is a DARK GREY and not
+   a void. Same construction, lifted to the values this file already uses for
+   a moulding: `#3a3e45` under the near wall, up to `#585d66` across the
+   middle, easing back down at the far one.
+
+   THE VIGNETTE IS THE WALLS AND THE GRADIENT IS THE FLOOR, and they are two
+   different statements about the same channel. The radial one starts earlier
+   and ends harder, because the dark at the ends of a slot is not shading —
+   it is the near wall standing between the lamp and the floor, and that
+   edge is short and steep. The floor then has room to come right up in the
+   middle, where nothing is in the way: `#767d88` is a long way above the
+   wall's own value, and that distance IS the depth.
+
+   AND IT NEEDS THE WHOLE SPAN, not a tint. The first attempt moved three
+   stops two steps up the scale and kept them within six values of each
+   other, which is a FLAT FLOOR painted grey — and a flat floor is the one
+   thing a cut cannot have, because what tells you a channel has depth is
+   that its middle catches light its walls do not. The radial vignette comes
+   down with it for the same reason: it was eating the gradient it sits on
+   top of. The unlit floor still stays under the grip's own face, so the
+   moulding reads in front of it.
+
+   AND THE LIT STATE IS WRITTEN AGAIN RIGHT AFTER, which is the rule this
+   file states three times: the skin's rest rule is (0,2,0) and sits at the
+   end, so it would otherwise swallow `.slide.on .sl-bed`, which is (0,2,0)
+   too. Restated verbatim — the lamp is unchanged, it just has to be said
+   after the floor it lights. */
+[data-skin="light"] .sl-bed{
+  background-image:
+    radial-gradient(120% 200% at 50% 45%, transparent 22%, rgba(0,0,0,.46) 100%),
+    linear-gradient(180deg,#3a3e45,#767d88 55%,#43474e);
+  box-shadow:
+    inset 0 2px 3px rgba(0,0,0,.6),
+    inset 0 -1px 1px rgba(255,255,255,.09);
+}
+[data-skin="light"] .slide.on .sl-bed{
+  background-image:
+    radial-gradient(120% 200% at 50% 45%, transparent 30%, rgba(0,0,0,.5) 100%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--lyr, var(--led)) 52%, #000) 0%,
+      color-mix(in srgb, var(--lyr, var(--led)) 90%, #fff) 34%,
+      color-mix(in srgb, var(--lyr, var(--led)) 88%, #000) 62%,
+      color-mix(in srgb, var(--lyr, var(--led)) 50%, #000) 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.6),
+    inset 0 0 0 1px rgba(0,0,0,.4),
+    0 0 4px color-mix(in srgb, var(--lyr, var(--led)) 8%, transparent),
+    0 0 9px color-mix(in srgb, var(--lyr, var(--led)) 4%, transparent);
+}
 [data-skin="light"] .slide{ background-color:transparent; background-image:none; }
 
 /* ── AND THE SHORT LIST OF THINGS THAT ARE STILL ALLOWED TO BE DARK ──────
@@ -7689,10 +7776,21 @@ span.nav-link{ cursor:default; }
     inset 0 -1px 0 rgba(255,255,255,.75),
     0 1px 0 rgba(255,255,255,.9);
 }
-[data-skin="light"] .slide.pill .sl-act{
-  background-color:var(--card); background-image:none;
-  box-shadow:0 1px 3px rgba(0,0,0,.18);
-}
+/* ── AN ACTUATOR IS A GRIP AND IT WAS FILED AS A FILL ────────────────────
+   `.sl-act` sat in the list that turns a fader's fill to ink, and the pill
+   variant then overrode that with a white cap. Neither is what the part is.
+   A FILL is a length that has been used — it belongs to the track and takes
+   the track's value. AN ACTUATOR is the thing your thumb pushes, and in
+   this language a grip is a dark knurled moulding wherever it appears: the
+   fader's cap, the range fader's jaws, the knob's cap, the gate's lever.
+   This is the fifth spelling of the same part and the last one still
+   wearing paint.
+
+   AND A WHITE ONE BROKE THE READING TWICE. On a pill the legend is what the
+   actuator UNCOVERS — ON showing means on — so a white grip beside a white
+   `OFF` panel left nothing to say which half was the grip; and the lit
+   state washes the actuator's inboard edge with the accent, which needs a
+   dark edge to wash. Both come back by taking the rule out. */
 [data-skin="light"] .skip{
   background-color:var(--primary-deep); background-image:none; color:#fff;
 }
@@ -7747,6 +7845,29 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.t, .klab, .eng, .micro, .name, .kval, .readout,
                         .sel-nm, .gate-nm, .ruler-label, .hb-legend){
   text-shadow:none;
+}
+
+/* ── THE ONE LAMP THIS SKIN ALLOWS, AND IT IS A LEGEND ───────────────────
+   EVERY OTHER GLOW CAME OUT because there is no far wall on paper and
+   nothing for a bloom to describe: an engraved shadow on cream is a drop
+   shadow, a lit cap on cream is a smudge. A LATCHED LEGEND is the exception
+   and the reason is the part. The key is now a WELL — it has walls, it is
+   below the panel, and the thing you are looking at is down inside it. A
+   lamp under a legend in a recess has somewhere to spill: the walls. That
+   is a real place, which is what every other glow in this skin was missing.
+
+   SO IT GOES TO `--primary-deep` RATHER THAN `--primary-ink`. The ink value
+   exists to carry 4.5:1 as flat text on white; this is not flat text on
+   white, it is a lit legend at the bottom of a hole, and the state is also
+   carried by the cap's position and its shadow. The brighter value is what
+   makes it read as lit rather than as merely coloured.
+
+   SAID AFTER THE BLANKET, because the blanket above is what would take the
+   shadow straight back off it. */
+[data-skin="light"] :is(.key, .pkey, .chip, .act).is-down,
+[data-skin="light"] :is(.key, .pkey, .chip).is-down :is(.t, .ct, .klab, .name){
+  color:var(--primary-deep);
+  text-shadow:0 0 7px color-mix(in srgb, var(--primary) 34%, transparent);
 }
 
 /* THE NAV'S WORDMARK WAS DARK GREY ON BLACK. The bar is the one dark object

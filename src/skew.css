@@ -352,6 +352,17 @@ body::after{
   transition:transform .1s;
 }
 .gridswatch:active{ transform:translateY(1px); }
+/* A SWATCH IS A SAMPLE OF INK AND THE RING ROUND IT IS A MOUNT. Black at 65%
+   with a 60% drop is a chip lying on a dark bench; on cream it is a hole
+   with a colour in it. Same mount, cut from the case: the control edge, the
+   cap's own chamfer, and the short throw everything else here casts. */
+[data-skin="light"] .gridswatch{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.35),
+    inset 0 0 0 1px rgba(0,0,0,.10),
+    0 0 0 1px var(--edge-ctl),
+    0 1px 2px rgba(0,0,0,.08);
+}
 
 /* ── page furniture ──────────────────────────────────────────────────────── */
 .wrap{ max-width:1160px; margin:0 auto; padding:56px 32px 120px; }
@@ -5695,6 +5706,13 @@ body.drawer-open .sliders i:nth-child(3),
   text-shadow:0 1px 0 rgba(255,255,255,.09);
 }
 .set-dunit{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c; }
+/* `cm` AND `mm` ARE A UNIT, NOT A READING. The dark theme gives them a green
+   that belongs to the same family as a lit readout, which on black says
+   "this is part of the display". On cream there is no lit display for them
+   to belong to, so the green is just a third ink on a panel that has two —
+   and it lands beside an e-paper module whose digits are near-black. A unit
+   is the quietest word in the row. */
+[data-skin="light"] .set-dunit{ color:var(--ink-3); }
 
 
 /* ADVANCED IS A DRAWER. It is allowed to hide because what it hides is rare;
@@ -6727,15 +6745,40 @@ span.nav-link{ cursor:default; }
 }
 [data-skin="light"] :is(.box, .module) .box-body{ background:var(--card); }
 
-/* THE SECTION BAND IS THE PAGE COLOUR WITH A COLOURED BAR DOWN ITS LEFT EDGE.
-   That bar is the only place a section gets a colour, and it means something:
-   orange is the default, and a different hue marks a section that is not like
-   the others. One rule, and `--bar` is what a section sets. */
+/* ── A PANEL HEAD IS NOT A BAND ─────────────────────────────────────────
+   IT WAS A TINT WITH A COLOURED BAR DOWN ITS LEFT EDGE, and the dark theme
+   does none of that: the head is the SAME VALUE as the panel and one
+   hairline separates it from the body. That is the better construction and
+   the corner proved it. A tint is a second value, two values meeting draw a
+   join, and a join on a case with rounded corners has to be mitred — which
+   is how a title bar ends up needing a radius calculated off its parent's
+   border just to stop two grey corners poking into the curve. A head that
+   is the case's own face has no join to mitre and no corner to get wrong.
+
+   THE HAIRLINE DOES THE WHOLE JOB, exactly as it does on black. The name is
+   the loudest thing in the row because it is set in bold ink, not because
+   it sits on a different ground. */
 [data-skin="light"] :is(.head, .box-head, .drawer-head, .mod-head, .win-head){
-  background:var(--paper);
+  background:transparent;
   border-bottom:1px solid var(--edge);
-  box-shadow:inset 3px 0 0 var(--bar, var(--primary));
+  box-shadow:none;
+  border-radius:0;
   color:var(--ink);
+}
+/* ── AND A HEAD ON A CASE YOU CAN SEE NEEDS THE ROOM A BAND DID NOT ──────
+   `.box-head` takes 5px top and bottom and 16 on the left, and both of
+   those were paid for by things this skin has since removed. The vertical
+   five worked because the head was a TINT: a band of a different value
+   reads as a region however thin it is, so the jewel had a field to sit in
+   and did not need air round it. The sixteen worked because an orange bar
+   ran down the left edge and the jewel was measured off the BAR, not off
+   the case.
+   Both are gone, so the jewel is now a small round object sitting in the
+   corner of a card with a hairline and a radius — and a corner is the one
+   place on a panel where two edges arrive at once. It needs the same inset
+   the body below it has, plus the two pixels the curve takes back. */
+[data-skin="light"] :is(.box-head, .head, .mod-head, .win-head){
+  padding:11px 16px 11px 18px;
 }
 [data-skin="light"] :is(.head, .box-head) .t,
 [data-skin="light"] .mod-name,
@@ -6826,10 +6869,7 @@ span.nav-link{ cursor:default; }
   background-color:var(--paper);
   background-image:none;
   border-color:var(--edge-ctl);
-  box-shadow:
-    inset 0 3px 5px rgba(0,0,0,.18),
-    inset 0 1px 2px rgba(0,0,0,.10),
-    inset 0 -1px 0 rgba(255,255,255,.5);
+  box-shadow:var(--well);
   transform:translateY(3px);
 }
 /* THE LATCHED KEY IS ORANGE INK ON WHITE, AND THE GLOW IS GONE. A text-shadow
@@ -6847,8 +6887,11 @@ span.nav-link{ cursor:default; }
   background-color:var(--paper);
   background-image:none;
 }
-[data-skin="light"] .key.is-down svg,
-[data-skin="light"] .sw.on svg{ filter:none; }
+/* THE DARK THEME PUTS AN ORANGE DROP-SHADOW UNDER A LIT GLYPH. Taking it
+   off was right while the lit cap was a solid orange fill; now that ON is a
+   well with the accent in the glyph, the switch wants that lamp back and
+   gets it at the end of this file. The key keeps the flat glyph. */
+[data-skin="light"] .key.is-down svg{ filter:none; }
 [data-skin="light"] .chip.is-down .ct{ color:var(--primary-ink); text-shadow:none; }
 /* A DEAD CONTROL IS STILL A LABELLED CONTROL. `--ink-3` on the page is
    2.40:1, so a disabled key used to be a key you could not read rather than
@@ -7118,6 +7161,17 @@ span.nav-link{ cursor:default; }
   --sink:
     inset 0 2px 3px rgba(0,0,0,.09),
     inset 0 -1px 0 rgba(255,255,255,.6);
+/* AND A LATCH IS DEEPER THAN A PRESS, which is why it is its own token and
+   not a second spelling of `--sink`. A momentary key is passing through the
+   bottom of its travel; a latched one has STOPPED there, and you are looking
+   down onto the shadow its own walls throw. Written once, because the rest
+   rule and the toggle's pulse both have to land on exactly this value or the
+   key changes one frame after the animation ends — the fault that pulse
+   already had once with `--recess`, and would have had again. */
+  --well:
+    inset 0 3px 5px rgba(0,0,0,.18),
+    inset 0 1px 2px rgba(0,0,0,.10),
+    inset 0 -1px 0 rgba(255,255,255,.5);
 /* ── AND A COLOURED CAP IS THE SAME CAP ─────────────────────────────────
    IT HAD A SECOND SHADOW STACK OF ITS OWN, and a second release keyframe to
    go with it. Every one of the last five faults came out of that pair: the
@@ -7186,11 +7240,24 @@ span.nav-link{ cursor:default; }
   position:relative;
   overflow:hidden;
 }
+/* AND THE STREAK IS SIZED IN PIXELS, NOT IN PER CENT. A gradient stop is a
+   fraction of the box, so the same two panes that read as a window on a
+   52px readout became a 700px diagonal WASH on a full-width one — the Pitch
+   field stopped looking like glass and started looking like a gradient bar,
+   which is the exact failure the angle was chosen to avoid. A reflection is
+   the room arriving at the surface: the window is the size the window is,
+   and a wider pane of glass shows more GLASS, not a wider window. Fixed
+   widths, no repeat, placed a third of the way in — and the ceiling sheen
+   is the one layer that does span, because the ceiling really is as wide as
+   the glass. */
 [data-skin="light"] :is(.lcd, .readout, .kval, .kr-val-box, .pk-lcd)::after{
   content:'';
   position:absolute;
   inset:0;
   pointer-events:none;
+  background-repeat:no-repeat;
+  background-size:150px 100%, 110px 100%, 100% 100%;
+  background-position:18% 0, 64% 0, 0 0;
   background-image:
     /* the bright pane — the window's near edge. The angle is nearly flat
        because the glass is WIDE and SHORT: a band at 120 degrees across a
@@ -7263,26 +7330,10 @@ span.nav-link{ cursor:default; }
 }
 
 /* ── the checkbox: a pale square that fills orange ───────────────────────── */
-[data-skin="light"] .sw{
-  background-color:var(--paper);
-  background-image:none;
-  box-shadow:inset 0 0 0 1px var(--edge-ctl);
-  border-radius:6px;
-  color:var(--ink-3);
-}
-[data-skin="light"] .sw:hover,
-[data-skin="light"] .tog:hover .sw{
-  background-color:var(--card-hover); background-image:none;
-  box-shadow:inset 0 0 0 1px #DCD8D3; color:var(--ink-2);
-}
-[data-skin="light"] .sw.on{
-  background-color:var(--primary-deep); background-image:none;
-  box-shadow:inset 0 0 0 1px var(--primary-deep);
-  color:#fff;
-}
-[data-skin="light"] .sw.on:hover{ background-color:var(--primary-light); background-image:none; color:#fff; }
-[data-skin="light"] .sw:active,
-[data-skin="light"] .tog:active .sw{ box-shadow:inset 0 1px 3px rgba(0,0,0,.12); }
+/* `.sw` IS RESTATED AT THE END OF THIS FILE, with the rest of the key
+   vocabulary. What was here was a flat tinted square and a solid orange ON,
+   and leaving it in place alongside the new one would be the two-stacks bug
+   again, in miniature. */
 [data-skin="light"] .tog:hover{ background:var(--card-hover); }
 [data-skin="light"] .tog:active{ background:var(--paper); }
 
@@ -7372,6 +7423,21 @@ span.nav-link{ cursor:default; }
    this one showed it. The column gap goes up with the inset for the same
    reason: three faders 10px apart inside a frame are a block, not a bank. */
 [data-skin="light"] .fbank{ padding:14px 16px; gap:16px; }
+/* ── AND THE SAME SENTENCE AGAIN, FOR THE BODIES THAT SET THEIR OWN ──────
+   `.gridbody` takes 9/10 and `.set-bay` takes 8/9, which are the numbers of
+   a panel whose edge you cannot see: on black the body runs out to a case
+   that is the same value as it is, so ten pixels is a gap between PARTS and
+   nothing is near a boundary because there is no boundary to be near. This
+   skin draws the case — a hairline and a value step — and the moment the
+   wall exists, ten pixels is a label pressed against it. The content has
+   not moved; the room it is in has acquired walls.
+
+   16 AT THE SIDES, which is what `.fbank` settled on and the same figure the
+   rest of this file reaches for: it is the first inset that reads as a
+   margin rather than as a gap. The Pitch readout is the one that shows it
+   worst, because it is full-bleed and ends ON the line. */
+[data-skin="light"] .gridbody{ padding:14px 16px 16px; }
+[data-skin="light"] .set-bay{ padding:12px 14px 14px; }
 /* and inside each strip: 7px between a readout, a 136px slot and a name is
    the spacing of a part crammed into a rack, which is what it was. */
 [data-skin="light"] .fbank .fader.vert{ gap:10px; }
@@ -7402,8 +7468,28 @@ span.nav-link{ cursor:default; }
    one part of this panel that is a WINDOW rather than a face, and every
    reference has a dark one in a light case. It keeps its glass, its glow and
    its colours; nothing in this skin reaches inside it. */
+/* AND IT IS DROPPED INTO THE CASE, NOT LAID ON IT. These were taking the
+   panel's own card shadow, which is the shadow of a thing that FLOATS — and
+   a floating black rectangle on a cream panel is a sticker, however well
+   drawn. A display is fitted into a cut-out: the case overhangs its top
+   edge and throws a line across the glass, the frame is a hairline of the
+   case's own control edge, and the bottom lip catches the room on its way
+   back up to the surface. The same three the e-paper module and the gate's
+   slot use, which is the point — everything let into this panel is let in
+   the same way. */
+/* THE HALO WAS A FILTER, WHICH IS WHY NOTHING ABOVE REACHED IT. `.drum`
+   carries `drop-shadow(0 5px 9px rgba(0,0,0,.75))` — a filter, not a
+   box-shadow, so every rule in this skin that neutralises a throw walked
+   straight past it. It is the dark theme's statement that the whole
+   assembly stands off the panel; this skin's is that it is cut into it, and
+   a part cannot be both. The window keeps its own inset walls, which is
+   where the depth lives. */
+[data-skin="light"] .drum{ filter:none; }
 [data-skin="light"] :is(.screen, .lcd.glass, .oc-page, .drum-win){
-  box-shadow:var(--shadow-card);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.55),
+    0 0 0 1px var(--edge-ctl),
+    0 1px 0 rgba(255,255,255,.85);
 }
 
 
@@ -7836,7 +7922,7 @@ span.nav-link{ cursor:default; }
    it, which is a pale letter lit from above on a dark wall: on cream it is a
    grey word with a drop shadow, and the only thing on the panel still
    pretending to be lit from inside. */
-[data-skin="light"] .box-head .nm{
+[data-skin="light"] :is(.box-head, .drawer-head, .head, .mod-head, .win-head) .nm{
   color:var(--ink);
   text-shadow:none;
 }
@@ -7983,7 +8069,162 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] .act.primary.flash,
 [data-skin="light"] .act.halt.flash{ animation-name:actuate-light; }
 
+/* ── AND THE TOGGLE'S SURGE LANDS IN THE WELL ────────────────────────────
+   `engage` is the same 260ms pulse for a LATCHING control, and where the
+   momentary one settles back onto a raised cap this one settles INTO the
+   recess, because that is where a toggle stops. It therefore has to end on
+   exactly what the latched rule holds, and in this skin that is `--well`.
+   The base keyframe ends on `--recess`: a different hole, so the animation
+   finished, the element fell back to its own rule, and the shadow changed
+   one frame AFTER the 260ms were over. Not a late shadow — a second one.
+
+   FOUR LAYERS IN BOTH FRAMES, because a shadow list only interpolates
+   against a list of the same length and anything else is swapped out whole
+   at the halfway mark. The ring is present at the end with no spread left,
+   and the three well layers never move: the hole is already there, the
+   surge is only the light arriving at it. */
+@keyframes engage-light{
+  0%{
+    box-shadow:
+      inset 0 3px 5px rgba(0,0,0,.18),
+      inset 0 1px 2px rgba(0,0,0,.10),
+      inset 0 -1px 0 rgba(255,255,255,.5),
+      0 0 0 2px var(--primary);
+  }
+  100%{
+    box-shadow:
+      inset 0 3px 5px rgba(0,0,0,.18),
+      inset 0 1px 2px rgba(0,0,0,.10),
+      inset 0 -1px 0 rgba(255,255,255,.5),
+      0 0 0 0 rgba(255,106,0,0);
+  }
+}
+[data-skin="light"] .engage{ animation-name:engage-light; }
+
 [data-skin="light"] :is(.key, .pkey, .chip, .sel, .sw, .act, .tog, .sel-row):focus-visible{
   outline:2px solid var(--primary-ink);
   outline-offset:2px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE LAYER DOCK — and it is four separate leaks, not one component
+
+   A ROW IN THIS DOCK IS A `button.row.sel`, AND `.sel` IS ALSO THE SELECT
+   CONTROL. One class name, two parts, and in the dark theme nothing happens
+   because `.row.sel` is (0,2,0) and `.sel` is (0,1,0). In this skin both are
+   (0,2,0) and the skin's select rule is written later, so the selected layer
+   row was being painted as a select: `--primary-deep` fill, a 168px width
+   from `--selw`, 9.5px letterspaced type, `var(--lift)` and an orange wall.
+   That is where the solid orange bar came from, and why it lost its name and
+   its chevron — it was not a row with the wrong colour, it was a select.
+
+   THE NAME COLLISION IS THE ROOT CAUSE AND RENAMING IT IS NOT THIS SKIN'S
+   CALL. So the row is restated here, last, over every property the select
+   rule sets — geometry included, because geometry leaked too.
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-skin="light"] .row.sel{
+  width:100%; height:40px; padding:0 8px 0 0; gap:5px;
+  border:0; border-radius:7px;
+  font-family:inherit; font-size:inherit; font-weight:inherit; letter-spacing:normal;
+  background-color:var(--card);
+  background-image:none;
+  color:var(--ink);
+  /* THE DARK ROW SAYS "UNDER POWER" WITH A RIM OF ITS OWN COLOUR AND A
+     BLOOM. The rim is the half that survives: a hard ring in the layer's
+     ink, which is the one place this dock is allowed to be coloured, since
+     the colour IS the layer's identity and not a state. The 12px bloom and
+     the 65% drop are a lamp in a dark room and come out. */
+  box-shadow:
+    inset 0 0 0 1px var(--lyr, var(--primary)),
+    0 1px 2px rgba(0,0,0,.06);
+}
+[data-skin="light"] .row.sel:hover{
+  background-color:var(--card-hover);
+  background-image:none;
+  color:var(--ink);
+}
+[data-skin="light"] .row.sel .name{ color:var(--ink); }
+
+/* THE ROWS KEPT THE DARK THEME'S OWN SHADOW, because the skin's row rule
+   sets a background, a bottom border and a colour and never mentions
+   `box-shadow` — so `inset 0 -1px 0 rgba(0,0,0,.7)` plus a 60% drop stayed
+   under every layer in the dock. That is the heavy dark edge. */
+[data-skin="light"] :is(.row, .setrow, .con-row, .modal-row, .hb-row, .mat-row){
+  box-shadow:none;
+}
+
+/* AND A HIDDEN LAYER IS DIMMER, NOT DARKER. `.row.off` takes its pipe to
+   #2a2c30 and its name to #6a6f77, which are a dark theme's two steps down
+   from a dark theme's values. On cream the same two steps go up. */
+[data-skin="light"] .row.off .pipe{
+  background:var(--edge-ctl);
+  box-shadow:none;
+}
+[data-skin="light"] .row.off .name{ color:var(--ink-3); }
+
+/* ── THE MICRO KEYS ARE RECESSED AND THAT IS THE POINT ───────────────────
+   Duplicate and delete are destructive or duplicative, and the dark theme
+   sinks them deliberately so they do not invite the thumb the way the
+   switches do. The skin only ever set their COLOUR, so the moulding stayed:
+   two black squares at the end of every row, which in a cream dock are the
+   loudest objects on it. They keep the intent and lose the pigment — a
+   shallow well in the milled value, with the glyph as a printed mark. */
+[data-skin="light"] .micro{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.10), inset 0 0 0 1px var(--edge);
+  color:var(--ink-2);
+}
+[data-skin="light"] .micro:hover{
+  color:var(--ink);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.12), inset 0 0 0 1px var(--edge-ctl);
+}
+[data-skin="light"] .micro.del:hover{
+  color:var(--no-ink);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.12), inset 0 0 0 1px var(--no-ink);
+}
+[data-skin="light"] .micro:disabled{ opacity:.35; box-shadow:inset 0 0 0 1px var(--edge); }
+
+/* ── AND THE EYE AND THE CELLS SWITCH ARE KEYS, SO THEY ARE CAPS ─────────
+   `.sw` was a flat tinted square and `.sw.on` a solid orange one, which is
+   the same mistranslation the latched key had: on black a switch that is ON
+   glows, so a wash of accent IS the state; on cream a wash is a swatch. It
+   is a cap like every other cap here — raised, with a wall — and ON is the
+   well, with the accent in the glyph. One vocabulary for every key on the
+   page, and this was the last family outside it.
+
+   IT IS GLOBAL, not scoped to the dock: a second description of this part
+   for one container is the bug that produced the two button stacks. */
+[data-skin="light"] .sw{
+  background-color:var(--card);
+  background-image:none;
+  --wall:var(--edge-ctl);
+  box-shadow:var(--lift);
+  border-radius:6px;
+  color:var(--ink-2);
+}
+[data-skin="light"] .sw:hover,
+[data-skin="light"] .tog:hover .sw{
+  background-color:var(--card-hover);
+  background-image:none;
+  color:var(--ink);
+}
+[data-skin="light"] :is(.sw.on, .sw.mixed){
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:var(--well);
+  color:var(--primary-deep);
+  transform:translateY(3px);
+}
+[data-skin="light"] :is(.sw.on, .sw.mixed) svg{
+  filter:drop-shadow(0 0 4px color-mix(in srgb, var(--primary) 40%, transparent));
+}
+[data-skin="light"] .sw:active,
+[data-skin="light"] .tog:active .sw{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:var(--sink);
+  transform:translateY(3px);
+}
+/* the dark theme's chamfer ring is a lit bezel and there is no lamp here */
+[data-skin="light"] :is(.sw.on, .sw.mixed, .sw:active)::after{ display:none; }

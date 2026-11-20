@@ -119,6 +119,29 @@
 
   const HERE = location.pathname.split('/').pop() || 'index.html';
 
+  /* ── THE SKIN, AND IT IS SET BEFORE ANYTHING IS DRAWN ─────────────────────
+     This script is the first node in <body>, which is the only moment a skin
+     can be chosen without a flash: the attribute lands on <html> before the
+     page's own markup exists, so nothing has already begun laying out in the
+     wrong skin.
+
+     THE ABSENCE OF THE ATTRIBUTE IS THE DARK THEME, not `data-skin="dark"`.
+     Dark is what this system IS; light is the deviation, and a selector that
+     has to name the default is a default that will be forgotten somewhere.
+
+     A `try` AROUND EVERY localStorage CALL, BOTH WAYS. It throws outright with
+     site data blocked, and a chrome script that throws takes the whole nav
+     with it — a forgotten skin is a nuisance, a missing nav bar is a dead
+     page. */
+  const SKIN_KEY = 'skew-skin';
+  let LIGHT = false;
+  try { LIGHT = localStorage.getItem(SKIN_KEY) === 'light'; } catch (_) {}
+  function applySkin() {
+    if (LIGHT) document.documentElement.dataset.skin = 'light';
+    else delete document.documentElement.dataset.skin;
+  }
+  applySkin();
+
   const mk = (tag, cls, html) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -411,6 +434,25 @@
        of the split the bar already has — the same arrangement §09's dock uses,
        where everything right of its single channel is the workspace. */
     if (!view && !isHome) strip.append(sectionsKey());
+
+    /* THE KEY SAYS WHERE THE PAGE STANDS, NOT WHERE IT IS GOING. It reads
+       LIGHT and is lit when the light skin is ON — a switch showing its own
+       state, like every other latched key in this system. A key that read
+       DARK while the page was light would be the one control here that has to
+       be read as an instruction rather than as a state. */
+    const skin = mk('button', 'chip nav-skin', 'LIGHT');
+    skin.type = 'button';
+    skin.title = 'Light skin';
+    skin.setAttribute('aria-pressed', String(LIGHT));
+    skin.classList.toggle('is-down', LIGHT);
+    skin.addEventListener('click', () => {
+      LIGHT = !LIGHT;
+      applySkin();
+      skin.setAttribute('aria-pressed', String(LIGHT));
+      skin.classList.toggle('is-down', LIGHT);
+      try { localStorage.setItem(SKIN_KEY, LIGHT ? 'light' : 'dark'); } catch (_) {}
+    });
+    strip.append(skin);
 
     const ver = mk('div', 'lcd nav-ver dim', 'v—');
     strip.append(ver);

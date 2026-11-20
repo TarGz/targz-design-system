@@ -6498,4 +6498,878 @@ span.nav-link{ cursor:default; }
       inset 0 -1px 0 rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
 
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKEW LIGHT — THE PANEL SKIN
+
+   NOT THE DARK THEME LIGHTENED, AND NOT A SECOND OPINION ABOUT IT EITHER.
+   The target is a panel that already ships: white card on a warm page, orange
+   where an action is, a cream field where a number is, and nothing black
+   except ink. Every value below comes from `_targz-launchpad/theme/
+   STYLEGUIDE.md`, which is the theme the Portrait apps actually run.
+
+   WHICH IS ALSO WHY THE ORANGE IS #FF6A00 AND NOT THE OLD #F26B1F. Julien
+   named the old document's colours and then showed the panel he wants; the
+   panel is the launchpad theme, CLAUDE.md says to converge on it rather than
+   drift further, and the two oranges are a hair apart. One orange in the repo
+   is worth more than the nine levels between them.
+
+   THE BLACK IS GONE FROM THE PANELS AND THAT IS THE WHOLE EDIT. The first
+   pass kept every control dark — correct for a K.O. II, wrong for this. A
+   control here is a white or cream part with a hairline round it, and the
+   orange is reserved for the two things that DO something: the select and the
+   primary key. Black survives as ink, as a slider's filled track, and as a
+   colour swatch, which is every place the reference uses it.
+
+   SEPARATION IS BORDERS AND ONE SOFT LIFT. `--border #E8E5E1` is 1.2:1
+   against white and does the work anyway, because a hairline is read as an
+   edge rather than as a value step. The panel gets `--shadow-card`, the
+   lightest thing in the styleguide, and nothing else on the page gets a
+   shadow at all.
+
+   WHAT SURVIVES OF THE SKEUOMORPHISM: the cream field is still sunk, the key
+   still travels under the thumb, the slider's thumb is still a part standing
+   on a track. What goes: every bevel, front, chamfer, glow and grain. On this
+   ground they are all dirt, and the reference has none of them.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-skin="light"]{
+  /* ── _targz-launchpad/theme/STYLEGUIDE.md, verbatim ────────────────────── */
+  --primary:        #FF6A00;
+  --primary-light:  #FF8A33;
+  --primary-subtle: #FFF3EB;
+
+  /* ── TWO MORE ORANGES, AND BOTH ARE THE SAME DECISION TWICE ────────────
+     #FF6A00 IS A FILL AND HAS NEVER BEEN ANYTHING ELSE. As a word on this
+     page it reads 2.78:1 on a card and 2.48:1 on the page — which means the
+     latched key, the live row and the kicker were all announcing a state
+     nobody could read. The brand orange does not move; a SECOND token carries
+     it into text, mixed 65% toward the ink, where it clears 5.19 / 4.64 / 4.93
+     on card, page and tint and is still recognisably the same orange. A
+     hairline or a word reads as HUE long before it reads as value.
+
+     AND WHITE ON THE FILL WAS 2.87:1, which is under the bar even for large
+     bold text, by a hair. The fill darkens rather than the label lightening,
+     because there is nothing above white to go to: #E55C00 takes it to 3.58
+     and is indistinguishable from #FF6A00 next to anything that is not
+     itself orange. Filled controls carrying a white label use it; everything
+     else keeps the brand value. */
+  --primary-ink:    #AF4E09;   /* orange AS TEXT — 5.19:1 on card           */
+  --primary-deep:   #E55C00;   /* orange as a FILL UNDER WHITE — 3.58:1     */
+
+  --ink:            #1A1A1A;
+  --ink-2:          #6B6B6B;
+  /* ── #9B9B9B IS NOT A TEXT COLOUR HERE AND NEVER WAS ───────────────────
+     2.69:1 on a card, 2.40:1 on the page. The styleguide calls it
+     `--text-tertiary` and on ITS flat white page that is a defensible 3.0; on
+     this warm ground it is a smudge. Three greys that all clear 4.5 on cream
+     is not a hierarchy, it is three shades of the same grey — so this one
+     stops being text. It rules lines, ticks and leaders, and every word that
+     used to wear it now wears `--ink-2`, which clears at 5.15 / 4.61. */
+  --ink-3:          #9B9B9B;   /* MARKS ONLY — rules, ticks, leaders        */
+  /* NOT PURE WHITE, AND IT NEVER SHOULD HAVE BEEN. #FFFFFF on the styleguide's
+     #F5F3F0 page is 1.03:1 — a card with no edge of its own, which on a large
+     panel stops reading as a card at all and starts reading as a hole in the
+     page. The styleguide names #FFFFFF for a SURFACE, and a surface there is a
+     list row or a small tile, not a four-hundred-pixel slab. Backed two per
+     cent off white and the page pushed a step warmer underneath it, so the
+     card has somewhere to sit without the hairline doing all the work. */
+  --paper:          #F1EEE9;
+  --card:           #FCFBF9;
+  --card-hover:     #F7F5F2;
+  --edge:           #E8E5E1;   /* panel and row hairlines              */
+  --edge-soft:      #F0EDEA;
+  /* A CONTROL'S EDGE IS NOT A PANEL'S EDGE. #E8E5E1 is 1.21:1 against a card
+     — fine as a rule between two rows, and not fine as the only thing saying
+     "this is a button". A control gets a darker one. It does not reach the
+     3:1 that 1.4.11 asks of a boundary carrying a control ON ITS OWN, because
+     that lands around #8E867A and turns the panel into a wireframe; what it
+     does is make the edge findable. The strict version is one value away if
+     Julien wants it. */
+  --edge-ctl:       #D3CDC4;
+  /* THE SEMANTICS SPLIT THE SAME WAY: a dot is a fill, a word is not.
+     #22C55E reads 2.20:1 and #EF4444 reads 3.64:1 on a card. */
+  --ok:             #22C55E;   /* the lamp   */
+  --no:             #EF4444;
+  --info:           #0015FF;
+  --ok-ink:         #15803D;   /* the word — 4.85:1 */
+  --no-ink:         #C81E1E;   /* 5.55:1            */
+
+  /* THE PAGE KEEPS THE OLD DOCUMENT'S WARMTH, which is the one thing from
+     `old/index.html` that the styleguide also asks for: its own background
+     gradient runs #FDF0E6 → #F5F3F0, so the warm end is already sanctioned
+     and the reference panel is plainly sitting on it. */
+  --page: linear-gradient(135deg, #FAEFE4 0%, #F1EEE9 42%, #EBEDF1 100%);
+
+  --r:     16px;   /* cards, panels   */
+  --r-sm:  10px;   /* buttons, inputs */
+  --r-pill:100px;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.03);
+  --shadow-md:   0 4px 12px rgba(0,0,0,.06);
+  --shadow-lg:   0 8px 24px rgba(0,0,0,.08);
+
+  /* ── the case tokens the rest of the file already reads ────────────────── */
+  --room:     var(--paper);
+  --case:     var(--card);
+  --case-lo:  var(--edge);
+  --case-hi:  #FFFFFF;
+  --bay:      var(--paper);
+  --plate:    var(--card);
+  --plate-hi: #FFFFFF;
+  --groove:   var(--edge);
+  --rim:      rgba(255,255,255,1);
+  --rim-lo:   var(--edge);
+
+  --txt:      var(--ink);
+  --txt-dim:  var(--ink-2);
+  --txt-etch: var(--ink-3);
+
+  /* ONE LINE MOVES EVERY LAMP. `--led` is read forty-eight times. */
+  --led:      var(--primary);
+  --led-hot:  var(--primary-light);
+  --led-red:  var(--no);
+
+  /* THE RECESS IS A CREAM FIELD NOW, NOT A MILLED WELL. The dark theme's is
+     eight rows deep and bottoms out near black; the reference's number field
+     is a flat cream rectangle with a hairline. Keeping the token means the
+     seven rules that read it all land on the same shape — one inset edge and
+     the faintest top shade, which is as much "sunk" as this ground can carry
+     before it starts looking like a hole cut in paper. */
+  --recess:
+    inset 0 0 0 1px var(--edge),
+    inset 0 1px 2px rgba(0,0,0,.04);
+  --chamfer: linear-gradient(152deg,
+    rgba(0,0,0,.05) 0%, rgba(0,0,0,.02) 30%,
+    rgba(255,255,255,0) 60%, rgba(255,255,255,.6) 100%);
+}
+
+/* THE GRAIN GOES OFF. It is anodising, and nothing here is anodised. */
+[data-skin="light"] body::after{ opacity:0; }
+
+[data-skin="light"] body{
+  background:var(--page);
+  background-attachment:fixed;
+  color:var(--ink);
+}
+
+/* ── page furniture ──────────────────────────────────────────────────────── */
+[data-skin="light"] h1{ color:var(--ink); }
+[data-skin="light"] .lede{ color:var(--ink-2); }
+[data-skin="light"] .lede b{ color:var(--ink); }
+/* h2 WAS #6d727c — 3.4:1 on this page, which is not a heading. A section
+   heading is what you navigate by and does not get to fail; the tally beside
+   it keeps the lighter tone, because a count is not a word you read. */
+[data-skin="light"] h2{ color:var(--ink-2); border-bottom-color:var(--edge); }
+[data-skin="light"] h2 span{ color:var(--ink-2); }
+[data-skin="light"] .kicker{ color:var(--primary-ink); }
+[data-skin="light"] .micro,
+[data-skin="light"] .stage-note{ color:var(--ink-2); }
+[data-skin="light"] .divider{ background:var(--edge); }
+
+/* ORANGE IS A FILL, NEVER A WORD. #FF6A00 reads 2.6:1 on this page, so the
+   warning stops being orange text on a tint and becomes dark ink on the
+   styleguide's own `--primary-subtle`. Same component, same meaning, and it
+   goes from 2.6:1 to 11:1 by swapping which of the two is the background. */
+[data-skin="light"] .warn{
+  border-color:#FFD9BC;
+  background:var(--primary-subtle);
+  color:#7A3A00;
+}
+[data-skin="light"] .warn svg{ stroke:var(--primary); }
+
+/* ── THE STAGE: a warm page, not a lit desk ──────────────────────────────── */
+[data-skin="light"] .stage{
+  background:#FBF8F5;
+  border-color:var(--edge-soft);
+  box-shadow:none;
+}
+[data-skin="light"] .sheet{
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.06), 0 10px 28px rgba(0,0,0,.07);
+}
+[data-skin="light"] .sheet.window{ box-shadow:none; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE PANEL — white card, warm page, hairline edges
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-skin="light"] :is(.box, .module, .rack, .console, .drawer, .modal, .win, .menu, .picker){
+  background:var(--card);
+  border:1px solid var(--edge);
+  border-radius:var(--r);
+  box-shadow:var(--shadow-card);
+  color:var(--ink);
+}
+[data-skin="light"] :is(.box, .module) .box-body{ background:var(--card); }
+
+/* THE SECTION BAND IS THE PAGE COLOUR WITH A COLOURED BAR DOWN ITS LEFT EDGE.
+   That bar is the only place a section gets a colour, and it means something:
+   orange is the default, and a different hue marks a section that is not like
+   the others. One rule, and `--bar` is what a section sets. */
+[data-skin="light"] :is(.head, .box-head, .drawer-head, .mod-head, .win-head){
+  background:var(--paper);
+  border-bottom:1px solid var(--edge);
+  box-shadow:inset 3px 0 0 var(--bar, var(--primary));
+  color:var(--ink);
+}
+[data-skin="light"] :is(.head, .box-head) .t,
+[data-skin="light"] .mod-name,
+[data-skin="light"] .box-head .name{
+  color:var(--ink); text-shadow:none; font-weight:700;
+}
+
+/* ── rows: white, separated by a hairline, label left and control right ──── */
+[data-skin="light"] :is(.row, .setrow, .con-row, .modal-row, .hb-row, .mat-row){
+  background:var(--card);
+  border-bottom:1px solid var(--edge-soft);
+  color:var(--ink-2);
+}
+[data-skin="light"] :is(.row, .setrow):hover{ background:var(--card-hover); }
+[data-skin="light"] :is(.name, .klab, .set-dlab, .rot-lab, .hb-optlab){ color:var(--ink-2); }
+
+/* ── THE BAY IS A GROUP, NOT A PIT ───────────────────────────────────────── */
+[data-skin="light"] .bay{
+  background:var(--paper);
+  box-shadow:inset 0 0 0 1px var(--edge);
+  border-radius:var(--r-sm);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTROLS
+
+   EVERY RULE BELOW RESTATES A STATE AT THE SKIN'S OWN SPECIFICITY. A rest
+   rule written here is (0,2,0) and sits at the end of the file, so it beats
+   the dark `.key.is-down` — which is also (0,2,0) — on source order alone,
+   even when all it sets is a colour. That is the trap this file names three
+   times and the first adoption hit twice. The answer is never `:not()`
+   gymnastics: it is to write the state again, prefixed, right after the rest
+   rule it would otherwise swallow.
+
+   THE LIT STATES NEED NO COLOUR OF THEIR OWN, because they are all
+   `var(--led)` and `--led` is already orange up in the token block. What they
+   need is their BACKGROUND and their SHADOW restated, which is the half the
+   dark theme hardcoded.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── the key: a white cap with a hairline, orange when it is lit ─────────── */
+[data-skin="light"] :is(.key, .pkey, .chip){
+  background-color:var(--card);
+  background-image:none;
+  border:1px solid var(--edge-ctl);
+  border-radius:var(--r-sm);
+  color:var(--ink);
+  text-shadow:none;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+[data-skin="light"] :is(.key, .pkey, .chip):hover{
+  background-color:var(--card-hover);
+  background-image:none;
+  color:var(--ink);
+  border-color:#DCD8D3;
+}
+[data-skin="light"] :is(.key, .pkey, .chip):active{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.10);
+  transform:translateY(1px);
+}
+/* A LATCHED KEY SAT IN A WELL THE SAME COLOUR AS ITSELF. Pressed was `--paper`
+   and the piano floor is `--paper`, so the one key that was ON dissolved into
+   the thing it was sitting in while its neighbours stood up in white — the
+   selection read as the gap, not as the choice. The fill goes to the warm tint
+   instead: still darker than the raised caps, still obviously IN, but now a
+   colour that belongs to the accent rather than to the floor. */
+[data-skin="light"] :is(.key.pressed, .key.skirt.is-down, .pkey.is-down, .chip.is-down){
+  background-color:var(--primary-subtle);
+  background-image:none;
+  border-color:#F0D3BC;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.08);
+  transform:translateY(1px);
+}
+/* THE LATCHED KEY IS ORANGE INK ON WHITE, AND THE GLOW IS GONE. A text-shadow
+   bloom is a lamp behind glass; there is no glass here and a bloom on white
+   is a smudge. Colour alone carries it, at 2.6:1 — which is why the latched
+   key ALSO keeps its pressed shadow rather than relying on the hue. */
+[data-skin="light"] :is(.key, .pkey, .chip, .act).is-down{
+  color:var(--primary-ink);
+  text-shadow:none;
+}
+[data-skin="light"] :is(.key, .pkey, .chip).is-down:hover{
+  color:var(--primary-ink);
+  background-color:var(--primary-subtle);
+  background-image:none;
+}
+[data-skin="light"] .key.is-down svg,
+[data-skin="light"] .sw.on svg{ filter:none; }
+[data-skin="light"] .chip.is-down .ct{ color:var(--primary-ink); text-shadow:none; }
+/* A DEAD CONTROL IS STILL A LABELLED CONTROL. `--ink-3` on the page is
+   2.40:1, so a disabled key used to be a key you could not read rather than
+   one you could not press. The label stays legible and the DEADNESS is said
+   by the flat fill, the gone shadow and the cursor — never by the contrast,
+   which is the one channel a reader cannot opt into. */
+[data-skin="light"] :is(.key, .pkey, .chip):disabled{
+  opacity:1; color:var(--ink-2);
+  background-color:var(--paper); background-image:none;
+  border-color:var(--edge-soft); box-shadow:none;
+}
+/* THE CAP'S FRONT AND ITS CAST ARE BOTH OFF. `::before` is the chamfer and
+   `::after` is the skirt; on a flat white card they draw a grey smear under
+   every key and a dark lip inside it. */
+/* THE BLACK SKIRT SURVIVED THE INVERSION AND SPECIFICITY IS WHY. A raised key
+   in a small piano or a keypad carried `0 2px 0 #0d0e10` — a SOLID black bar
+   under the cap — because `.piano.sm .pkey:not(.is-down):not(:active)` is
+   (0,5,0) and this skin's key rule is (0,2,0). That is the trap this file
+   names three times, hit from an angle it had not been hit from: not a STATE
+   rule out-ranking a rest rule, but a SIZE rule that also carries a shadow.
+   The skirt is the right part — a key does have a body — it just has to be
+   the value a light chassis would cut it from. */
+[data-skin="light"] .piano.sm .pkey:not(.is-down):not(:active),
+[data-skin="light"] .keypad .pkey:not(.is-down):not(:active){
+  box-shadow:0 1px 0 var(--edge-ctl), 0 1px 3px rgba(0,0,0,.05);
+}
+/* a pale grey label on a white chip, left over from dark-mode hover */
+[data-skin="light"] .chip.new:hover{
+  color:var(--ink);
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+[data-skin="light"] :is(.key, .pkey, .chip)::before,
+[data-skin="light"] :is(.key, .pkey, .chip)::after{ display:none; }
+
+/* ── the primary key: a solid orange bar, like ADD PEN ───────────────────── */
+[data-skin="light"] :is(.act, .key).go,
+[data-skin="light"] :is(.act, .key).fire,
+[data-skin="light"] .act.primary{
+  background-color:var(--primary-deep);
+  background-image:none;
+  border:1px solid var(--primary-deep);
+  color:#fff;
+  font-weight:700;
+  text-shadow:none;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+[data-skin="light"] :is(.act, .key).go:hover,
+[data-skin="light"] :is(.act, .key).fire:hover,
+[data-skin="light"] .act.primary:hover{
+  background-color:var(--primary-light); background-image:none; color:#fff;
+}
+[data-skin="light"] :is(.act, .key).go:active,
+[data-skin="light"] :is(.act, .key).fire:active,
+[data-skin="light"] .act.primary:active{
+  background-color:#E85F00; background-image:none; transform:translateY(1px);
+}
+[data-skin="light"] .act.halt{
+  background-color:var(--no); background-image:none;
+  border-color:var(--no); color:#fff; text-shadow:none;
+}
+[data-skin="light"] .act.halt:hover{ background-color:#DC2626; background-image:none; }
+
+/* ── the select: a solid orange field with a chevron ─────────────────────── */
+[data-skin="light"] .sel{
+  background-color:var(--primary-deep);
+  background-image:none;
+  border:1px solid var(--primary-deep);
+  border-radius:var(--r-sm);
+  color:#fff;
+  font-weight:700;
+  text-shadow:none;
+  box-shadow:none;
+}
+[data-skin="light"] .sel:hover{ background-color:var(--primary-light); background-image:none; color:#fff; }
+[data-skin="light"] .sel .sel-chev,
+[data-skin="light"] .sel:hover .sel-chev{ color:#fff; }
+[data-skin="light"] .sel.is-down{
+  background-color:var(--primary-light); background-image:none;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.18);
+}
+[data-skin="light"] .sel.is-down .sel-chev{ color:#fff; }
+/* the open list is a white popover, not an orange one — it is a menu */
+[data-skin="light"] .sellist{
+  background:var(--card); border:1px solid var(--edge);
+  border-radius:var(--r-sm); box-shadow:var(--shadow-md);
+}
+[data-skin="light"] .sel-row{ color:var(--ink-2); background:transparent; }
+[data-skin="light"] .sel-row:hover,
+[data-skin="light"] .sel-row:focus-visible{ color:var(--ink); background:var(--paper); }
+[data-skin="light"] .sel-row.is-cur{ color:var(--primary-ink); }
+[data-skin="light"] .sel-row.is-cur:hover,
+[data-skin="light"] .sel-row.is-cur:focus-visible{ color:var(--primary-ink); background:var(--primary-subtle); }
+
+/* ── the slider: cream track, dark fill, a square orange thumb ───────────── */
+[data-skin="light"] :is(.ftrack, .kr-track, .sl-bed){
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 0 0 1px var(--edge-ctl);
+  border-radius:var(--r-pill);
+}
+/* THE FILL IS INK, NOT ORANGE, AND THE REFERENCE IS WHY. With an orange thumb
+   on an orange fill the handle disappears into its own travel; the dark fill
+   is what makes the thumb's position readable at a glance. */
+[data-skin="light"] :is(.ffill, .kr-val, .sl-act){
+  background-color:var(--ink);
+  background-image:none;
+  box-shadow:none;
+}
+[data-skin="light"] :is(.fcap, .fend, .knob-cap, .ld-puck){
+  background-color:var(--primary);
+  background-image:none;
+  border:none;
+  box-shadow:0 1px 2px rgba(0,0,0,.14);
+}
+
+/* ── the number field: cream, sunk, mono ink, right-aligned ──────────────── */
+[data-skin="light"] :is(.lcd, .readout, .kval, .kr-val-box, .pk-lcd){
+  background-color:var(--paper);
+  border:1px solid var(--edge-ctl);
+  background-image:none;
+  color:var(--ink);
+  border-radius:var(--r-sm);
+  box-shadow:var(--recess);
+  text-shadow:none;
+}
+/* THE NAV'S VERSION LAMP IS NOT A FIELD. It is a lit window, the same object
+   as every `.screen` in this skin, and it stays dark for the reason they do:
+   a readout is a thing you look INTO. It is the only dark element left in the
+   bar, which is what makes it read as lit rather than as leftover. */
+[data-skin="light"] .nav-ver{
+  background-color:#111; background-image:none;
+  color:#7CFFB0; box-shadow:none;
+}
+
+/* ── the checkbox: a pale square that fills orange ───────────────────────── */
+[data-skin="light"] .sw{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 0 0 1px var(--edge-ctl);
+  border-radius:6px;
+  color:var(--ink-3);
+}
+[data-skin="light"] .sw:hover,
+[data-skin="light"] .tog:hover .sw{
+  background-color:var(--card-hover); background-image:none;
+  box-shadow:inset 0 0 0 1px #DCD8D3; color:var(--ink-2);
+}
+[data-skin="light"] .sw.on{
+  background-color:var(--primary-deep); background-image:none;
+  box-shadow:inset 0 0 0 1px var(--primary-deep);
+  color:#fff;
+}
+[data-skin="light"] .sw.on:hover{ background-color:var(--primary-light); background-image:none; color:#fff; }
+[data-skin="light"] .sw:active,
+[data-skin="light"] .tog:active .sw{ box-shadow:inset 0 1px 3px rgba(0,0,0,.12); }
+[data-skin="light"] .tog:hover{ background:var(--card-hover); }
+[data-skin="light"] .tog:active{ background:var(--paper); }
+
+/* ── the jewel / pilot keeps being a lamp, it just has no bloom ──────────── */
+[data-skin="light"] :is(.jewel, .pilot){ box-shadow:none; }
+
+/* ── the spec table and the detail rows ──────────────────────────────────── */
+[data-skin="light"] .spec th{ color:var(--ink-2); border-bottom-color:var(--edge); }
+[data-skin="light"] .spec td{ color:var(--ink-2); border-bottom-color:var(--edge-soft); }
+[data-skin="light"] .spec td:first-child,
+[data-skin="light"] .spec td b{ color:var(--ink); }
+[data-skin="light"] .spec code{
+  background:var(--paper); border:1px solid var(--edge); color:#7A3A00;
+}
+[data-skin="light"] .spec tr.trap td{ background:var(--primary-subtle); }
+[data-skin="light"] .detail{ border-top:1px solid var(--edge); }
+[data-skin="light"] .detail-tab{
+  background:var(--card); border:1px solid var(--edge);
+  border-radius:var(--r-sm); box-shadow:var(--shadow-card);
+}
+[data-skin="light"] .detail-nm{ color:var(--ink); }
+[data-skin="light"] .detail-n{ color:var(--ink-2); }
+[data-skin="light"] .tagcut{
+  background:var(--paper); border:1px solid var(--edge); color:var(--ink-2);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE SHADOWS — ALL OF THEM, AT ONCE
+
+   THE DARK THEME THROWS SIXTY PIXELS AT NINETY PER CENT BLACK and it is right
+   to: the room is near-black, a long throw costs nothing, and without it a
+   panel is a flat shape. Put the same shadow on warm paper and it is a bruise
+   the size of the panel. Twenty-five selectors in this file carry one, and
+   chasing them one at a time is how a skin ends up with twenty-five different
+   answers to the same question — so they are re-weighted together, here, and
+   the weights come from the styleguide rather than from taste.
+
+   THREE TIERS AND NOTHING ELSE. A floating object gets `--shadow-lg`, a panel
+   gets `--shadow-card`, and a part sitting on a panel gets nothing at all,
+   because on this ground a part is held by its hairline and its own value. A
+   fourth tier is a fourth opinion about how far off the page things are.
+
+   `filter: drop-shadow` IS A SEPARATE PROBLEM AND NEEDS A SEPARATE LINE.
+   `.bulge-wrap` throws two of them at .75 and .6, and no `box-shadow` rule
+   can reach that — it is a filter, it composites after layout, and it is what
+   draws the dark smear across the bottom right of a panel. It goes to a
+   single soft drop rather than to `none`, because the thing it is shadowing
+   genuinely does bulge out of the case and needs to look like it. */
+[data-skin="light"] :is(.box, .console, .palette, .win, .drawer, .modal, .menu, .picker, .loupe){
+  box-shadow:var(--shadow-card);
+}
+[data-skin="light"] :is(.win.dragging, .navdock.seated > .strip){
+  box-shadow:var(--shadow-lg);
+}
+[data-skin="light"] :is(.plate, .demo-plate, .tab-demo, .gizmo, .pencap, .pencap.on,
+                        .win-floor, .box.bulge, .gate-lever, .skip){
+  box-shadow:0 1px 2px rgba(0,0,0,.05);
+}
+[data-skin="light"] .bulge-wrap{
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.10));
+}
+[data-skin="light"] .tear{ filter:drop-shadow(0 2px 3px rgba(0,0,0,.10)); }
+
+/* ── THE GROUP CONTAINERS WERE MILLED WELLS AND ARE NOW JUST GROUPS ───────
+   `.piano` and `.strokes` are the bars that hold a row of keys — the STEP and
+   UNITS strips. The dark theme fills them with the case seen deeper, which on
+   paper is a black frame round four white caps: the single loudest thing on
+   the panel and the one that makes it look like two designs fighting. A group
+   on this ground is a hairline and a tint, and the keys inside it keep every
+   bit of the separation they already had. */
+[data-skin="light"] :is(.piano, .strokes, .keypad, .fbank, .bankwrap){
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 0 0 1px var(--edge);
+  border-radius:var(--r-sm);
+}
+[data-skin="light"] .strokes{ border-left:2px solid var(--lyr, var(--primary)); }
+/* A BOX NEEDS AN INSET AND `.fbank` NEVER HAD ONE. In the dark theme the bank
+   is a bare flex row with no fill, so three strips sitting flush against its
+   bounds costs nothing — there are no bounds. This skin gave it a tint and a
+   hairline, which turns the same row into a container, and a container whose
+   contents touch its own edge reads as cropped rather than as grouped. The
+   readouts were against the lid and the channel names against the floor.
+
+   `.piano` and `.keypad` already carry their own padding, which is why only
+   this one showed it. The column gap goes up with the inset for the same
+   reason: three faders 10px apart inside a frame are a block, not a bank. */
+[data-skin="light"] .fbank{ padding:14px 16px; gap:16px; }
+/* and inside each strip: 7px between a readout, a 136px slot and a name is
+   the spacing of a part crammed into a rack, which is what it was. */
+[data-skin="light"] .fbank .fader.vert{ gap:10px; }
+
+/* ── THE KNOB STAYS A KNOB, AND ONLY ITS SEAT CHANGES ────────────────────
+   A rotary is a moulded part and it is allowed to be dark — it reads correctly
+   on cream and it is the one control on the page you grip rather than press.
+   What does not survive is the SEAT: a 74px dark disc behind it, which on this
+   ground stopped being a shadowed recess and became a white halo with a black
+   ring in it. It is the case, so it takes the case's colour. */
+[data-skin="light"] .rot-seat{
+  background:var(--paper);
+  box-shadow:inset 0 0 0 1px var(--edge);
+}
+[data-skin="light"] .rot-lead{ background:var(--edge); }
+[data-skin="light"] .rot-lab{ color:var(--ink-2); }
+[data-skin="light"] .rot-lab.is-cur{ color:var(--primary-ink); }
+
+/* ── THE SCREENS STAY BLACK, WHICH IS NOT AN OVERSIGHT ───────────────────
+   A readout is emissive. A DRO showing 0.000 in lit green behind glass is the
+   one part of this panel that is a WINDOW rather than a face, and every
+   reference has a dark one in a light case. It keeps its glass, its glow and
+   its colours; nothing in this skin reaches inside it. */
+[data-skin="light"] :is(.screen, .lcd.glass, .oc-page, .drum-win){
+  box-shadow:var(--shadow-card);
+}
+
+
+/* ── THE NAV AND THE APP DOCK STAY BLACK AND STOP SHOUTING ───────────────
+   Both throw 60px at ninety per cent, which is correct over a near-black room
+   and is a cloud with a bar in it over paper. A dark object on a light page
+   DOES throw a real shadow — it is the one place in this skin that earns one —
+   but it is a short one, because the thing separating it from the page is a
+   hundred levels of value, not the shadow. */
+/* ── ONLY THE NAV IS BLACK. THE DOCKS ARE PANELS. ────────────────────────
+   `.strip` is the bar across the top of the page — a separate object floating
+   over the document, and the one Julien asked to keep dark. `.dock` and
+   `.appdock` are not that: they are the CASE a layer list or a verb bar is
+   built into, which is to say they are panels, and a black panel is the thing
+   this skin exists to stop. They were grouped with the nav because all three
+   threw the same sixty-pixel shadow; sharing a shadow is not sharing a job.
+
+   A DARK OBJECT ON A LIGHT PAGE EARNS A SHADOW AND A LIGHT ONE DOES NOT, so
+   the nav keeps a short throw and the docks take the panel's own card lift. */
+/* THE NAV BAR IS A BAR, NOT A SHADOW. It was the last black object with a
+   panel's job, kept dark on the theory that a floating bar wants to read as a
+   separate layer. It does — but layering is the shadow's job and the border's,
+   not the value's. A black bar on a cream page is a hole punched through the
+   document, and every key sitting in it has to be re-lit to survive.
+
+   So: the bar is MILLED (--paper, the value a section band takes) and the keys
+   in it are RAISED (--card, brighter than what they sit on). That is the same
+   figure-ground the rest of the skin uses, applied to the one place that was
+   still inverted. The throw stays short, because a light object an inch off a
+   light page casts a short shadow and anything longer is a lie about height. */
+[data-skin="light"] .strip{
+  background-color:var(--paper);
+  background-image:none;
+  border:1px solid var(--edge);
+  color:var(--ink);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.05),
+    0 8px 20px -8px rgba(0,0,0,.14);
+}
+/* the knurl and the grain were white-on-black: on cream they are white on white */
+[data-skin="light"] .strip::before{ display:none; }
+/* SEATED still deepens, it just does it in the register the page can carry */
+[data-skin="light"] .navdock.seated > .strip{
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.06),
+    0 14px 28px -10px rgba(0,0,0,.18),
+    0 0 0 1px var(--edge);
+}
+/* a key in the bar is the brighter metal, so it reads as sitting ON the bar */
+[data-skin="light"] .strip :is(.key, .pkey, .chip){
+  background-color:var(--card);
+  border-color:var(--edge-ctl);
+}
+[data-skin="light"] :is(.dock, .appdock, .dock-bar){
+  background-color:var(--card);
+  background-image:none;
+  border:1px solid var(--edge);
+  box-shadow:var(--shadow-card);
+  color:var(--ink);
+}
+
+
+/* ── THE SMALL KEYS WERE STILL MOULDED IN BLACK ──────────────────────────
+   `.act` is the icon key that duplicates, deletes and opens a row — the two
+   dark squares at the right of every layer, and the hatched chevron beside
+   them. The skin had only ever named the LOUD acts: `.go`, `.fire`, `.halt`,
+   `.primary`. Those are the ones that carry a colour, so they were the ones
+   that came to mind, and the plain one — which is most of them, and all of
+   the ones that repeat down a list — was left wearing the dark theme.
+
+   A QUIET KEY IS THE DEFAULT AND NOT THE EXCEPTION. It takes the same white
+   cap, the same findable edge and the same ink as `.key`, which is what it
+   is; only the loud ones get to differ, and they already say so in a class. */
+[data-skin="light"] :is(.act, .chev, .add, .win-btn, .drawer-tab, .menu-ico){
+  background-color:var(--card);
+  background-image:none;
+  border:1px solid var(--edge-ctl);
+  color:var(--ink);
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  text-shadow:none;
+}
+[data-skin="light"] :is(.act, .chev, .add, .win-btn):hover{
+  background-color:var(--card-hover);
+  background-image:none;
+  color:var(--ink);
+  border-color:#C4BDB2;
+}
+[data-skin="light"] :is(.act, .chev, .add, .win-btn):active{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.10);
+}
+[data-skin="light"] :is(.act, .chev, .add, .win-btn):disabled{
+  opacity:1; color:var(--ink-2);
+  background-color:var(--paper); background-image:none;
+  border-color:var(--edge); box-shadow:none;
+}
+/* THE CHEVRON'S KNURL GOES. It is a milled grip, which is a thing you feel on
+   a cap you actually push; printed on a white key it is four grey lines that
+   read as a rendering fault. The `background-image` is cleared on its own
+   rather than through the shorthand — the shorthand is what erased the knurl
+   from the controls that still want one, the last time this was tried. */
+[data-skin="light"] :is(.act, .chev)::before,
+[data-skin="light"] :is(.act, .chev)::after{ display:none; }
+
+/* ── THE HATCH BAY AND THE DRAWER ARE PANELS TOO ─────────────────────────── */
+[data-skin="light"] :is(.hatchbay, .drawer, .drawer-body, .oc-drawer, .lwrap, .lfield){
+  background-color:var(--card);
+  background-image:none;
+  color:var(--ink);
+}
+[data-skin="light"] :is(.lrow, .filmrow, .drum-item){
+  background-color:var(--card);
+  background-image:none;
+  border:1px solid var(--edge);
+  color:var(--ink);
+}
+
+/* THE SCREWS STAY, AND THEY ARE THE ONE PIECE OF HARDWARE THIS SKIN KEEPS.
+   A screw in a corner is not a material claim about the panel — it is a joint,
+   it is the same part on a cream case as on a black one, and taking it out
+   would be taking out the last thing that says this was assembled rather than
+   drawn. It only loses the dark theme's halo. */
+[data-skin="light"] .screw{ box-shadow:none; filter:none; opacity:.55; }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EVERY REMAINING CUT, WELL AND SLOT
+
+   FORTY-TWO CLASSES WERE STILL DARK AFTER THE PANELS WENT LIGHT, and they
+   were not missed one at a time — they are all the same part. A well, a slot,
+   a channel, a gap, a cut, a field: the dark theme fills each one with the
+   case seen deeper, which on anodised aluminium means near-black, and every
+   one of them is a black rectangle somewhere inside a cream panel.
+
+   THE RULE THE TOKEN BLOCK ALREADY STATES IS THE RULE: the floor of a hole is
+   the case's colour MINUS SOME LIGHT, not minus all of it. On this ground
+   that is `--paper` with a hairline, and it is one declaration for all of
+   them rather than forty-two opinions about how dark a hole is.
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-skin="light"] :is(.gap, .slot, .chan, .sep, .port, .empty,
+                        .hb-deep, .hb-field, .bay-field, .bay-cap, .bay-deep,
+                        .drum-bay, .menu-cut, .modal-well, .gate-slot, .ld-well,
+                        .pk-well, .pk-field, .oc, .oc-bar, .oc-field, .oc-tab,
+                        .api, .api-more, .kwrap, .sliders, .fticks, .fslot,
+                        .demo-well, .demo-stage, .intcell, .lens, .tear,
+                        .set-bay, .set-adv, .set-advbody, .con-log, .con-foot,
+                        .drawer-head, .mod-tags, .rig-cells, .togcell, .tab-cell){
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 0 0 1px var(--edge);
+  color:var(--ink);
+}
+
+/* THE TOGGLE'S BED IS A WELL TOO, and its actuator is the part standing in
+   it. `--recess` is already redefined, so the bed only needs its fill. */
+[data-skin="light"] .sl-bed{ background-color:var(--paper); background-image:none; }
+[data-skin="light"] .slide{ background-color:transparent; background-image:none; }
+
+/* ── AND THE SHORT LIST OF THINGS THAT ARE STILL ALLOWED TO BE DARK ──────
+   TWO KINDS, AND NO OTHERS. A MOULDED PART — a knob's collar, a ball's seat,
+   a gizmo's hub, a grip — is plastic rather than case, it is the thing you put
+   your hand on, and it reads correctly on cream because it is small, round and
+   obviously not the panel. A WINDOW — a meter, a readout, an FPS strip, a hue
+   bar — is emissive, and every light-cased machine ever built has dark glass
+   in it.
+
+   WHAT IS NOT ON THIS LIST IS A PANEL, A BAY, A ROW OR A KEY. If one of those
+   is still dark, it is a miss, not a decision. */
+[data-skin="light"] :is(.knob-collar, .orbit-seat, .gz-hub, .gz-node,
+                        .drum-grip, .meter, .fpsmeter button, .pk-hue .ftrack){
+  /* left as the dark theme drew them — deliberately */
+}
+[data-skin="light"] .menu-kbd{
+  background-color:var(--paper); background-image:none;
+  border:1px solid var(--edge-ctl); color:var(--ink-2);
+}
+[data-skin="light"] .pipe{ box-shadow:none; }
+
+
+/* ── THE LAST FIVE, AND THEY ARE THE SAME TWO KINDS AGAIN ────────────────
+   `.fader`'s tick strip and `.orbay`'s collar are mouldings; `.win-dock`,
+   `.menu-row` and `.wipe` are a bar, a list row and a sweep, which are panel
+   parts and have no business being dark. Named rather than caught by the
+   blanket above, because each one only wants the half of it that applies. */
+[data-skin="light"] :is(.win-dock, .wipe){
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 0 0 1px var(--edge);
+}
+[data-skin="light"] .menu-row{ background-color:transparent; background-image:none; color:var(--ink); }
+[data-skin="light"] .menu-row:hover,
+[data-skin="light"] .menu-row:focus-visible{ background-color:var(--paper); background-image:none; color:var(--ink); }
+[data-skin="light"] .fader{ background-color:transparent; background-image:none; }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE ONES THE LAST SWEEP MISSED, AND WHY IT MISSED THEM
+
+   THE SWEEP ASKED THE WRONG QUESTION. It checked whether a class appeared
+   anywhere in this skin and called that covered — so every panel listed in
+   the SHADOW rule counted as done, while its background was never touched.
+   `.palette`, `.plate`, `.loupe`, `.gizmo`, `.pencap`, `.win-floor` and the
+   rest had their sixty-pixel throw softened and stayed black underneath. A
+   test that passes on a class NAME rather than on the PROPERTY in question is
+   a test that reports the work it did not do.
+
+   SO THIS LIST IS BY PROPERTY: every rule below sets a background, and the
+   question asked of each class was "does anything in this skin set its
+   background", not "is it mentioned". The TOOL palette is the one Julien
+   photographed and it is first.
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-skin="light"] :is(.palette, .plate, .loupe, .win-floor, .drum-win,
+                        .box.bulge, .demo-plate, .tab-demo){
+  background-color:var(--card);
+  background-image:none;
+  border:1px solid var(--edge);
+  color:var(--ink);
+}
+[data-skin="light"] :is(.gizmo, .pencap, .gate-lever, .sel-tick, .thumb.empty,
+                        .row.all, .slide.rocker, .fader.vert .ftrack){
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:inset 0 0 0 1px var(--edge-ctl);
+  color:var(--ink);
+}
+[data-skin="light"] .slide.pill .sl-act{
+  background-color:var(--card); background-image:none;
+  box-shadow:0 1px 3px rgba(0,0,0,.18);
+}
+[data-skin="light"] .skip{
+  background-color:var(--primary-deep); background-image:none; color:#fff;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE ENGRAVED LABEL — THE LAST READABILITY FAULT, AND THE SUBTLEST
+
+   `TRANSPORT`, `TOOL`, `PUSH, NOT OVERLAY`. Every small caps label in this
+   system is ENGRAVED: a glyph darker than the metal, carrying a 1px white
+   line underneath it which is the lit far wall of the cut. On a dark case
+   that reads as a letter milled into aluminium and it is one of the best
+   things in the language.
+
+   ON CREAM IT IS A GLYPH THE COLOUR OF THE PANEL WITH A WHITE LINE UNDER IT,
+   which is to say it is barely there — the base value is #5d626b at around
+   3:1, and then the white text-shadow fills in the very edges the eye uses to
+   find a letterform. The shadow does not merely fail to help; it actively
+   erases the thing it is supposed to light.
+
+   SO THE ENGRAVING GOES AND THE WEIGHT STAYS. A label is ink now. It keeps
+   its tracking, its size and its caps — everything that made it read as a
+   machine's lettering — and loses only the one effect that needed a dark
+   ground to work. This is the same decision as the orange: the IDEA survives
+   the inversion, the VALUE cannot. */
+[data-skin="light"] :is(.head, .box-head, .win-head, .drawer-head, .mod-head) .t,
+[data-skin="light"] :is(.klab, .kicker, .hb-legend, .set-dlab, .oc-tab,
+                        .gate-nm, .mod-name, .con-t, .bay-t, .mat-t, .hh-sub,
+                        .ruler-label, .micro, .eng, .stage-note, .detail-n,
+                        .tab-sub, .drum-item, .sel-nm, .prog-nm, .kval, .name){
+  color:var(--ink-2);
+  text-shadow:none;
+}
+/* AND THE ONES THAT ARE A TITLE RATHER THAN A LABEL GO ALL THE WAY TO INK. */
+[data-skin="light"] :is(.head, .box-head, .win-head, .drawer-head, .mod-head) .t,
+[data-skin="light"] :is(.mod-name, .box-head .name, .win-head .t){
+  color:var(--ink);
+  font-weight:700;
+  text-shadow:none;
+}
+/* THE BLANKET: any engraved text-shadow left anywhere in a light panel. There
+   is no white far wall on paper, so there is nothing for it to describe. */
+[data-skin="light"] :is(.t, .klab, .eng, .micro, .name, .kval, .readout,
+                        .sel-nm, .gate-nm, .ruler-label, .hb-legend){
+  text-shadow:none;
+}
+
+/* THE NAV'S WORDMARK WAS DARK GREY ON BLACK. The bar is the one dark object
+   left and its own brand kept the dark theme's dim — #6d727c on #1b1c20 is
+   2.6:1, which is the only unreadable thing on an otherwise finished bar. */
+[data-skin="light"] .strip .nav-mark,
+[data-skin="light"] .strip .brand{ color:var(--ink); }
+
 }   /* @layer skew */
+
+/* ── THE SEMANTIC WORDS TAKE THE DARK VARIANTS ───────────────────────────
+   Same split as the orange: the lamp keeps the bright value because it is a
+   fill the eye finds by hue, and the word takes the dark one because a word
+   is found by value. #22C55E is 2.20:1 as text and #EF4444 is 3.64:1 — both
+   under, so both get a second token rather than a compromise that spoils the
+   lamp. */
+[data-skin="light"] :is(.ok, .good, .pass, .con-log .ok){ color:var(--ok-ink); }
+[data-skin="light"] :is(.bad, .err, .fail, .con-log .err){ color:var(--no-ink); }
+[data-skin="light"] .act.halt{ background-color:var(--no-ink); border-color:var(--no-ink); }
+
+/* ── THE FOCUS RING, WHICH THE DARK THEME NEVER NEEDED TO STATE ──────────
+   On near-black a browser's default ring is visible by accident. On cream it
+   is a pale blue hairline over a pale warm card and it disappears, which
+   takes the keyboard path with it. Two pixels of the brand orange, offset so
+   it never eats the control's own edge. */
+[data-skin="light"] :is(.key, .pkey, .chip, .sel, .sw, .act, .tog, .sel-row):focus-visible{
+  outline:2px solid var(--primary-ink);
+  outline-offset:2px;
+}

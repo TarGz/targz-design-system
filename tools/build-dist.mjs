@@ -54,6 +54,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import fs from 'node:fs';
+import { manifest, toRust, toJs } from './tokens.mjs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -226,22 +227,81 @@ function buildHatch(v) {
   return banner('skew-hatch.js', v) + src;
 }
 
+/* ── THE MACHINE SHEET IS COPIED TOO, AND NOT SHIPPING IT COST AN APP A UI ──
+   `src/skew-machine.css` is a thousand lines of exactly what a plotter front
+   end needs — the DRO, the E-stop, the jog grid, the pen bank, the annunciator,
+   the override columns. It has never been in dist/, and README.md says dist/ is
+   the only folder an app touches. So TargzPenPlotterCtrl rebuilt every one of
+   those parts by hand under its own `.cd-*` names: a 4x3 jog grid, a
+   click-to-edit DRO, three override faders, an abort key, a state dot. The
+   design system already had all of it and told nobody.
+
+   It gets the banner and nothing else, like the hatch engine: there are no
+   doc-site rules in it to strip, so a transformation here could only introduce
+   a difference between what is tested and what ships. */
+function buildMachine(v) {
+  const src = fs.readFileSync(path.join(ROOT, 'src/skew-machine.css'), 'utf8');
+  return banner('skew-machine.css', v) + src;
+}
+
+/* ── AND THE MANIFEST, WHICH IS THE ONLY THING TWO OF THE THREE APPS CAN USE ─
+   See tools/tokens.mjs for why this exists. Short version: two of the three
+   adopting apps are Rust egui and cannot load a stylesheet at any price, so
+   `dist/` as three copyable files is the wrong unit of adoption for them. Every
+   var() followed, every color-mix() computed, every shadow broken into its
+   layers and every gradient into its stops — in JSON, in Rust and in JS. */
+const man = manifest(fs.readFileSync(path.join(ROOT, 'src/skew.css'), 'utf8'));
+
 const targets = [
   ['dist/skew-kit.js', js],
   ['dist/skew.css', css],
   ['dist/skew-hatch.js', buildHatch(v)],
+  ['dist/skew-machine.css', buildMachine(v)],
+  ['dist/skew-tokens.json', JSON.stringify({ version: v, ...man }, null, 2) + '\n'],
+  ['dist/skew_tokens.rs', toRust(man, v)],
+  ['dist/skew-tokens.js', toJs(man, v)],
 ];
+
+/* ── AND THE FONT, WHICH USED TO VANISH WITHOUT SAYING SO ────────────────────
+   `src/skew.css` loads Silkscreen by RELATIVE path — `url('fonts/…woff2')` — so
+   a sheet copied into an app without its `fonts/` folder resolves that against
+   the app's own css directory, finds nothing, and falls back to the system mono
+   in `--font-read`. No error, no console warning, no missing-glyph box: the
+   readouts simply stop being made of pixels, which is the one thing that made
+   them readouts. An adopter has to NOTICE a font to discover the bug.
+
+   Binary, so it is compared and written as bytes rather than as text. */
+const FONTS = fs.existsSync(path.join(ROOT, 'src/fonts'))
+  ? fs.readdirSync(path.join(ROOT, 'src/fonts')).sort()
+  : [];
 
 if (WRITE) {
   fs.mkdirSync(DIST, { recursive: true });
   for (const [rel, text] of targets) fs.writeFileSync(path.join(ROOT, rel), text);
-  console.log(`wrote dist/ at v${v} · ${dropped} doc-site rules dropped from the CSS`);
+  if (FONTS.length) {
+    fs.mkdirSync(path.join(DIST, 'fonts'), { recursive: true });
+    for (const f of FONTS) {
+      fs.copyFileSync(path.join(ROOT, 'src/fonts', f), path.join(DIST, 'fonts', f));
+    }
+  }
+  const nd = Object.keys(man.skins.dark).length, nl = Object.keys(man.skins.light).length;
+  console.log(`wrote dist/ at v${v} · ${dropped} doc-site rules dropped from the CSS`
+    + (FONTS.length ? ` · ${FONTS.length} font file(s) copied` : '')
+    + ` · ${nd} dark / ${nl} light tokens resolved`);
 } else {
   let drift = 0;
   for (const [rel, text] of targets) {
     const p = path.join(ROOT, rel);
     const have = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
     if (have === text) console.log(`  ok      ${rel}`);
+    else { drift++; console.log(`  DRIFT   ${rel}${have === null ? ' (missing)' : ''}`); }
+  }
+  for (const f of FONTS) {
+    const rel = `dist/fonts/${f}`;
+    const to = path.join(ROOT, rel);
+    const from = fs.readFileSync(path.join(ROOT, 'src/fonts', f));
+    const have = fs.existsSync(to) ? fs.readFileSync(to) : null;
+    if (have && have.equals(from)) console.log(`  ok      ${rel}`);
     else { drift++; console.log(`  DRIFT   ${rel}${have === null ? ' (missing)' : ''}`); }
   }
   console.log(drift ? `\n${drift} file(s) stale — run with --write` : `\nclean at v${v}`);

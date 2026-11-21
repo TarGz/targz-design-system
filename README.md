@@ -1,8 +1,16 @@
 # Skew
 
-A dark, machined design language. Anodised chassis, backlit keys, jewel LEDs, engraved plates,
-one lamp above-left and nothing that argues with it. Used by my pen plotter control software and
-my generative art UI.
+A machined design language in two skins. Anodised chassis, backlit keys, jewel LEDs, engraved
+plates, one lamp above-left and nothing that argues with it. Used by my pen plotter control
+software and my generative art UI.
+
+**Two skins, one attribute.** Dark is the default and the absence of the attribute — not
+`data-skin="dark"`. Light is `<html data-skin="light">`, and it is a material change only: the
+same parts, the same geometry, cast in a cream case instead of a black one.
+
+**And it ships values, not only a stylesheet.** Two of the three apps adopting it are Rust egui
+and cannot load CSS at any price; a third's markup shares no class name with it. So `dist/`
+carries a resolved token manifest as well — see *Adopting it* below.
 
 ```bash
 npm run dev          # http://localhost:2860
@@ -14,9 +22,14 @@ npm run dev          # http://localhost:2860
 
 ```
 src/      skew.css, skew-kit.js, skew-hatch.js, skew-machine.css   what you edit
-dist/     skew.css, skew-kit.js, skew-hatch.js                     what an app copies
-docs/     the six pages, plus their own CSS and nav
-tools/    build-dist.mjs
+          fonts/    the display face, loaded by skew.css by relative path
+dist/     skew.css, skew-kit.js, skew-hatch.js, skew-machine.css   what an app copies
+          fonts/    copied, because skew.css loads it by relative path
+          skew-tokens.json  every token, both skins, var() and color-mix() resolved
+          skew_tokens.rs    the same, as one Palette struct with two values
+          skew-tokens.js    the same, with colours as 0-1 floats for a vertex buffer
+docs/     the six pages, plus their own CSS, nav and APP-ALIGNMENT.md
+tools/    build-dist.mjs, tokens.mjs
 ```
 
 Changing any of it: [`CONTRIBUTING.md`](CONTRIBUTING.md). Adding a hatch: the same file, and it
@@ -28,6 +41,31 @@ reorganised, which is the whole reason it exists. Everything else is source and 
 ---
 
 ## Adopting it
+
+### If your app cannot load CSS
+
+Two of the three apps using this are Rust `eframe/egui`: no CSS, no HTML, no DOM. They adopt
+**`dist/skew_tokens.rs`** — one `Palette` struct and two values of it, `Palette::dark()` and
+`Palette::light()`. It is a struct and not a wall of `pub const` on purpose: a const is chosen
+when the binary is built and a skin is chosen when the app starts, so holding a `Palette` in
+your state is the only form in which an egui app can have a light mode at all.
+
+Vendor the file — both apps build in CI, which cannot see a sibling folder.
+
+A token that exists in one skin and not the other is an `Option`. The two skins do not name the
+same parts: `--card` and `--case-face` are light-only, `--plate` and `--groove` dark-only, because
+the dark theme was written first and the light skin is an island appended to it. Filling the gap
+with a transparent colour would compile, run, and draw nothing.
+
+`--recess` and `--chamfer` are not values — they are a nine-layer inset shadow and a 152° gradient,
+and egui has neither. They are emitted as their **layers** and their **stops**, which is the form
+your painter code already wants.
+
+For a WebGL vertex buffer, **`dist/skew-tokens.js`** carries every colour a second time as a
+normalised 0–1 quadruplet. It also sidesteps Chromium 110, which drops every `color-mix()`
+declaration silently — and this sheet has 67 of them.
+
+### If it can
 
 Copy `dist/skew.css` and `dist/skew-kit.js` into your app, and `dist/skew-hatch.js` if you
 fill anything. Do not link back to this folder:
@@ -89,3 +127,21 @@ because deleting the thing a decision was made against loses the decision.
 - A folder is a bay, not a collapsible header.
 - A theme that tints the thing being drawn is a theme that lies about the drawing. The chrome is
   metal; the paper is not.
+
+
+---
+
+## What this system does not own
+
+**The chrome is metal; the paper is not.** A terminal's buffer and a plotter's toolpath are the
+drawing, not the furniture around it — and `skew.css`'s own `.sheet` rule settles it: *a theme
+that tints the thing being drawn is a theme that lies about the drawing.*
+
+So: Terminass bundles 956 iTerm2 schemes and its own `Palette{bg,fg,cursor,selection,ansi[16]}`,
+and that is correct. The plotter's three.js colours carry plotter semantics Skew has no business
+in — travel against feed against already-drawn, where the drawn grey must not be black because
+black already means *excluded by you* rather than *drawn by the machine*. Neither is a gap.
+
+A **status LED must never be the only carrier of state.** A dot that encodes run, pause and alarm
+by colour alone is unreadable to a quarter of the people who will stand in front of it, and the
+machine it is attached to moves.

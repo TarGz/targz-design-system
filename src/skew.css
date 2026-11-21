@@ -80,6 +80,37 @@
   --txt-etch:    #0a0b0c;   /* engraved-into-metal text                      */
 
   --led:         #FF6A00;   /* the accent is a LAMP here, not a fill         */
+/* ── THE SEMANTIC COLOURS, AND DARK HAS NEVER HAD ANY ────────────────────
+   `:root` carried `--led`, `--led-hot` and `--led-red` and stopped there — no
+   success, no background, no border. So targz-launchpad2 built its two most
+   semantically loaded controls out of stock Tailwind: the Launch key from a
+   teal ramp and the Stop key from an orange one, neither of which this file
+   has ever seen. An app reaching for a colour this system does not have will
+   find one somewhere, and where it finds it is not a decision anybody made.
+
+   THESE ARE THAT APP'S OWN VALUES, ADOPTED. `--ok` is launchpad2's running
+   teal and `--no` is its stop orange — and the orange is worth naming out
+   loud, because STOP IS NOT RED HERE. That app calls a stopped project warm
+   rather than dangerous, which is right: a project that is not running is a
+   state, not a fault. `--led-red` stays what it was, the fault lamp.
+
+   AND THE RUNNING COLOUR HAD TWO ANSWERS. launchpad2 says teal; Terminass
+   says #7CFFB0, which is its LCD green doing duty as a success colour. Teal
+   wins, because #7CFFB0 is a DISPLAY value — it is what a lit readout is made
+   of — and a system where "the number is showing" and "the process is alive"
+   are the same colour cannot say either one.
+
+   NO `--info` IN DARK. No app has one, and picking a blue that reads on a
+   near-black panel with nothing to check it against is exactly the guess this
+   pass is here to stop making. Named as an open decision, not filled in. */
+  --ok:          #2DD4BF;   /* running — launchpad2's Launch key fill        */
+  --ok-bg:       #134E4A;
+  --ok-edge:     #0F766E;
+  --ok-ink:      #5EEAD4;   /* the word, which on dark is the LIGHTER one    */
+  --no:          #C2410C;   /* stopped — launchpad2's Stop key, warm not red */
+  --no-bg:       #7C2D12;
+  --no-edge:     #9A3412;
+  --no-ink:      #FF8E3A;
 /* ── THE CHOSEN WORD, AND IT IS ONE VALUE FOR BOTH SKINS ─────────────────
    A SELECTOR'S LIST IS A LEGEND AND ONE ENTRY IS A READING. Six names beside
    a rotary, eight beside a gated lever, nine keys in a grid, the rows in a
@@ -139,6 +170,119 @@
    Swap this one value to change the face everywhere. */
   --font-read: "Silkscreen", var(--font);
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE SCALES — spacing, type, heights, stacking, motion, radius
+
+   THESE DO NOT BELONG TO A SKIN AND THAT IS WHY THEY ARE HERE. A skin changes
+   what a surface is MADE OF; it does not change how far apart two things sit
+   or how long a transition runs. Declaring them once in `:root` means the
+   light skin inherits every one of them and cannot drift from the dark one —
+   which is the failure the radii already demonstrate, below.
+
+   THEY ARE NOT INVENTED. Every number is lifted from
+   `TargzPenPlotterCtrl/app/css/pc-tokens.css:74-122`, which is the only one of
+   the three adopting apps that built a complete scale and the only one that
+   got it right. The other two invented their own because this file had none:
+   targz-launchpad2 has six layout consts and ten ad-hoc type sizes with no
+   scale constant; Terminass has two spacing values, roughly forty hard-coded
+   offsets, and its etched tracking passed per call site at five different
+   values. A system that ships colour and nothing else is a system that has
+   decided the hard half is somebody else's problem three times over.
+
+   AND A SCALE NOTHING READS IS NOT A SCALE. This file currently writes raw
+   radii far more often than it reads its own token — 7px eighteen times, 4px
+   seventeen, 8px fourteen — against `var(--r-sm)` seven. Adding the tokens is
+   the first half; the rules reaching for them is the second, and it is not
+   done in this pass. Named here so the next one has somewhere to aim.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+  /* SPACING. Eight steps, and the gaps between them widen as they go: 4, 6, 8
+     are the inside of a control, 12 and 16 are between controls, 20 upward is
+     between groups. A linear scale would give you four values you never use
+     at the top and none of the ones you need at the bottom. */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 20px;
+  --space-7: 24px;
+  --space-8: 32px;
+
+  /* TYPE. Six sizes, 11 to 20, and they are close together on purpose: this is
+     a panel language, where the span from a tick legend to a panel title is
+     two steps, not six. Anything above 20 on these surfaces is a heading on a
+     document, which is a different kind of page. */
+  --text-xs:   11px;
+  --text-sm:   12px;
+  --text-base: 13px;
+  --text-md:   14px;
+  --text-lg:   16px;
+  --text-xl:   20px;
+
+  --leading-tight:   1.2;    /* a legend, a readout — one line that must not grow */
+  --leading-normal:  1.45;   /* rows, labels, most of a panel */
+  --leading-relaxed: 1.6;    /* a paragraph of help text */
+
+  --tracking-tight:  -0.01em;  /* large type, which spaces itself */
+  --tracking-normal: 0;
+  --tracking-wide:   0.08em;   /* an ENGRAVED legend; the caps need the air */
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* CONTROL HEIGHTS. Three, because a panel has three: the thing in a row, the
+     thing on its own, and the thing you hit without looking. */
+  --control-sm: 24px;
+  --control-md: 32px;
+  --control-lg: 40px;
+
+  /* STACKING. Seven levels with room between them, so a part can be pushed one
+     step without colliding with the next thing up. The gaps are the feature:
+     `z-index: 501` is a legitimate thing to write and it must not be a modal.
+     `--z-grain` already existed on its own and keeps its own note. */
+  --z-base:      1;
+  --z-raised:    10;
+  --z-sticky:    100;
+  --z-overlay:   500;
+  --z-modal:     1000;
+  --z-statusbar: 2000;
+  --z-toast:     3000;
+
+  /* MOTION. Two durations and nothing else. A control answering the hand is
+     fast; a surface arriving or leaving is slower; there is no third case in
+     this language, and every per-part duration in this file that is neither
+     of these is a number somebody typed. */
+  --transition:      .15s ease;
+  --transition-slow: .25s ease;
+
+  /* RADIUS, AND IT WAS LIGHT-ONLY UNTIL NOW. `--r`, `--r-sm` and `--r-pill`
+     were declared inside `[data-skin="light"]`, which means the dark theme —
+     the one that shipped first and that both Rust apps transcribed by hand —
+     has never had a radius token at all. Terminass hard-codes KEY_RADIUS 7,
+     MODULE_RADIUS 11, LCD_RADIUS 5; launchpad2 R_CARD 16, R_SM 7. Three
+     answers, none of them readable from here.
+     `--r-key` and `--r-mod` are named because those two ARE the numbers this
+     file writes most often, and a scale that cannot express the part you draw
+     eighteen times is a scale that will be ignored. */
+  --r-key:  7px;    /* a cap: key, pkey, chip, micro */
+  --r-mod: 11px;    /* a module, a card, a bay */
+  --r-sm:  10px;
+  --r:     16px;
+  --r-pill: 100px;
+
+  /* THE FOCUS RING, IN BOTH SKINS, BECAUSE THIS REPO IS THE ONLY ONE DOING IT.
+     The plotter defines a ring and consumes it twice against nineteen
+     `outline:none`; launchpad2 shows a ring on two of about forty controls,
+     every one of which is Tab-reachable; Terminass has none and intercepts
+     Tab outright. A ring that is a token is a ring an app can adopt without
+     deciding what it looks like. `--ring-r` already existed, per control. */
+  --ring:       0 0 0 3px color-mix(in srgb, var(--led) 22%, transparent);
+  --ring-color: var(--led);
+  --ring-w:     2px;
 
   /* Grain. One texture, reused everywhere — real metal is never flat, and a
      gradient with no grain reads as plastic within about two seconds. */
@@ -6730,6 +6874,16 @@ span.nav-link{ cursor:default; }
   --info:           #0015FF;
   --ok-ink:         #15803D;   /* the word — 4.85:1 */
   --no-ink:         #C81E1E;   /* 5.55:1            */
+/* AND A SEMANTIC COLOUR IS THREE VALUES, NOT ONE. A styleguide button variant
+   is a fill, a background and a border — `_targz-launchpad/theme/STYLEGUIDE.md`
+   defines its Launch and Stop states exactly that way — and this skin shipped
+   the fill alone, so every variant built against the styleguide had two
+   thirds of itself missing. The values are the plotter's, which are the
+   styleguide's: `pc-tokens.css:15-21`. */
+  --ok-bg:          #F0FDF4;
+  --ok-edge:        #BBF7D0;
+  --no-bg:          #FEF2F2;
+  --no-edge:        #FECACA;
 
   /* THE PAGE KEEPS THE OLD DOCUMENT'S WARMTH, which is the one thing from
      `old/index.html` that the styleguide also asks for: its own background
@@ -6737,9 +6891,15 @@ span.nav-link{ cursor:default; }
      and the reference panel is plainly sitting on it. */
   --page: linear-gradient(135deg, #FAEFE4 0%, #F1EEE9 42%, #EBEDF1 100%);
 
-  --r:     16px;   /* cards, panels   */
-  --r-sm:  10px;   /* buttons, inputs */
-  --r-pill:100px;
+  /* THE RING TAKES THE INK VALUE ON CREAM. `--led` at 22% over a pale card is
+     a tint nobody sees; the ring has to be found, which is the whole job. */
+  --ring:       0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  --ring-color: var(--primary-ink);
+
+/* THE RADII LIVE IN `:root` NOW — see the scales there. They were declared
+   here, which meant the dark theme, the one both Rust apps transcribed by
+   hand, had no radius token at all. A scale that exists in one skin is not a
+   scale, it is a local variable. */
 
 /* ── NO DROP SHADOWS. A LIGHT PANEL IS BEVELLED, NOT FLOATED ─────────────
    A DROP SHADOW IS A CLAIM ABOUT HEIGHT and it is a claim a cream panel on a
@@ -6760,6 +6920,14 @@ span.nav-link{ cursor:default; }
    everything that reaches for them means "separate this from what it sits
    on" and that is still what they do — they just do it with the edge the
    object actually has instead of with a shape on the floor behind it. */
+/* `--shadow-sm` IS THE SHALLOWEST OF THEM AND THE STYLEGUIDE HAS IT. Every
+   button variant published there is defined partly in terms of it, so an app
+   copying those rules into a Skew-skinned page was reading a token that did
+   not exist. Like the other three it is a bevel and not a cast — see the note
+   above — which is the collision item 8 of the alignment study is about: the
+   NAME survives and the BEHAVIOUR inverts, silently. */
+  --shadow-sm:
+    inset 0 1px 0 rgba(255,255,255,.75);
   --shadow-card:
     inset 0 1px 0 rgba(255,255,255,.9),
     inset 0 -1px 0 rgba(0,0,0,.055);

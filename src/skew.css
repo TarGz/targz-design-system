@@ -7856,6 +7856,49 @@ span.nav-link{ cursor:default; }
    `.piano` and `.keypad` already carry their own padding, which is why only
    this one showed it. The column gap goes up with the inset for the same
    reason: three faders 10px apart inside a frame are a block, not a bank. */
+/* ══════════════════════════════════════════════════════════════════════════
+   A RAISED CAP NEEDS ROOM, AND THE ARGUMENT IS ALREADY IN THIS FILE
+
+   `.palette` carries it, written for the dark theme: "every raised cap lays a
+   3px hard skirt plus blur under itself, so a 5px gap is really ~2px of
+   daylight — and a pressed cap drops 2px further into it." That is why the
+   palette is 10px and the keypad's rows are 11.
+
+   `.piano` was never given the same. It kept 6px of padding and a 5px gap,
+   which worked while the surround was a dark well with no line in it — on
+   black the skirt and the floor are near enough the same value that a cap
+   overhanging its own gap costs nothing.
+
+   THIS SKIN DRAWS THE FRAME, AND THAT IS WHAT BROKE IT. The group now has a
+   lit lip and a hairline at its inside edge; the cap now has a 3px wall and a
+   contact shadow under it. Six pixels of padding puts the frame's line
+   straight through the cap's shadow, and the row reads as keys jammed against
+   the inside of a box rather than mounted in a plate. The fix is the one the
+   palette already made: give the skirt somewhere to land.
+
+   AND THE REACH VALUES MOVE WITH THEM. `--pkey-reach-*` is how far an
+   interlocked key extends to meet its neighbour, and the comments beside each
+   one say what it is derived from — half the gap, or the padding. Change a
+   gap without changing its reach and the bar stops being one bar: the lines
+   that join the keys fall short and you get four separate buttons that happen
+   to touch. The same goes for `.hb-tabs`'s three `::before` offsets, which
+   are literally the padding written out.
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-skin="light"] .piano{ padding:10px; gap:10px; --pkey-reach-x:5px; }
+[data-skin="light"] .piano.sm{ padding:9px; gap:9px; --pkey-reach-x:4.5px; }
+[data-skin="light"] .keypad{ padding:10px; gap:12px 10px; --pkey-reach-x:5px; --pkey-reach-y:6px; }
+[data-skin="light"] .palette{ padding:11px; gap:12px; --pkey-reach-y:6px; }
+[data-skin="light"] .navdock > .strip{ padding:11px 13px; gap:10px; --pkey-reach-x:5px; --pkey-reach-y:11px; }
+
+/* THE WRAPPING TAB STRIP, which is a grid and whose reach is written as three
+   literal offsets rather than as a token — they are the padding, so they move
+   with it. The column gap stays tighter than the piano's because six names
+   across four columns is already at the width it fits in. */
+[data-skin="light"] .piano.sm.hb-tabs{ padding:9px; gap:8px; --pkey-reach-x:4px; --pkey-reach-y:4px; }
+[data-skin="light"] .hb-tabs > .pkey:nth-child(-n+3)::before{ top:-9px; }
+[data-skin="light"] .hb-tabs > .pkey:nth-child(n+4)::before{ bottom:-9px; }
+[data-skin="light"] .hb-tabs > .pkey:nth-child(3n+1)::before{ left:-9px; }
+
 [data-skin="light"] .fbank{ padding:14px 16px; gap:16px; }
 /* ── AND THE SAME SENTENCE AGAIN, FOR THE BODIES THAT SET THEIR OWN ──────
    `.gridbody` takes 9/10 and `.set-bay` takes 8/9, which are the numbers of
@@ -8237,28 +8280,30 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] .prog-cap{ color:var(--ink-2); }
 
 /* ── AND A BEZEL DOES NOT DRAW INSIDE A BEZEL ────────────────────────────
-   TWO FRAMES ON ONE GROUP IS A DOUBLE CONTOUR, and it appears the moment a
-   container that has one is put inside another that has one — a `.piano`
-   inside its documentation cell, a `.palette` inside a bay, a fader bank
-   inside a panel body. Each is correct on its own; nested they draw a line
-   round the keys and a second line six pixels outside it, and the eye reads
-   the gap between them as a part.
+   TWO FRAMES ON ONE GROUP IS A DOUBLE PANEL, and the first attempt at this
+   took only the inner one's SHADOW away — which left its FILL and its radius,
+   so the second rectangle was still there, drawn in a different value instead
+   of a different line. A tint is a frame. That is the whole of what a frame
+   is on a surface this pale.
 
-   THE OUTER ONE WINS, BECAUSE IT IS THE ONE HOLDING SOMETHING. A frame says
-   "this is a piece of case with things mounted in it" — and the thing mounted
-   in the outer frame is the inner group ENTIRE, caption and tag included, not
-   just the row of keys. The inner keeps its tint, which is all a group needs
-   once something else is already drawing the edge.
+   AND IT IS THE SPECIMEN CELLS THAT ARE WRONG, NOT NESTING IN GENERAL. A
+   `.piano` inside a panel body in a real app DOES want its own well: the dark
+   theme gives it one, and it is what says the four keys are one setting. What
+   it does not want is a second case round it — and `.intcell`, `.togcell` and
+   `.tab-cell` are not cases, they are the blocks this DOCUMENTATION poses a
+   part in. They exist on exactly one page and in no app. Turning them into
+   cases is what put a case inside a case.
 
-   This is the same sentence as the nav bar's, one level up: the keys are
-   brighter than the bar and the bar is darker than the case, so the VALUE
-   STEP is the edge and a line on top of it is the edge drawn twice. */
-[data-skin="light"] :is(.bay, .piano, .palette, .strokes, .keypad, .fbank, .bankwrap,
-                        .togcell, .intcell, .tab-cell, .drum-bay, .set-bay, .gridbody,
-                        .kwrap.inline, .box, .module, .drawer, .modal, .win)
-                    :is(.bay, .piano, .palette, .strokes, .keypad, .fbank, .bankwrap,
-                        .drum-bay, .set-bay, .gridbody, .kwrap.inline){
+   So the cell keeps the frame — it is the thing holding the specimen, its
+   caption and its tag — and the specimen inside it draws nothing. In an app
+   there is no cell and the part keeps everything. */
+[data-skin="light"] :is(.intcell, .togcell, .tab-cell, .rig-cells)
+                    :is(.bay, .piano, .palette, .strokes, .keypad, .fbank,
+                        .bankwrap, .drum-bay, .gridbody, .kwrap.inline){
+  background-color:transparent;
+  background-image:none;
   box-shadow:none;
+  border:0;
 }
 
 /* ── THE FOUR SPECIMENS IN §02 WERE THE SAME PALE RECTANGLE ──────────────

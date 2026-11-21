@@ -2,7 +2,7 @@
    skew-machine.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-machine.css
-     at       Skew v1.111.0
+     at       Skew v1.112.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -1061,10 +1061,18 @@
     inset 0 0 0 1px var(--epaper-bezel),
     inset 0 -1px 0 rgba(255,255,255,.75);
 }
+/* AND IT IS THE REGULAR WEIGHT, NOT THE BOLD ONE. `.dro-num` is 700 because
+   a proportional face at 25px on a black panel needs the mass to hold against
+   the glow around it. A BITMAP FACE HAS NO WEIGHT AXIS — Silkscreen's bold is
+   a second drawing with a thicker stem on the SAME five-pixel grid, so at
+   21px the counters inside 8, 6 and 0 close up and the decimal point merges
+   with the digit beside it. The number stops being legible at exactly the
+   size it most needs to be. Regular, and the pixels keep their holes. */
 [data-skin="light"] .dro-num{
   font-family:var(--font-read);
   font-size:21px;            /* the bitmap face is small per em; 25 was the mono's */
-  letter-spacing:.02em;
+  font-weight:400;
+  letter-spacing:.04em;
   color:var(--epaper-ink);
   text-shadow:none;
   -webkit-font-smoothing:none;

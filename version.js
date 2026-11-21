@@ -1,6 +1,16 @@
-export const version = '1.111.0';
+export const version = '1.112.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.112.0',
+    date: '2026-11-21',
+    changes: [
+      "A RAISED CAP NEEDS ROOM, AND THE ARGUMENT WAS ALREADY IN THIS FILE. `.palette` carries it, written for the dark theme: every raised cap lays a 3px hard skirt plus blur under itself, so a 5px gap is really ~2px of daylight, and a pressed cap drops 2px further into it. That is why the palette is 10px and the keypad's rows are 11. `.piano` was never given the same — 6px of padding and a 5px gap — which worked while the surround was a dark well with no line in it, because on black the skirt and the floor are near enough the same value that a cap overhanging its own gap costs nothing. THIS SKIN DRAWS THE FRAME, and that is what broke it: six pixels puts the frame's line straight through the cap's shadow and the row reads as keys jammed against the inside of a box rather than mounted in a plate.",
+      "AND EVERY REACH VALUE MOVED WITH THEM, which is the half that would have broken silently. `--pkey-reach-*` is how far an interlocked key extends to meet its neighbour, and each one is derived from half the gap or from the padding — the comments beside them say so. Change a gap without its reach and the bar stops being ONE BAR: the lines that join the keys fall short and you get four separate buttons that happen to touch. Same for the wrapping tab strip's three ::before offsets, which are literally the padding written out.",
+      "A TINT IS A FRAME, ON A SURFACE THIS PALE. The first attempt at the double panel took only the inner container's SHADOW away, which left its fill and its radius — so the second rectangle was still there, drawn in a different value instead of a different line. And it is the SPECIMEN CELLS that are wrong, not nesting in general: a `.piano` inside a panel body in a real app does want its own well, and it is what says the four keys are one setting. `.intcell`, `.togcell` and `.tab-cell` are not cases, they are the blocks this documentation poses a part in — they exist on one page and in no app. The cell keeps the frame; the specimen inside it draws nothing.",
+      "AND THE DRO IS SET IN THE REGULAR WEIGHT. `.dro-num` is 700 because a proportional face at 25px on a black panel needs the mass to hold against the glow around it. A BITMAP FACE HAS NO WEIGHT AXIS — Silkscreen's bold is a second drawing with a thicker stem on the same five-pixel grid, so at 21px the counters inside 8, 6 and 0 close up and the decimal point merges with the digit beside it. The number stops being legible at exactly the size it most needs to be.",
+    ],
+  },
   {
     version: '1.111.0',
     date: '2026-11-21',

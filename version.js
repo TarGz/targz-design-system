@@ -1,6 +1,15 @@
-export const version = '1.108.0';
+export const version = '1.108.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.108.1',
+    date: '2026-11-21',
+    changes: [
+      "THE ALIGNMENT STUDY IS IN THE REPO, AND IT CHANGES WHAT SHIPPING MEANS. Three apps are adopting the light skin and ALL THREE ADOPT BY VALUES, NOT BY STYLESHEET: targz-launchpad2 and Terminass are Rust eframe/egui with no CSS, no HTML and no DOM — both have already hand-transcribed Skew's dark hex into their own theme.rs, independently, and both have drifted — and TargzPenPlotterCtrl is Electron with .cd-* plus Metro4 markup that no Skew class name matches, so loading skew.css would restyle nothing. `dist/` being the only folder an app touches is therefore the wrong unit of adoption; a resolved token manifest is the right one.",
+      "AND THE APP THAT CAN TAKE THE CSS HAS A BETTER TOKEN FILE THAN THE DESIGN SYSTEM. `pc-tokens.css` carries spacing, a type scale, leading, tracking, weights, control heights, z-index, motion and a focus ring — 79 definitions. A grep of src/skew.css for any of those returns ZERO, in both skins, which is why all three apps invented their own and why the radius tokens exist only inside the light skin while dark has never had one.",
+      "`docs/APP-ALIGNMENT.md` holds the study, the five blockers and the two prompts: twelve items for the token and build work, and twelve parts the apps each built for themselves — toast, tooltip, search, spinner, scrollbar first. No code is changed by it. Branch `skew-app-alignment`.",
+    ],
+  },
   {
     version: '1.108.0',
     date: '2026-11-21',

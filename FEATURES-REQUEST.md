@@ -27,6 +27,16 @@ future adoption pays for them again.
 
 ## Open
 
+### Ship values, not just a stylesheet — the token manifest
+Two of three adopting apps are Rust egui and cannot load CSS. See `docs/APP-ALIGNMENT.md`, prompt 1.
+
+### The non-colour scales: spacing, type, control heights, z-index, motion
+Skew has none; all three apps invented their own. `docs/APP-ALIGNMENT.md` item 1.
+
+### The twelve missing parts — toast, tooltip, search, spinner, scrollbar first
+Each already built by hand in at least one app. `docs/APP-ALIGNMENT.md`, prompt 2.
+
+
 ### `[design system]` There is no LAYER LIST part, and three apps now have one
 Portrait-Typo has a layer dock, Portrait-ribbons has just grown one, and the hatch bay's
 surface strip was built as one before it went back to `.piano.sm`. Every time it is the same

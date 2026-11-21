@@ -1,6 +1,17 @@
-export const version = '1.112.0';
+export const version = '1.113.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.113.0',
+    date: '2026-11-21',
+    changes: [
+      "A SELECTED ROW IS RAISED, NOT RINGED. The first answer was a hard 1px ring in the layer's own colour, and it read as a VALIDATION ERROR — an outline round a row is what a form puts there when the field is wrong, a mark laid ON the row rather than anything about it, and at 1px in a saturated hue on cream it was the loudest thing in the panel for the least important reason. The dark theme does not do that either: it lifts the card's value AND gives it a rim, and what got carried over was the rim without the LIFT, which is the half that does the work. So it is the skin's own figure-ground, the one every key already uses — the rows lie milled in the bay and the selected one stands out of it as a raised cap. The colour stays in the pipe, which is the layer's identity and not its state.",
+      "AND THE `.sel` COLLISION REACHED IT THROUGH A VARIABLE THIS TIME. `[data-skin=light] .sel` sets `--wall: var(--primary-ink)` so a select gets an orange side; `.row.sel` matches that selector, and `--lift` resolves `var(--wall)` ON THE ELEMENT — so the layer row inherited the select's pigment and grew a dark orange band along its bottom edge. A cream cap standing on an orange wall is a cap made of two materials. The fill and the geometry had already been restated; `--wall` and `--chamf` are the channels that arrive through a VARIABLE rather than through a property, which is why they survived the first pass. Third fault from one class name.",
+      "THE NO-NESTED-FRAME RULE IS GENERAL NOW, NOT SCOPED TO THE DOCUMENTATION. Two attempts got it wrong in opposite directions: the first took only the inner container's shadow and left its fill, which still draws a second rectangle because A TINT IS A FRAME on a surface this pale; the second scoped it to the specimen cells on the theory that a part inside a real panel wants its own well. The nav bar and the jog panel are the counter-examples — `.nav-pages` is a `.piano` inside `.strip`, and STEP and UNITS are `.piano.sm` inside a bay, both drawing a box inside a box in an app. The outer wins, because what is mounted in it is the inner group ENTIRE. The inner keeps its padding and its gaps and loses only the edge.",
+      "A BANK OF ROWS IS A LAYOUT, NOT A CASE, AND THE PEN BANK PROVED IT BADLY. `.penbank` is a bare flex column — display:flex, a gap, nothing else — and giving it a fill and a frame was the `.rack` mistake again. It looked worse here because of what sits on it: each row is a knob, thirty pixels of air, then a WHITE KEY that is flex:1. The key is opaque and covers everything to its right, so the tint survived only behind the knob column and ended in mid-air where the first key began. A container visible only in the gaps between its contents is not a container, it is a stain. The annunciator, the stats strip, the rail and the override column keep their bezels, because those are plates and bars with things let into them.",
+      "AND THE LAYER DOCK LOADS AT REST. Nothing open, ALL under power — the state a dock is in when you arrive at it. Opening L1 on load was a demo convenience that put the stroke strip on screen without a click, and it cost the page its resting state, which is the thing a documentation panel is for.",
+    ],
+  },
   {
     version: '1.112.0',
     date: '2026-11-21',

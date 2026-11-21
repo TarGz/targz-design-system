@@ -2,7 +2,7 @@
    skew-machine.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-machine.css
-     at       Skew v1.112.0
+     at       Skew v1.113.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -1126,14 +1126,33 @@
 }
 [data-skin="light"] .jog-home:hover{ color:var(--ink); }
 
-/* ── THE PEN AND RUN BANKS, AND THE OVERRIDE COLUMN ────────────────────────
-   All three are groups, so all three are bezels. Their contents are `.key`,
-   `.micro` and `.fader`, which the main sheet already owns. */
-[data-skin="light"] :is(.penbank, .runbank, .ovrcol, .annun, .stats, .rail){
+/* ── A BANK OF ROWS IS A LAYOUT, NOT A CASE ────────────────────────────────
+   `.penbank` AND `.runbank` ARE BARE FLEX COLUMNS — `display:flex`, a gap,
+   nothing else. Giving them a fill and a frame was the `.rack` mistake again,
+   and it looked worse here because of what sits on top: each row is a knob,
+   thirty pixels of air, and then a WHITE KEY that is `flex:1`. The key is
+   opaque and covers everything to its right, so the bank's tint survived only
+   where nothing was over it — a grey vertical band behind the knob column,
+   ending in mid-air where the first key began. A container that is visible
+   only in the gaps between its contents is not a container, it is a stain.
+
+   The parts that ARE cases keep the bezel: the annunciator is a plate with
+   lamps let into it, the stats strip and the rail are machined bars, and the
+   override column is a milled channel with faders in it. */
+[data-skin="light"] :is(.annun, .stats, .rail, .ovrcol){
   background-color:var(--paper);
   background-image:none;
   box-shadow:var(--surround);
 }
+
+/* AND THE ROWS NEED THE AIR THE CAPS TAKE. 8px between two rows of raised
+   keys is 5px once each one's 3px wall is counted, and the contact shadow
+   lands in what is left — so the three rows read as a stack that has been
+   compressed rather than as three separate controls. Same sentence as the
+   piano's, one part along. */
+[data-skin="light"] .penbank{ gap:14px; }
+[data-skin="light"] .runbank{ gap:14px; }
+[data-skin="light"] .runbank .row2{ gap:12px; }
 
 /* THE PEN WINDOW IS A READOUT, so it is the same module as the DRO. */
 [data-skin="light"] .pen-win{

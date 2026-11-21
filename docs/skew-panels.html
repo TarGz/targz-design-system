@@ -165,8 +165,15 @@ const st = {
     mkLayer('L4', '#E4123F', 96,  6, 30, true),
     mkLayer('L5', '#4CE04C', 54,  8, 22),
   ],
-  open: { 0: true },          // 0 is the ALL row; L1 opens on load to show the strip
-  sel: 1,                     // which module is under power
+  /* NOTHING IS OPEN AND `ALL` IS THE ONE UNDER POWER, which is the state a
+     layer dock is in when you arrive at it: five layers listed, none of them
+     expanded, and the selection on the row that means "every layer". Opening
+     L1 on load was a demo convenience — it put the stroke strip on screen
+     without a click — and it cost the page its resting state, which is the
+     thing a documentation panel is actually for. The strip is one click away
+     and the chevron is what says so. */
+  open: {},
+  sel: 0,                     // 0 is the ALL row; which module is under power
   groundOn: true,
   groundShadow: true,
   groundContours: true,

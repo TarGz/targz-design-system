@@ -8280,24 +8280,32 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] .prog-cap{ color:var(--ink-2); }
 
 /* ── AND A BEZEL DOES NOT DRAW INSIDE A BEZEL ────────────────────────────
-   TWO FRAMES ON ONE GROUP IS A DOUBLE PANEL, and the first attempt at this
-   took only the inner one's SHADOW away — which left its FILL and its radius,
-   so the second rectangle was still there, drawn in a different value instead
-   of a different line. A tint is a frame. That is the whole of what a frame
-   is on a surface this pale.
+   TWO FRAMES ON ONE GROUP IS A DOUBLE PANEL. The first attempt took only the
+   inner one's SHADOW away, which left its fill and its radius — so the second
+   rectangle was still there, drawn in a different value instead of a
+   different line. A TINT IS A FRAME on a surface this pale. The second
+   attempt scoped it to the documentation's specimen cells, on the theory that
+   a part inside a real panel still wants its own well. That was wrong too,
+   and the nav bar and the jog panel are the counter-examples: `.nav-pages` is
+   a `.piano` INSIDE `.strip`, and the jog panel's STEP and UNITS strips are
+   `.piano.sm` inside a bay. Both drew a box inside a box, in an app, with no
+   documentation anywhere near them.
 
-   AND IT IS THE SPECIMEN CELLS THAT ARE WRONG, NOT NESTING IN GENERAL. A
-   `.piano` inside a panel body in a real app DOES want its own well: the dark
-   theme gives it one, and it is what says the four keys are one setting. What
-   it does not want is a second case round it — and `.intcell`, `.togcell` and
-   `.tab-cell` are not cases, they are the blocks this DOCUMENTATION poses a
-   part in. They exist on exactly one page and in no app. Turning them into
-   cases is what put a case inside a case.
+   SO IT IS THE GENERAL RULE, AND THE OUTER ONE WINS. A frame says "this is a
+   piece of case with something mounted in it". What is mounted in the outer
+   frame is the inner group ENTIRE — its caption, its keys, its tag — not just
+   the row. Drawing a second frame round the row says the row is mounted in
+   something that is itself mounted in something, which is one more claim
+   about the assembly than the assembly makes.
 
-   So the cell keeps the frame — it is the thing holding the specimen, its
-   caption and its tag — and the specimen inside it draws nothing. In an app
-   there is no cell and the part keeps everything. */
-[data-skin="light"] :is(.intcell, .togcell, .tab-cell, .rig-cells)
+   THE INNER KEEPS ITS PADDING AND ITS GAPS, which is the part that still
+   matters: the caps need the room whether or not anything draws a line round
+   them. It loses only the fill, the frame and the radius — everything whose
+   job was to say "edge", when something else is already saying it. */
+[data-skin="light"] :is(.strip, .bay, .box-body, .piano, .palette, .keypad, .strokes,
+                        .fbank, .bankwrap, .jogopt, .hatchbay, .set-bay, .gridbody,
+                        .drum-bay, .intcell, .togcell, .tab-cell, .rig-cells,
+                        .box, .module, .drawer, .modal, .win, .picker)
                     :is(.bay, .piano, .palette, .strokes, .keypad, .fbank,
                         .bankwrap, .drum-bay, .gridbody, .kwrap.inline){
   background-color:transparent;
@@ -8846,6 +8854,35 @@ span.nav-link{ cursor:default; }
    CALL. So the row is restated here, last, over every property the select
    rule sets — geometry included, because geometry leaked too.
    ══════════════════════════════════════════════════════════════════════════ */
+/* ── AND A SELECTED ROW IS RAISED, NOT RINGED ──────────────────────────────
+   THE FIRST ANSWER WAS A HARD 1px RING IN THE LAYER'S OWN COLOUR, and it read
+   as a validation error. An outline round a row is what a form puts there
+   when the field is wrong; it is a mark laid ON the row rather than anything
+   about the row, and at 1px in a saturated hue on cream it is the loudest
+   thing in the panel for the least important reason.
+
+   THE DARK THEME DOES NOT DO THAT EITHER — it lifts the card's value and
+   gives it a rim. What was carried over was the rim and not the LIFT, which
+   is the half that does the work: on black the selected row is brighter than
+   its neighbours, and brighter than its neighbours is what "under power"
+   means on a panel.
+
+   SO IT IS THE SKIN'S OWN FIGURE-GROUND, THE ONE EVERY KEY ALREADY USES. The
+   rows sit in a milled bay, so a row at rest is MILLED — the bay's own value,
+   flat, no edge of its own. The selected one is a RAISED CAP: the brighter
+   face, the wall, the contact shadow. One row is standing up out of the bay
+   and the rest are lying in it, which is a thing you can see from across the
+   room and does not need a colour at all.
+
+   THE COLOUR STAYS IN THE PIPE, which is where it was already and where it
+   belongs: the pipe is the layer's identity, not its state, and it is there
+   whether the row is selected or not. */
+[data-skin="light"] .bay .row{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:none;
+}
+[data-skin="light"] .bay .row:hover{ background-color:var(--card-hover); }
 [data-skin="light"] .row.sel{
   width:100%; height:40px; padding:0 8px 0 0; gap:5px;
   border:0; border-radius:7px;
@@ -8853,21 +8890,31 @@ span.nav-link{ cursor:default; }
   background-color:var(--card);
   background-image:none;
   color:var(--ink);
-  /* THE DARK ROW SAYS "UNDER POWER" WITH A RIM OF ITS OWN COLOUR AND A
-     BLOOM. The rim is the half that survives: a hard ring in the layer's
-     ink, which is the one place this dock is allowed to be coloured, since
-     the colour IS the layer's identity and not a state. The 12px bloom and
-     the 65% drop are a lamp in a dark room and come out. */
-  box-shadow:
-    inset 0 0 0 1px var(--lyr, var(--primary)),
-    0 1px 2px rgba(0,0,0,.06);
+  /* ── AND THE WALL HAD TO BE RESET, WHICH IS THE `.sel` COLLISION AGAIN ───
+     `[data-skin="light"] .sel` sets `--wall: var(--primary-ink)` so a select
+     gets an orange side instead of a grey one — and `.row.sel` matches that
+     selector, because the class means "selected row" here and "select
+     control" there. `--lift` resolves `var(--wall)` ON THE ELEMENT, so the
+     layer row inherited the select's pigment and grew a dark orange band
+     along its bottom edge: a cream cap standing on an orange wall, which is
+     a cap made of two materials.
+     The fill and the geometry were already restated above; these two are the
+     channels that reach the row through a VARIABLE rather than through a
+     property, which is why they survived the first pass. */
+  --wall:var(--edge-ctl);
+  --chamf:rgba(255,255,255,.95);
+  box-shadow:var(--lift);
+  transform:none;
 }
 [data-skin="light"] .row.sel:hover{
   background-color:var(--card-hover);
   background-image:none;
   color:var(--ink);
 }
-[data-skin="light"] .row.sel .name{ color:var(--ink); }
+[data-skin="light"] .row.sel .name{ color:var(--ink); font-weight:700; }
+/* A RAISED ROW NEEDS THE SAME AIR A RAISED CAP NEEDS — the bay's 5px gap is
+   two pixels once the wall under the selected row is counted. */
+[data-skin="light"] .bay{ gap:9px; }
 
 /* THE ROWS KEPT THE DARK THEME'S OWN SHADOW, because the skin's row rule
    sets a background, a bottom border and a colour and never mentions

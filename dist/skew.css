@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.112.0
+     at       Skew v1.113.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -7825,7 +7825,26 @@ span.nav-link{ cursor:default; }
 }
 [data-skin="light"] .prog-nm{ color:var(--ink); }
 [data-skin="light"] .prog-cap{ color:var(--ink-2); }
-.rig-cells)
+[data-skin="light"] :is(.strip,
+.bay,
+.box-body,
+.piano,
+.palette,
+.keypad,
+.strokes,
+.fbank,
+.bankwrap,
+.jogopt,
+.hatchbay,
+.set-bay,
+.drum-bay,
+.rig-cells,
+.box,
+.module,
+.drawer,
+.modal,
+.win,
+.picker)
                     :is(.bay,
 .piano,
 .palette,
@@ -8352,6 +8371,35 @@ span.nav-link{ cursor:default; }
    CALL. So the row is restated here, last, over every property the select
    rule sets — geometry included, because geometry leaked too.
    ══════════════════════════════════════════════════════════════════════════ */
+/* ── AND A SELECTED ROW IS RAISED, NOT RINGED ──────────────────────────────
+   THE FIRST ANSWER WAS A HARD 1px RING IN THE LAYER'S OWN COLOUR, and it read
+   as a validation error. An outline round a row is what a form puts there
+   when the field is wrong; it is a mark laid ON the row rather than anything
+   about the row, and at 1px in a saturated hue on cream it is the loudest
+   thing in the panel for the least important reason.
+
+   THE DARK THEME DOES NOT DO THAT EITHER — it lifts the card's value and
+   gives it a rim. What was carried over was the rim and not the LIFT, which
+   is the half that does the work: on black the selected row is brighter than
+   its neighbours, and brighter than its neighbours is what "under power"
+   means on a panel.
+
+   SO IT IS THE SKIN'S OWN FIGURE-GROUND, THE ONE EVERY KEY ALREADY USES. The
+   rows sit in a milled bay, so a row at rest is MILLED — the bay's own value,
+   flat, no edge of its own. The selected one is a RAISED CAP: the brighter
+   face, the wall, the contact shadow. One row is standing up out of the bay
+   and the rest are lying in it, which is a thing you can see from across the
+   room and does not need a colour at all.
+
+   THE COLOUR STAYS IN THE PIPE, which is where it was already and where it
+   belongs: the pipe is the layer's identity, not its state, and it is there
+   whether the row is selected or not. */
+[data-skin="light"] .bay .row{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:none;
+}
+[data-skin="light"] .bay .row:hover{ background-color:var(--card-hover); }
 [data-skin="light"] .row.sel{
   width:100%; height:40px; padding:0 8px 0 0; gap:5px;
   border:0; border-radius:7px;
@@ -8359,21 +8407,31 @@ span.nav-link{ cursor:default; }
   background-color:var(--card);
   background-image:none;
   color:var(--ink);
-  /* THE DARK ROW SAYS "UNDER POWER" WITH A RIM OF ITS OWN COLOUR AND A
-     BLOOM. The rim is the half that survives: a hard ring in the layer's
-     ink, which is the one place this dock is allowed to be coloured, since
-     the colour IS the layer's identity and not a state. The 12px bloom and
-     the 65% drop are a lamp in a dark room and come out. */
-  box-shadow:
-    inset 0 0 0 1px var(--lyr, var(--primary)),
-    0 1px 2px rgba(0,0,0,.06);
+  /* ── AND THE WALL HAD TO BE RESET, WHICH IS THE `.sel` COLLISION AGAIN ───
+     `[data-skin="light"] .sel` sets `--wall: var(--primary-ink)` so a select
+     gets an orange side instead of a grey one — and `.row.sel` matches that
+     selector, because the class means "selected row" here and "select
+     control" there. `--lift` resolves `var(--wall)` ON THE ELEMENT, so the
+     layer row inherited the select's pigment and grew a dark orange band
+     along its bottom edge: a cream cap standing on an orange wall, which is
+     a cap made of two materials.
+     The fill and the geometry were already restated above; these two are the
+     channels that reach the row through a VARIABLE rather than through a
+     property, which is why they survived the first pass. */
+  --wall:var(--edge-ctl);
+  --chamf:rgba(255,255,255,.95);
+  box-shadow:var(--lift);
+  transform:none;
 }
 [data-skin="light"] .row.sel:hover{
   background-color:var(--card-hover);
   background-image:none;
   color:var(--ink);
 }
-[data-skin="light"] .row.sel .name{ color:var(--ink); }
+[data-skin="light"] .row.sel .name{ color:var(--ink); font-weight:700; }
+/* A RAISED ROW NEEDS THE SAME AIR A RAISED CAP NEEDS — the bay's 5px gap is
+   two pixels once the wall under the selected row is counted. */
+[data-skin="light"] .bay{ gap:9px; }
 [data-skin="light"] :is(.row,
 .con-row,
 .modal-row,

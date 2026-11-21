@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.109.1
+     at       Skew v1.110.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -293,6 +293,50 @@
   --ring:       0 0 0 3px color-mix(in srgb, var(--led) 22%, transparent);
   --ring-color: var(--led);
   --ring-w:     2px;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE STYLEGUIDE NAMES — an alias layer, because renaming broke every app
+
+   `_targz-launchpad/theme/STYLEGUIDE.md` publishes a copy-paste `:root` and
+   every app in this family was built against it. TargzPenPlotterCtrl's
+   `pc-tokens.css` follows it almost exactly. Then this language arrived and
+   renamed all of it — `--bg` to `--paper`, `--surface` to `--card`, `--border`
+   to `--edge`, `--text*` to `--ink*`, `--green/--red/--blue` to
+   `--ok/--no/--info`, `--radius*` to `--r*` — and revalued two of them on the
+   way. An app already reading the old names gets nothing from this sheet AND
+   NO ERROR, which is the worst failure mode available: a var() with no
+   definition and no fallback makes the declaration invalid at computed-value
+   time and the property falls back to inherited or initial. A panel that
+   should be #F5F3F0 is simply transparent, and the page looks almost right.
+
+   SO THE OLD NAMES RESOLVE HERE. One direction only: old name reads new
+   token, never the reverse. This is a bridge for code already written, not a
+   second vocabulary — a new rule in this file that reaches for `--text`
+   instead of `--ink` is a rule that has made the alias permanent.
+
+   ── THE ONE IT CANNOT COVER ───────────────────────────────────────────────
+   `--shadow-card`, `--shadow-md` and `--shadow-lg` KEEP THEIR NAMES AND HAVE
+   THE OPPOSITE BEHAVIOUR. In the styleguide they cast; here they bevel, with
+   no outer throw at all, because a cream panel on a cream page has no room
+   under it to cast into. An alias cannot fix a name that already means two
+   things — an app reading `--shadow-card` gets a value, it is simply not the
+   one it was written for, and nothing anywhere says so. It is said here, and
+   in the README, which is the only remedy available.
+   ══════════════════════════════════════════════════════════════════════════ */
+  --bg:             var(--room);
+  --surface:        var(--case);
+  --border:         var(--case-lo);
+  --border-light:   var(--case-lo);
+  --text:           var(--txt);
+  --text-secondary: var(--txt-dim);
+  --text-tertiary:  var(--txt-dim);
+  --primary:        var(--led);
+  --green:          var(--ok);
+  --red:            var(--no);
+  --blue:           var(--info, var(--led));
+  --radius:         var(--r);
+  --radius-sm:      var(--r-sm);
+  --radius-pill:    var(--r-pill);
 
   /* Grain. One texture, reused everywhere — real metal is never flat, and a
      gradient with no grain reads as plastic within about two seconds. */
@@ -6506,6 +6550,20 @@ span.nav-link{ cursor:default; }
      and the reference panel is plainly sitting on it. */
   --page: linear-gradient(135deg, #FAEFE4 0%, #F1EEE9 42%, #EBEDF1 100%);
 
+/* THE SAME ALIASES, POINTED AT THE LIGHT VALUES. `--primary` is already a
+   token of this skin's own, so it is not repeated here; the rest follow the
+   same one-way rule as in `:root`. */
+  --bg:             var(--paper);
+  --surface:        var(--card);
+  --border:         var(--edge);
+  --border-light:   var(--edge-soft);
+  --text:           var(--ink);
+  --text-secondary: var(--ink-2);
+  --text-tertiary:  var(--ink-3);
+  --green:          var(--ok);
+  --red:            var(--no);
+  --blue:           var(--info);
+
   /* THE RING TAKES THE INK VALUE ON CREAM. `--led` at 22% over a pale card is
      a tint nobody sees; the ring has to be found, which is the whole job. */
   --ring:       0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
@@ -7670,6 +7728,60 @@ span.nav-link{ cursor:default; }
                         .hb-deep, .bay-field, .bay-deep, .rig-cells){
   box-shadow:var(--surround);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PROGRESS — the one part all three adopting apps need and the skin had
+   almost nothing to say about
+
+   `.meter` carried twelve literal colours and one light rule out of six;
+   `.prog-cap` carried one and had none at all. So every app that needed to
+   show a job running rebuilt it: TargzPenPlotterCtrl has
+   `.cd-progress-track`, `-fill` and `-pct`, written from scratch, because the
+   version in the system only existed in black.
+
+   THE TRACK IS A CUT AND THE SEGMENTS ARE LAMPS, which is the same sentence
+   as every other recess in this skin and the reason this is six short rules
+   rather than a redesign. What changes is only what a lamp is made of on
+   cream: a lit segment on black is a glow, and on paper it is a SOLID FILL
+   with no bloom — there is nothing for a bloom to spill into, and a bloom on
+   a pale ground is a smudge round a bar.
+
+   AN UNLIT SEGMENT IS NOT AN ABSENCE. On black it can be, because the track
+   is already black and an unlit lamp is the track showing through. On cream
+   the track is pale, so an empty segment has to be DRAWN — a step down from
+   the floor it sits in — or forty of them read as one continuous bar that is
+   always full. */
+[data-skin="light"] .meter{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.14),
+    inset 0 0 0 1px var(--edge-ctl),
+    inset 0 -1px 0 rgba(255,255,255,.8);
+}
+[data-skin="light"] .meter i{
+  background:var(--edge);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.05);
+}
+[data-skin="light"] .meter i.on{
+  background:var(--primary);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+}
+/* THE ARRIVING SEGMENT IS THE DARKER ORANGE, NOT THE LIGHTER ONE. On black
+   `--led-hot` is hotter because hotter is brighter; on cream the brightest
+   thing is the paper, so the head of the bar reads by being DEEPER than the
+   ones behind it. The polarity of a lamp inverts with the ground it is on,
+   which is the whole of the difference between these two skins. */
+[data-skin="light"] .meter i.on.hot{
+  background:var(--primary-deep);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+}
+[data-skin="light"] .meter.done i.on{
+  background:var(--ok);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+}
+[data-skin="light"] .prog-nm{ color:var(--ink); }
+[data-skin="light"] .prog-cap{ color:var(--ink-2); }
 [data-skin="light"] :is(.bay,
 .piano,
 .palette,

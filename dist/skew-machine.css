@@ -2,7 +2,7 @@
    skew-machine.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-machine.css
-     at       Skew v1.110.0
+     at       Skew v1.111.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -1016,3 +1016,210 @@
 
 /* the head's own lamp, for a panel whose subject has a state */
 .head .lamp{ margin-left:auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE LIGHT SKIN FOR THE MACHINE PARTS
+
+   THIS SHEET HAD NO SKIN AT ALL — a thousand lines, a hundred and ten literal
+   hex colours, and not one `[data-skin]` rule — and it is also the sheet that
+   was never in `dist/`. Both halves of that are the same mistake, and
+   TargzPenPlotterCtrl is what it cost: that app rebuilt every part below by
+   hand under its own names, because the design system's versions were dark
+   and unreachable. A 4x3 jog grid, a click-to-edit DRO, three override
+   faders, an abort key, a state dot. All of it already here.
+
+   IT READS `skew.css`'s TOKENS AND DOES NOT DEFINE ITS OWN. `--epaper`,
+   `--surround`, `--paper`, `--ink` and the rest live in the main sheet's
+   `[data-skin="light"]` block, which is on the same element, so they resolve.
+   This file alone in a page with no skew.css is the dark theme, which is what
+   it has always been.
+
+   ── THE THREE DECISIONS ──────────────────────────────────────────────────
+   1. A DRO IS E-PAPER, NOT A PHOSPHOR. Every readout in this language became
+      a matte grey module on cream, and the position display is the most-read
+      number on the page — it does not get to be the one exception. The green
+      goes; green is what a LIT segment is made of, and nothing here is lit.
+   2. THE E-STOP STAYS RED AND STAYS DOMED. It is the one part on any machine
+      that is the same colour in every lighting condition, in every country,
+      by convention and in several places by law. A skin that restyles an
+      emergency stop has mistaken a safety device for a button.
+   3. THE STICK STAYS DARK. It is a moulded grip — the thing you put your hand
+      on — which is the short list this skin already keeps black: the knob's
+      collar, the drum's grip, the fader's cap. Its ball, body and seat are
+      forty rules of lathe work and none of it is about the panel's colour.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── THE DRO ───────────────────────────────────────────────────────────────
+   The module is dropped into the case, so it gets the three things every cut
+   in this skin gets: the near wall's shadow across the glass, a hairline
+   frame of the case's own control edge, and a lit lip coming back up. */
+[data-skin="light"] .dro{
+  background-color:var(--epaper);
+  background-image:none;
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.16),
+    inset 0 0 0 1px var(--epaper-bezel),
+    inset 0 -1px 0 rgba(255,255,255,.75);
+}
+[data-skin="light"] .dro-num{
+  font-family:var(--font-read);
+  font-size:21px;            /* the bitmap face is small per em; 25 was the mono's */
+  letter-spacing:.02em;
+  color:var(--epaper-ink);
+  text-shadow:none;
+  -webkit-font-smoothing:none;
+}
+/* MOVING IS STILL A STATE AND IT STILL HAS TO SHOW. On black it is a hotter
+   phosphor; on paper there is no hotter, so it is the ACCENT — the one colour
+   this skin allows to mean "this is happening". The digits do not change size
+   or weight, because a readout whose metrics move while it is being driven is
+   a readout you cannot read while it is being driven. */
+[data-skin="light"] .dro.live .dro-num{
+  color:var(--pick);
+  text-shadow:none;
+}
+/* THE AXIS LETTER KEEPS ITS OWN COLOUR — `--ax` is pushed in per cell and X
+   red / Y green / Z blue is a CNC convention this system does not own. It
+   loses the bloom, which is a lamp behind glass and there is no lamp here. */
+[data-skin="light"] .dro-lab{ text-shadow:none; }
+
+/* THE TRAVEL SCALE IS A CHANNEL CUT IN THE CASE. */
+[data-skin="light"] .dro-bar{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,.14),
+    inset 0 0 0 1px var(--edge-ctl);
+}
+[data-skin="light"] .dro-zero{
+  background-color:var(--card);
+  background-image:none;
+  color:var(--ink-2);
+  box-shadow:var(--lift);
+}
+[data-skin="light"] .dro-zero:hover{ color:var(--ink); }
+
+/* ── THE JOG PAD ───────────────────────────────────────────────────────────
+   The grid is the plate the keys are mounted in, so it is a bezel like every
+   other group in this skin; the keys themselves are `.pkey` and `skew.css`
+   has already dressed them. Only the home key needs saying, because it is a
+   micro key and those are RECESSED on purpose — they are not the thing your
+   thumb should find first on a machine that moves. */
+[data-skin="light"] .jog-grid{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:var(--surround);
+}
+[data-skin="light"] .jog-home{
+  background-color:var(--paper);
+  background-image:none;
+  color:var(--ink-2);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.10), inset 0 0 0 1px var(--edge);
+}
+[data-skin="light"] .jog-home:hover{ color:var(--ink); }
+
+/* ── THE PEN AND RUN BANKS, AND THE OVERRIDE COLUMN ────────────────────────
+   All three are groups, so all three are bezels. Their contents are `.key`,
+   `.micro` and `.fader`, which the main sheet already owns. */
+[data-skin="light"] :is(.penbank, .runbank, .ovrcol, .annun, .stats, .rail){
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:var(--surround);
+}
+
+/* THE PEN WINDOW IS A READOUT, so it is the same module as the DRO. */
+[data-skin="light"] .pen-win{
+  background-color:var(--epaper);
+  background-image:none;
+  color:var(--epaper-ink);
+  text-shadow:none;
+  font-family:var(--font-read);
+  -webkit-font-smoothing:none;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.16),
+    inset 0 0 0 1px var(--epaper-bezel);
+}
+
+/* ── THE ANNUNCIATOR ───────────────────────────────────────────────────────
+   AN UNLIT ANNUNCIATOR IS NOT A DARK CELL ON PAPER. On black it can be: the
+   panel is black and a dead lamp is the panel showing through its window. On
+   cream there is nothing behind it, so an unlit cell has to be DRAWN as a
+   cell — a shallow recess with the legend printed in it, faint but legible,
+   because the whole point of an annunciator is that you can read what it
+   WOULD say before it says it. A row of black rectangles on a cream machine
+   is a row of broken lamps.
+   The LIT state keeps everything: `--lamp` is pushed in per cell and a lit
+   annunciator is the one place on this panel that genuinely emits. */
+[data-skin="light"] .ann{
+  background-color:var(--paper);
+  background-image:none;
+  color:var(--ink-3);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.10), inset 0 0 0 1px var(--edge);
+}
+[data-skin="light"] .ann:hover{ color:var(--ink-2); }
+
+/* ── THE E-STOP, AND ONLY ITS FURNITURE ────────────────────────────────────
+   The mushroom is untouched. What changes is the plate it is bolted to and
+   the collar round it: those are case, and case is cream. The red dome on a
+   cream mount reads harder than it ever did on black, which is correct — a
+   stop that is easy to find is the entire specification. */
+[data-skin="light"] .estop-mount{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:var(--surround);
+}
+[data-skin="light"] .estop-collar{
+  background-color:var(--edge-ctl);
+  background-image:none;
+}
+[data-skin="light"] .estop-leg{ color:var(--ink-2); }
+[data-skin="light"] .estop-leg span{ color:var(--ink-3); }
+
+/* ── THE GUARD ─────────────────────────────────────────────────────────────
+   A flip-up cover over a key you must not press by accident. The cover is
+   case; its handle stays a moulding. */
+[data-skin="light"] .guard{ color:var(--ink); }
+[data-skin="light"] .guard::after{
+  background-color:var(--edge-ctl);
+  background-image:none;
+}
+
+/* ── THE STATUS STRIP AND THE RAIL ─────────────────────────────────────────
+   Labels and values, not displays: ink, not e-paper. */
+[data-skin="light"] .stat{
+  background-color:var(--card);
+  background-image:none;
+  box-shadow:var(--shadow-card);
+}
+[data-skin="light"] .stat b{ color:var(--ink-2); }
+[data-skin="light"] .stat span{ color:var(--ink); }
+[data-skin="light"] .rail-cell{ color:var(--ink-2); }
+[data-skin="light"] .rail-cell b{ color:var(--ink); }
+
+/* ── THE TAPE STAYS DARK, AND THAT IS THE RULE FROM THE README ─────────────
+   It is the machine TALKING — G-code going out, responses coming back, the
+   controller's own errors. That is the buffer, not the furniture, and the
+   README already settles it: a theme that tints the thing being drawn is a
+   theme that lies about the drawing. Terminass bundles 956 terminal schemes
+   for exactly this reason and does not let its chrome near them.
+   It gets a frame, because it is now a dark window let into a cream case and
+   every other one of those in this skin is cut in rather than laid on. */
+[data-skin="light"] .tape{
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.55),
+    0 0 0 1px var(--edge-ctl),
+    0 1px 0 rgba(255,255,255,.85);
+}
+
+/* ── THE DOCUMENT'S OWN FURNITURE ──────────────────────────────────────────
+   The inventory table and the section rule belong to the machine page rather
+   than to an app, and they are here because the page is here. */
+[data-skin="light"] .inv th{ color:var(--ink-2); border-bottom-color:var(--edge); }
+[data-skin="light"] .inv td{ color:var(--ink-2); border-bottom-color:var(--edge-soft); }
+[data-skin="light"] .inv td:first-child{ color:var(--ink); }
+[data-skin="light"] .inv td code{
+  color:var(--ink-2);
+  background:var(--paper);
+}
+[data-skin="light"] .inv .have td:nth-child(2){ color:var(--ok-ink); }
+[data-skin="light"] .cut{ color:var(--ink-2); }

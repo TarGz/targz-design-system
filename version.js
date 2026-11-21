@@ -1,6 +1,18 @@
-export const version = '1.110.0';
+export const version = '1.111.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.111.0',
+    date: '2026-11-21',
+    changes: [
+      "THE MACHINE SHEET HAS A LIGHT SKIN. A thousand lines, a hundred and ten literal hex colours and not one [data-skin] rule — and it was also the sheet that was never in dist/. Both halves are the same mistake, and TargzPenPlotterCtrl is what it cost: that app rebuilt every part of it by hand under its own names — a 4x3 jog grid, a click-to-edit DRO, three override faders, an abort key, a state dot — because the system's versions were dark and unreachable. It reads skew.css's tokens and defines none of its own, so this file alone in a page with no skew.css is still the dark theme, which is what it has always been.",
+      "A DRO IS E-PAPER, NOT A PHOSPHOR. Every readout in this language became a matte grey module on cream, and the position display is the most-read number on the page — it does not get to be the exception. The green goes: green is what a LIT segment is made of and nothing here is lit. MOVING is still a state and still shows, but on paper there is no hotter, so it is the ACCENT; the digits do not change size or weight either, because a readout whose metrics move while it is being driven is one you cannot read while it is being driven.",
+      "THE E-STOP STAYS RED AND STAYS DOMED. It is the one part on any machine that is the same colour in every lighting condition, in every country, by convention and in several places by law — a skin that restyles an emergency stop has mistaken a safety device for a button. Only its mount and collar change, because those are case. The red dome on a cream plate reads harder than it ever did on black, which is correct: a stop that is easy to find is the entire specification.",
+      "AND THE STICK STAYS DARK. It is a moulded grip, the thing you put your hand on, which is the short list this skin already keeps black alongside the knob's collar, the drum's grip and the fader's cap. Its ball, body and seat are forty rules of lathe work and none of it is about the panel's colour.",
+      "AN UNLIT ANNUNCIATOR IS NOT A DARK CELL ON PAPER. On black it can be — the panel is black and a dead lamp is the panel showing through its window. On cream there is nothing behind it, so an unlit cell has to be DRAWN as a cell, with its legend printed faint but legible, because the whole point of an annunciator is that you can read what it WOULD say before it says it. A row of black rectangles on a cream machine is a row of broken lamps.",
+      "THE TAPE STAYS DARK, AND THAT IS THE README'S OWN RULE. It is the machine talking — G-code going out, responses coming back, the controller's errors. That is the buffer and not the furniture: a theme that tints the thing being drawn is a theme that lies about the drawing. It gets a frame, because it is now a dark window let into a cream case and every other one of those in this skin is cut in rather than laid on.",
+    ],
+  },
   {
     version: '1.110.0',
     date: '2026-11-21',

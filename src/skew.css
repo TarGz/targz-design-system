@@ -80,6 +80,23 @@
   --txt-etch:    #0a0b0c;   /* engraved-into-metal text                      */
 
   --led:         #FF6A00;   /* the accent is a LAMP here, not a fill         */
+/* ── THE CHOSEN WORD, AND IT IS ONE VALUE FOR BOTH SKINS ─────────────────
+   A SELECTOR'S LIST IS A LEGEND AND ONE ENTRY IS A READING. Six names beside
+   a rotary, eight beside a gated lever, nine keys in a grid, the rows in a
+   drum — all PRINTING: cut into the panel, there whether you are on them or
+   not. Exactly one of them is also what the control currently SAYS, and that
+   is not a label at all. It is the value.
+
+   IT WAS THREE DIFFERENT ORANGES. The rotary's chosen name was #FFD9BC, a
+   latched key was `--led`, a drum row something else again — three answers
+   to one question, drifted apart because each family answered it where that
+   family was defined. `--pick` is the answer, named once, and changing the
+   chosen word everywhere in both skins is now one line.
+
+   AND IT DOES NOT CHANGE WITH THE SKIN. The accent is the accent; what a
+   skin changes is what is AROUND it. A lamp under a word on black and the
+   same lamp under the same word on cream is the same lamp. */
+  --pick:        #FF6A00;
   --led-hot:     #FFB273;
   --led-red:     #FF2D2D;
 
@@ -113,6 +130,14 @@
     rgba(255,255,255,.30) 100%);
 
   --font: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+/* THE DISPLAY FACE MOVED UP HERE FROM THE LIGHT SKIN. It arrived as part of
+   the e-paper readout and was declared where that readout lives, which was
+   right while it was only a readout's face. It is the face of a READING now,
+   and a reading happens in both skins, so the name belongs to the system and
+   not to one of its two dresses. The @font-face was always at the head of
+   this file and outside the layer; only the token was in the wrong room.
+   Swap this one value to change the face everywhere. */
+  --font-read: "Silkscreen", var(--font);
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
 
   /* Grain. One texture, reused everywhere — real metal is never flat, and a
@@ -6037,6 +6062,58 @@ body.modal-open{ overflow:hidden; }
   border:1px solid #1e2024;
   background:radial-gradient(70% 60% at 28% 0%, rgba(255,255,255,.055), transparent 60%),
              linear-gradient(180deg,#141518,#0c0d0f); }
+/* ── AND THE FOURTH SURFACE THIS SECTION NEVER NAMED: THE SURROUND ───────
+   A chassis is proud, a well is cut, a stage is a field — and a BEZEL is
+   none of the three. It is a frame: a band of the case standing a little
+   above the panel, holding something that is not the panel. Every grouped
+   thing in this system sits in one — a key bank, a fader bank, a drum, a
+   knob's seat — and it was the one surface doing work in the drawings and
+   absent from the vocabulary.
+
+   WHAT MAKES IT A FRAME AND NOT A PLATE is that its inside is lower than
+   its lip. A plate is lit on top and shadowed underneath; a bezel is lit on
+   its outer lip, turns down into a floor, and throws onto the panel it
+   stands on. Three edges instead of two, which is what tells you something
+   is MEANT to go inside it. */
+.demo-bezel{ width:90px; height:44px; border-radius:8px;
+  background:linear-gradient(180deg,#1c2024,#15181b);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.8),
+             inset 0 0 0 1px rgba(0,0,0,.55),
+             0 1px 0 rgba(255,255,255,.055), 0 5px 12px -5px rgba(0,0,0,.85); }
+/* ── AND THE FOUR SWATCHES DO NOT SAY HOW THEY LIVE ─────────────────────
+   FOUR RECTANGLES IN A ROW ARE FOUR RECTANGLES. The section's claim is not
+   that these are four fills — it is that they are four POSITIONS relative to
+   one surface, and a position cannot be shown by a thing on its own: proud
+   of WHAT, cut into WHAT, a frame around WHAT. Side by side they are a
+   colour chart, which is why they read as the same pale box four times.
+
+   SO THE LAST SPECIMEN IS AN ASSEMBLY. One stage — the field everything is
+   set down on — carrying a chassis standing on it, a well cut into it, and a
+   bezel with a part sitting inside the bezel. The same four, in the only
+   arrangement where each one has something to be proud of, cut into, or
+   wrapped around. The lamp is where it always is, so the top edges light and
+   the bottom edges shade, and the whole order reads off in one look:
+     the part is above the bezel's lip,
+     the bezel's lip is above the stage,
+     the chassis is above the stage,
+     the well is below it. */
+.demo-stack{
+  display:flex; align-items:center; justify-content:center; gap:13px;
+  width:286px; height:56px; padding:0 14px; border-radius:10px;
+  border:1px solid #1e2024;
+  background:radial-gradient(70% 60% at 28% 0%, rgba(255,255,255,.055), transparent 60%),
+             linear-gradient(180deg,#141518,#0c0d0f);
+}
+.demo-stack > *{ width:72px; height:32px; flex:0 0 72px; border-radius:7px; }
+.demo-stack .demo-bezel{ display:flex; align-items:center; justify-content:center; padding:5px; }
+/* the part IN the bezel — a chassis again, which is the point: a bezel is
+   not a material, it is a place to put one */
+.demo-stack .demo-bezel i{
+  display:block; width:100%; height:100%; border-radius:4px;
+  background:linear-gradient(176deg,#2b2e33,#1b1d20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.85),
+             0 1px 2px rgba(0,0,0,.8);
+}
 .demo-etch{ font-family:var(--font); font-size:15px; font-weight:700; letter-spacing:.18em; color:#5d626b;
   text-shadow:0 1px 0 rgba(255,255,255,.12), 0 -1px 0 rgba(0,0,0,.7); }
 
@@ -6619,6 +6696,22 @@ span.nav-link{ cursor:default; }
      card has somewhere to sit without the hairline doing all the work. */
   --paper:          #F1EEE9;
   --card:           #FCFBF9;
+/* ── AND A PANEL IS NOT A CAP ────────────────────────────────────────────
+   THE CASE AND THE KEYS ON IT WERE THE SAME VALUE. `--card` is the raised
+   cap — a key, a chip, a row — and the panel was taking it too, which left
+   the one surface you put things ON at the same brightness as the things
+   you put on it. The wall and the hairline were carrying the whole
+   separation, and on a large slab that reads as white paper with white
+   stickers on it rather than as a cream case with white caps.
+
+   `#F5F3F0` IS THE LAUNCHPAD STYLEGUIDE'S OWN `--bg` and therefore not a
+   new colour in this system — it is the value the Portrait apps already
+   call the surface. Here it is the CASE: a step under the caps, a step over
+   the milled value, and warm enough that the page reads as the room it
+   sits in rather than as more of the same panel. The order top to bottom is
+   now cap, case, milling, cut — four surfaces, four values, which is what
+   the dark theme has always had. */
+  --case-face:      #F5F3F0;
   --card-hover:     #F7F5F2;
   --edge:           #E8E5E1;   /* panel and row hairlines              */
   --edge-soft:      #F0EDEA;
@@ -6648,9 +6741,36 @@ span.nav-link{ cursor:default; }
   --r-sm:  10px;   /* buttons, inputs */
   --r-pill:100px;
 
-  --shadow-card: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.03);
-  --shadow-md:   0 4px 12px rgba(0,0,0,.06);
-  --shadow-lg:   0 8px 24px rgba(0,0,0,.08);
+/* ── NO DROP SHADOWS. A LIGHT PANEL IS BEVELLED, NOT FLOATED ─────────────
+   A DROP SHADOW IS A CLAIM ABOUT HEIGHT and it is a claim a cream panel on a
+   cream page cannot support: there is no room under it, because the page IS
+   the case. On black the shadow works by being DARKER THAN THE ROOM, and the
+   room has ninety levels of headroom for it; on cream the same shadow is a
+   grey smudge leaking out from behind a shape, and a dozen of them on a page
+   is dirt round every rectangle.
+
+   WHAT A LIGHT CASE ACTUALLY HAS IS A BEVEL. The edge of the material turns
+   through the light: the top rolls up toward the lamp and goes bright, the
+   bottom rolls away and goes dark, and that pair — on the INSIDE of the
+   edge, where the material is — is the whole of the depth. It is how a
+   moulded panel reads in a lit room, and it is why the parts in this skin
+   that already looked right are the ones built this way.
+
+   SO THE THREE SHADOW TOKENS STOP CASTING. They keep their names, because
+   everything that reaches for them means "separate this from what it sits
+   on" and that is still what they do — they just do it with the edge the
+   object actually has instead of with a shape on the floor behind it. */
+  --shadow-card:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    inset 0 -1px 0 rgba(0,0,0,.055);
+  --shadow-md:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(0,0,0,.08),
+    inset 0 0 0 1px var(--edge-ctl);
+  --shadow-lg:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -2px 0 rgba(0,0,0,.10),
+    inset 0 0 0 1px var(--edge-ctl);
 
   /* ── the case tokens the rest of the file already reads ────────────────── */
   --room:     var(--paper);
@@ -6729,21 +6849,28 @@ span.nav-link{ cursor:default; }
 }
 [data-skin="light"] .sheet{
   background:#fff;
-  box-shadow:0 1px 3px rgba(0,0,0,.06), 0 10px 28px rgba(0,0,0,.07);
+  box-shadow:var(--shadow-card);
 }
 [data-skin="light"] .sheet.window{ box-shadow:none; }
 
 /* ══════════════════════════════════════════════════════════════════════════
    THE PANEL — white card, warm page, hairline edges
    ══════════════════════════════════════════════════════════════════════════ */
-[data-skin="light"] :is(.box, .module, .rack, .console, .drawer, .modal, .win, .menu, .picker){
-  background:var(--card);
+/* `.rack` CAME OUT OF THIS LIST AND IT IS A GRID. It is the layout that
+   lays the project cards out — `display:grid`, a gap, nothing else — and a
+   panel rule gave it a fill, a radius and a BORDER, whose left and right
+   edges are two full-height vertical lines running the length of the page
+   beside the cards. Nothing in the dark theme shows it, because there a
+   panel's fill is the page's fill and its border is a hairline of black on
+   black. A container that only positions things is not a surface. */
+[data-skin="light"] :is(.box, .module, .console, .drawer, .modal, .win, .menu, .picker){
+  background:var(--case-face);
   border:1px solid var(--edge);
   border-radius:var(--r);
   box-shadow:var(--shadow-card);
   color:var(--ink);
 }
-[data-skin="light"] :is(.box, .module) .box-body{ background:var(--card); }
+[data-skin="light"] :is(.box, .module) .box-body{ background:var(--case-face); }
 
 /* ── A PANEL HEAD IS NOT A BAND ─────────────────────────────────────────
    IT WAS A TINT WITH A COLOURED BAR DOWN ITS LEFT EDGE, and the dark theme
@@ -6798,7 +6925,7 @@ span.nav-link{ cursor:default; }
 /* ── THE BAY IS A GROUP, NOT A PIT ───────────────────────────────────────── */
 [data-skin="light"] .bay{
   background:var(--paper);
-  box-shadow:inset 0 0 0 1px var(--edge);
+  box-shadow:var(--surround);
   border-radius:var(--r-sm);
 }
 
@@ -7188,12 +7315,38 @@ span.nav-link{ cursor:default; }
 
    THE DEFAULTS ARE THE WHITE CAP, which is the common case, so a button that
    says nothing is already right. */
+/* ── THE SURROUND: WHAT A GROUP IS MADE OF ──────────────────────────────
+   A SUB-PANEL WAS A TINT WITH A HAIRLINE, which says "these things belong
+   together" and nothing else. It is flat, it has no top and no bottom, and
+   on a case that is itself a surface it reads as a rectangle drawn ON the
+   panel rather than as a piece OF it.
+
+   WHAT THE ROTARY'S SEAT AND THE DRUM'S BAY HAVE — the two that look right —
+   is a BEZEL: a band of the case standing slightly proud, lit along its top
+   edge where it turns up to meet the lamp, and casting a short shadow onto
+   the panel below it. That is what makes the part inside look HELD rather
+   than placed. It is the same three surfaces as everything else in this
+   skin, applied to a frame instead of to a cap: a lit top, a body, and the
+   shadow the body throws.
+
+   ONE TOKEN, because the alternative is eleven containers each inventing a
+   frame and drifting apart the next time one is tuned.
+
+   AND IT HAS TO BE VISIBLE TO BE A FRAME. The first version used `--edge`
+   and a six-per-cent throw, which is the value this file picked for a RULE
+   BETWEEN TWO ROWS — a line that is meant to be found only when looked for.
+   A frame is not a rule: it is the edge of a piece of material, and if you
+   have to look for it the piece is not there. `--edge-ctl`, the value a
+   control's own edge takes, and a throw deep enough to put air under the
+   frame. Four surfaces now: a lit top, the body, a dark line where the body
+   turns under, and the shadow it casts. */
+  --surround:
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1.5px 0 rgba(0,0,0,.11),
+    inset 0 0 0 1px var(--edge-ctl);
   --epaper:       #D0CBC1;   /* the glass — 1.40:1 under the case, never white */
   --epaper-ink:   #23211C;   /* 9.95:1 on the glass */
   --epaper-bezel: #A9A49A;   /* the frame — 2.14:1 against the case */
-  /* THE DISPLAY FACE. Silkscreen first, system mono behind it — see the
-     @font-face at the head of this file. Swap this one value to change it. */
-  --font-read: "Silkscreen", var(--font);
 }
 [data-skin="light"] :is(.lcd, .readout, .kval, .kr-val-box, .pk-lcd){
   background-color:var(--epaper);
@@ -7324,9 +7477,37 @@ span.nav-link{ cursor:default; }
    as every `.screen` in this skin, and it stays dark for the reason they do:
    a readout is a thing you look INTO. It is the only dark element left in the
    bar, which is what makes it read as lit rather than as leftover. */
+/* ── THE VERSION LAMP IS A SCREEN IN DAYLIGHT ───────────────────────────
+   IT WAS THE ONE BLACK OBJECT LEFT, kept that way on the argument that a
+   readout is emissive and every light-cased machine has dark glass in it.
+   That holds for a DRO behind a bezel in the middle of a panel; it stops
+   holding for a 60px badge sitting in a bar that is now entirely cream,
+   where the same black rectangle is a hole punched through the furniture.
+
+   A RADAR SET ANSWERS THIS: the tube is grey when the room is bright, and
+   what you are looking at is a screen rather than a lamp. So the glass is
+   the e-paper grey this skin already mills its displays from, and the frame
+   is the same bezel.
+
+   AND THE TRACE IS NOT GREEN. Green was the dark theme's, where it is a
+   PHOSPHOR — a lit thing, and the only colour on that bar. There is nothing
+   lit here: a daylight tube shows its trace as dark marks on grey glass, the
+   same way the e-paper modules on every panel in this skin do. Green on
+   grey is also a third ink on a page that has an ink and an accent, and it
+   was carrying no meaning — a version number is not a status. `--epaper-ink`
+   at 9.95:1, which is the value every other reading on the page is set in.
+
+   IT KEEPS THE COVER GLASS, because `.nav-ver` is an `.lcd` and the sheen
+   across it is the whole reason it reads as a screen and not as a label. */
 [data-skin="light"] .nav-ver{
-  background-color:#111; background-image:none;
-  color:#7CFFB0; box-shadow:none;
+  background-color:var(--epaper);
+  background-image:none;
+  border:1px solid var(--epaper-bezel);
+  color:var(--epaper-ink);
+  text-shadow:none;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.18),
+    inset 0 -1px 0 rgba(255,255,255,.9);
 }
 
 /* ── the checkbox: a pale square that fills orange ───────────────────────── */
@@ -7339,6 +7520,26 @@ span.nav-link{ cursor:default; }
 
 /* ── the jewel / pilot keeps being a lamp, it just has no bloom ──────────── */
 [data-skin="light"] :is(.jewel, .pilot){ box-shadow:none; }
+
+/* ── THE RUNNING RAIL IS A LIGHT PIPE AND A LIGHT PIPE NEEDS A DARK CASE ──
+   `.module::before` is a 4px bar down the left edge of a project card: dark
+   and dead when the project is down, green and glowing when it is up. On
+   black that is exactly what it says it is — an edge-lit rod let into the
+   side of the case, found in peripheral vision, which is the whole reason it
+   is a bar and not a word.
+
+   ON CREAM IT IS NEITHER HALF OF THAT. The dead state is a dark stripe on a
+   pale card, which reads as damage rather than as an unlit lamp; the live
+   state is a green smear whose 18px bloom has nothing to bloom into, so it
+   spreads sideways onto the page instead of back into the room. And because
+   every card in the column carries one at the same x, a scrolling list of
+   them draws a continuous vertical line down the left of the page — a rule
+   that connects cards which are not connected.
+
+   THE PILOT ALREADY SAYS IT. A card is up when its jewel is lit, which is
+   the same fact in the one place this skin can still put a lamp: a small
+   saturated dot on a pale ground, which is a lens and not a glow. */
+[data-skin="light"] .module::before{ display:none; }
 
 /* ── the spec table and the detail rows ──────────────────────────────────── */
 [data-skin="light"] .spec th{ color:var(--ink-2); border-bottom-color:var(--edge); }
@@ -7386,17 +7587,24 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.box, .console, .palette, .win, .drawer, .modal, .menu, .picker, .loupe){
   box-shadow:var(--shadow-card);
 }
-[data-skin="light"] :is(.win.dragging, .navdock.seated > .strip){
+/* A WINDOW BEING DRAGGED IS LIFTED AND KEEPS THE DEEPER EDGE. The nav is
+   not: it is a strip of the case, and the ring inside `--shadow-lg` put the
+   outline straight back on it the moment it seated. */
+[data-skin="light"] .win.dragging{
   box-shadow:var(--shadow-lg);
 }
 [data-skin="light"] :is(.plate, .demo-plate, .tab-demo, .gizmo, .pencap, .pencap.on,
                         .win-floor, .box.bulge, .skip){
-  box-shadow:0 1px 2px rgba(0,0,0,.05);
+  box-shadow:var(--shadow-card);
 }
+/* A FILTER IS A DROP SHADOW BY ANOTHER NAME, and the bulge is the one shape
+   that needs one — a clip-path has no box for an inset to run round, so its
+   lobe would have no edge at all. It keeps the thinnest possible one: enough
+   to separate the silhouette from the page and not enough to read as height. */
 [data-skin="light"] .bulge-wrap{
-  filter:drop-shadow(0 6px 10px rgba(0,0,0,.10));
+  filter:drop-shadow(0 0 0.5px rgba(0,0,0,.35));
 }
-[data-skin="light"] .tear{ filter:drop-shadow(0 2px 3px rgba(0,0,0,.10)); }
+[data-skin="light"] .tear{ filter:drop-shadow(0 1px 1px rgba(0,0,0,.18)); }
 
 /* ── THE GROUP CONTAINERS WERE MILLED WELLS AND ARE NOW JUST GROUPS ───────
    `.piano` and `.strokes` are the bars that hold a row of keys — the STEP and
@@ -7408,7 +7616,7 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.piano, .strokes, .keypad, .fbank, .bankwrap){
   background-color:var(--paper);
   background-image:none;
-  box-shadow:inset 0 0 0 1px var(--edge);
+  box-shadow:var(--surround);
   border-radius:var(--r-sm);
 }
 [data-skin="light"] .strokes{ border-left:2px solid var(--lyr, var(--primary)); }
@@ -7448,20 +7656,42 @@ span.nav-link{ cursor:default; }
    What does not survive is the SEAT: a 74px dark disc behind it, which on this
    ground stopped being a shadowed recess and became a white halo with a black
    ring in it. It is the case, so it takes the case's colour. */
-/* AND IN THE END THE SEAT GOES. Painting it `--paper` with a hairline was
-   still painting it: a 74px tinted patch behind a 62px dial, which is a
-   backing plate the object does not have. The dark theme needs the disc
-   because the dial is dark on a dark panel and the recess is the only thing
-   separating them; on cream the dial is already the one dark part for ninety
-   levels in every direction and needs nothing behind it at all. The case is
-   the case, all the way up to the knob. */
+/* ── THE SEAT COMES BACK, BECAUSE IT WAS NEVER THE PROBLEM ──────────────
+   IT WAS TAKEN OUT TO KILL A SQUARE, and the square turned out to be
+   `.tear` — the pointer's own svg box, filled because it was filed as a cut.
+   The seat is a circle and was innocent. What it was guilty of is the thing
+   the first attempt at it did: painting `--paper` flat behind the dial, a
+   tinted patch larger than the part in front of it, which is a backing plate
+   and not a seat.
+
+   A SEAT IS A HOLE THE KNOB SITS IN, so it is the same three things every
+   other hole in this skin gets: the case's milled value for the floor, the
+   near wall's shadow falling across it, and a lit lip where the far wall
+   comes back up to the surface. The dark theme's is a near-black disc for
+   the same reason its slots are near-black — a cut is darker than what it
+   is cut into, and what this one is cut into is cream. */
 [data-skin="light"] .rot-seat{
-  background:none;
-  box-shadow:none;
+  background:var(--paper);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.14),
+    inset 0 0 0 1px var(--edge-ctl),
+    inset 0 -1px 0 rgba(255,255,255,.9);
 }
 [data-skin="light"] .rot-lead{ background:var(--edge); }
 [data-skin="light"] .rot-lab{ color:var(--ink-2); }
-[data-skin="light"] .rot-lab.is-cur{ color:var(--primary-ink); }
+/* ── THE SELECTED POSITION IS A READING, SO IT IS SET LIKE ONE ───────────
+   A ROTARY'S LEGEND IS PRINTING ON THE CASE — six names cut into the panel,
+   all of them there whether you are on them or not. One of them is also the
+   VALUE, and that is a different kind of fact: it is what the control
+   currently says, which everywhere else in this skin is a display. So the
+   current position takes the display face, the accent, and the small lamp
+   the latched legend takes — the same three things, for the same reason, on
+   the one word in the list that is a readout rather than a label.
+
+   THE OTHER FIVE DO NOT MOVE. A legend that changed weight or face as the
+   dial passed it would be the panel re-engraving itself. */
+/* THE SELECTED LABEL IS HANDLED IN ONE PLACE AT THE END OF THIS FILE, with
+   every other kind of selected label. See THE CHOSEN WORD. */
 
 /* ── THE SCREENS STAY BLACK, WHICH IS NOT AN OVERSIGHT ───────────────────
    A readout is emissive. A DRO showing 0.000 in lit green behind glass is the
@@ -7523,20 +7753,29 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] .strip{
   background-color:var(--paper);
   background-image:none;
-  border:1px solid var(--edge);
+  /* NO OUTLINE ON THE BAR. It had a border AND the ring inside `--shadow-md`,
+     which is two lines; and a bar is a strip of the case sized to the keys
+     in it, so both of them run a couple of pixels off the caps and read as a
+     box drawn round a row of buttons rather than as the strip they sit on.
+     The keys are white and the bar is milled — that step is the edge, and it
+     is the one a real panel uses. What is left is the bevel: lit along the
+     top where the strip turns up to the lamp, shaded along the bottom. */
+  border:0;
   color:var(--ink);
-  box-shadow:
-    0 1px 2px rgba(0,0,0,.05),
-    0 8px 20px -8px rgba(0,0,0,.14);
+  box-shadow:var(--shadow-card);
 }
 /* the knurl and the grain were white-on-black: on cream they are white on white */
 [data-skin="light"] .strip::before{ display:none; }
-/* SEATED still deepens, it just does it in the register the page can carry */
+/* SEATED DEEPENS ITS OWN BEVEL AND DRAWS NO OUTLINE. `--shadow-lg` carries
+   a ring, which is right for a popover that has to be told apart from the
+   panel under it and wrong for a bar that is part of the furniture — the
+   outline came back the moment the bar docked, which is the same two lines
+   again, one scroll later. The bottom edge rolls a little further instead:
+   the same material, seen from slightly more above. */
 [data-skin="light"] .navdock.seated > .strip{
   box-shadow:
-    0 1px 2px rgba(0,0,0,.06),
-    0 14px 28px -10px rgba(0,0,0,.18),
-    0 0 0 1px var(--edge);
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -2px 0 rgba(0,0,0,.08);
 }
 /* a key in the bar is the brighter metal, so it reads as sitting ON the bar */
 [data-skin="light"] .strip :is(.key, .pkey, .chip){
@@ -7634,15 +7873,146 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.gap, .slot, .chan, .sep, .port, .empty,
                         .hb-deep, .hb-field, .bay-field, .bay-cap, .bay-deep,
                         .drum-bay, .menu-cut, .modal-well, .ld-well,
-                        .pk-well, .pk-field, .oc, .oc-bar, .oc-field, .oc-tab,
+                        .pk-well, .oc, .oc-bar, .oc-field, .oc-tab,
                         .api, .api-more, .sliders,
-                        .demo-well, .demo-stage, .intcell, .lens, .tear,
+                        .lens,
                         .set-bay, .set-adv, .set-advbody, .con-log, .con-foot,
-                        .drawer-head, .mod-tags, .rig-cells, .togcell, .tab-cell){
+                        .drawer-head, .mod-tags, .rig-cells){
   background-color:var(--paper);
   background-image:none;
   box-shadow:inset 0 0 0 1px var(--edge);
   color:var(--ink);
+}
+
+/* ── AND A COLOUR PICKER'S FIELD IS MADE OF COLOUR ──────────────────────
+   `.pk-field` AND THE HUE TRACK WERE BOTH BEING BLANKED, from two different
+   directions. The field went into the cut list, which sets
+   `background-image:none` — and that image is not decoration, it is the
+   CONTROL: a white-to-hue ramp across and a black ramp down, which is the
+   entire saturation/value plane you are picking out of. The hue track lost
+   its rainbow to the fader rule, which quite reasonably paints a slot the
+   case's milled value, except this slot's contents are the scale.
+
+   BOTH ARE THE SAME MISTAKE IN ONE SENTENCE: a skin may set the MATERIAL
+   and never the DATA. A track that is grey because the skin is light is a
+   track; a hue track that is grey is a broken instrument. So the field comes
+   out of the list and the hue track is restated verbatim — the gradients are
+   the dark theme's own, because a colour is a colour under any lighting.
+
+   WHAT THE SKIN STILL OWNS is the frame round them: the near wall's shadow
+   and the lit lip, in the case's values rather than in black. */
+[data-skin="light"] .pk-field{
+  box-shadow:
+    inset 0 0 0 1px var(--edge-ctl),
+    0 1px 0 rgba(255,255,255,.9);
+}
+[data-skin="light"] .pk-hue .ftrack{
+  background-color:transparent;
+  background-image:linear-gradient(90deg,#f00 0,#ff0 16.66%,#0f0 33.33%,#0ff 50%,#00f 66.66%,#f0f 83.33%,#f00 100%);
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,.25),
+    inset 0 0 0 1px var(--edge-ctl),
+    0 1px 0 rgba(255,255,255,.9);
+}
+/* AND NO TRENCH OVER A RAINBOW. `.ftrack::before` is the empty length of a
+   fader's travel, painted in the case's own face — over a hue scale it is a
+   cream sheet laid across the colours. There is no empty length here: every
+   point on this track is a value. */
+[data-skin="light"] .pk-hue .ftrack::before{ display:none; }
+
+/* `.tear` WAS IN THAT LIST AND IT IS AN SVG. The rotary's pointer is a
+   teardrop drawn as a `<svg class="tear">`, and an svg element is a BOX
+   whatever is painted inside it — so filling it gave the knob a cream
+   square with a hairline round it, sitting behind a round part and larger
+   than the part it was behind. Nothing about it was a hole; it was in the
+   list because it is a shape with a name that sounds like a cut. */
+
+/* ── AND NEITHER IS A SPECIMEN CELL ──────────────────────────────────────
+   `.togcell`, `.intcell` and `.tab-cell` are the blocks this documentation
+   poses a part in. A cut has no padding and no corner because a cut is an
+   absence — so filing them as holes gave each one a tint, a hairline, and
+   then nothing to hold its contents off the line it had just drawn: a flush
+   grey rectangle with square corners and a toggle touching every edge.
+   They are CASES, which is a surface you set things down on, so they take
+   the panel's own face, the panel's radius and the panel's inset. */
+[data-skin="light"] :is(.togcell, .intcell, .tab-cell){
+  background-color:var(--case-face);
+  background-image:none;
+  box-shadow:var(--surround);
+  border-radius:var(--r);
+  padding:14px 16px 16px;
+  color:var(--ink);
+}
+
+/* ── THE GROUPS IN THAT LIST TAKE THE SURROUND INSTEAD OF A HAIRLINE ─────
+   `.drum-bay`, `.set-bay`, `.hb-deep` and the rest are not cuts, they are
+   the frames a part is mounted in — which is why the drum's is the one that
+   already looked right: it is deep enough that the hairline was never doing
+   the work. Said after the list so it only changes the frames and leaves the
+   actual holes alone. */
+[data-skin="light"] :is(.drum-bay, .set-bay, .set-adv, .set-advbody,
+                        .hb-deep, .bay-field, .bay-deep, .rig-cells){
+  box-shadow:var(--surround);
+}
+[data-skin="light"] .gridbody{ box-shadow:var(--surround); border-radius:var(--r-sm); }
+
+/* ── THE FOUR SPECIMENS IN §02 WERE THE SAME PALE RECTANGLE ──────────────
+   THAT SECTION'S WHOLE JOB is to show that a chassis, a well, a stage and a
+   bezel are four different surfaces under one lamp, and the skin had put
+   three of them in lists that paint a tint and a hairline — so the page was
+   demonstrating four names for one rectangle. Each takes the construction
+   it is actually naming, out of the tokens the rest of this skin is built
+   from: the cap's lift, the latch's well, the case's own face, the frame's
+   surround. */
+[data-skin="light"] .demo-plate{
+  background-color:var(--card); background-image:none;
+  border:0; box-shadow:var(--lift);
+}
+[data-skin="light"] .demo-well{
+  background-color:var(--paper); background-image:none;
+  border:0; box-shadow:var(--well);
+}
+[data-skin="light"] .demo-stage{
+  background-color:var(--case-face); background-image:none;
+  border:1px solid var(--edge); box-shadow:none;
+}
+[data-skin="light"] .demo-bezel{
+  background-color:var(--paper); background-image:none;
+  border:0; box-shadow:var(--surround);
+}
+[data-skin="light"] .demo-stack{
+  background-color:var(--case-face); background-image:none;
+  border-color:var(--edge);
+}
+[data-skin="light"] .demo-stack .demo-bezel i{
+  background-color:var(--card); background-image:none;
+  box-shadow:var(--lift);
+}
+
+/* ── AND A PARAM STRIP IS A PLATE, WHICH I TOOK OFF IT BY ACCIDENT ───────
+   `.kwrap` CAME OUT OF THE CUT LIST because a knob stacked over its readout
+   is not a hole — and that was right for the STACKED form, which is what the
+   square behind every knob was. It was wrong for `.kwrap.inline`, which this
+   file calls a param strip and gives a plate of its own precisely so that a
+   column of them reads as a rack of channels rather than as controls
+   floating on the body. Taking the skin's fill away left that plate wearing
+   the dark theme's, which is how two black pods ended up inside a cream
+   cell. The stacked form stays bare; the strip gets the surround. */
+[data-skin="light"] .kwrap.inline{
+  background-color:var(--paper);
+  background-image:none;
+  box-shadow:var(--surround);
+}
+
+/* ── THE LIGHT DIRECTION DISC IS MOUNTED, NOT PRINTED ────────────────────
+   Every other part that sits in this case now has a frame round it and this
+   one had a flat pale circle with a legend on it, which reads as a diagram
+   of a hemisphere rather than as a part you aim. Its well is already in the
+   cut list and keeps its own floor; what was missing is the rim the floor is
+   cut into — the same lit top and short throw every other mounting gets, on
+   a circle instead of a rectangle. */
+[data-skin="light"] .ldisc{
+  box-shadow:var(--surround);
 }
 
 /* `.fslot` AND `.fticks` WERE IN THAT LIST AND NEITHER IS A HOLE. A slot is
@@ -7825,9 +8195,13 @@ span.nav-link{ cursor:default; }
    background", not "is it mentioned". The TOOL palette is the one Julien
    photographed and it is first.
    ══════════════════════════════════════════════════════════════════════════ */
+/* THESE ARE CASES TOO, so they take the case's face and not the cap's. The
+   bulge panel is the one that shows it: it is a whole enclosure with a lobe
+   moulded into its side, and an enclosure the same value as the keys on it
+   is a sheet of paper with the parts drawn on. */
 [data-skin="light"] :is(.palette, .plate, .loupe, .win-floor,
-                        .box.bulge, .demo-plate, .tab-demo){
-  background-color:var(--card);
+                        .box.bulge, .tab-demo){
+  background-color:var(--case-face);
   background-image:none;
   border:1px solid var(--edge);
   color:var(--ink);
@@ -8228,3 +8602,81 @@ span.nav-link{ cursor:default; }
 }
 /* the dark theme's chamfer ring is a lit bezel and there is no lamp here */
 [data-skin="light"] :is(.sw.on, .sw.mixed, .sw:active)::after{ display:none; }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE CHOSEN WORD — one rule, every list, BOTH SKINS
+
+   See `--pick` at the head of this file for what this is and why it is one
+   value. This is where it lands.
+
+   THE FACE IS THE READING'S FACE. A chosen entry is what the control says,
+   and everything else in this system that says a value — every readout,
+   every display — is set in the bitmap face. The label beside a knob was the
+   one reading still wearing the body type, which is why a lit legend read as
+   a coloured LABEL rather than as a reading: hue alone is a weak signal and
+   it was carrying the whole claim on its own. Three channels — face, colour,
+   lamp — and the word stops being one of the six names and becomes the one
+   the machine is on.
+
+   SCREENS ARE NOT IN HERE. A readout is already a display and already set in
+   this face; it has nothing to be chosen out of. This rule is for labels
+   that happen to be selected, which is a different fact.
+
+   OUTSIDE `@layer skew` AND LAST IN THE FILE, deliberately. Four families
+   spell "this one" four ways — `.on`, `.is-down`, `.is-cur` — and each had a
+   later, less specific rule setting only a colour on top of it, which is how
+   a glow ended up with nothing lit inside it. Unlayered beats layered
+   whatever the specificity, so there is nothing left that can disagree.
+   ══════════════════════════════════════════════════════════════════════════ */
+/* ── THE WHOLE LIST IS SET IN IT, NOT JUST THE ONE THAT IS LIT ───────────
+   A LIST IS ONE OBJECT. Setting only the chosen entry in the display face
+   made the face part of the SELECTION, which is the same mistake as putting
+   the state in the colour and nowhere else — except louder, because type is
+   a stronger signal than hue. Six names in two faces is two kinds of thing
+   on one dial, and the eye has to work out which kind it is looking at
+   before it can read which one is on.
+
+   THE LIST IS A LEGEND AND A LEGEND IS CUT IN ONE FACE. What changes when
+   you turn the knob is WHICH NAME IS LIT — colour and a lamp, one channel
+   and its reinforcement, exactly what a real panel does when it backlights
+   one engraving out of six. The letterforms do not change, because the
+   engraving does not change. */
+.rot-lab,
+.gate-leg .gate-nm,
+.drum-item,
+.sel-row{
+  font-family:var(--font-read);
+  letter-spacing:.02em;
+  -webkit-font-smoothing:none;
+  -moz-osx-font-smoothing:grayscale;
+}
+/* THE BITMAP FACE IS SMALL PER EM, so the two places that set a list's type
+   for a proportional one give it the pixels back. NOT THE DRUM: its rows are
+   a cylinder's pitch, not a type size. */
+.rot-lab,
+.gate-leg .gate-nm{ font-size:11px; }
+
+/* ── AND ONE OF THEM IS LIT, WHICH IS COLOUR AND A LAMP AND NOTHING ELSE ─
+   NO FACE IN HERE. The list rule above already set it for every entry, the
+   lit one included, so repeating it here would do nothing for a list — and
+   it would do something for a KEY, which is why it is not here.
+
+   A KEY IS NOT A LIST ENTRY. A name beside a rotary is printing on a panel
+   and the dial points at one of them; a key is a PART, moulded, with its
+   legend on the cap. Its legend is sized to a cap that is sized to the grid
+   it sits in, and swapping the face mid-grid makes one cap's lettering a
+   different size and weight from its eight neighbours — the thing the list
+   rule exists to avoid, done to the other kind of object. A latched key
+   already says it is in by being 3px lower than the rest with its own
+   shadow over it; the accent on its legend is the lamp, and that is all it
+   needs from here. */
+.rot-lab.on,
+.gate-leg.on .gate-nm,
+.drum-item.on,
+.sel-row.is-cur,
+:is(.key, .pkey, .chip, .act).is-down,
+:is(.key, .pkey, .chip).is-down :is(.t, .ct, .klab, .name){
+  color:var(--pick);
+  text-shadow:0 0 7px color-mix(in srgb, var(--pick) 38%, transparent);
+}

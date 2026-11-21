@@ -1025,7 +1025,30 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
     cell('chassis', el('span', 'demo-plate'), 'proud · out of the metal'),
     cell('well',    el('span', 'demo-well'),  'recessed · into it'),
     cell('stage',   el('span', 'demo-stage'), 'neither · a field'),
+    /* A BEZEL IS THE FOURTH, and it is the one this section was missing
+       while every grouped thing on the site already sat in one. A chassis is
+       proud, a well is cut, a stage is a field; a bezel is a FRAME — a band
+       of the case standing above the panel to hold something that is not the
+       panel. What makes it a frame rather than a plate is that its inside is
+       lower than its lip: lit on the outer edge, turning down into a floor,
+       throwing onto the surface it stands on. Three edges instead of two,
+       which is what says something is meant to go in it. */
+    cell('bezel',   el('span', 'demo-bezel'), 'a frame · around a part'),
     cell('engraving', etch,                   'cut, not printed'),
+    /* AND THE ONE THAT ACTUALLY SHOWS IT. Four swatches in a row are four
+       swatches: the claim here is not that these are four fills, it is that
+       they are four POSITIONS relative to one surface, and a position cannot
+       be shown by a thing on its own — proud of what, cut into what, a frame
+       around what. So the last specimen is an assembly: one stage carrying a
+       chassis standing on it, a well cut into it, and a bezel with a part
+       inside the bezel. Same lamp, same four, in the only arrangement where
+       each one has something to be proud of, cut into, or wrapped around. */
+    cell('assembled', (() => {
+      const st = el('span', 'demo-stack');
+      st.append(el('span', 'demo-plate'), el('span', 'demo-well'),
+                el('span', 'demo-bezel', '<i></i>'));
+      return st;
+    })(), 'a stage, holding the other three'),
   );
 })();
 

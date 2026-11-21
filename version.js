@@ -1,6 +1,13 @@
-export const version = '1.109.0';
+export const version = '1.109.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.109.1',
+    date: '2026-11-21',
+    changes: [
+      "A BEZEL DOES NOT DRAW INSIDE A BEZEL. Two frames on one group is a double contour, and it appears the moment a container that has one goes inside another that has one — a `.piano` inside its documentation cell, a `.palette` inside a bay, a fader bank inside a panel body. Each is correct alone; nested they draw a line round the keys and a second line six pixels outside it, and the eye reads the gap between them as a part. The OUTER one wins, because it is the one holding something: what is mounted in it is the inner group entire, caption and tag included, not just the row of keys. The inner keeps its tint, which is all a group needs once something else is drawing the edge. Same sentence as the nav bar's, one level up — the value step IS the edge, and a line on top of it is the edge drawn twice.",
+    ],
+  },
   {
     version: '1.109.0',
     date: '2026-11-21',

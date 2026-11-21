@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.109.0
+     at       Skew v1.109.1
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -7669,6 +7669,33 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] :is(.drum-bay, .set-bay, .set-adv, .set-advbody,
                         .hb-deep, .bay-field, .bay-deep, .rig-cells){
   box-shadow:var(--surround);
+}
+[data-skin="light"] :is(.bay,
+.piano,
+.palette,
+.strokes,
+.keypad,
+.fbank,
+.bankwrap,
+.drum-bay,
+.set-bay,
+.kwrap.inline,
+.box,
+.module,
+.drawer,
+.modal,
+.win)
+                    :is(.bay,
+.piano,
+.palette,
+.strokes,
+.keypad,
+.fbank,
+.bankwrap,
+.drum-bay,
+.set-bay,
+.kwrap.inline) {
+  box-shadow:none;
 }
 
 /* ── THE FOUR SPECIMENS IN §02 WERE THE SAME PALE RECTANGLE ──────────────

@@ -1046,10 +1046,50 @@
 [data-skin="light"] .dro{
   background-color:var(--epaper);
   background-image:none;
+  /* the far wall's white return is gone: on a module this wide it draws as a
+     hard rule under the glass rather than as a wall catching the lamp, and one
+     part has one lamp — which here is the moulded top edge below */
   box-shadow:
-    inset 0 2px 5px rgba(0,0,0,.16),
-    inset 0 0 0 1px var(--epaper-bezel),
-    inset 0 -1px 0 rgba(255,255,255,.75);
+    inset 0 2px 6px rgba(0,0,0,var(--glass-well)),
+    inset 0 0 0 1px var(--epaper-bezel);
+}
+/* AND THE CEILING, WHICH THIS PART NEVER HAD. The window `::after` in skew.css
+   is scoped to `.lcd` and its family, so the DRO — the widest piece of glass in
+   the language — was the one module with no light on it at all beyond its own
+   edge. Same gradient, same value: it is the same sheet of glass. */
+[data-skin="light"] .dro::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  /* READ OFF THE RUST PORT, not guessed: sampling a column down a DRO module
+     in the running gallery against the same module in this sheet, the painted
+     one sits 29/255 brighter than `--epaper` just under the bezel and is back
+     to the base value by the floor. Two per cent dying at 64% was a tenth of
+     that and the module read flat. */
+  /* AND IT DIES IN THE TOP HALF. A sheen that runs to the floor is not a
+     ceiling on the glass, it is the glass being a lighter colour — the thing
+     it describes is light arriving from ABOVE, so it has to stop while there
+     is still face left for it to have stopped over. */
+  background-image:linear-gradient(180deg,
+    rgba(255,255,255,var(--glass-sheen)) 0%,
+    rgba(255,255,255,calc(var(--glass-sheen) * .34)) 34%,
+    transparent 58%);
+}
+/* THE SAME EDGE LIGHT THE LIT WINDOWS GET, at the module's own radius. `.dro`
+   is already `position:relative`, so this rides over the head, the number and
+   the bar and takes no clicks. */
+[data-skin="light"] .dro::after{
+  content:'';
+  position:absolute;
+  inset:2px;
+  pointer-events:none;
+  border-radius:7px;
+  border-top:1px solid rgba(255,255,255,var(--glass-edge));
+  border-right:1px solid rgba(255,255,255,var(--glass-edge));
+  -webkit-mask-image:linear-gradient(180deg,#000 0,#000 16%,rgba(0,0,0,0) 52%);
+  mask-image:linear-gradient(180deg,#000 0,#000 16%,rgba(0,0,0,0) 52%);
 }
 /* AND IT IS THE REGULAR WEIGHT, NOT THE BOLD ONE. `.dro-num` is 700 because
    a proportional face at 25px on a black panel needs the mass to hold against

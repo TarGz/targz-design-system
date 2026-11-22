@@ -3871,7 +3871,7 @@ const BAY_DROP = 10;                               // straight run into the dial
 const SVGNS = 'http://www.w3.org/2000/svg';
 
 function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
-                    onChange } = {}) {
+                    step = 1, onChange } = {}) {
   const wrap = el('div', 'orbay');
   const st = { yaw, pitch, roll };
   let syncing = false;
@@ -3907,7 +3907,7 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
     Object.assign(st, v);
     if (syncing) return;
     syncing = true;
-    for (const k in knobs) knobs[k].set(Math.round(st[k]));
+    for (const k in knobs) knobs[k].set(Math.round(st[k] / step) * step);
     syncing = false;
     onChange && onChange({ ...st });
   };
@@ -3916,8 +3916,8 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
     const a = ORBIT_AX.find(x => x.key === k);
     knobs[k] = knob({
       label: k[0].toUpperCase() + k.slice(1), arc: a.col, endless: true,
-      min: -180, max: 180, step: 1, bipolar: true, size: 44, value: st[k],
-      fmt: v => `${Math.round(v)}°`,
+      min: -180, max: 180, step, bipolar: true, size: 44, value: st[k],
+      fmt: v => step < 1 ? `${(+v).toFixed(1)}°` : `${Math.round(v)}°`,
       onChange: v => {
         st[k] = v;
         if (syncing) return;
@@ -4003,7 +4003,7 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
     const was = syncing;
     syncing = true;
     ball.set(st);
-    for (const k in knobs) knobs[k].set(Math.round(st[k]));
+    for (const k in knobs) knobs[k].set(Math.round(st[k] / step) * step);
     syncing = was;
     return wrap;
   };

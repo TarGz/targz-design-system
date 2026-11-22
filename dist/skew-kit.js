@@ -2,7 +2,7 @@
    skew-kit.js — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew-kit.js
-     at       Skew v1.113.0
+     at       Skew v1.114.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -3884,7 +3884,7 @@ const BAY_DROP = 10;                               // straight run into the dial
 const SVGNS = 'http://www.w3.org/2000/svg';
 
 function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
-                    onChange } = {}) {
+                    step = 1, onChange } = {}) {
   const wrap = el('div', 'orbay');
   const st = { yaw, pitch, roll };
   let syncing = false;
@@ -3920,7 +3920,7 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
     Object.assign(st, v);
     if (syncing) return;
     syncing = true;
-    for (const k in knobs) knobs[k].set(Math.round(st[k]));
+    for (const k in knobs) knobs[k].set(Math.round(st[k] / step) * step);
     syncing = false;
     onChange && onChange({ ...st });
   };
@@ -3929,8 +3929,8 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
     const a = ORBIT_AX.find(x => x.key === k);
     knobs[k] = knob({
       label: k[0].toUpperCase() + k.slice(1), arc: a.col, endless: true,
-      min: -180, max: 180, step: 1, bipolar: true, size: 44, value: st[k],
-      fmt: v => `${Math.round(v)}°`,
+      min: -180, max: 180, step, bipolar: true, size: 44, value: st[k],
+      fmt: v => step < 1 ? `${(+v).toFixed(1)}°` : `${Math.round(v)}°`,
       onChange: v => {
         st[k] = v;
         if (syncing) return;
@@ -4016,7 +4016,7 @@ function orbitBay({ size = 'sm', yaw = 0, pitch = 0, roll = 0, glass = false,
     const was = syncing;
     syncing = true;
     ball.set(st);
-    for (const k in knobs) knobs[k].set(Math.round(st[k]));
+    for (const k in knobs) knobs[k].set(Math.round(st[k] / step) * step);
     syncing = was;
     return wrap;
   };
@@ -6806,6 +6806,6 @@ function keyBank({ label, options, index = 0, cols, onChange }) {
 
 window.SkewKit = {
   el, svg, eng, ICON, ENG, knob, fader, rangeFader, rotary, drum, gizmo, orbit, orbitBay, lightDir, selector, gate, keyBank, key, pkey, swBtn, toggle, chevBtn, assetRow, openPicker, openPlate, menu, plateKey, appDock, MODKEY, progress, modal, typeable, engage, windowise, WIN_ICON, hex2rgb, rgb2hex, rgb2hsv, hsv2rgb, RING_R, RING_C, CAP_W, panelShape, ORBIT_AX, SFX, clicky,
-  VERSION: '1.113.0',
+  VERSION: '1.114.0',
 };
 })();

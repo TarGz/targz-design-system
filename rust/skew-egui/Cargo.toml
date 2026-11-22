@@ -1,0 +1,23 @@
+[package]
+name = "skew-egui"
+version = "1.114.0"
+edition = "2021"
+description = "Skew (targz-design-system) as painted egui parts: tokens, the light-skin key, the vertical fader, panels and wells."
+license = "MIT"
+publish = false
+
+# The crate version TRACKS THE DESIGN SYSTEM'S version.js, not its own count.
+# A part of this crate has no meaning apart from the skin it draws, so a second
+# version number would only ever be a thing to reconcile.
+
+[dependencies]
+egui = "0.29"
+
+[dev-dependencies]
+# The gallery only. A library that pulled in a windowing backend would decide
+# the host app's event loop for it.
+eframe = { version = "0.29", default-features = false, features = ["glow", "default_fonts"] }
+
+[[example]]
+name = "gallery"
+path = "examples/gallery.rs"

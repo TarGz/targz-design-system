@@ -300,7 +300,21 @@ export function manifest(css) {
    that routine needs. */
 const rustName = (n) => n.replace(/^--/, '').replace(/-/g, '_');
 
-export function toRust(man, version) {
+/* The same file is emitted twice: into `dist/`, for an app that vendors a copy,
+   and into `rust/skew-egui/src/tokens.rs`, where the crate reads it as a module.
+   Only this paragraph of the header differs, because only the answer to "where
+   did this come from and may I edit it" differs. */
+export const VENDOR_NOTE = `// VENDOR THIS FILE. An adopting Rust app that does not take the skew-egui
+// crate builds in .github/workflows and CI cannot see a sibling folder, so this
+// is copied in and committed, not linked. If you DO take the crate, you get the
+// same values as \`skew_egui::tokens\` and this file is not yours to copy.`;
+
+export const CRATE_NOTE = `// THIS IS THE skew-egui CRATE'S OWN COPY — \`skew_egui::tokens\`. It is written
+// by the generator, not by hand, and \`node tools/build-dist.mjs --write\` will
+// overwrite it. The identical file is emitted to dist/skew_tokens.rs for apps
+// that vendor values without taking the crate.`;
+
+export function toRust(man, version, vendorNote = VENDOR_NOTE) {
   const skins = man.skins;
   const names = [...new Set([...Object.keys(skins.dark), ...Object.keys(skins.light)])].sort();
   const colors = names.filter(n => (skins.light[n] || skins.dark[n]).type === 'color');
@@ -349,8 +363,7 @@ export function toRust(man, version) {
 //   at       Skew v${version}
 //   rebuild  node tools/build-dist.mjs --write
 //
-// VENDOR THIS FILE. Both adopting Rust apps build in .github/workflows and CI
-// cannot see a sibling folder, so this is copied in and committed, not linked.
+${vendorNote}
 //
 // IT IS A STRUCT AND NOT A WALL OF \`pub const\`, DELIBERATELY. A const is chosen
 // when the binary is built; a skin is chosen when the app starts. Hold a
@@ -399,14 +412,23 @@ ${body('light')}
 ${shadows.map(n => {
   const d = shadowOf('dark', n), l = shadowOf('light', n);
   const fn = rustName(n);
-  return `pub fn ${fn}_dark() -> &'static [ShadowLayer] {
-    &[
+  /* ── A SHADOW IS A `Vec`, NOT A `&'static [..]` ──────────────────────────
+     The first cut of this emitter returned `&'static [ShadowLayer]` from a
+     `&[ ... ]` literal and did not compile: rvalue static promotion gives up as
+     soon as a layer list is empty-or-not per skin and the slice is built in the
+     function body, so rustc reports E0515 — returning a reference to a local
+     temporary. Both adopting apps hit it and TargzPenPlotterCtrl hand-patched
+     its vendored copy to `Vec`, which is the fix, applied here so the generated
+     file compiles as it is shipped. A shadow is read once when a part is
+     painted; an allocation of at most nine layers is not the cost that matters. */
+  return `pub fn ${fn}_dark() -> Vec<ShadowLayer> {
+    vec![
 ${d || ''}
     ]
 }
 
-pub fn ${fn}_light() -> &'static [ShadowLayer] {
-    &[
+pub fn ${fn}_light() -> Vec<ShadowLayer> {
+    vec![
 ${l || d || ''}
     ]
 }`;

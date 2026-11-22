@@ -28,6 +28,9 @@ dist/     skew.css, skew-kit.js, skew-hatch.js, skew-machine.css   what an app c
           skew-tokens.json  every token, both skins, var() and color-mix() resolved
           skew_tokens.rs    the same, as one Palette struct with two values
           skew-tokens.js    the same, with colours as 0-1 floats for a vertex buffer
+rust/     skew-egui/   the same parts PAINTED, for the apps that cannot load CSS
+                       src/tokens.rs  generated, same bytes as dist/skew_tokens.rs
+                       assets/        Silkscreen as TTF — egui cannot read woff2
 docs/     the six pages, plus their own CSS, nav and APP-ALIGNMENT.md
 tools/    build-dist.mjs, tokens.mjs
 ```
@@ -51,6 +54,15 @@ when the binary is built and a skin is chosen when the app starts, so holding a 
 your state is the only form in which an egui app can have a light mode at all.
 
 Vendor the file — both apps build in CI, which cannot see a sibling folder.
+
+**Or take the whole part and not only its colours.** `rust/skew-egui` is this repo's egui
+implementation: the generated tokens *plus* the painted key, fader, panel and well that all
+three apps were each re-drawing by hand. Values stop drifting with a manifest; drawings only
+stop drifting with shared code. `cargo run --example gallery` is the running reference —
+every part in every state, light skin. It is taken as a **`git` dependency pinned by `rev`**,
+because CI cannot see a sibling folder and a `path` dependency is the one thing that cannot
+work; [`rust/skew-egui/README.md`](rust/skew-egui/README.md) has the dependency line, the
+local-override block and the const-by-const port table.
 
 A token that exists in one skin and not the other is an `Option`. The two skins do not name the
 same parts: `--card` and `--case-face` are light-only, `--plate` and `--groove` dark-only, because

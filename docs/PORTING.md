@@ -1,12 +1,19 @@
 # Porting Skew
 
-Two documents in one, both answering questions a token manifest cannot.
+Three documents in one, all answering questions a token manifest cannot.
 
 1. **What the four unportable parts are**, written as anatomy rather than as CSS — because
    `--recess` and `--chamfer` already exist a second time in Rust as painter code, and the
    translation was done by eye.
 2. **Rulings on the orphan values** — every colour an app invented because this system did not
    have one. System or app, one line each.
+3. **How a Rust app takes the parts instead of re-drawing them** — `rust/skew-egui`, and why it
+   is a `git` dependency.
+
+> **Part one is now also code.** The light-skin key, the vertical fader, the panel and the well
+> are implemented in `rust/skew-egui` and `cargo run --example gallery` draws every state of
+> them. The anatomy below is still the thing to read first — it is why those numbers — but a
+> second hand-transcription of it is no longer the way to adopt the skin.
 
 ---
 
@@ -173,3 +180,43 @@ is not a value to paste in. Named here so three apps stop each inventing a fourt
 plotter's millimetres, a canvas's pixels, a terminal's cells — and a design system that fixes it
 has decided what every app is for. **App, deliberately.** The grid's *ink* could be a token; its
 pitch cannot.
+
+---
+
+## Part three — `rust/skew-egui`, the parts as code
+
+A manifest stops the **values** drifting. Only shared code stops the **drawings** drifting, and
+the drawings are most of this language: by the time an app has a cap on a wall with a double
+throw under it, a mesh gradient inset 1.2px inside an anti-aliased fill, and a fader whose rod
+runs *below* its cap, it has re-derived about three hundred lines that have one right answer.
+Three apps did that independently. `rust/skew-egui` is that code, once.
+
+**What is in it:** the generated tokens (`src/tokens.rs`, the same bytes as
+`dist/skew_tokens.rs`), a `Theme` that resolves a `Palette` into the names the parts ask for,
+the key in five states, the fader, `panel_frame`, `well_frame`, `well_shadow`, `section`,
+`label`, Silkscreen as TTF, and the three primitives egui lacks (`vgrad`, `mix`, `hex`).
+
+**What is not in it:** the nine-layer dark `--recess`, the 152° `--chamfer`, the LCD glow and
+`--grain` — §1 to §4 above, still unported, still worth reading before anyone ports them. The
+light skin is the tuned one; `Theme::dark()` resolves the dark palette and draws with it, but
+the dark skin's glow is a drawing and not a value, and a pale glow on a pale ground is a smudge.
+
+### How an app depends on it
+
+**A `git` dependency, pinned by `rev`.** Not a `path` dependency on a sibling folder: both Rust
+apps build in `.github/workflows`, `actions/checkout` fetches one repo, and `../targz-design-system`
+does not exist in CI. This is the same constraint that made `dist/skew_tokens.rs` a vendored
+file, and a public git URL answers it without the copy.
+
+```toml
+[dependencies]
+skew-egui = { git = "https://github.com/TarGz/targz-design-system.git", rev = "<sha>" }
+```
+
+Pinning by revision is the point as much as the transport: a commit here cannot change an app's
+pixels until someone moves that `rev` deliberately, which is what "approved by eye" requires.
+`rust/skew-egui/README.md` carries the local-override `[patch]` block for working on a part and
+its app at once, and a const-by-const table for porting a hand-written `theme.rs`.
+
+**Vendoring is the fallback, not the plan** — for an offline or vendored-registry build only,
+and then with the revision written in a comment. It is the state this crate exists to end.

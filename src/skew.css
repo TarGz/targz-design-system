@@ -7570,6 +7570,12 @@ span.nav-link{ cursor:default; }
     inset 0 1px 0 rgba(255,255,255,1),
     inset 0 -1.5px 0 rgba(0,0,0,.11),
     inset 0 0 0 1px var(--edge-ctl);
+  /* THE GLASS'S TWO LIGHTS, AS VALUES, so a page can turn them while it is
+     running — which is how both of these were settled. The edge is the line
+     along the moulded top; the sheen is the ceiling on the face. */
+  --glass-edge:  1;     /* the line along the moulded top, and it is full white */
+  --glass-sheen: .35;   /* the ceiling on the face, dying in the top half */
+  --glass-well:  .6;    /* the near wall's shadow across the top of the glass */
   --epaper:       #D0CBC1;   /* the glass — 1.40:1 under the case, never white */
   --epaper-ink:   #23211C;   /* 9.95:1 on the glass */
   --epaper-bezel: #A9A49A;   /* the frame — 2.14:1 against the case */
@@ -7580,9 +7586,9 @@ span.nav-link{ cursor:default; }
   border:1px solid var(--epaper-bezel);
   color:var(--epaper-ink);
   border-radius:3px;
-  box-shadow:
-    inset 0 1px 2px rgba(0,0,0,.16),
-    0 1px 0 rgba(255,255,255,.9);
+  /* no white line under the module: the case coming back up is a hard rule
+     under the glass at this size, and the light on this part is its edge */
+  box-shadow:inset 0 1px 3px rgba(0,0,0,var(--glass-well));
   text-shadow:none;
   font-variant-numeric:tabular-nums;
   /* A BITMAP FACE MUST NOT BE SMOOTHED. Antialiasing a 5px grid is the one
@@ -7629,39 +7635,53 @@ span.nav-link{ cursor:default; }
    widths, no repeat, placed a third of the way in — and the ceiling sheen
    is the one layer that does span, because the ceiling really is as wide as
    the glass. */
+/* ── AND THE WINDOW IS AN EDGE, NOT A PANE ──────────────────────────────
+   THE TWO DIAGONAL PANES CAME OUT, and the egui port is what settled it.
+   Painted at the same fractions on a 290px DRO module they draw a broad
+   white wash across the glass with the coordinate reading through it —
+   what you see is the gradient, not a window — and every attempt to tune
+   it ran into the same wall: a pane only reads as a reflection on a chip
+   small enough that the pane is wider than the part.
+
+   WHAT A MOULDED EDGE DOES is catch the room along the ONE line where the
+   surface turns: bright where it faces the lamp, gone within a couple of
+   pixels, and carried round the corner because that is where the turn is
+   sharpest. A top border and a right border on an inset box with the
+   part's own radius IS that line, masked so the right-hand side dies a
+   third of the way down rather than running to the floor.
+
+   AND THE CEILING COMES DOWN TO A FIFTEENTH of what it was. The old value
+   was judged on a 52px readout; the same sheen over a module is a lit
+   panel, which is the one thing this skin says a panel is not. */
 [data-skin="light"] :is(.lcd, .readout, .kval, .kr-val-box, .pk-lcd)::after{
   content:'';
   position:absolute;
   inset:0;
   pointer-events:none;
-  background-repeat:no-repeat;
-  background-size:150px 100%, 110px 100%, 100% 100%;
-  background-position:18% 0, 64% 0, 0 0;
-  background-image:
-    /* the bright pane — the window's near edge. The angle is nearly flat
-       because the glass is WIDE and SHORT: a band at 120 degrees across a
-       50x18 cell is read as a vertical slash, which is a gradient. It has
-       to lie down before it reads as something lying ON the surface. */
-    linear-gradient(148deg,
-      transparent   0    26%,
-      rgba(255,255,255,.10) 33%,
-      rgba(255,255,255,.26) 39%,
-      rgba(255,255,255,.07) 45%,
-      transparent   52%  100%),
-    /* the far pane, thinner and dimmer, at its own angle — a window has a
-       mullion, and two edges that do not agree is what says the reflection
-       is of something rather than being a shine applied to something */
-    linear-gradient(163deg,
-      transparent   0    60%,
-      rgba(255,255,255,.06) 65%,
-      rgba(255,255,255,.13) 69%,
-      rgba(255,255,255,.04) 73%,
-      transparent   78%  100%),
-    /* the ceiling on the top of the glass */
-    linear-gradient(180deg,
-      rgba(255,255,255,.15) 0%,
-      rgba(255,255,255,.04) 40%,
-      transparent 64%);
+  /* READ OFF THE RUST PORT, not guessed: sampling a column down a DRO module
+     in the running gallery against the same module in this sheet, the painted
+     one sits 29/255 brighter than `--epaper` just under the bezel and is back
+     to the base value by the floor. Two per cent dying at 64% was a tenth of
+     that and the module read flat. */
+  /* AND IT DIES IN THE TOP HALF. A sheen that runs to the floor is not a
+     ceiling on the glass, it is the glass being a lighter colour — the thing
+     it describes is light arriving from ABOVE, so it has to stop while there
+     is still face left for it to have stopped over. */
+  background-image:linear-gradient(180deg,
+    rgba(255,255,255,var(--glass-sheen)) 0%,
+    rgba(255,255,255,calc(var(--glass-sheen) * .34)) 34%,
+    transparent 58%);
+}
+[data-skin="light"] :is(.lcd, .readout, .kval, .kr-val-box, .pk-lcd)::before{
+  content:'';
+  position:absolute;
+  inset:1px;
+  pointer-events:none;
+  border-radius:inherit;
+  border-top:1px solid rgba(255,255,255,var(--glass-edge));
+  border-right:1px solid rgba(255,255,255,var(--glass-edge));
+  -webkit-mask-image:linear-gradient(180deg,#000 0,#000 16%,rgba(0,0,0,0) 52%);
+  mask-image:linear-gradient(180deg,#000 0,#000 16%,rgba(0,0,0,0) 52%);
 }
 
 /* ── A DISPLAY DOES NOT GROW WHEN ITS VALUE DOES ─────────────────────────

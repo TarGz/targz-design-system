@@ -54,7 +54,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import fs from 'node:fs';
-import { manifest, toRust, toJs } from './tokens.mjs';
+import { manifest, toRust, toJs, CRATE_NOTE } from './tokens.mjs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -259,6 +259,12 @@ const targets = [
   ['dist/skew-machine.css', buildMachine(v)],
   ['dist/skew-tokens.json', JSON.stringify({ version: v, ...man }, null, 2) + '\n'],
   ['dist/skew_tokens.rs', toRust(man, v)],
+  /* ── AND THE CRATE'S COPY, WHICH IS THE SAME VALUES AS A MODULE ────────────
+     `rust/skew-egui` is this repo's egui implementation: the tokens plus the
+     painted parts the apps were each re-drawing by hand. Its token module is
+     generated here rather than vendored into it, so the crate cannot drift from
+     src/skew.css either — the one thing a crate is for. */
+  ['rust/skew-egui/src/tokens.rs', toRust(man, v, CRATE_NOTE)],
   ['dist/skew-tokens.js', toJs(man, v)],
 ];
 
@@ -275,6 +281,17 @@ const FONTS = fs.existsSync(path.join(ROOT, 'src/fonts'))
   ? fs.readdirSync(path.join(ROOT, 'src/fonts')).sort()
   : [];
 
+/* ── AND AGAIN AS TTF, BECAUSE egui CANNOT READ woff2 ────────────────────────
+   `egui::FontData` takes a raw TTF/OTF; it has no woff2 decompressor and never
+   will, so the web build of Silkscreen is unusable in a Rust app. The TTFs are
+   converted once and live beside the woff2 in src/fonts/. The crate embeds them
+   with `include_bytes!`, which means they must sit INSIDE the crate directory:
+   a `git` dependency checks out the whole repo and would resolve `../../src`,
+   but a vendored copy of the crate folder alone would not. So they are copied
+   here, like dist/, and committed. */
+const CRATE = 'rust/skew-egui';
+const CRATE_ASSETS = FONTS.filter(f => f.endsWith('.ttf') || f === 'OFL.txt');
+
 if (WRITE) {
   fs.mkdirSync(DIST, { recursive: true });
   for (const [rel, text] of targets) fs.writeFileSync(path.join(ROOT, rel), text);
@@ -284,9 +301,16 @@ if (WRITE) {
       fs.copyFileSync(path.join(ROOT, 'src/fonts', f), path.join(DIST, 'fonts', f));
     }
   }
+  if (CRATE_ASSETS.length) {
+    fs.mkdirSync(path.join(ROOT, CRATE, 'assets'), { recursive: true });
+    for (const f of CRATE_ASSETS) {
+      fs.copyFileSync(path.join(ROOT, 'src/fonts', f), path.join(ROOT, CRATE, 'assets', f));
+    }
+  }
   const nd = Object.keys(man.skins.dark).length, nl = Object.keys(man.skins.light).length;
   console.log(`wrote dist/ at v${v} · ${dropped} doc-site rules dropped from the CSS`
     + (FONTS.length ? ` · ${FONTS.length} font file(s) copied` : '')
+    + (CRATE_ASSETS.length ? ` · ${CRATE_ASSETS.length} into ${CRATE}/assets` : '')
     + ` · ${nd} dark / ${nl} light tokens resolved`);
 } else {
   let drift = 0;
@@ -296,8 +320,11 @@ if (WRITE) {
     if (have === text) console.log(`  ok      ${rel}`);
     else { drift++; console.log(`  DRIFT   ${rel}${have === null ? ' (missing)' : ''}`); }
   }
-  for (const f of FONTS) {
-    const rel = `dist/fonts/${f}`;
+  const bin = [
+    ...FONTS.map(f => [`dist/fonts/${f}`, f]),
+    ...CRATE_ASSETS.map(f => [`${CRATE}/assets/${f}`, f]),
+  ];
+  for (const [rel, f] of bin) {
     const to = path.join(ROOT, rel);
     const from = fs.readFileSync(path.join(ROOT, 'src/fonts', f));
     const have = fs.existsSync(to) ? fs.readFileSync(to) : null;

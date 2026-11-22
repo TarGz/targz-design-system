@@ -1154,6 +1154,43 @@ const SEGS = 40;
   });
 })();
 
+/* ── THE GLASS TUNER ────────────────────────────────────────────────────────
+   NOT PART OF THE LANGUAGE — a bench instrument, pinned bottom right, that
+   turns `--glass-edge` and `--glass-sheen` on <html> while the page runs. Both
+   values were settled by eye against the egui port, and an alpha of two per
+   cent against one of eleven is not a thing anyone can judge from a stylesheet.
+   It writes nothing back: read the numbers off it and put them in src/skew.css.
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  const R = document.documentElement;
+  const cs = getComputedStyle(R);
+  const box = el('div', null);
+  box.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:9000;'
+    + 'display:flex;flex-direction:column;gap:7px;padding:10px 12px;border-radius:10px;'
+    + 'background:var(--card,#FCFBF9);box-shadow:var(--shadow-lg,0 8px 24px rgba(0,0,0,.18)),'
+    + '0 0 0 1px var(--edge-ctl,#D3CDC4);font-family:var(--font);font-size:9px;'
+    + 'letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2,#6B6B6B)';
+  box.append(el('div', null, 'GLASS'));
+  [['--glass-edge', 0, 1, 0.01], ['--glass-sheen', 0, 1, 0.01],
+   ['--glass-well', 0, 0.6, 0.01]].forEach(([v, lo, hi, st]) => {
+    const row = el('div', null);
+    row.style.cssText = 'display:flex;align-items:center;gap:8px';
+    const inp = document.createElement('input');
+    inp.type = 'range'; inp.min = lo; inp.max = hi; inp.step = st;
+    inp.value = parseFloat(cs.getPropertyValue(v)) || 0;
+    inp.style.width = '116px';
+    const out = el('span', null, inp.value);
+    out.style.cssText = 'min-width:38px;text-align:right;color:var(--ink,#1A1A1A)';
+    inp.addEventListener('input', () => {
+      R.style.setProperty(v, inp.value);
+      out.textContent = inp.value;
+    });
+    row.append(el('span', null, v.replace('--glass-', '')), inp, out);
+    box.append(row);
+  });
+  document.body.append(box);
+})();
+
 /* ── first paint ────────────────────────────────────────────────────────── */
 M.feed = 0;
 changed();

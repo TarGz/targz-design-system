@@ -1,6 +1,16 @@
-export const version = '1.114.0';
+export const version = '1.115.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.115.0',
+    date: '2026-11-22',
+    changes: [
+      "THE NAV BAR IS IN THE CRATE, AND SO IS THE SHAPE OF THE WORK. `nav_bar` is `.strip.nav-strip` ported from docs/skew-nav.js: the wordmark, ONE channel, the documents as an interlocked bar, the sections key, the skin key and the version window. One channel, because everything right of it is the workspace and two would claim three groups where there are two; no HOME key, because the wordmark is the way home and a key beside it is the same door twice, costing a slot in a bar that has to fit on a phone. The skin key says where the page STANDS rather than where it is going — it reads LIGHT and is lit when the light skin is on, like every other latched key in this system.",
+      "AND THE GALLERY IS BUILT THE WAY THE SITE IS BUILT, WHICH IS THE PART THAT MATTERS. One centred column and the same numbered sections each document carries, in order, under the same names, read off their own <h2>s — and a section the crate cannot draw yet is STILL A SECTION, with a placeholder naming what is missing. A reference that shows only what exists cannot tell you what does not; PARITY.md is a table and a table is not a thing you can look at. The bar switches pages, so MACHINE's nine sections and SYSTEM's fifteen are both one click away and both honest about their holes.",
+      "PARITY.md IS THE LIST: every part in skew.css, skew-machine.css and skew-kit.js against what the crate draws — fourteen done, the rest open and named, with the four unportable parts from PORTING.md marked as still prose. It ends with the shape a new part takes, which is the half a checklist usually leaves out: a paint function that takes a state and allocates nothing, an interactive one that derives that state from the Response, every number carrying the rule it came from, a gallery entry in every state, and a row in the table.",
+      "AND THE GLASS TUNER CAME BACK OUT OF BOTH. It was three sliders pinned to the machine page and two faders in the gallery, and it did its job: the edge, the sheen and the well are settled values now, written into the token block. A bench instrument that stays after the measurement is an instrument that ships.",
+    ],
+  },
   {
     version: '1.114.0',
     date: '2026-11-22',

@@ -46,6 +46,7 @@ mod fader;
 mod frame;
 mod key;
 mod machine;
+mod nav;
 mod paint;
 mod theme;
 
@@ -55,6 +56,7 @@ pub use key::{btn, colored_btn, key, paint_key, paint_pkey_down, pkey_bar, KeySt
 pub use machine::{
     bezel_edges, bezel_frame, cut, dro, jog_pad, lcd, paint_lcd, panel, JogPress,
 };
+pub use nav::{nav_bar, Nav, NavHit, NAV_GAP, NAV_HEIGHT};
 pub use paint::{hex, mix, rgb, vgrad};
 pub use theme::{mono, read_font, Skin, Theme};
 pub use tokens::{Palette, ShadowLayer};

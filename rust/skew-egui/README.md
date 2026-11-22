@@ -32,12 +32,17 @@ painter code, it was written three times by hand, and it is what lives here.
 | `dro` `jog_pad` | A coordinate under glass with its travel scale; the direction pad. |
 | `panel_frame` `well_frame` `well_shadow` | The chassis and the recess. |
 | `section` `label` `read_font` `mono` | Etched type, and Silkscreen as `--font-read`. |
-| `vgrad` `mix` `hex` `rgb` | The primitives, since egui has no gradient. |
+| `nav_bar` | `.strip.nav-strip` — wordmark, page keys, sections, skin, version. |
+| `vgrad` `mix` `hex` `rgb` `glass` | The primitives, since egui has no gradient or inset shadow. |
 
 Silkscreen ships here as **TTF** (`assets/`, OFL alongside): egui's `FontData` takes raw
 TTF/OTF and has no woff2 decompressor, so the web build of the font is unusable in a
 Rust app. The TTFs are copied in from `src/fonts/` by the same build step that writes
 `dist/` — they are generated-and-committed, like everything in `dist/`.
+
+**[`PARITY.md`](PARITY.md) is the list**: every part the stylesheet and
+`skew-kit.js` have, what is drawn here, and what is still open — plus the shape
+a new part takes. Read it before adding one.
 
 ## The light skin is the tuned one
 

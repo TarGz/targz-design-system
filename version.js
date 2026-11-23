@@ -1,6 +1,13 @@
-export const version = '1.119.0';
+export const version = '1.119.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.119.1',
+    date: '2026-11-23',
+    changes: [
+      "A LATCHED KEY IN THE LAUNCHER'S TOOLBAR HOLDS ITS LINE. A key that latches travels — 2px in the base, 3px in the light skin — which is right in a bank, where every cap shares the drop and they read as one surface being worked. In a toolbar only the skin key latches, and it stays down for as long as the page is light, so its travel is not travel: it is a permanent offset on one part in a row whose whole job is to share a top and a bottom edge. The key stopped reading as held and started reading as fitted badly. A held key already says so three ways — the recess under it, the chamfer ring around it, the accent in its glyph — so the fourth channel, the only one that costs alignment, is cancelled inside `.con-top`, pad compensation included. Both declarations are named: the skin writes its own at equal weight and further down the file, so cancelling the base one alone left light dropping the key further than dark ever had.",
+    ],
+  },
   {
     version: '1.119.0',
     date: '2026-11-23',

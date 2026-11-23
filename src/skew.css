@@ -2735,6 +2735,35 @@ html{ -webkit-tap-highlight-color:transparent; }
 .con-top :is(.sel, .slot, .lcd){ height:32px; }
 .con-top .lcd{ margin-left:0; }
 
+/* ── AND A LATCHED KEY IN THAT ROW HOLDS ITS LINE ─────────────────────────
+   A KEY THAT LATCHES TRAVELS 2px, WHICH IS RIGHT EVERYWHERE BUT HERE. In a
+   bank of keys every cap shares the drop as it is pressed and they read as
+   one surface being worked; in a toolbar only ONE of them latches — the skin
+   key, which is down for as long as the page is light — so its 2px is not
+   travel any more, it is a permanent offset on a single part in a row whose
+   whole job is to share a top and a bottom edge. The key does not read as
+   held; it reads as fitted badly.
+
+   THE TRAVEL IS THE FOURTH CHANNEL, AND THE ONLY EXPENSIVE ONE. A held key
+   already says so three ways — the recess under it, the chamfer ring around
+   it and the accent in its glyph — and the note above the travel rule says
+   as much in its own words: with the walls and the chamfer doing the work,
+   the drop no longer has to carry the message. Here it carries nothing and
+   costs the alignment, so here it goes.
+
+   THE PAD'S COMPENSATION GOES WITH IT, or it would be correcting for travel
+   that no longer happens and open a 2px dead band along the top — which is
+   the exact fault the rule it mirrors was written to close. */
+/* AND THE SKIN STATES IT TWICE, SO THIS HAS TO. The light block writes its
+   own latched rule — same parts, 3px instead of 2 — at equal weight and
+   further down the file, so cancelling only the base one left the light skin
+   dropping the key further than the dark skin ever had. The skin's answer is
+   named here by its own attribute, which is the only thing that outranks it. */
+.con-top .key.skirt.is-down,
+[data-skin="light"] .con-top .key.skirt.is-down{ transform:none; }
+.con-top .key.skirt.is-down::before,
+[data-skin="light"] .con-top .key.skirt.is-down::before{ transform:none; }
+
 /* ── THE STRIP ASKS, INSTEAD OF A DIALOG ASKING ───────────────────────────
    A CONFIRMATION IS NOT A DESTINATION. The dialog dimmed the whole rack,
    covered the folder being deleted and the projects about to come loose, and

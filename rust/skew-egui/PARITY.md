@@ -24,7 +24,7 @@ Status: **done** · **partial** — drawn, but a state or a skin is missing ·
 | drum | `drum()` | — | **open** |
 | switch | `swBtn()` | — | **open** |
 | picker | `openPicker()` | — | **open** |
-| select | `.sel` | — | **open** |
+| select | `.sel`, `selector()` | `sel`, `paint_sel`, `paint_sel_list` | **face done** — the plate is `paint_sel_list`, a painter: a live popup is an overlay the host drives |
 
 ## The surfaces
 

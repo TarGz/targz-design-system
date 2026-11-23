@@ -1,6 +1,17 @@
-export const version = '1.119.1';
+export const version = '1.120.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.120.0',
+    date: '2026-11-23',
+    changes: [
+      "EVERY STATE OF THE LAUNCHER IS ON THE PAGE NOW, AND NOT ONLY IN THE CODE. A posed console can be in one state at a time, so half of what § 06 actually is — a pull that failed, an update waiting, a folder being renamed, a rack emptied by a filter — was reachable only by finding the press that produces it, and anyone porting the window to another toolkit had to guess the rest from the source. A second window under the board draws all twenty-four, once each, in six groups, captioned with the name the code calls the state by: `APP.st = 'failed'`, not \"the error state\". The name in the picture and the name in the variable being the same word is the whole point of putting them on a page together. It is `inert`, which is the one attribute that means it — `pointer-events:none` stops the mouse and leaves Tab walking into twenty-four dead controls.",
+      "AND THE EGUI PORT IS THE SAME LAUNCHER AGAIN. It had stayed on the version with folder TABS, a description paragraph on every card, a NODE stamp that could not be wrong and therefore could not be read, and a port printed only for what was already running — four design arguments the web had settled and the Rust had not heard. § 06 of the gallery is now one list with a folder selector, the inline rename with its bin and tick, the armed delete row, the drawer on the card, and the two empty racks; the card carries its folder and tags as separate stamps and its address whether or not anything is answering. Five parts came with it — the selector and its plate, the milled field, the printed stamp, the warning line, the empty rack — plus the red cap, which is spent on one key in the whole app.",
+      "THE LAUNCHER'S DESK IS INSIDE ITS WINDOW, WHICH IS THE OPPOSITE OF EVERY OTHER SECTION. A knob is never loose on a bench — it is mounted in a face — so a stage that rules the ground under one is showing a thing the product cannot contain. The launcher is not a part: it is a whole program whose window holds its own page, and the rack is cards laid out on that page. So the ruling goes in and the ground around it stays plain, with the grid pinned to the window rather than the viewport, because a desk that slid under the cards as you scrolled would be saying the desk belongs to the document.",
+      "A SELECTOR IS A WELL, NOT A CAP, AND THE STYLESHEET SAYS SO TWICE. The light skin carries two rules for `.sel` and only one is ever reached: the bare one paints a `--primary-deep` cap, and the `.selwrap` one paints a milled `--paper` field — and since the kit always builds its face inside a `.selwrap`, every selector in the system is the second. The port had taken the first, which made the quietest control on the strip the loudest thing in the window and left it outshouting LAUNCH, the one key on the page you came to press. The accent is kept for the open state's ring and chevron, which is all it is for here.",
+      "AND A LATCHED KEY HOLDS ITS LINE IN THE PORT TOO. `paint_pkey_down` translates its cap down by the wall, which is right in a bank where the step between faces is the reading and wrong in a bar, where one row of boxes is cut to one height. The skin key is the case: it is down for as long as the light skin is on, so with travel its RESTING state was three pixels below its neighbours. `paint_pkey_held` and `ActStyle::Held` are the same well, rim and lit legend with the three pixels of y taken out — the exception `src/skew.css` already makes by name, twice.",
+    ],
+  },
   {
     version: '1.119.1',
     date: '2026-11-23',

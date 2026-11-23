@@ -30,6 +30,11 @@ pub enum Icon {
     /// `ICON.code` — open in editor.
     Code,
     Close,
+    /// `ICON.pencil` — edit. On the launcher's strip it is the one door to
+    /// everything that happens to a folder's name.
+    Pencil,
+    /// `ICON.check` — the tick on the orange cap that commits an inline edit.
+    Check,
 }
 
 /// A path in the 24-unit box, as open or closed polylines.
@@ -192,6 +197,20 @@ fn build(icon: Icon) -> Vec<(Vec<Pos2>, bool)> {
         Icon::Close => {
             p.m(18.0, 6.0).l(6.0, 18.0);
             p.m(6.0, 6.0).l(18.0, 18.0);
+        }
+        // `M12 20h9` and the nib: a stroke from the tip up to the hinge, the
+        // 2.12-radius corner at the top, then back down to the tail.
+        // `M12 20h9` is the rule under it, and the nib is the SVG's own
+        // `a2.12 2.12 0 0 1 3 3`: a half-turn about (18,5) from 225° round to
+        // 45°, which is the corner where the two long edges of the pencil meet.
+        Icon::Pencil => {
+            p.m(12.0, 20.0).l(21.0, 20.0);
+            p.m(16.5, 3.5).arc(18.0, 5.0, 2.12, 225.0, 405.0)
+                .l(7.0, 19.0).l(3.0, 20.0).l(4.0, 16.0);
+            p.end(true);
+        }
+        Icon::Check => {
+            p.m(20.0, 6.0).l(9.0, 17.0).l(4.0, 12.0);
         }
     }
     p.end(false);

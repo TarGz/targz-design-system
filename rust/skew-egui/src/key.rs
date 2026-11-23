@@ -283,11 +283,34 @@ pub fn key(
 /// an action key; a key in a BAR latches by going down, because what it reports
 /// is a position among its neighbours.
 pub fn paint_pkey_down(p: &egui::Painter, th: &Theme, rect: Rect, text: &str, text_size: f32) {
+    pkey_down(p, th, rect, text, text_size, true)
+}
+
+/// The same key held down, WITHOUT THE TRAVEL — for a key latched in a BAR.
+///
+/// A LATCHED KEY IN A TOOLBAR HOLDS ITS LINE. Travel is right in a bank, where
+/// the key that is down is one of a run of faces and the step between them is
+/// the whole of the reading. A toolbar is not a bank: it is one row of boxes
+/// cut to one height, and a part that drops three pixels out of that row
+/// reads as broken rather than as engaged. The skin key is the case — it is
+/// down for as long as the light skin is on, which is most of the time, so its
+/// resting state would be "fallen out of the bar".
+///
+/// `src/skew.css` makes the same exception by name, twice: `.con-top
+/// .key.skirt.is-down{ transform:none }` and again under `[data-skin=light]`,
+/// because the skin writes its own travel at equal weight further down the
+/// file. The well, the rim and the lit legend are untouched — what goes is
+/// three pixels of y, and nothing else.
+pub fn paint_pkey_held(p: &egui::Painter, th: &Theme, rect: Rect, text: &str, text_size: f32) {
+    pkey_down(p, th, rect, text, text_size, false)
+}
+
+fn pkey_down(p: &egui::Painter, th: &Theme, rect: Rect, text: &str, text_size: f32, travel: bool) {
     let wall_h = (rect.height() * 0.09).clamp(2.0, 3.0);
     let rv = (rect.height() * 0.24).clamp(5.0, 10.0);
     let r = Rounding::same(rv);
     let cap = Rect::from_min_max(rect.min, pos2(rect.right(), rect.bottom() - wall_h))
-        .translate(vec2(0.0, wall_h));
+        .translate(vec2(0.0, if travel { wall_h } else { 0.0 }));
     p.rect_filled(cap, r, th.paper);
     // --well: inset 0 3px 5px /.18, inset 0 1px 2px /.10, inset 0 -1px 0 white .5
     for (d, a) in [(1.5_f32, 46_u8), (3.0, 30), (4.5, 16), (6.0, 8)] {

@@ -59,15 +59,15 @@
        The light hover stays: in that skin a dead field is a hairline, not a
        well, and the hairline has to survive the pointer. -->
   <style>
-    [data-skin="light"] #console2 .port.off:hover{ box-shadow:inset 0 0 0 1px var(--edge); }
+    [data-skin="light"] :is(#console2,#console2s) .port.off:hover{ box-shadow:inset 0 0 0 1px var(--edge); }
     /* A SYSTEM BUG, PATCHED HERE AND NOT FIXED HERE: `.slot input` is the dark
        skin's phosphor (#7CFFB0 and its bloom) and the light block never
        restates it, so what you type in a filter comes out green on cream — on
        § 06 too, and on every page with a slot. The honest fix is one line in
        `src/skew.css` plus a `dist/` rebuild; this scopes the light answer to
        § 07 so the section can be judged. */
-    [data-skin="light"] #console2 .slot input{ color:var(--ink); text-shadow:none; }
-    [data-skin="light"] #console2 .slot input::placeholder{ color:var(--ink-3); }
+    [data-skin="light"] :is(#console2,#console2s) .slot input{ color:var(--ink); text-shadow:none; }
+    [data-skin="light"] :is(#console2,#console2s) .slot input::placeholder{ color:var(--ink-3); }
 
     /* ── THE PALETTE, PREVIEWED ON § 07 ────────────────────────
        THE FOUR CHOSEN COLOURS, and the three steps they make:
@@ -90,7 +90,7 @@
 
        SCOPED PREVIEW. § 02 of `skew-system.html` is where this palette is
        written down; the real change is the token blocks in `src/skew.css`. */
-    [data-skin="light"] #console2{
+    [data-skin="light"] :is(#console2,#console2s){
       --paper:#EAE6DC;
       --card:#FCF9F3;
       --case-face:#F5F2EA;
@@ -112,14 +112,34 @@
          stage around this console draws them, so repeating them here would
          be a second grid at a second phase inside the first. */
     }
-    [data-skin="light"] #console2 .module{ background-color:var(--card); }
+    [data-skin="light"] :is(#console2,#console2s) .module{ background-color:var(--card); }
     /* EACH MARK IS ITS OWN PLATE, the way the NODE stamp was one: a stamped
        plate reads as a separate fact, and two facts sharing one plate read as
        one string. The row never wraps and never grows. */
-    #console2 .mod-stamps{ display:flex; align-items:center; gap:6px; flex:0 0 auto; flex-wrap:nowrap; }
+    :is(#console2,#console2s) .mod-stamps{ display:flex; align-items:center; gap:6px; flex:0 0 auto; flex-wrap:nowrap; }
     /* the lit cap, full chroma, and its wall one step down */
-    [data-skin="light"] #console2 .act.go{ background:#FF6A00; border-color:#C24A00; }
-    [data-skin="light"] #console2 .act.go:hover{ background:#FF7D1F; }
+    [data-skin="light"] :is(#console2,#console2s) .act.go{ background:#FF6A00; border-color:#C24A00; }
+    [data-skin="light"] :is(#console2,#console2s) .act.go:hover{ background:#FF7D1F; }
+
+    /* ── THE STATE BOOK'S FURNITURE, AND IT IS NOT A SKEW PART ────────────
+       A HEADING AND A CAPTION ARE THE PAGE TALKING, not the launcher. Skew
+       has no "specimen label" because no app has one, so these four rules
+       live here with the section they serve and use nothing but the tokens
+       the panel above is already painted with. */
+    #console2s .sb-why{ font-family:var(--font); font-size:10.5px; letter-spacing:.07em;
+      text-transform:uppercase; color:var(--txt-dim); line-height:1.6; margin:0 0 30px; }
+    #console2s .sb-grp{ margin-bottom:36px; }
+    #console2s .sb-grp:last-child{ margin-bottom:0; }
+    #console2s .sb-grp h4{ font-family:var(--font); font-size:11px; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--txt); margin:0 0 16px;
+      padding-bottom:8px; border-bottom:1px solid var(--edge); }
+    #console2s .sb-row{ margin-bottom:20px; }
+    #console2s .sb-row:last-child{ margin-bottom:0; }
+    /* THE CAPTION IS THE CODE'S OWN NAME FOR THE STATE, which is the only
+       reason this gallery is worth having: an agent reading it can put the
+       picture and the variable together without being told. */
+    #console2s .sb-cap{ display:block; font-family:var(--mono,var(--font)); font-size:9.5px;
+      letter-spacing:.09em; text-transform:uppercase; color:var(--txt-dim); margin:0 0 8px; }
   </style>
   <!-- THE CONSOLE STANDS ON A STAGE LIKE EVERY OTHER PANEL ON THIS PAGE, and
        that is the only reason it is here: a stage is the desk, the desk is
@@ -138,6 +158,36 @@
         <span class="appwin-name">Targz Launchpad</span>
       </div>
       <div class="console" id="console2"></div>
+    </div>
+  </div>
+
+  <!-- ── EVERY STATE, SIDE BY SIDE AND DEAD ────────────────────────────────
+       THE BOARD ABOVE IS THE ARGUMENT; THIS IS THE PARTS LIST. A posed
+       console can only ever be in one state at a time, so the half of the
+       launcher that is states — a pull that failed, an update waiting, a
+       folder being renamed, an empty rack — is reachable only by finding the
+       press that produces it, and an agent porting the window to another
+       toolkit has to guess the rest from the source.
+
+       SO EVERY STATE IS DRAWN ONCE, CAPTIONED WITH ITS OWN VARIABLE. The
+       caption is `APP.st = 'failed'` and not "the error state", because the
+       name in the picture and the name in the code being the same word is
+       the whole point of putting them on a page together.
+
+       AND IT IS `inert`, WHICH IS THE ONE ATTRIBUTE THAT MEANS IT. Not
+       `pointer-events:none` — that stops the mouse and leaves Tab walking
+       into twenty-two dead controls. `inert` takes the whole subtree out of
+       the pointer, the keyboard and the accessibility tree at once, so the
+       gallery cannot be mistaken for a second launcher you are allowed to
+       press. Nothing in here is wired to anything. -->
+  <div class="stage">
+    <div class="stage-note">every state · captioned with its own variable · not a control</div>
+    <div class="appwin">
+      <div class="appwin-bar">
+        <span class="appwin-dots"><i></i><i></i><i></i></span>
+        <span class="appwin-name">Targz Launchpad — every state</span>
+      </div>
+      <div class="console" id="console2s" inert></div>
     </div>
   </div>
 
@@ -2948,6 +2998,180 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   drawStrip();
   drawRack();
   root.append(strip, rack);
+
+  /* ══════════════════════════════════════════════════════════════════════
+     THE STATE BOOK — every state the code above has, drawn once
+
+     IT BUILDS ITS OWN PARTS AND IT NEVER CALLS THE BOARD'S DRAWERS. Every
+     control on the live strip exists exactly once: `drawStrip` appends the
+     same `slot`, `running`, `rescan`, `chan`, `skinKey`, `upd` and `ver`
+     every time it runs, and `paintVer` writes into that one readout. Putting
+     any of them in a specimen does not copy it — it MOVES it out of the
+     launcher. Same for `buildNameEditor` and `buildDeleteBar`, which read
+     and write the live `editF` and `delArm` and would commit a rename into
+     the real `FOLDERS` on their way out.
+
+     `buildModule` IS THE ONE EXCEPTION, and only with objects made here. It
+     caches its pull bar on `p._line`, so a spread copy of a real project
+     would hand the specimen the board's own bar.
+     ══════════════════════════════════════════════════════════════════════ */
+  (function stateBook() {
+    const book = document.getElementById('console2s');
+    if (!book) return;
+
+    /* ── the page's own furniture: a section, a caption, a row ───────────── */
+    const sect = title => {
+      const g = el('div','sb-grp');
+      g.append(el('h4','', title));
+      book.append(g);
+      return g;
+    };
+    const spec = (g, cap, node) => {
+      const r = el('div','sb-row');
+      r.append(el('span','sb-cap', cap), node);
+      g.append(r);
+    };
+    /* THE SPECIMEN ROW CARRIES `con-top`, and it has to: the one-height rule
+       and the no-travel rule for a latched key are both scoped to that class,
+       so a row built without it shows four heights and a sunken sun key —
+       which is the exact bug this section spent a day fixing. */
+    const con = (...kids) => {
+      const r = el('div','con-top');
+      r.style.cssText = 'display:flex;align-items:center;flex-wrap:nowrap;gap:8px';
+      r.append(...kids);
+      return r;
+    };
+    const field = (val, ph) => {
+      const f = el('div','slot');
+      f.style.flex = '0 0 186px'; f.style.width = '186px'; f.style.maxWidth = '186px';
+      const i = el('input');
+      i.type = 'text'; i.value = val; i.placeholder = ph;
+      i.setAttribute('aria-label', ph);
+      f.append(i);
+      return f;
+    };
+    const sel = value => K.selector({ options:opts(), width:186,
+      index: Math.max(0, opts().indexOf(value)) });
+    const lcd = (txt, cls) => {
+      const b = el('button','lcd verkey' + (cls ? ' ' + cls : ''));
+      b.type = 'button'; b.textContent = txt;
+      return b;
+    };
+    const tog = on => {
+      const t = K.toggle({ label:'RUNNING', lamp:'#FF6A00', value:on,
+        title:'Show only what is up' });
+      t.style.width = 'auto'; t.style.flex = '0 0 auto'; t.style.marginLeft = '-6px';
+      const w = el('div');
+      w.style.cssText = 'display:flex;align-items:center';
+      w.append(t);
+      return w;
+    };
+
+    book.append(Object.assign(el('p','sb-why'),
+      { textContent: 'The board above can only be in one state at a time. '
+        + 'Every other state the code has is below, once each, with the name '
+        + 'the code calls it by. Nothing here is wired to anything.' }));
+
+    /* ── A · THE FOLDER ROW ─────────────────────────────────────────────── */
+    const A = sect('A · the folder row — which projects');
+    spec(A, "folder = ALL FOLDERS · no commands, because there is no folder to command",
+      con(sel(ALL)));
+    spec(A, "folder = NO FOLDER · still no commands: it is a filter, not a folder",
+      con(sel(NONE)));
+    spec(A, "folder = 'Portrait' · named, so the one door appears",
+      con(sel('Portrait'), key(ICON.pencil, { cls:'act aux ico', title:'Edit this folder' })));
+    spec(A, "editF.mode = 'rename' · the selector IS the field · bin, name, tick",
+      con(key(ICON.trash, { cls:'act aux ico', title:'Delete this folder' }),
+          field('Portrait', 'FOLDER NAME'),
+          key(ICON.check, { cls:'act go ico', title:'Save this name' })));
+    spec(A, "editF.mode = 'new' · no bin: there is nothing yet to delete",
+      con(field('', 'NEW FOLDER'),
+          key(ICON.check, { cls:'act go ico', title:'Save this name' })));
+
+    const delBar = (name, n) => {
+      const say = el('span','con-say');
+      say.append(el('span','', 'Delete '), el('b','', name),
+        el('span','', n
+          ? ` — ${n} project${n === 1 ? '' : 's'} go back to no folder. Nothing on disk is touched.`
+          : ' — it is empty. Nothing on disk is touched.'));
+      const keys = el('span');
+      keys.style.cssText = 'display:flex;align-items:center;gap:8px;margin-left:18px;flex:0 0 auto';
+      keys.append(key('<span>CANCEL</span>', { cls:'act aux' }),
+                  key(`${ICON.trash}<span>DELETE</span>`, { cls:'act halt' }));
+      return con(say, keys);
+    };
+    spec(A, "delArm = 'Portrait' · the whole row, and it counts what comes loose",
+      delBar('Portrait', 4));
+    spec(A, "delArm = 'Razo' · the same row when the folder is empty",
+      delBar('Razo', 0));
+
+    /* ── B · THE SWITCH ─────────────────────────────────────────────────── */
+    const B = sect('B · the running filter — its own line, under the row');
+    spec(B, 'onlyUp = false', tog(false));
+    spec(B, 'onlyUp = true · the lamp is the state', tog(true));
+
+    /* ── C · THE VERSION READOUT ────────────────────────────────────────── */
+    const C = sect('C · the version readout — APP.st');
+    spec(C, "APP.st = 'idle' · it is a readout you can press", lcd('V2.3.0'));
+    spec(C, "APP.st = 'checking' · busy, and dead while it is",
+      Object.assign(lcd('CHECKING', 'busy'), { disabled:true }));
+    spec(C, "APP.st = 'latest' · says so for 2.4s, then back to idle", lcd('UP TO DATE'));
+    spec(C, "APP.st = 'failed' · the only red readout in the app", lcd('CHECK FAILED', 'err'));
+    spec(C, "APP.st = 'available' · the readout is REPLACED by the cap, not joined by it",
+      key(`${ICON.settle}<span>UPDATE 2.4.0</span>`, { cls:'act go upd', title:'Install version 2.4.0' }));
+    spec(C, "APP.st = 'updating' · the percent is in the readout",
+      Object.assign(lcd('UPDATING 47%', 'busy'), { disabled:true }));
+    spec(C, "APP.st = 'done' · the new number, with a tick", lcd('V2.4.0 ✓'));
+
+    /* ── D · GIT PULL ───────────────────────────────────────────────────── */
+    const D = sect('D · git pull --ff-only — p.pull, the one tool that takes time');
+    const bar = st => { const p = { name:'spec', pull:st }; paintPull(p); return p._line; };
+    spec(D, "pull.st = 'run' · pct 0 — fetching origin…", bar({ st:'run', pct:0 }));
+    spec(D, "pull.st = 'run' · pct 45 — the only step that shows a number",
+      bar({ st:'run', pct:45 }));
+    spec(D, "pull.st = 'run' · pct 85 — fast-forwarding…", bar({ st:'run', pct:85 }));
+    spec(D, "pull.st = 'ok' · it says what changed, then hides itself after 4s",
+      bar({ st:'ok', msg:'3 files changed · 41 insertions(+), 9 deletions(−)' }));
+    spec(D, "pull.st = 'ok' · nothing to pull", bar({ st:'ok', msg:'Already up to date.' }));
+    spec(D, "pull.st = 'err' · it STAYS, and it carries the three ways out",
+      bar({ st:'err', msg:'fatal: Not possible to fast-forward, aborting.' }));
+    spec(D, "pull.st = 'err' · git's own words, never ours",
+      bar({ st:'err', msg:'error: your local changes to settings.json would be overwritten' }));
+
+    /* ── E · THE CARD ───────────────────────────────────────────────────── */
+    const E = sect('E · one project — p.up, p.port, and the drawer');
+    const rackOf = (...mods) => { const r = el('div','rack'); r.append(...mods); return r; };
+    const proj = o => Object.assign({ kind:'NODE', tags:[], folder:'', port:0, up:false }, o);
+    spec(E, 'p.up = true · split STOP + restart · the port is a door',
+      rackOf(buildModule(proj({ name:'Portrait-Typo', folder:'Portrait', port:2857, up:true, tags:['dev'] }))));
+    spec(E, 'p.up = false · LAUNCH · the port is the door NUMBER',
+      rackOf(buildModule(proj({ name:'Portrait-DNA', folder:'Portrait', port:2853, tags:['dev'] }))));
+    spec(E, 'p.port = 0 · PORT ASSIGNED ON LAUNCH · and p.folder = "" prints NO FOLDER',
+      rackOf(buildModule(proj({ name:'_divers/plotter-bench' }))));
+    /* THE DRAWER IS THE ONE STATE THAT NEEDS THE BOARD'S OWN VARIABLE, and
+       it is set for one synchronous call and put straight back — `editing`
+       is read inside `buildModule` and nowhere else. */
+    const was = editing;
+    editing = 'targz.fr';
+    const drawer = buildModule(proj({ name:'targz.fr', folder:'Web', port:4000, tags:['serve'] }));
+    editing = was;
+    spec(E, "editing = 'targz.fr' · the pencil is LATCHED and the row is under the card",
+      rackOf(drawer));
+
+    /* ── F · THE RACK WITH NOTHING IN IT ────────────────────────────────── */
+    const F = sect('F · the empty rack — two reasons, and only one has a way out');
+    const none = (txt, out) => {
+      const r = el('div','rack'), e = el('div','empty');
+      e.append(el('span','', txt));
+      if (out) e.append(key('<span>CLEAR FILTERS</span>', { cls:'act aux' }));
+      r.append(e);
+      return r;
+    };
+    spec(F, 'filtering() = true · the filter did it, so the filter can undo it',
+      none('NOTHING MATCHES', true));
+    spec(F, 'filtering() = false · the disk is empty · no key, because there is nothing to press',
+      none('NO PROJECTS FOUND', false));
+  })();
 })();
 
 

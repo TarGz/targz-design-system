@@ -20,19 +20,40 @@
 use egui::{vec2, Align, Color32, Layout, Rect, Sense, Ui, Vec2};
 use skew_egui::{
     btn, colored_btn, cut, dro, fader, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
-    paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
+    console, page_fill, paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
-    act, module_card, paint_well, paint_icon, surround, version_readout, ActStyle,
+    act, channel, con_say, empty_rack, module_card, pull_line, sel, sel_list, sel_list_size,
+    slot_field, version_readout, version_readout_h, ActStyle,
     ModuleHit, ModuleView, Part, PullHit, PullState, VerState, MODULE_MIN_W,
 };
 
+/// `.pipe` — the layer lamp at the head of a `.tog` row: 4px of lit colour,
+/// the height of the row, with its own small bloom. Unlit it is a milled bar.
+fn pipe(ui: &mut Ui, th: &Theme, on: bool) {
+    let (r, _) = ui.allocate_exact_size(vec2(4.0, 22.0), Sense::hover());
+    if !ui.is_rect_visible(r) {
+        return;
+    }
+    let p = ui.painter();
+    if on {
+        p.rect_filled(r.expand(3.0), egui::Rounding::same(5.0), th.primary.gamma_multiply(0.16));
+        p.rect_filled(r, egui::Rounding::same(2.0), th.primary);
+    } else {
+        p.rect_filled(r, egui::Rounding::same(2.0), th.edge_ctl);
+    }
+}
+
 /// One project on the launcher's rack, and what its pull will do in the demo.
+///
+/// NO DESCRIPTION. The card dropped it when the rack became one list, so the
+/// demo's data drops it too — a field the part cannot draw is a field that
+/// drifts.
 struct Proj {
     name: &'static str,
+    /// Empty means no folder, which is the common case in the real rack.
     folder: &'static str,
     port: u16,
     up: bool,
-    desc: &'static str,
     tags: &'static [&'static str],
     pull: Option<PullState>,
     t0: f64,
@@ -41,27 +62,41 @@ struct Proj {
     hide_at: f64,
 }
 
+/// THE SAME EIGHT PROJECTS THE WEB PAGE HAS, including the two in no folder.
+/// A mock that files everything designs for a library nobody has.
 fn projects() -> Vec<Proj> {
-    let p = |name, port, up, desc, tags, ok, msg| Proj {
-        name, folder: "Portrait", port, up, desc, tags, pull: None, t0: 0.0, ok, msg, hide_at: 0.0,
+    let p = |name, folder, port, up, tags, ok, msg| Proj {
+        name, folder, port, up, tags, pull: None, t0: 0.0, ok, msg, hide_at: 0.0,
     };
     vec![
-        p("Portrait-Typo", 2857, true,
-          "Generative portrait engine — 3D letters dropped into a virtual box under gravity, settled by physics, then flattened into a hatch-filled pen-plotter drawing.",
-          &["dev"], true, "3 files changed · 41 insertions(+), 9 deletions(−)"),
-        p("Portrait-ribbons", 2855, true,
-          "Generative portrait engine — 3D ribbons on a flow field, twisting from face-on to edge-on to draw a portrait in white on black.",
-          &["dev"], true, "Already up to date."),
-        p("Portrait-Cubes", 2851, true,
-          "Generative isometric cube grid with hatching for pen plotter — portrait encoding via grayscale density.",
-          &["dev", "start"], false, "fatal: Not possible to fast-forward, aborting."),
-        p("Portrait-DNA", 2853, false,
-          "Generative portrait engine — DNA-shaped pattern layered over a portrait image, plotter-ready.",
-          &["dev"], false, "error: your local changes to settings.json would be overwritten"),
+        p("Portrait-Typo", "Portrait", 2857, true, &["dev"], true,
+          "3 files changed · 41 insertions(+), 9 deletions(−)"),
+        p("Portrait-ribbons", "Portrait", 2855, true, &["dev"], true, "Already up to date."),
+        p("Portrait-Cubes", "Portrait", 2851, true, &["dev", "start"], false,
+          "fatal: Not possible to fast-forward, aborting."),
+        p("Portrait-DNA", "Portrait", 2853, false, &["dev"], false,
+          "error: your local changes to settings.json would be overwritten"),
+        p("targz-design-system", "Targz", 2860, false, &["dev"], true, "Already up to date."),
+        p("targz.fr", "Web", 4000, false, &["serve"], true, "Already up to date."),
+        p("_divers/agent-tiktok", "", 3310, false, &["dev"], true, "Already up to date."),
+        p("_divers/plotter-bench", "", 0, false, &[], true, "Already up to date."),
     ]
 }
 
-const FOLDERS: [&str; 5] = ["Running", "All", "Portrait", "Razo", "Web"];
+/// The two values that are not folders, and they lead the list. `ALL FOLDERS`
+/// and `NO FOLDER` are filters; everything after them is a folder you can
+/// rename and delete. The commands split on exactly that line.
+const ALL: &str = "ALL FOLDERS";
+const NONE: &str = "NO FOLDER";
+
+/// Which inline edit the strip is in, if any. `None` is the resting row.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Edit {
+    /// Naming a folder that does not exist yet — so there is no bin.
+    New,
+    /// Renaming the one that is picked — bin, field, tick.
+    Rename,
+}
 
 /// The nav registry and every page's sections, from `docs/skew-nav.js` and the
 /// `<h2>` of each document. The bar and this list cannot disagree — the same
@@ -172,8 +207,31 @@ struct Gallery {
     sun: bool,
     chev_open: bool,
     rack: Vec<Proj>,
-    lp_folder: usize,
+    /// The folders, which rename and delete change — so they are owned state
+    /// and not a `const` array of tabs.
+    folders: Vec<String>,
+    /// Which value the folder selector is showing: `ALL FOLDERS`, `NO FOLDER`,
+    /// or one of `folders`.
+    lp_folder: String,
     lp_q: String,
+    lp_only_up: bool,
+    /// The strip's inline edit, and the name being typed into it.
+    lp_edit: Option<Edit>,
+    lp_buf: String,
+    /// `delArm` — the folder the armed row is about to empty.
+    lp_del: Option<String>,
+    /// Which card has its folder drawer open, by name. Kept out here so the
+    /// drawer survives the rack being redrawn under it.
+    lp_card: Option<String>,
+    /// Set for the one frame an inline edit opens on, so the field is focused
+    /// once. Asked for every frame it never loses focus and never commits.
+    lp_focus: bool,
+    /// The selector's list is open. It is drawn in an overlay so it COVERS
+    /// the rack instead of shoving it down the window — which is the whole
+    /// reason a popover is a popover.
+    lp_list: bool,
+    /// Where the selector's face is, so the plate can hang off its bottom edge.
+    lp_rect: Rect,
     ver: VerState,
     ver_t0: f64,
     ver_n: usize,
@@ -204,8 +262,17 @@ impl Gallery {
             sun: true,
             chev_open: false,
             rack: projects(),
-            lp_folder: 1,
+            folders: vec!["Portrait".into(), "Targz".into(), "Web".into()],
+            lp_folder: ALL.into(),
             lp_q: String::new(),
+            lp_only_up: false,
+            lp_edit: None,
+            lp_buf: String::new(),
+            lp_del: None,
+            lp_card: None,
+            lp_focus: false,
+            lp_list: false,
+            lp_rect: Rect::NOTHING,
             ver: VerState::Idle("2.3.0".into()),
             ver_t0: 0.0,
             ver_n: 0,
@@ -696,59 +763,375 @@ impl Gallery {
         }
     }
 
+    /// `[ALL FOLDERS, NO FOLDER, …folders]` — the selector's values. The two
+    /// that lead are filters and the rest are folders, and the folder commands
+    /// split on exactly that line.
+    fn lp_opts(&self) -> Vec<String> {
+        let mut v = vec![ALL.to_string(), NONE.to_string()];
+        v.extend(self.folders.iter().cloned());
+        v
+    }
+
+    /// A NAMED folder is picked — so RENAME and DELETE have an object. They
+    /// are PRESENT OR ABSENT rather than enabled or greyed, because a key that
+    /// is there and dead still has to be read before it can be dismissed.
+    fn lp_named(&self) -> bool {
+        self.lp_folder != ALL && self.lp_folder != NONE
+    }
+
+    /// Which projects survive the three filters, in rack order. Each one is
+    /// applied to the result of the last: folder, then text, then running.
+    fn lp_filtered(&self) -> Vec<usize> {
+        let q = self.lp_q.trim().to_lowercase();
+        (0..self.rack.len())
+            .filter(|&i| {
+                let p = &self.rack[i];
+                let by_folder = self.lp_folder == ALL
+                    || (self.lp_folder == NONE && p.folder.is_empty())
+                    || p.folder == self.lp_folder;
+                let hay = format!("{} {} {}", p.name, p.folder, p.tags.join(" ")).to_lowercase();
+                by_folder && (!self.lp_only_up || p.up) && hay.contains(&q)
+            })
+            .collect()
+    }
+
+    fn lp_filtering(&self) -> bool {
+        !self.lp_q.trim().is_empty() || self.lp_folder != ALL || self.lp_only_up
+    }
+
+    /// Enter commits. An empty name is a cancel, because a folder with no name
+    /// is not a folder — and a rename to the same word is a no-op rather than
+    /// a rewrite of every project that was in it.
+    fn lp_commit(&mut self) {
+        let Some(mode) = self.lp_edit.take() else { return };
+        let v = self.lp_buf.trim().to_string();
+        if v.is_empty() {
+            return;
+        }
+        match mode {
+            Edit::New => {
+                if !self.folders.contains(&v) {
+                    self.folders.push(v.clone());
+                }
+            }
+            Edit::Rename => {
+                let was = self.lp_folder.clone();
+                if v != was {
+                    for f in &mut self.folders {
+                        if *f == was {
+                            *f = v.clone();
+                        }
+                    }
+                    // the folder is a property of the project, so renaming it
+                    // has to walk the rack — there is no directory to move
+                    for p in &mut self.rack {
+                        if p.folder == was {
+                            // leaked on purpose: `Proj.folder` is `&'static str`
+                            // in this demo, and a rename in a demo is cheap
+                            p.folder = Box::leak(v.clone().into_boxed_str());
+                        }
+                    }
+                }
+            }
+        }
+        self.lp_folder = v;
+    }
+
+    /// The bin arms; the row states the consequence and offers CANCEL and
+    /// DELETE. Two presses, which is the whole of the protection — what went
+    /// is the room you had to be sent to, not the stop.
+    fn lp_do_delete(&mut self) {
+        let Some(was) = self.lp_del.take() else { return };
+        self.folders.retain(|f| *f != was);
+        for p in &mut self.rack {
+            if p.folder == was {
+                p.folder = "";
+            }
+        }
+        self.lp_folder = ALL.into();
+    }
+
     fn launchpad(&mut self, ui: &mut Ui) {
         let th = self.th;
         self.lp_tick(ui.ctx());
         let now = ui.input(|i| i.time);
-        let in_folder = |p: &Proj, i: usize| match i { 0 => p.up, 1 => true, _ => p.folder == FOLDERS[i] };
 
-        surround(ui, &th, th.r, 16.0, |ui| {
+        // THE LAUNCHER IS A WINDOW, NOT A PANEL, so it is `console` and not
+        // `surround`: the ruled desk is INSIDE it, the cards are laid out ON
+        // that desk, and the page around it stays plain. Every other section
+        // on this page is the opposite way round, because every other section
+        // is a part MOUNTED IN a face.
+        console(ui, &th, 18.0, |ui| {
             ui.set_width(ui.available_width());
-            // ── the top: Running first, then the folders, and the version at the right end
+
+            // ══ ROW ONE: A LINE OF BOXES ════════════════════════════════════
+            // THE STRIP IS SPLIT BY WHAT A PART IS, not by what it does. This
+            // line is everything cut as a box of ONE HEIGHT — the selector,
+            // the field, the keys — and it reads left to right as a sentence:
+            // which folder, then what matches, then, past the gap, what the
+            // program is. 8px binds, 18px separates, and the one channel marks
+            // the single cut that matters.
+            //
+            // IT IS LAID FROM THE RIGHT, and that is not a preference. The app
+            // group is all fixed widths and the field is the only part that
+            // gives, so taking the program's corner out of the row first
+            // leaves exactly the room the field is allowed to claim — no
+            // measured constant, and nothing to keep in step by hand.
             ui.horizontal(|ui| {
-                ui.spacing_mut().item_spacing.x = 8.0;
-                for (i, f) in FOLDERS.iter().enumerate() {
-                    let n = self.rack.iter().filter(|p| in_folder(p, i)).count();
-                    let style = if i == self.lp_folder { ActStyle::Down } else { ActStyle::Aux };
-                    if act(ui, &th, &[Part::Text(f), Part::Count(n)], style, 28.0, true).clicked() {
-                        self.lp_folder = i;
-                    }
-                }
-                act(ui, &th, &[Part::Text("+ NEW FOLDER")], ActStyle::Aux, 28.0, true);
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                    let r = version_readout(ui, &th, &self.ver);
-                    if r.clicked() {
+                    ui.spacing_mut().item_spacing.x = 8.0;
+                    // ── what the program IS, right of the channel
+                    // 32, not 21: `.con-top` puts every box in this row on
+                    // one height, and the readout is the short one.
+                    if version_readout_h(ui, &th, &self.ver, 32.0).clicked() {
                         match self.ver {
                             VerState::Available(_) => { self.ver = VerState::Updating(0); self.ver_t0 = now; }
-                            VerState::Idle(_) | VerState::Failed | VerState::Latest | VerState::Done(_) => {
-                                self.ver = VerState::Checking; self.ver_t0 = now;
-                            }
-                            _ => {}
+                            _ => { self.ver = VerState::Checking; self.ver_t0 = now; }
                         }
                     }
+                    // THE SKIN KEY POSES ITS STATE AND DOES NOT CHANGE IT.
+                    // The bar at the top of this gallery owns the skin; two
+                    // controls writing one attribute is two chances to
+                    // disagree about which of them is true.
+                    let lit = th.skin == Skin::Light;
+                    let sk = if lit {
+                        let (rect, r) = ui.allocate_exact_size(vec2(32.0, 35.0), Sense::click());
+                        // held, so the sun stays on the strip's line
+                        skew_egui::paint_act(ui.painter(), &th, rect, &[Part::Icon(Icon::Sun)],
+                                             ActStyle::Held, KeyState::Raised, 10.5);
+                        r
+                    } else {
+                        act(ui, &th, &[Part::Icon(Icon::Sun)], ActStyle::Aux, 32.0, true)
+                    };
+                    if sk.on_hover_text("Light or dark").clicked() {
+                        self.live = "SKIN — the nav bar owns it".into();
+                    }
+                    channel(ui, &th);
+                    if act(ui, &th, &[Part::Icon(Icon::Restart), Part::Text("RESCAN")], ActStyle::Aux, 32.0, true)
+                        .on_hover_text("Look for projects again")
+                        .clicked()
+                    {
+                        self.live = "RESCAN".into();
+                    }
+                    ui.add_space(10.0);
+
+                    // ── and your projects, in the room that is left
+                    ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
+                        ui.spacing_mut().item_spacing.x = 8.0;
+                        if let Some(name) = self.lp_del.clone() {
+                            // THE WHOLE ROW, not a group in it: the sentence
+                            // needs the width the selector and the field were
+                            // using, and leaving them there would let you
+                            // change the folder you are deleting while the
+                            // warning for the old one is still up.
+                            let n = self.rack.iter().filter(|p| p.folder == name).count();
+                            let tail = if n > 0 {
+                                format!(" — {n} project{} go back to no folder. Nothing on disk is touched.",
+                                        if n == 1 { "" } else { "s" })
+                            } else {
+                                " — it is empty. Nothing on disk is touched.".to_string()
+                            };
+                            con_say(ui, &th, "Delete ", &name, &tail);
+                            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                                ui.spacing_mut().item_spacing.x = 8.0;
+                                if act(ui, &th, &[Part::Icon(Icon::Trash), Part::Text("DELETE")], ActStyle::Halt, 32.0, true).clicked() {
+                                    self.lp_do_delete();
+                                }
+                                if act(ui, &th, &[Part::Text("CANCEL")], ActStyle::Aux, 32.0, true).clicked() {
+                                    self.lp_del = None;
+                                }
+                            });
+                            // ESCAPE LEAVES, which is what every other field
+                            // here already does — and the armed row is the one
+                            // place a stray Return could empty a folder, so
+                            // nothing in it is focused by default.
+                            if ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                                self.lp_del = None;
+                            }
+                        } else if let Some(mode) = self.lp_edit {
+                            // ── THE SELECTOR BECOMES THE FIELD. Same place,
+                            //    same 186px, same row: the control that SHOWS
+                            //    the name is the control that TAKES it, which
+                            //    is how a file is renamed in every file
+                            //    browser there has ever been.
+                            let bin = if mode == Edit::Rename {
+                                // THE BIN IS ON THE FAR SIDE OF THE FIELD FROM
+                                // THE TICK. They are the two ways out and they
+                                // do opposite things; side by side they are a
+                                // pair of 32px caps differing only by the mark
+                                // on the face, and the one you hit by mistake
+                                // empties a folder.
+                                Some(act(ui, &th, &[Part::Icon(Icon::Trash)], ActStyle::Aux, 32.0, true)
+                                    .on_hover_text("Delete this folder"))
+                            } else {
+                                // A FOLDER BEING NAMED FOR THE FIRST TIME DOES
+                                // NOT EXIST YET, so there is nothing to bin.
+                                None
+                            };
+                            let hint = if mode == Edit::New { "NEW FOLDER" } else { "FOLDER NAME" };
+                            let f = slot_field(ui, &th, 186.0, 32.0, None, hint, &mut self.lp_buf);
+                            if self.lp_focus {
+                                f.request_focus();
+                                self.lp_focus = false;
+                            }
+                            let ok = act(ui, &th, &[Part::Icon(Icon::Check)], ActStyle::Go, 32.0, true)
+                                .on_hover_text("Save this name");
+
+                            // ── THE ORDER THESE ARE RESOLVED IN IS THE WHOLE
+                            //    CORRECTNESS OF THE ROW, and it is the same
+                            //    bug the web version had in another form.
+                            //    ESCAPE FIRST: a `TextEdit` also loses focus on
+                            //    Escape, so a commit keyed off `lost_focus`
+                            //    would save the name you just cancelled.
+                            //    THE BIN NEXT: the press that arms it is the
+                            //    press that blurs the field, so arming has to
+                            //    happen before the blur is read as a commit —
+                            //    otherwise the bin arrives to delete a folder
+                            //    that has just been renamed out from under it.
+                            let esc = ui.input(|i| i.key_pressed(egui::Key::Escape));
+                            let binning = bin.as_ref().is_some_and(|b| b.clicked() || b.is_pointer_button_down_on());
+                            if esc {
+                                self.lp_edit = None;
+                            } else if binning {
+                                // `was` is the folder as it stands, never the
+                                // half-typed name: that is the only thing there
+                                // is to remove.
+                                self.lp_del = Some(self.lp_folder.clone());
+                                self.lp_edit = None;
+                            } else if ok.clicked()
+                                || (f.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)))
+                            {
+                                self.lp_commit();
+                            }
+                        } else {
+                            // ── THE VALUE LEADS AND ITS COMMAND FOLLOWS IT.
+                            //    The selector says which folder; the pencil
+                            //    acts on THAT folder, so it comes after it and
+                            //    vanishes with it. First would be a verb with
+                            //    no object for as long as ALL FOLDERS is up.
+                            let cur = self.lp_folder.clone();
+                            let sr = sel(ui, &th, &cur, 186.0, 32.0, self.lp_list);
+                            self.lp_rect = sr.rect;
+                            if sr.clicked() {
+                                self.lp_list = !self.lp_list;
+                            }
+                            if self.lp_named()
+                                && act(ui, &th, &[Part::Icon(Icon::Pencil)], ActStyle::Aux, 32.0, true)
+                                    .on_hover_text("Edit this folder")
+                                    .clicked()
+                            {
+                                self.lp_edit = Some(Edit::Rename);
+                                self.lp_buf = cur;
+                                self.lp_focus = true;
+                            }
+                            ui.add_space(10.0);
+                            // THE FIELD IS THE ONLY THING THAT GIVES, and it
+                            // never gives everything: at 200 the placeholder
+                            // still reads, and a field narrower than its own
+                            // label cannot be told from a button.
+                            let w = ui.available_width().clamp(200.0, 420.0);
+                            slot_field(ui, &th, w, 32.0, Some(Icon::Search), "FILTER", &mut self.lp_q);
+                        }
+                    });
                 });
             });
-            ui.add_space(8.0);
-            // ── search
+
+            // ── TEN UNDER ROW ONE, because the switch belongs to it: a folder,
+            //    a field and then only-what-is-running are three narrowings of
+            //    one list, and a bigger break would cut the third off from the
+            //    two it follows.
+            ui.add_space(10.0);
+
+            // ══ ROW TWO: THE ONE PART THAT IS NOT A BOX ═════════════════════
+            // The selector, the field and the keys are cut rectangles of about
+            // one height. A slide switch is a slot milled in the face with a
+            // grip standing proud of it and its name beside it in the open —
+            // dropped into that line it was the one part with no edge, so it
+            // read as having come loose and fallen out of the row. On its own
+            // line it is what it actually is: a setting you leave on.
             ui.horizontal(|ui| {
-                let (slot, _) = ui.allocate_exact_size(vec2(280.0, 30.0), Sense::hover());
-                paint_well(ui.painter(), slot, th.paper, th.edge);
-                paint_icon(ui.painter(), Icon::Search, egui::pos2(slot.left() + 18.0, slot.center().y), 13.0, 1.8, th.ink_2, 0.0);
-                let field = Rect::from_min_max(egui::pos2(slot.left() + 32.0, slot.top() + 6.0), egui::pos2(slot.right() - 8.0, slot.bottom() - 6.0));
-                ui.put(field, egui::TextEdit::singleline(&mut self.lp_q)
-                    .frame(false)
-                    .hint_text("SEARCH")
-                    .font(egui::FontId::monospace(11.0))
-                    .text_color(th.ink));
+                ui.spacing_mut().item_spacing.x = 9.0;
+                // `.pipe` LEADS THE ROW AND IT IS A BAR, not a bead. It is the
+                // layer lamp every `.tog` in this system carries: 4px wide,
+                // the height of the row, lit in the thing's own colour — here
+                // the rack's orange, so the filter and what it selects say the
+                // same thing. A round lamp between the switch and its name is
+                // a third object in a part that has two.
+                pipe(ui, &th, self.lp_only_up);
+                let mut on = self.lp_only_up;
+                if slide(ui, &th, "lp-running", &mut on, SlideKind::Grip).clicked() {
+                    self.lp_only_up = on;
+                }
+                ui.label(mono("RUNNING", 9.5).color(if self.lp_only_up { th.ink } else { th.ink_2 }));
             });
-            ui.add_space(14.0);
-            // ── the rack: as many columns as fit at the module's minimum width
-            let idx: Vec<usize> = (0..self.rack.len())
-                .filter(|&i| in_folder(&self.rack[i], self.lp_folder)
-                    && self.rack[i].name.to_lowercase().contains(&self.lp_q.to_lowercase()))
-                .collect();
+
+            // ── THE OPEN LIST, IN AN OVERLAY AND NOT IN THE ROW ─────────
+            //    A PLATE THAT TAKES LAYOUT SPACE IS NOT A PLATE. Laid out in
+            //    the strip it pushed the rack half a window down every time
+            //    the list opened, which is the one thing a popover exists to
+            //    avoid — you open it to CHOOSE from a list while the thing it
+            //    filters stays where you left it.
+            //
+            //    IT CLOSES THE WAY EVERY PLATE IN THIS SYSTEM CLOSES: the
+            //    face, Escape, or a press anywhere else. Not the chevron,
+            //    which lies down and stays down because it is a signpost.
+            if self.lp_list {
+                let opts = self.lp_opts();
+                let refs: Vec<&str> = opts.iter().map(|s| s.as_str()).collect();
+                let cur = refs.iter().position(|v| *v == self.lp_folder).unwrap_or(0);
+                let at = egui::pos2(self.lp_rect.left(), self.lp_rect.bottom() + 6.0);
+                let picked = egui::Area::new(egui::Id::new("lp-sellist"))
+                    .order(egui::Order::Foreground)
+                    .fixed_pos(at)
+                    .show(ui.ctx(), |ui| sel_list(ui, &th, 186.0, &refs, cur, &["NEW FOLDER…"]))
+                    .inner;
+                let plate = Rect::from_min_size(at, sel_list_size(refs.len(), 1, 186.0));
+                if let Some(i) = picked {
+                    self.lp_list = false;
+                    if i < opts.len() {
+                        self.lp_folder = opts[i].clone();
+                    } else {
+                        // NEW NEEDS NOTHING, so it lives in the list — that is
+                        // where you already are when you are thinking about
+                        // folders, and the only place the answer could be.
+                        self.lp_edit = Some(Edit::New);
+                        self.lp_buf.clear();
+                        self.lp_focus = true;
+                    }
+                } else if ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                    self.lp_list = false;
+                } else if ui.ctx().input(|i| i.pointer.any_click()) {
+                    if let Some(pos) = ui.ctx().input(|i| i.pointer.interact_pos()) {
+                        if !plate.contains(pos) && !self.lp_rect.contains(pos) {
+                            self.lp_list = false;
+                        }
+                    }
+                }
+            }
+
+            // ── THIRTY-TWO UNDER THE WHOLE STRIP. This is the break between
+            //    the window's chrome and its contents, and it is the only gap
+            //    here that has to be bigger than the 14 between two cards: a
+            //    band of controls one card-gap above the rack reads as the
+            //    rack's first row.
+            ui.add_space(32.0);
+
+            // ══ THE RACK ════════════════════════════════════════════════════
+            let idx = self.lp_filtered();
             if idx.is_empty() {
-                ui.label(mono(if self.lp_folder == 0 { "NOTHING IS RUNNING" } else { "NO PROJECTS IN THIS FOLDER" }, 10.5).color(th.ink_3));
+                let filtering = self.lp_filtering();
+                let (txt, out) = if filtering {
+                    ("NOTHING MATCHES", Some("CLEAR FILTERS"))
+                } else {
+                    ("NO PROJECTS FOUND", None)
+                };
+                if let Some(r) = empty_rack(ui, &th, txt, out) {
+                    if r.clicked() {
+                        self.lp_q.clear();
+                        self.lp_folder = ALL.into();
+                        self.lp_only_up = false;
+                    }
+                }
                 return;
             }
             let cols = ((ui.available_width() + 14.0) / (MODULE_MIN_W + 14.0)).floor().max(1.0) as usize;
@@ -757,8 +1140,11 @@ impl Gallery {
                 ui.columns(cols, |c| {
                     for (k, &i) in row.iter().enumerate() {
                         let p = &self.rack[i];
-                        let v = ModuleView { name: p.name, desc: p.desc, port: p.port, up: p.up,
-                                             folder: p.folder, tags: p.tags, pull: p.pull.as_ref() };
+                        let v = ModuleView {
+                            name: p.name, port: p.port, up: p.up, folder: p.folder,
+                            tags: p.tags, pull: p.pull.as_ref(),
+                            editing: self.lp_card.as_deref() == Some(p.name),
+                        };
                         if let Some(h) = module_card(&mut c[k], &th, &v) {
                             hits.push((i, h));
                         }
@@ -767,68 +1153,197 @@ impl Gallery {
                 ui.add_space(14.0);
             }
             for (i, h) in hits {
-                let p = &mut self.rack[i];
+                let name = self.rack[i].name;
                 match h {
-                    ModuleHit::Stop => p.up = false,
-                    ModuleHit::Launch => p.up = true,
+                    ModuleHit::Stop => self.rack[i].up = false,
+                    ModuleHit::Launch => self.rack[i].up = true,
                     ModuleHit::Pull | ModuleHit::Pull2(PullHit::Retry) => {
-                        p.pull = Some(PullState::Run(0));
-                        p.t0 = now;
+                        self.rack[i].pull = Some(PullState::Run(0));
+                        self.rack[i].t0 = now;
                     }
-                    ModuleHit::Pull2(PullHit::Dismiss) => p.pull = None,
-                    other => self.live = format!("{} · {:?}", p.name, other),
+                    ModuleHit::Pull2(PullHit::Dismiss) => self.rack[i].pull = None,
+                    // the drawer survives the rack being redrawn under it:
+                    // filing a project repaints everything, and a drawer that
+                    // shut every time you used it is one you open twice
+                    ModuleHit::Edit => {
+                        self.lp_card = if self.lp_card.as_deref() == Some(name) {
+                            None
+                        } else {
+                            Some(name.to_string())
+                        };
+                    }
+                    other => self.live = format!("{name} · {other:?}"),
                 }
             }
         });
 
-        // ── the state sheet: every state, posed and still ───────────────────
-        ui.add_space(28.0);
-        ui.label(mono("THE VERSION CHECK", 8.5).color(th.ink_2));
-        ui.add_space(8.0);
+        self.lp_states(ui);
+    }
+
+    // ══ THE STATE BOOK ══════════════════════════════════════════════════════
+    // THE CONSOLE ABOVE IS THE ARGUMENT; THIS IS THE PARTS LIST. A posed
+    // console can only be in one state at a time, so the half of the launcher
+    // that is states — a pull that failed, an update waiting, a folder being
+    // renamed, an empty rack — is reachable only by finding the press that
+    // produces it. Every state is drawn once here, captioned with the name the
+    // code calls it by, and the six groups are `docs/skew-panels.html`'s own.
+    //
+    // POSED, NOT LIVE: whatever is pressed down here changes nothing.
+    fn lp_states(&mut self, ui: &mut Ui) {
+        let th = self.th;
+        let head = |ui: &mut Ui, t: &str| {
+            ui.add_space(26.0);
+            ui.label(mono(t, 9.5).color(th.ink));
+            ui.add_space(10.0);
+        };
+        let cap = |ui: &mut Ui, t: &str| {
+            ui.add_space(5.0);
+            ui.label(mono(t, 8.5).color(th.ink_3));
+            ui.add_space(14.0);
+        };
+        let row = |ui: &mut Ui, add: &mut dyn FnMut(&mut Ui)| {
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 8.0;
+                add(ui);
+            });
+        };
+
+        // ── A · THE FOLDER ROW ──────────────────────────────────────────────
+        head(ui, "A · THE FOLDER ROW — WHICH PROJECTS");
+        for (c, value, pencil) in [
+            ("folder = ALL FOLDERS · no commands, because there is no folder to command", ALL, false),
+            ("folder = NO FOLDER · still no commands: it is a filter, not a folder", NONE, false),
+            ("folder = 'Portrait' · named, so the one door appears", "Portrait", true),
+        ] {
+            row(ui, &mut |ui: &mut Ui| {
+                let _ = sel(ui, &th, value, 186.0, 32.0, false);
+                if pencil {
+                    let _ = act(ui, &th, &[Part::Icon(Icon::Pencil)], ActStyle::Aux, 32.0, true);
+                }
+            });
+            cap(ui, c);
+        }
+        row(ui, &mut |ui: &mut Ui| {
+            let _ = act(ui, &th, &[Part::Icon(Icon::Trash)], ActStyle::Aux, 32.0, true);
+            let mut b = "Portrait".to_string();
+            let _ = slot_field(ui, &th, 186.0, 32.0, None, "FOLDER NAME", &mut b);
+            let _ = act(ui, &th, &[Part::Icon(Icon::Check)], ActStyle::Go, 32.0, true);
+        });
+        cap(ui, "editF.mode = 'rename' · the selector IS the field · bin, name, tick");
+        row(ui, &mut |ui: &mut Ui| {
+            let mut b = String::new();
+            let _ = slot_field(ui, &th, 186.0, 32.0, None, "NEW FOLDER", &mut b);
+            let _ = act(ui, &th, &[Part::Icon(Icon::Check)], ActStyle::Go, 32.0, true);
+        });
+        cap(ui, "editF.mode = 'new' · no bin: there is nothing yet to delete");
+        for (c, name, n) in [
+            ("delArm = 'Portrait' · the whole row, and it counts what comes loose", "Portrait", 4usize),
+            ("delArm = 'Razo' · the same row when the folder is empty", "Razo", 0),
+        ] {
+            let tail = if n > 0 {
+                format!(" — {n} projects go back to no folder. Nothing on disk is touched.")
+            } else {
+                " — it is empty. Nothing on disk is touched.".to_string()
+            };
+            row(ui, &mut |ui: &mut Ui| {
+                con_say(ui, &th, "Delete ", name, &tail);
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    ui.spacing_mut().item_spacing.x = 8.0;
+                    let _ = act(ui, &th, &[Part::Icon(Icon::Trash), Part::Text("DELETE")], ActStyle::Halt, 32.0, true);
+                    let _ = act(ui, &th, &[Part::Text("CANCEL")], ActStyle::Aux, 32.0, true);
+                });
+            });
+            cap(ui, c);
+        }
+        row(ui, &mut |ui: &mut Ui| {
+            let opts = ["ALL FOLDERS", "NO FOLDER", "Portrait", "Targz", "Web"];
+            let (rect, _) = ui.allocate_exact_size(vec2(186.0, 14.0 + 26.0 * 6.0 + 9.0), Sense::hover());
+            skew_egui::paint_sel_list(ui.painter(), &th, rect.min, 186.0, &opts, 2, &["NEW FOLDER…"], None);
+        });
+        cap(ui, "the list · the live row is pressed in and lit · NEW under a cut, no tick");
+
+        // ── B · THE SWITCH ──────────────────────────────────────────────────
+        head(ui, "B · THE RUNNING FILTER — ITS OWN LINE, UNDER THE ROW");
+        for (c, on) in [("onlyUp = false", false), ("onlyUp = true · the lamp is the state", true)] {
+            row(ui, &mut |ui: &mut Ui| {
+                pipe(ui, &th, on);
+                let mut v = on;
+                let _ = slide(ui, &th, if on { "sb-run-on" } else { "sb-run-off" }, &mut v, SlideKind::Grip);
+                ui.label(mono("RUNNING", 9.5).color(if on { th.ink } else { th.ink_2 }));
+            });
+            cap(ui, c);
+        }
+
+        // ── C · THE VERSION READOUT ─────────────────────────────────────────
+        head(ui, "C · THE VERSION READOUT — APP.st");
         ui.horizontal_wrapped(|ui| {
-            ui.spacing_mut().item_spacing = vec2(28.0, 18.0);
-            for (cap, st) in [
-                ("IDLE", VerState::Idle("2.3.0".into())),
-                ("CHECKING", VerState::Checking),
-                ("UP TO DATE", VerState::Latest),
-                ("UPDATE AVAILABLE", VerState::Available("2.4.0".into())),
-                ("UPDATING", VerState::Updating(46)),
-                ("UPDATED", VerState::Done("2.4.0".into())),
-                ("CHECK FAILED", VerState::Failed),
+            ui.spacing_mut().item_spacing = vec2(26.0, 18.0);
+            for (c, st) in [
+                ("idle", VerState::Idle("2.3.0".into())),
+                ("checking", VerState::Checking),
+                ("latest", VerState::Latest),
+                ("failed", VerState::Failed),
+                ("available", VerState::Available("2.4.0".into())),
+                ("updating", VerState::Updating(47)),
+                ("done", VerState::Done("2.4.0".into())),
             ] {
                 ui.vertical(|ui| {
-                    version_readout(ui, &th, &st);
+                    let _ = version_readout(ui, &th, &st);
                     ui.add_space(6.0);
-                    ui.label(mono(cap, 8.5).color(th.ink_3));
+                    ui.label(mono(&format!("APP.st = '{c}'"), 8.5).color(th.ink_3));
                 });
             }
         });
-        ui.add_space(22.0);
-        ui.label(mono("A MODULE · RUN AND PULL", 8.5).color(th.ink_2));
-        ui.add_space(8.0);
-        let base = &self.rack[0];
-        let poses: [(&str, bool, Option<PullState>); 6] = [
-            ("RUNNING", true, None),
-            ("STOPPED", false, None),
-            ("PULLING · 63%", true, Some(PullState::Run(63))),
-            ("PULLED · CHANGES", true, Some(PullState::Ok("3 files changed · 41 insertions(+), 9 deletions(−)".into()))),
-            ("PULLED · NOTHING NEW", false, Some(PullState::Ok("Already up to date.".into()))),
-            ("PULL FAILED", false, Some(PullState::Err("fatal: Not possible to fast-forward, aborting.".into()))),
+
+        // ── D · GIT PULL ────────────────────────────────────────────────────
+        head(ui, "D · GIT PULL --FF-ONLY — p.pull");
+        for (c, st) in [
+            ("pull.st = 'run' · pct 0 — fetching origin…", PullState::Run(0)),
+            ("pull.st = 'run' · pct 45 — the only step that shows a number", PullState::Run(45)),
+            ("pull.st = 'run' · pct 85 — fast-forwarding…", PullState::Run(85)),
+            ("pull.st = 'ok' · it says what changed, then leaves on its own",
+             PullState::Ok("3 files changed · 41 insertions(+), 9 deletions(−)".into())),
+            ("pull.st = 'ok' · nothing to pull", PullState::Ok("Already up to date.".into())),
+            ("pull.st = 'err' · it STAYS, and carries the three ways out",
+             PullState::Err("fatal: Not possible to fast-forward, aborting.".into())),
+            ("pull.st = 'err' · git's own words, never ours",
+             PullState::Err("error: your local changes to settings.json would be overwritten".into())),
+        ] {
+            let _ = pull_line(ui, &th, &st);
+            cap(ui, c);
+        }
+
+        // ── E · THE CARD ────────────────────────────────────────────────────
+        head(ui, "E · ONE PROJECT — p.up, p.port, AND THE DRAWER");
+        let poses: [(&str, &str, &str, u16, bool, bool, &[&str]); 4] = [
+            ("p.up = true · split STOP + restart · the port is a door",
+             "Portrait-Typo", "Portrait", 2857, true, false, &["dev"]),
+            ("p.up = false · LAUNCH · the port is the door NUMBER",
+             "Portrait-DNA", "Portrait", 2853, false, false, &["dev"]),
+            ("p.port = 0 · PORT ASSIGNED ON LAUNCH · and folder \"\" prints NO FOLDER",
+             "_divers/plotter-bench", "", 0, false, false, &[]),
+            ("editing · the pencil is LATCHED and the drawer is on the card, not over it",
+             "targz.fr", "Web", 4000, false, true, &["serve"]),
         ];
         let cols = ((ui.available_width() + 14.0) / (MODULE_MIN_W + 14.0)).floor().max(1.0) as usize;
-        for row in poses.chunks(cols) {
+        for chunk in poses.chunks(cols) {
             ui.columns(cols, |c| {
-                for (k, (cap, up, pull)) in row.iter().enumerate() {
-                    let v = ModuleView { name: base.name, desc: base.desc, port: base.port, up: *up,
-                                         folder: base.folder, tags: base.tags, pull: pull.as_ref() };
-                    // posed, not live: whatever is pressed here changes nothing
+                for (k, (cp, name, folder, port, up, editing, tags)) in chunk.iter().enumerate() {
+                    let v = ModuleView { name, port: *port, up: *up, folder, tags, pull: None, editing: *editing };
                     let _ = module_card(&mut c[k], &th, &v);
-                    c[k].add_space(6.0);
-                    c[k].label(mono(*cap, 8.5).color(th.ink_3));
+                    c[k].add_space(5.0);
+                    c[k].label(mono(*cp, 8.5).color(th.ink_3));
                 }
             });
             ui.add_space(14.0);
         }
+
+        // ── F · THE EMPTY RACK ──────────────────────────────────────────────
+        head(ui, "F · THE EMPTY RACK — TWO REASONS, ONE WAY OUT");
+        let _ = empty_rack(ui, &th, "NOTHING MATCHES", Some("CLEAR FILTERS"));
+        cap(ui, "filtering() = true · the filter did it, so the filter can undo it");
+        let _ = empty_rack(ui, &th, "NO PROJECTS FOUND", None);
+        cap(ui, "filtering() = false · the disk is empty · no key, nothing to press");
     }
 
     fn overrides(&mut self, ui: &mut Ui) {
@@ -935,8 +1450,18 @@ impl Gallery {
 impl eframe::App for Gallery {
     fn update(&mut self, ctx: &egui::Context, _f: &mut eframe::Frame) {
         let th = self.th;
+        // ── THE PAGE IS `--page` AND IT IS FLAT ─────────────────────────
+        //    It was `--paper`, which is the hole milled INTO a panel — so the
+        //    whole gallery read as one slab of the darkest cream in the skin
+        //    and nothing on it had anything to stand apart from. The page is
+        //    the cool #EFF4F7, and the separation from the warm parts on it is
+        //    TEMPERATURE, not darkness: dropping the page's value to force
+        //    contrast is what aged the screen.
+        //
+        //    AND IT IS NOT RULED. The grid is the launcher's own desk and it
+        //    lives INSIDE its window — see `console`.
         egui::CentralPanel::default()
-            .frame(panel_frame(&th, th.paper))
+            .frame(panel_frame(&th, page_fill(&th)))
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical().show(ui, |ui| {
                     // ONE CENTRED COLUMN, like every page on the site: a

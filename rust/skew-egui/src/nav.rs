@@ -13,7 +13,7 @@
 //! the same door twice, and it costs a slot in a bar that has to fit on a
 //! phone.
 
-use crate::key::{key, paint_pkey_down, pkey_bar, KeyStyle};
+use crate::key::{key, paint_pkey_held, pkey_bar, KeyStyle};
 use crate::machine::lcd;
 use crate::theme::{mono, Theme};
 use egui::{pos2, vec2, Color32, Rounding, Sense, Stroke, Ui, Vec2};
@@ -41,9 +41,15 @@ pub enum NavHit {
     Skin,
 }
 
-/// `.chan` — the channel the bar is split by: a slot milled in the case, which
+/// `.chan` — the channel a bar is split by: a slot milled in the case, which
 /// in this skin is the floor colour and a hairline and nothing else.
-fn channel(ui: &mut Ui, th: &Theme) {
+///
+/// IT IS THE SAME PART IN THREE PLACES — the nav bar, the app dock and the
+/// launcher's strip — and it always marks the same cut: everything to the
+/// right of it is the workspace or the program, everything to the left is the
+/// documents or your projects. One channel, because two would claim three
+/// groups where there are two.
+pub fn channel(ui: &mut Ui, th: &Theme) {
     let (rect, _) = ui.allocate_exact_size(vec2(3.0, 22.0), Sense::hover());
     if !ui.is_rect_visible(rect) {
         return;
@@ -101,7 +107,12 @@ pub fn nav_bar(ui: &mut Ui, th: &Theme, nav: &Nav, current: &mut usize) -> Optio
                     let (rect, resp) = ui.allocate_exact_size(size, Sense::click());
                     let resp = resp.on_hover_cursor(egui::CursorIcon::PointingHand);
                     if ui.is_rect_visible(rect) {
-                        paint_pkey_down(ui.painter(), th, rect, "LIGHT", 11.0);
+                        // HELD, NOT PRESSED. The skin key is down for as long
+                        // as the light skin is on, which is most of the time —
+                        // so with travel its RESTING state is three pixels
+                        // below the keys either side of it, and the bar reads
+                        // as having one loose part in it.
+                        paint_pkey_held(ui.painter(), th, rect, "LIGHT", 11.0);
                     }
                     if resp.clicked() {
                         hit = Some(NavHit::Skin);

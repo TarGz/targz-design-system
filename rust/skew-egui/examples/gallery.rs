@@ -19,7 +19,7 @@
 
 use egui::{vec2, Align, Color32, Layout, Rect, Sense, Ui, Vec2};
 use skew_egui::{
-    btn, colored_btn, cut, dro, fader, jog_pad, key, knob, KnobKind, label, lcd, mono, nav_bar, paint_fader,
+    btn, colored_btn, cut, dro, fader, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
     paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
 };
@@ -128,6 +128,10 @@ struct Gallery {
     pot: f32,
     heading: f32,
     bank: [f32; 3],
+    slides: [bool; 4],
+    lit: [bool; 3],
+    sun: bool,
+    chev_open: bool,
 }
 
 impl Gallery {
@@ -149,6 +153,10 @@ impl Gallery {
             pot: 62.0,
             heading: 147.0,
             bank: [34.0, 71.0, 52.0],
+            slides: [true, false, true, false],
+            lit: [true, false, true],
+            sun: true,
+            chev_open: false,
         }
     }
 
@@ -306,6 +314,23 @@ impl Gallery {
             }
             ui.add_space(12.0);
             label(ui, &th, "A TOGGLE KEY LATCHES BY LIGHTING ITS CAP");
+        });
+        ui.add_space(20.0);
+        // SLIDE SWITCH: A on / off, then B on / off, as § Pressing lays them out
+        ui.vertical(|ui| {
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 18.0;
+                let kinds = [SlideKind::Grip, SlideKind::Grip, SlideKind::Pill, SlideKind::Pill];
+                for (i, kind) in kinds.into_iter().enumerate() {
+                    let mut v = self.slides[i];
+                    if slide(ui, &th, &format!("slide{i}"), &mut v, kind).clicked() {
+                        self.live = format!("SLIDE {} {}", i + 1, if v { "ON" } else { "OFF" });
+                    }
+                    self.slides[i] = v;
+                }
+            });
+            ui.add_space(8.0);
+            ui.label(mono("SLIDE SWITCH", 8.5).color(th.ink_2));
         });
     }
 
@@ -486,6 +511,67 @@ impl Gallery {
         });
     }
 
+    /// § Pressing: BACKLIT KEY, MOMENTARY VS LATCHING, MICRO KEY, KNURLED CHEVRON.
+    fn pressing(&mut self, ui: &mut Ui) {
+        let th = self.th;
+        let cap = |ui: &mut Ui, t: &str| {
+            ui.add_space(10.0);
+            ui.label(mono(t, 8.5).color(th.ink_2));
+        };
+        ui.horizontal_top(|ui| {
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 10.0;
+                    for i in 0..3 {
+                        let mut v = self.lit[i];
+                        if backlit(ui, &th, Icon::Eye, &mut v).clicked() {
+                            self.live = format!("BACKLIT {} {}", i + 1, if v { "ON" } else { "OFF" });
+                        }
+                        self.lit[i] = v;
+                    }
+                });
+                cap(ui, "BACKLIT KEY");
+            });
+            ui.add_space(48.0);
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 11.0;
+                    if icon_key(ui, &th, Icon::Upload, None).clicked() {
+                        self.live = "MOMENTARY · SPRANG BACK".into();
+                    }
+                    if icon_key(ui, &th, Icon::Sun, Some(&mut self.sun)).clicked() {
+                        self.live = format!("LATCHING {}", if self.sun { "DOWN" } else { "UP" });
+                    }
+                });
+                cap(ui, "MOMENTARY VS LATCHING");
+            });
+            ui.add_space(48.0);
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 5.0;
+                    if micro(ui, &th, Icon::Copy, false).clicked() {
+                        self.live = "DUPLICATE".into();
+                    }
+                    if micro(ui, &th, Icon::Trash, true).clicked() {
+                        self.live = "DELETE".into();
+                    }
+                });
+                cap(ui, "MICRO KEY");
+            });
+            ui.add_space(48.0);
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 5.0;
+                    sep(ui, &th);
+                    if chevron(ui, &th, "chev", &mut self.chev_open).clicked() {
+                        self.live = format!("CHEVRON {}", if self.chev_open { "OPEN" } else { "CLOSED" });
+                    }
+                });
+                cap(ui, "KNURLED CHEVRON");
+            });
+        });
+    }
+
     fn overrides(&mut self, ui: &mut Ui) {
         let th = self.th;
         ui.horizontal_top(|ui| {
@@ -518,7 +604,11 @@ impl Gallery {
             (0, 0) => self.factories(ui),
             (0, 1) => self.surfaces(ui),
             (0, 2) => self.open(ui, "the token sheet · the values are in tokens.rs"),
-            (0, 3) => self.open(ui, "jewel · pilot · lamp — the unlit one is a filter"),
+            (0, 3) => {
+                self.pressing(ui);
+                ui.add_space(20.0);
+                self.open(ui, "jewel · pilot · lamp — the unlit one is a filter");
+            }
             (0, 4) => self.knobs(ui),
             (0, 5) => self.toggle_section(ui),
             (0, 6) => self.interlock(ui),

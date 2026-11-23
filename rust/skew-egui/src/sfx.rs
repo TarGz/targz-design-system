@@ -191,6 +191,10 @@ pub fn press() {
 pub fn release() {
     emit(|| strike(3200.0, 1.8, 0.005, 0.11, None));
 }
+/// A switch going over centre — crisper than a key, and shorter.
+pub fn flip() {
+    emit(|| strike(2800.0, 2.3, 0.007, 0.26, Some((350.0, 0.012, 0.016))));
+}
 /// A fader cap lifted off its track — damped, nothing rings.
 pub fn grab() {
     emit(|| strike(980.0, 0.9, 0.011, 0.15, None));

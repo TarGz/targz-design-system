@@ -192,13 +192,18 @@ pub fn paint_key(
 /// up** — on the pointer, not on `clicked()`, because the sound of a key is the
 /// sound of it going down, and a click fires on the way back up.
 pub(crate) fn clicky(ui: &Ui, resp: &egui::Response) {
+    clicky_with(ui, resp, crate::sfx::press, crate::sfx::release);
+}
+
+/// [`clicky`] with the pair named — a switch goes over with `flip`.
+pub(crate) fn clicky_with(ui: &Ui, resp: &egui::Response, down_sfx: fn(), up_sfx: fn()) {
     let id = resp.id.with("skew-clicky");
     let down = resp.is_pointer_button_down_on();
     let was = ui.data(|d| d.get_temp::<bool>(id)).unwrap_or(false);
     if down && !was {
-        crate::sfx::press();
+        down_sfx();
     } else if !down && was {
-        crate::sfx::release();
+        up_sfx();
     }
     if down != was {
         ui.data_mut(|d| d.insert_temp(id, down));

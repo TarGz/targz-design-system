@@ -1,6 +1,17 @@
-export const version = '1.116.0';
+export const version = '1.117.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.117.0',
+    date: '2026-11-23',
+    changes: [
+      "THE SLIDE SWITCH IS IN THE CRATE, IN BOTH ITS DRESSES. `slide` / `paint_slide` port `.slide` (a 46×22 cut, the light skin's grey floor that lights in `--led`, a dark knurled grip with 20px of throw and the CSS's overshoot) and `.slide.pill` (the dotted grip and ON / OFF printed on the floor, the legend being what the grip uncovers). The grip stays dark in light, as the CSS says it must. The rocker is not ported: the stylesheet flags it WIP, not to be copied into an app yet.",
+      "AND THE SMALL PRESSING PARTS. `backlit` (`.sw`, 24px — a raised `--card` cap off, a `--paper` well with the glyph lit in `--primary-deep` on), `icon_key` (the 38px momentary / latching pair), `micro` (22px, flush, red on hover only for delete) and `chevron` (20×22, which in light loses its knurl and, open, sinks, turns 90° and lights in `--led`), with `sep` beside it.",
+      "THE ICONS ARE STROKES. `paint_icon` draws the kit's eye, upload, sun, copy, trash and chevron from their SVG point for point in the 24-unit box, at each part's own stroke width — egui reads no SVG and six icons do not earn a rasteriser.",
+      "AND THEY SOUND LIKE THE KIT'S. `flip` joins the crate's bank: switches, backlit keys and the chevron flip and release; icon keys press and release; the micro key is silent, as it is in the kit.",
+      "THE GALLERY SHOWS THEM where the documents do: the switches under The toggle, the pressing row under The primitives.",
+    ],
+  },
   {
     version: '1.116.0',
     date: '2026-11-23',

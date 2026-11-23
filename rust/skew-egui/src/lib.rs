@@ -45,21 +45,30 @@ pub mod tokens;
 
 mod fader;
 mod frame;
+mod icon;
 mod key;
 mod knob;
 mod machine;
 mod nav;
 mod paint;
+mod press;
+mod switch;
 mod theme;
 
 pub use fader::{fader, paint_fader, FaderState, FADER_SIZE};
 pub use frame::{label, panel_frame, section, well_frame, well_shadow};
 pub use knob::{knob, paint_knob, KnobKind, KNOB_D, KNOB_SIZE};
+pub use icon::{paint_icon, paint_icon_lit, Icon};
+pub use press::{
+    backlit, chevron, icon_key, micro, paint_icon_key, sep, BACKLIT_SIZE, CHEV_SIZE, ICON_KEY_SIZE,
+    MICRO_SIZE,
+};
 pub use key::{btn, colored_btn, key, paint_key, paint_pkey_down, pkey_bar, KeyState, KeyStyle};
 pub use machine::{
     bezel_edges, bezel_frame, cut, dro, jog_pad, lcd, paint_lcd, panel, JogPress,
 };
 pub use nav::{nav_bar, Nav, NavHit, NAV_GAP, NAV_HEIGHT};
 pub use paint::{hex, mix, rgb, vgrad};
+pub use switch::{paint_slide, slide, SlideKind, SLIDE_SIZE};
 pub use theme::{mono, read_font, Skin, Theme};
 pub use tokens::{Palette, ShadowLayer};

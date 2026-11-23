@@ -1,6 +1,6 @@
 [package]
 name = "skew-egui"
-version = "1.115.0"
+version = "1.116.0"
 edition = "2021"
 description = "Skew (targz-design-system) as painted egui parts: tokens, the light-skin key, the vertical fader, panels and wells."
 license = "MIT"
@@ -10,8 +10,15 @@ publish = false
 # A part of this crate has no meaning apart from the skin it draws, so a second
 # version number would only ever be a thing to reconcile.
 
+[features]
+# The panel's sound bank (`sfx`). On by default; a host that wants silence or
+# has its own audio sets `default-features = false` and every call is a no-op.
+default = ["sound"]
+sound = ["dep:rodio"]
+
 [dependencies]
 egui = "0.29"
+rodio = { version = "0.19", default-features = false, optional = true }
 
 [dev-dependencies]
 # The gallery only. A library that pulled in a windowing backend would decide

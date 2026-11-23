@@ -19,7 +19,7 @@
 
 use egui::{vec2, Align, Color32, Layout, Rect, Sense, Ui, Vec2};
 use skew_egui::{
-    btn, colored_btn, cut, dro, fader, jog_pad, key, label, lcd, mono, nav_bar, paint_fader,
+    btn, colored_btn, cut, dro, fader, jog_pad, key, knob, KnobKind, label, lcd, mono, nav_bar, paint_fader,
     paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
 };
@@ -125,6 +125,9 @@ struct Gallery {
     step: usize,
     units: usize,
     nav_demo: usize,
+    pot: f32,
+    heading: f32,
+    bank: [f32; 3],
 }
 
 impl Gallery {
@@ -143,6 +146,9 @@ impl Gallery {
             step: 1,
             units: 0,
             nav_demo: 1,
+            pot: 62.0,
+            heading: 147.0,
+            bank: [34.0, 71.0, 52.0],
         }
     }
 
@@ -433,6 +439,53 @@ impl Gallery {
         });
     }
 
+    /// KNOB, KNOB · ENDLESS and FADER · VERTICAL BANK, live.
+    fn knobs(&mut self, ui: &mut Ui) {
+        let th = self.th;
+        let cap = |ui: &mut Ui, t: &str| {
+            ui.add_space(8.0);
+            ui.label(mono(t, 8.5).color(th.ink_2));
+        };
+        ui.horizontal_top(|ui| {
+            ui.vertical(|ui| {
+                let (c, _) = knob(ui, &th, "pot", &mut self.pot, 0.0, 100.0, KnobKind::Pot, |v| format!("{v:.0}"));
+                if c {
+                    self.live = format!("KNOB {:.0}", self.pot);
+                }
+                cap(ui, "KNOB");
+            });
+            ui.add_space(60.0);
+            ui.vertical(|ui| {
+                let (c, _) = knob(ui, &th, "heading", &mut self.heading, -180.0, 180.0, KnobKind::Endless, |v| format!("{v:.0}°"));
+                if c {
+                    self.live = format!("KNOB · ENDLESS {:.0}°", self.heading);
+                }
+                cap(ui, "KNOB · ENDLESS");
+            });
+        });
+        ui.add_space(24.0);
+        ui.vertical(|ui| {
+            let f = egui::Frame::none()
+                .fill(th.case_face)
+                .stroke(egui::Stroke::new(1.0, th.edge))
+                .rounding(egui::Rounding::same(th.r))
+                .inner_margin(egui::Margin { left: 16.0, right: 16.0, top: 14.0, bottom: 16.0 });
+            f.show(ui, |ui| {
+                ui.spacing_mut().item_spacing.x = 10.0;
+                ui.horizontal_top(|ui| {
+                    let [lo, mid, hi] = &mut self.bank;
+                    let (a, _) = fader(ui, &th, "LOW", lo, 0.0, 100.0);
+                    let (b, _) = fader(ui, &th, "MID", mid, 0.0, 100.0);
+                    let (c, _) = fader(ui, &th, "HIGH", hi, 0.0, 100.0);
+                    if a || b || c {
+                        self.live = format!("LOW {:.0} · MID {:.0} · HIGH {:.0}", lo, mid, hi);
+                    }
+                });
+            });
+            cap(ui, "FADER · VERTICAL BANK");
+        });
+    }
+
     fn overrides(&mut self, ui: &mut Ui) {
         let th = self.th;
         ui.horizontal_top(|ui| {
@@ -466,7 +519,7 @@ impl Gallery {
             (0, 1) => self.surfaces(ui),
             (0, 2) => self.open(ui, "the token sheet · the values are in tokens.rs"),
             (0, 3) => self.open(ui, "jewel · pilot · lamp — the unlit one is a filter"),
-            (0, 4) => self.open(ui, "knob — the biggest single gap"),
+            (0, 4) => self.knobs(ui),
             (0, 5) => self.toggle_section(ui),
             (0, 6) => self.interlock(ui),
             (0, 7) => self.nav_section(ui),

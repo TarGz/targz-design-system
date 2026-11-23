@@ -188,6 +188,23 @@ pub fn paint_key(
     p.text(cap_up.center(), Align2::CENTER_CENTER, text, font, fg);
 }
 
+/// The kit's `clicky`: **press as the pointer goes down, release as it comes
+/// up** — on the pointer, not on `clicked()`, because the sound of a key is the
+/// sound of it going down, and a click fires on the way back up.
+pub(crate) fn clicky(ui: &Ui, resp: &egui::Response) {
+    let id = resp.id.with("skew-clicky");
+    let down = resp.is_pointer_button_down_on();
+    let was = ui.data(|d| d.get_temp::<bool>(id)).unwrap_or(false);
+    if down && !was {
+        crate::sfx::press();
+    } else if !down && was {
+        crate::sfx::release();
+    }
+    if down != was {
+        ui.data_mut(|d| d.insert_temp(id, down));
+    }
+}
+
 /// An interactive key: allocate, sense, paint the state the pointer puts it in.
 ///
 /// `drag` makes it a click-and-drag key, which is what a jog pad needs.
@@ -213,6 +230,9 @@ pub fn key(
     } else {
         resp
     };
+    if enabled {
+        clicky(ui, &resp);
+    }
     if !ui.is_rect_visible(rect) {
         return resp;
     }
@@ -325,6 +345,7 @@ pub fn pkey_bar(
             if i == *sel {
                 let (rect, resp) = ui.allocate_exact_size(size, Sense::click());
                 let resp = resp.on_hover_cursor(egui::CursorIcon::PointingHand);
+                clicky(ui, &resp);
                 if ui.is_rect_visible(rect) {
                     paint_pkey_down(ui.painter(), th, rect, t, 11.0);
                 }

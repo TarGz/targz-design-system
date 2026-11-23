@@ -1,6 +1,17 @@
-export const version = '1.115.0';
+export const version = '1.116.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.116.0',
+    date: '2026-11-23',
+    changes: [
+      "THE KNOB IS IN THE CRATE. `knob` / `paint_knob` port `.knob` part for part: the black collar (it stays dark in the light skin), the orange 270° arc with its glow, the knurled cap inset 19% with a specular that does not turn, the lit pointer — and the endless kind, which draws no arc, lights its pointer in `--arc` and wears the centre mark when bipolar. The e-paper readout sits under it. Drag follows the kit: down or right turns it clockwise, 200px is the full range, shift divides by five.",
+      "AND THE FADER IS REDRAWN TO THE CSS, NOT TO A MEMORY OF IT. The slot is 136px, not 96; the track is `--paper` with a `--card` trench and an `--ink` fill from the cap to the floor; the cap is `.fader.vert .fcap` — 24×17, the six-stop horizontal gradient, knurl on the shoulders only and the lit indicator standing VERTICAL in the waist; the scale is on the right, quarters in `--ink-2` and fifths in `#C9C3BA`; the readout is the same e-paper module as everywhere else.",
+      "THE CRATE HAS THE SOUND BANK. `sfx` ports the kit's voices number for number — noise through a bandpass over a falling sine for a strike, a falling square for the knob's ratchet, nothing repeating exactly. Keys `press` on the way down and `release` on the way up; the knob ratchets 40 notches to its travel; the fader `grab`s and `drop`s. Behind a `sound` cargo feature, on by default, rendered off the UI thread.",
+      "AND A FADER BRUSHES ITS SCALE. It was silent as it ran on the grounds that it has no ratchet, which is true, and it is why the new voice is not a chirp: `slide` is the deadest, quietest strike in the bank, one per printed mark the cap passes while held — twenty to the travel. In the kit and in the crate both.",
+      "THE GALLERY SHOWS THEM: KNOB, KNOB · ENDLESS and a LOW / MID / HIGH vertical bank under SYSTEM → Knob layouts, where the knob was the biggest open gap.",
+    ],
+  },
   {
     version: '1.115.0',
     date: '2026-11-22',

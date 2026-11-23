@@ -441,6 +441,9 @@ fn home_key(ui: &mut Ui, th: &Theme, size: Vec2, enabled: bool) -> egui::Respons
     } else {
         resp
     };
+    if enabled {
+        crate::key::clicky(ui, &resp);
+    }
     if !ui.is_rect_visible(rect) {
         return resp;
     }

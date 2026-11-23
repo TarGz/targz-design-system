@@ -197,8 +197,9 @@ const el = (tag, cls, html) => {
    all is a buzz rather than a ratchet. A real encoder has a fixed number of
    detents whatever it is wired to, so the tick is keyed to a fixed division
    of the TRAVEL — `ENC` of them end to end — and the value's own step is left
-   to say what the value is. THE KNOB ALONE: a fader has no ratchet in it and
-   is silent as it runs, which is the note on `rangeFader`'s setter.
+   to say what the value is. A FADER HAS NO RATCHET IN IT, so it does not
+   chirp: it brushes its scale instead — `slide`, one soft strike per printed
+   mark the cap passes while held.
 
    BUILT LAZILY, on the first sound, because an AudioContext made before a
    gesture is one the browser suspends and one nobody asked for. Muted through
@@ -379,6 +380,13 @@ const SFX = (() => {
     lift:    () => strike(3500, 1.9, .0035, .045),
     // a fader cap lifted off its track — damped, nothing rings
     grab:    () => strike( 980,  .9, .011, .15),
+    /* THE CAP PASSING A MARK ON ITS SCALE. Not a ratchet — a fader has no
+       detent in it, and a chirp here would claim one. It is the felt of the
+       cap brushing the edge of a printed graduation: the shortest, deadest,
+       quietest strike in the bank, one per mark crossed (twenty to the travel,
+       the scale's fifths), so a slow pull reads as distance covered and a fast
+       one blurs into a soft rasp. Under `lift`, which is the floor of audible. */
+    slide:   () => strike(1400, 1.2, .004, .05),
     // and set back down on it
     drop:    () => strike( 800, 1.0, .014, .17,  160, .014, .030),
   };
@@ -1283,8 +1291,15 @@ function fader({ label, min, max, step = 0.01, value, fmt, mode = 'level',
   // `held` is what makes it fire once on the way in rather than on every
   // pointermove for as long as you sit in the band.
   let held = false;
+  /* THE SCALE THE CAP BRUSHES: twenty marks, the fifths the ticks print. Only
+     while the cap is HELD — a typed value or a host's sync moves no cap past
+     anything. */
+  const MARKS = 20;
+  const mark = x => Math.round(norm(x) * MARKS);
   const set = (x, quiet) => {
+    const was = mark(v);
     v = q(x);
+    if (!quiet && track.dataset.on && mark(v) !== was) SFX.slide();
     // the notch: inside 3% of the middle the cap falls into zero
     if (mode === 'center' && Math.abs(norm(v) - zero) < DETENT) {
       v = q(min + zero * (max - min));

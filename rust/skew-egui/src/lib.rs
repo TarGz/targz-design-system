@@ -18,7 +18,7 @@
 //! * [`Theme`] — a [`tokens::Palette`] resolved into the names the painted parts
 //!   actually ask for, with the light/dark fallbacks stated once instead of at
 //!   every call site. **Select it at startup; it is a value, not a const.**
-//! * The parts: [`key`], [`btn`], [`colored_btn`], [`fader`], [`panel_frame`],
+//! * The parts: [`key`], [`btn`], [`colored_btn`], [`fader`], [`knob`], [`panel_frame`],
 //!   [`well_frame`], [`section`], [`label`].
 //!
 //! ## The light skin is the tuned one
@@ -40,11 +40,13 @@
 //! # }
 //! ```
 
+pub mod sfx;
 pub mod tokens;
 
 mod fader;
 mod frame;
 mod key;
+mod knob;
 mod machine;
 mod nav;
 mod paint;
@@ -52,6 +54,7 @@ mod theme;
 
 pub use fader::{fader, paint_fader, FaderState, FADER_SIZE};
 pub use frame::{label, panel_frame, section, well_frame, well_shadow};
+pub use knob::{knob, paint_knob, KnobKind, KNOB_D, KNOB_SIZE};
 pub use key::{btn, colored_btn, key, paint_key, paint_pkey_down, pkey_bar, KeyState, KeyStyle};
 pub use machine::{
     bezel_edges, bezel_frame, cut, dro, jog_pad, lcd, paint_lcd, panel, JogPress,

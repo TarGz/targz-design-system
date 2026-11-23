@@ -22,7 +22,46 @@ use skew_egui::{
     btn, colored_btn, cut, dro, fader, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
     paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
+    act, module_card, paint_well, paint_icon, surround, version_readout, ActStyle,
+    ModuleHit, ModuleView, Part, PullHit, PullState, VerState, MODULE_MIN_W,
 };
+
+/// One project on the launcher's rack, and what its pull will do in the demo.
+struct Proj {
+    name: &'static str,
+    folder: &'static str,
+    port: u16,
+    up: bool,
+    desc: &'static str,
+    tags: &'static [&'static str],
+    pull: Option<PullState>,
+    t0: f64,
+    ok: bool,
+    msg: &'static str,
+    hide_at: f64,
+}
+
+fn projects() -> Vec<Proj> {
+    let p = |name, port, up, desc, tags, ok, msg| Proj {
+        name, folder: "Portrait", port, up, desc, tags, pull: None, t0: 0.0, ok, msg, hide_at: 0.0,
+    };
+    vec![
+        p("Portrait-Typo", 2857, true,
+          "Generative portrait engine — 3D letters dropped into a virtual box under gravity, settled by physics, then flattened into a hatch-filled pen-plotter drawing.",
+          &["dev"], true, "3 files changed · 41 insertions(+), 9 deletions(−)"),
+        p("Portrait-ribbons", 2855, true,
+          "Generative portrait engine — 3D ribbons on a flow field, twisting from face-on to edge-on to draw a portrait in white on black.",
+          &["dev"], true, "Already up to date."),
+        p("Portrait-Cubes", 2851, true,
+          "Generative isometric cube grid with hatching for pen plotter — portrait encoding via grayscale density.",
+          &["dev", "start"], false, "fatal: Not possible to fast-forward, aborting."),
+        p("Portrait-DNA", 2853, false,
+          "Generative portrait engine — DNA-shaped pattern layered over a portrait image, plotter-ready.",
+          &["dev"], false, "error: your local changes to settings.json would be overwritten"),
+    ]
+}
+
+const FOLDERS: [&str; 5] = ["Running", "All", "Portrait", "Razo", "Web"];
 
 /// The nav registry and every page's sections, from `docs/skew-nav.js` and the
 /// `<h2>` of each document. The bar and this list cannot disagree — the same
@@ -132,6 +171,13 @@ struct Gallery {
     lit: [bool; 3],
     sun: bool,
     chev_open: bool,
+    rack: Vec<Proj>,
+    lp_folder: usize,
+    lp_q: String,
+    ver: VerState,
+    ver_t0: f64,
+    ver_n: usize,
+    ver_cur: String,
 }
 
 impl Gallery {
@@ -157,6 +203,13 @@ impl Gallery {
             lit: [true, false, true],
             sun: true,
             chev_open: false,
+            rack: projects(),
+            lp_folder: 1,
+            lp_q: String::new(),
+            ver: VerState::Idle("2.3.0".into()),
+            ver_t0: 0.0,
+            ver_n: 0,
+            ver_cur: "2.3.0".into(),
         }
     }
 
@@ -572,6 +625,212 @@ impl Gallery {
         });
     }
 
+    // ── 06 / LAUNCHPAD ──────────────────────────────────────────────────────
+
+    /// Move every timed thing on the console one frame on: pulls in flight,
+    /// done lines leaving, and the version check's state machine.
+    fn lp_tick(&mut self, ctx: &egui::Context) {
+        let now = ctx.input(|i| i.time);
+        let mut live = false;
+        for p in &mut self.rack {
+            match &p.pull {
+                Some(PullState::Run(_)) => {
+                    live = true;
+                    let pct = (((now - p.t0) / 2.2) * 100.0).min(100.0) as u8;
+                    // a failing pull dies where git dies: after the fetch, at the merge
+                    p.pull = Some(if !p.ok && pct >= 82 {
+                        PullState::Err(p.msg.into())
+                    } else if pct >= 100 {
+                        p.hide_at = now + 4.0;
+                        PullState::Ok(p.msg.into())
+                    } else {
+                        PullState::Run(pct)
+                    });
+                }
+                Some(PullState::Ok(_)) => {
+                    live = true;
+                    if now > p.hide_at {
+                        p.pull = None;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let dt = now - self.ver_t0;
+        let next = match &self.ver {
+            VerState::Checking => {
+                live = true;
+                (dt > 0.9).then(|| {
+                    let n = self.ver_n;
+                    self.ver_n += 1;
+                    match n % 3 {
+                        0 if self.ver_cur != "2.4.0" => VerState::Available("2.4.0".into()),
+                        0 | 1 => VerState::Latest,
+                        _ => VerState::Failed,
+                    }
+                })
+            }
+            VerState::Latest => { live = true; (dt > 2.4).then(|| VerState::Idle(self.ver_cur.clone())) }
+            VerState::Updating(_) => {
+                live = true;
+                let pct = ((dt / 2.0) * 100.0).min(100.0) as u8;
+                Some(if pct >= 100 {
+                    self.ver_cur = "2.4.0".into();
+                    VerState::Done(self.ver_cur.clone())
+                } else {
+                    VerState::Updating(pct)
+                })
+            }
+            VerState::Done(_) => { live = true; (dt > 2.4).then(|| VerState::Idle(self.ver_cur.clone())) }
+            _ => None,
+        };
+        if let Some(n) = next {
+            let restart = !matches!((&self.ver, &n), (VerState::Updating(_), VerState::Updating(_)));
+            self.ver = n;
+            if restart {
+                self.ver_t0 = now;
+            }
+        }
+        if live {
+            ctx.request_repaint();
+        }
+    }
+
+    fn launchpad(&mut self, ui: &mut Ui) {
+        let th = self.th;
+        self.lp_tick(ui.ctx());
+        let now = ui.input(|i| i.time);
+        let in_folder = |p: &Proj, i: usize| match i { 0 => p.up, 1 => true, _ => p.folder == FOLDERS[i] };
+
+        surround(ui, &th, th.r, 16.0, |ui| {
+            ui.set_width(ui.available_width());
+            // ── the top: Running first, then the folders, and the version at the right end
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 8.0;
+                for (i, f) in FOLDERS.iter().enumerate() {
+                    let n = self.rack.iter().filter(|p| in_folder(p, i)).count();
+                    let style = if i == self.lp_folder { ActStyle::Down } else { ActStyle::Aux };
+                    if act(ui, &th, &[Part::Text(f), Part::Count(n)], style, 28.0, true).clicked() {
+                        self.lp_folder = i;
+                    }
+                }
+                act(ui, &th, &[Part::Text("+ NEW FOLDER")], ActStyle::Aux, 28.0, true);
+                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    let r = version_readout(ui, &th, &self.ver);
+                    if r.clicked() {
+                        match self.ver {
+                            VerState::Available(_) => { self.ver = VerState::Updating(0); self.ver_t0 = now; }
+                            VerState::Idle(_) | VerState::Failed | VerState::Latest | VerState::Done(_) => {
+                                self.ver = VerState::Checking; self.ver_t0 = now;
+                            }
+                            _ => {}
+                        }
+                    }
+                });
+            });
+            ui.add_space(8.0);
+            // ── search
+            ui.horizontal(|ui| {
+                let (slot, _) = ui.allocate_exact_size(vec2(280.0, 30.0), Sense::hover());
+                paint_well(ui.painter(), slot, th.paper, th.edge);
+                paint_icon(ui.painter(), Icon::Search, egui::pos2(slot.left() + 18.0, slot.center().y), 13.0, 1.8, th.ink_2, 0.0);
+                let field = Rect::from_min_max(egui::pos2(slot.left() + 32.0, slot.top() + 6.0), egui::pos2(slot.right() - 8.0, slot.bottom() - 6.0));
+                ui.put(field, egui::TextEdit::singleline(&mut self.lp_q)
+                    .frame(false)
+                    .hint_text("SEARCH")
+                    .font(egui::FontId::monospace(11.0))
+                    .text_color(th.ink));
+            });
+            ui.add_space(14.0);
+            // ── the rack: as many columns as fit at the module's minimum width
+            let idx: Vec<usize> = (0..self.rack.len())
+                .filter(|&i| in_folder(&self.rack[i], self.lp_folder)
+                    && self.rack[i].name.to_lowercase().contains(&self.lp_q.to_lowercase()))
+                .collect();
+            if idx.is_empty() {
+                ui.label(mono(if self.lp_folder == 0 { "NOTHING IS RUNNING" } else { "NO PROJECTS IN THIS FOLDER" }, 10.5).color(th.ink_3));
+                return;
+            }
+            let cols = ((ui.available_width() + 14.0) / (MODULE_MIN_W + 14.0)).floor().max(1.0) as usize;
+            let mut hits: Vec<(usize, ModuleHit)> = Vec::new();
+            for row in idx.chunks(cols) {
+                ui.columns(cols, |c| {
+                    for (k, &i) in row.iter().enumerate() {
+                        let p = &self.rack[i];
+                        let v = ModuleView { name: p.name, desc: p.desc, port: p.port, up: p.up,
+                                             folder: p.folder, tags: p.tags, pull: p.pull.as_ref() };
+                        if let Some(h) = module_card(&mut c[k], &th, &v) {
+                            hits.push((i, h));
+                        }
+                    }
+                });
+                ui.add_space(14.0);
+            }
+            for (i, h) in hits {
+                let p = &mut self.rack[i];
+                match h {
+                    ModuleHit::Stop => p.up = false,
+                    ModuleHit::Launch => p.up = true,
+                    ModuleHit::Pull | ModuleHit::Pull2(PullHit::Retry) => {
+                        p.pull = Some(PullState::Run(0));
+                        p.t0 = now;
+                    }
+                    ModuleHit::Pull2(PullHit::Dismiss) => p.pull = None,
+                    other => self.live = format!("{} · {:?}", p.name, other),
+                }
+            }
+        });
+
+        // ── the state sheet: every state, posed and still ───────────────────
+        ui.add_space(28.0);
+        ui.label(mono("THE VERSION CHECK", 8.5).color(th.ink_2));
+        ui.add_space(8.0);
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing = vec2(28.0, 18.0);
+            for (cap, st) in [
+                ("IDLE", VerState::Idle("2.3.0".into())),
+                ("CHECKING", VerState::Checking),
+                ("UP TO DATE", VerState::Latest),
+                ("UPDATE AVAILABLE", VerState::Available("2.4.0".into())),
+                ("UPDATING", VerState::Updating(46)),
+                ("UPDATED", VerState::Done("2.4.0".into())),
+                ("CHECK FAILED", VerState::Failed),
+            ] {
+                ui.vertical(|ui| {
+                    version_readout(ui, &th, &st);
+                    ui.add_space(6.0);
+                    ui.label(mono(cap, 8.5).color(th.ink_3));
+                });
+            }
+        });
+        ui.add_space(22.0);
+        ui.label(mono("A MODULE · RUN AND PULL", 8.5).color(th.ink_2));
+        ui.add_space(8.0);
+        let base = &self.rack[0];
+        let poses: [(&str, bool, Option<PullState>); 6] = [
+            ("RUNNING", true, None),
+            ("STOPPED", false, None),
+            ("PULLING · 63%", true, Some(PullState::Run(63))),
+            ("PULLED · CHANGES", true, Some(PullState::Ok("3 files changed · 41 insertions(+), 9 deletions(−)".into()))),
+            ("PULLED · NOTHING NEW", false, Some(PullState::Ok("Already up to date.".into()))),
+            ("PULL FAILED", false, Some(PullState::Err("fatal: Not possible to fast-forward, aborting.".into()))),
+        ];
+        let cols = ((ui.available_width() + 14.0) / (MODULE_MIN_W + 14.0)).floor().max(1.0) as usize;
+        for row in poses.chunks(cols) {
+            ui.columns(cols, |c| {
+                for (k, (cap, up, pull)) in row.iter().enumerate() {
+                    let v = ModuleView { name: base.name, desc: base.desc, port: base.port, up: *up,
+                                         folder: base.folder, tags: base.tags, pull: pull.as_ref() };
+                    // posed, not live: whatever is pressed here changes nothing
+                    let _ = module_card(&mut c[k], &th, &v);
+                    c[k].add_space(6.0);
+                    c[k].label(mono(*cap, 8.5).color(th.ink_3));
+                }
+            });
+            ui.add_space(14.0);
+        }
+    }
+
     fn overrides(&mut self, ui: &mut Ui) {
         let th = self.th;
         ui.horizontal_top(|ui| {
@@ -620,6 +879,7 @@ impl Gallery {
             (0, 12) => self.open(ui, "meter · the progress track"),
             (0, 13) => self.open(ui, "modal · window · menu · picker"),
             (0, 14) => self.open(ui, "the traps are prose — docs/PORTING.md"),
+            (1, 5) => self.launchpad(ui),
             (2, 0) => self.jog(ui),
             (2, 1) => self.open(ui, "stick — stays dark in this skin"),
             (2, 2) => self.open(ui, "pen bank"),

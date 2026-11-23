@@ -16,6 +16,20 @@ pub enum Icon {
     Copy,
     Trash,
     Chev,
+    Play,
+    Stop,
+    /// `ICON.run` — the restart arrow.
+    Restart,
+    /// `ICON.ext` — open in browser.
+    Ext,
+    Search,
+    /// `ICON.settle` — the down arrow onto a line: git pull, update.
+    Pull,
+    Term,
+    Folder,
+    /// `ICON.code` — open in editor.
+    Code,
+    Close,
 }
 
 /// A path in the 24-unit box, as open or closed polylines.
@@ -126,6 +140,59 @@ fn build(icon: Icon) -> Vec<(Vec<Pos2>, bool)> {
         Icon::Chev => {
             p.m(9.0, 6.0).l(15.0, 12.0).l(9.0, 18.0);
         }
+        Icon::Play => {
+            p.m(6.0, 3.0).l(20.0, 12.0).l(6.0, 21.0);
+            p.end(true);
+        }
+        Icon::Stop => {
+            p.m(7.0, 5.0).l(17.0, 5.0).arc(17.0, 7.0, 2.0, -90.0, 0.0).l(19.0, 17.0)
+                .arc(17.0, 17.0, 2.0, 0.0, 90.0).l(7.0, 19.0).arc(7.0, 17.0, 2.0, 90.0, 180.0)
+                .l(5.0, 7.0).arc(7.0, 7.0, 2.0, 180.0, 270.0);
+            p.end(true);
+        }
+        Icon::Restart => {
+            // polyline 1 4 1 10 7 10 · M3.51 15 a9 9 0 1 0 2.13-9.36 L1 10
+            p.m(1.0, 4.0).l(1.0, 10.0).l(7.0, 10.0);
+            p.m(3.51, 15.0);
+            for i in 1..=24 {
+                let a = (160.5 - 295.5 * i as f32 / 24.0).to_radians();
+                p.l(12.0 + 9.0 * a.cos(), 12.0 + 9.0 * a.sin());
+            }
+            p.l(1.0, 10.0);
+        }
+        Icon::Ext => {
+            p.m(18.0, 13.0).l(18.0, 19.0).arc(16.0, 19.0, 2.0, 0.0, 90.0).l(5.0, 21.0)
+                .arc(5.0, 19.0, 2.0, 90.0, 180.0).l(3.0, 8.0).arc(5.0, 8.0, 2.0, 180.0, 270.0).l(11.0, 6.0);
+            p.m(15.0, 3.0).l(21.0, 3.0).l(21.0, 9.0);
+            p.m(10.0, 14.0).l(21.0, 3.0);
+        }
+        Icon::Search => {
+            p.circle(11.0, 11.0, 7.0);
+            p.m(21.0, 21.0).l(16.65, 16.65);
+        }
+        Icon::Pull => {
+            p.m(12.0, 3.0).l(12.0, 14.0);
+            p.m(7.5, 9.5).l(12.0, 14.0).l(16.5, 9.5);
+            p.m(4.0, 20.0).l(20.0, 20.0);
+        }
+        Icon::Term => {
+            p.m(4.0, 17.0).l(10.0, 11.0).l(4.0, 5.0);
+            p.m(12.0, 19.0).l(20.0, 19.0);
+        }
+        Icon::Folder => {
+            p.m(22.0, 19.0).arc(20.0, 19.0, 2.0, 0.0, 90.0).l(4.0, 21.0).arc(4.0, 19.0, 2.0, 90.0, 180.0)
+                .l(2.0, 5.0).arc(4.0, 5.0, 2.0, 180.0, 270.0).l(9.0, 3.0).l(11.0, 6.0).l(20.0, 6.0)
+                .arc(20.0, 8.0, 2.0, -90.0, 0.0);
+            p.end(true);
+        }
+        Icon::Code => {
+            p.m(16.0, 18.0).l(22.0, 12.0).l(16.0, 6.0);
+            p.m(8.0, 6.0).l(2.0, 12.0).l(8.0, 18.0);
+        }
+        Icon::Close => {
+            p.m(18.0, 6.0).l(6.0, 18.0);
+            p.m(6.0, 6.0).l(18.0, 18.0);
+        }
     }
     p.end(false);
     p.lines
@@ -165,4 +232,25 @@ pub fn paint_icon_lit(p: &egui::Painter, icon: Icon, c: Pos2, px: f32, stroke: f
         paint_icon(p, icon, c + d, px, stroke, g, 0.0);
     }
     paint_icon(p, icon, c, px, stroke, ink, 0.0);
+}
+
+/// Play or Stop drawn SOLID — the transport glyphs, filled as every transport
+/// draws them — with an optional soft light of `glow` around them.
+pub fn paint_icon_solid(p: &egui::Painter, icon: Icon, c: Pos2, px: f32, col: Color32, glow: Option<Color32>) {
+    let k = px / 24.0;
+    let pts: Vec<Pos2> = match icon {
+        Icon::Play => vec![pos2(6.0, 3.0), pos2(20.0, 12.0), pos2(6.0, 21.0)],
+        _ => vec![pos2(5.0, 5.0), pos2(19.0, 5.0), pos2(19.0, 19.0), pos2(5.0, 19.0)],
+    };
+    // optical centre: a triangle's mass sits left of its box centre
+    let shift = if icon == Icon::Play { 1.0 } else { 0.0 };
+    let map = |q: &Pos2, s: f32| pos2(c.x + (q.x - 12.0 + shift) * k * s, c.y + (q.y - 12.0) * k * s);
+    if let Some(g) = glow {
+        for (s, a) in [(1.45, 0.10), (1.25, 0.18)] {
+            let ring: Vec<Pos2> = pts.iter().map(|q| map(q, s)).collect();
+            p.add(egui::Shape::convex_polygon(ring, g.gamma_multiply(a), Stroke::NONE));
+        }
+    }
+    let body: Vec<Pos2> = pts.iter().map(|q| map(q, 1.0)).collect();
+    p.add(egui::Shape::convex_polygon(body, col, Stroke::new(1.2 * k, col)));
 }

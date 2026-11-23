@@ -38,6 +38,12 @@ pub fn lcd(ui: &mut Ui, th: &Theme, text: &str) -> egui::Response {
 
 /// `.lcd` into a rect you own — for a readout placed by hand.
 pub fn paint_lcd(p: &egui::Painter, th: &Theme, rect: Rect, text: &str) {
+    paint_lcd_ink(p, th, rect, text, th.epaper_ink, th.epaper_bezel);
+}
+
+/// [`paint_lcd`] with the ink and the bezel named — for a dim readout, or a
+/// readout reporting a fault.
+pub fn paint_lcd_ink(p: &egui::Painter, th: &Theme, rect: Rect, text: &str, ink: Color32, bezel: Color32) {
     let rect = snap_rect(p, rect);
     let r = Rounding::same(3.0);
     p.rect_filled(rect, r, th.epaper);
@@ -51,15 +57,9 @@ pub fn paint_lcd(p: &egui::Painter, th: &Theme, rect: Rect, text: &str) {
         true,
         Stroke::new(1.0, Color32::from_rgba_unmultiplied(0, 0, 0, 41)),
     );
-    p.rect_stroke(rect, r, Stroke::new(1.0, th.epaper_bezel));
+    p.rect_stroke(rect, r, Stroke::new(1.0, bezel));
     // and no white line under the module, for the reason the DRO has none
-    p.text(
-        rect.center(),
-        Align2::CENTER_CENTER,
-        text,
-        read_font(12.0),
-        th.epaper_ink,
-    );
+    p.text(rect.center(), Align2::CENTER_CENTER, text, read_font(12.0), ink);
 }
 
 // ── the engraved caption ────────────────────────────────────────────────────

@@ -117,6 +117,8 @@ Object.assign(ICON, {
   upload:svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
   image: svg('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
   sun:   svg('<circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>'),
+  /* the launchpad's OPEN IN EDITOR — Lucide's code, as the app ships it */
+  code:  svg('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>'),
   term:  svg('<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>'),
   /* THE SPEAKER TAKES THE SAME SLASH EVERY OTHER `…Off` IN THIS SET TAKES —
      the plain drawing with a rule through it, so off is a SHAPE and not a
@@ -1478,7 +1480,10 @@ function openPicker(anchor, value, onChange, swatches) {
      whether the dropper is there. */
   const place = () => {
     const a = anchor.getBoundingClientRect(), p = plate.getBoundingClientRect();
-    let x = a.left + a.width / 2 - p.width / 2;
+    /* `align: 'start'` HANGS THE PLATE FROM THE ANCHOR'S LEFT EDGE, for a
+       plate that is the anchor opening (the selector's list) rather than a
+       thing it points at. */
+    let x = align === 'start' ? a.left : a.left + a.width / 2 - p.width / 2;
     let y = a.bottom + 9;
     if (y + p.height > innerHeight - 8) y = Math.max(8, a.top - p.height - 9);
     plate.style.left = Math.max(8, Math.min(x, innerWidth - p.width - 8)) + 'px';
@@ -2586,7 +2591,7 @@ let plateOpen = null;
    directly over its key. The moment a wide plate slides off a window edge the
    tail is somewhere in the middle of the bar, pointing at whatever happens to
    be under it. */
-function openPlate(anchor, body, { up = true, cls = '', onKey } = {}) {
+function openPlate(anchor, body, { up = true, cls = '', onKey, align = 'center', gap = 11 } = {}) {
   if (plateOpen) {
     const same = plateOpen.anchor === anchor;
     plateOpen.close();
@@ -2595,13 +2600,15 @@ function openPlate(anchor, body, { up = true, cls = '', onKey } = {}) {
 
   const plate = el('div', 'plate ' + cls);
   plate.append(body);
+  // a plate that is the anchor opening is never narrower than the anchor
+  if (align === 'start') plate.style.minWidth = anchor.getBoundingClientRect().width + 'px';
   document.body.append(plate);
 
   /* Measured after it is in the DOM: the height depends on what it was given,
      and the flip decision depends on the height. */
   const place = () => {
     const a = anchor.getBoundingClientRect(), p = plate.getBoundingClientRect();
-    const GAP = 11;
+    const GAP = gap;
     let above = up;
     if (above && a.top - p.height - GAP < 8) above = false;
     else if (!above && a.bottom + p.height + GAP > innerHeight - 8) above = true;
@@ -6535,7 +6542,7 @@ function selector({ label, options, index = 0, width = 168, onChange }) {
   };
 
   const open = () => {
-    const plate = openPlate(face, build(), { up: false, cls: 'menu sellist', onKey: (e, close) => {
+    const plate = openPlate(face, build(), { up: false, cls: 'menu sellist', align: 'start', gap: 6, onKey: (e, close) => {
       if (e.key === 'ArrowDown')      { e.preventDefault(); step(1); }
       else if (e.key === 'ArrowUp')   { e.preventDefault(); step(-1); }
       else if (e.key === 'Home')      { e.preventDefault(); rows[0].focus(); }

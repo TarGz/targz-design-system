@@ -53,6 +53,8 @@
 
   <h2>06 <span>/</span> Launchpad</h2>
   <div class="console" id="console"></div>
+  <!-- every state of the console, posed and still -->
+  <div class="lp-states" id="lp-states"></div>
 
   <footer>targz design system · skew · exploration 01 · skew-panels.html</footer>
 </div>
@@ -643,6 +645,7 @@ Object.assign(ICON, {
   upload:svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
   image: svg('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
   sun:   svg('<circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>'),
+  code:  svg('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>'),
   term:  svg('<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>'),
   /* THE SPEAKER TAKES THE SAME SLASH EVERY OTHER `…Off` IN THIS SET TAKES —
      the plain drawing with a rule through it, so off is a SHAPE and not a
@@ -2195,19 +2198,205 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       desc:'Generative portrait engine — DNA-shaped pattern layered over a portrait image, plotter-ready.',
       tags:['dev'] },
   ];
-  const FOLDERS = ['All', 'Portrait', 'Razo', 'Web'];
+  /* RUNNING IS A CATEGORY, so it is a chip in the same radio row as the
+     folders rather than a readout beside it: "what is up right now" is a
+     question you FILTER by, and a number you can only look at answers half of
+     it. It sits second, after All, because it cuts across every folder. */
+  const FOLDERS = ['All', 'Running', 'Portrait', 'Razo', 'Web'];
+  const inFolder = (p, i) => i === 0 || (i === 1 ? p.up : p.folder === FOLDERS[i]);
   let folder = 0, q = '';
 
   const visible = () => PROJECTS.filter(p =>
-    (folder === 0 || p.folder === FOLDERS[folder]) &&
-    p.name.toLowerCase().includes(q.toLowerCase()));
+    inFolder(p, folder) && p.name.toLowerCase().includes(q.toLowerCase()));
+
+  /* ── THE VERSION READOUT IS THE UPDATE CHECK ───────────────────────────────
+     Clicking the version is where everyone already looks for "am I current?",
+     so that is where the question is asked. The readout itself reports the
+     check — CHECKING, UP TO DATE, CHECK FAILED — and only when there IS
+     something to install does a key appear beside it: an Update key that is
+     not there is an Update key nobody has to learn to ignore. The update runs
+     in the same readout, as a percentage, and the readout lands on the new
+     number. Built once and repainted in place, so a check in flight survives
+     the rack being redrawn under it. The demo cycles its three answers:
+     available, up to date, failed. */
+  const APP = { ver: '2.3.0', latest: '2.4.0', st: 'idle', pct: 0, n: 0 };
+  const ver = el('button', 'lcd verkey');
+  ver.type = 'button';
+  const upd = key(`${ICON.settle}<span></span>`, { cls: 'act go upd' });
+  let settleT = 0;
+  const paintVer = () => {
+    const txt = { idle: `V${APP.ver}`, checking: 'CHECKING', latest: 'UP TO DATE',
+                  failed: 'CHECK FAILED', available: `V${APP.ver}`,
+                  updating: `UPDATING ${APP.pct}%`, done: `V${APP.ver} ✓` }[APP.st];
+    ver.textContent = txt;
+    ver.className = 'lcd verkey' + (APP.st === 'checking' || APP.st === 'updating' ? ' busy' : '')
+                                 + (APP.st === 'failed' ? ' err' : '');
+    ver.title = APP.st === 'failed' ? 'Could not reach the update server — click to try again'
+              : APP.st === 'updating' ? 'Installing…' : 'Check for updates';
+    ver.disabled = APP.st === 'checking' || APP.st === 'updating';
+    // AN AVAILABLE UPDATE TAKES THE VERSION'S PLACE: the key is the readout's
+    // answer, so it stands where the readout stood rather than beside it
+    upd.hidden = APP.st !== 'available';
+    ver.hidden = APP.st === 'available';
+    upd.lastElementChild.textContent = `UPDATE ${APP.latest}`;
+    upd.title = `Install version ${APP.latest}`;
+  };
+  const later = (st, ms) => { clearTimeout(settleT); settleT = setTimeout(() => { APP.st = st; paintVer(); }, ms); };
+  ver.addEventListener('click', () => {
+    if (ver.disabled) return;
+    APP.st = 'checking'; paintVer();
+    const answer = ['available', 'latest', 'failed'][APP.n++ % 3];
+    setTimeout(() => {
+      APP.st = answer === 'available' && APP.ver === APP.latest ? 'latest' : answer;
+      paintVer();
+      if (APP.st === 'latest') later('idle', 2400);
+    }, 900);
+  });
+  upd.addEventListener('click', () => {
+    APP.st = 'updating'; APP.pct = 0; paintVer();
+    const t = setInterval(() => {
+      APP.pct = Math.min(100, APP.pct + 7 + Math.round(Math.random() * 9));
+      paintVer();
+      if (APP.pct >= 100) {
+        clearInterval(t);
+        APP.ver = APP.latest; APP.st = 'done'; paintVer();
+        later('idle', 2400);
+      }
+    }, 140);
+  });
+  paintVer();
+
+  /* ── GIT PULL: A STATUS LINE THAT SAYS WHAT IT IS DOING ────────────────────
+     A pull is the one tool on the card that takes time and can fail, so it is
+     the one that reports. Pressing it opens a line under the keys, in the same
+     well as the localhost strip: a lamp, what git is doing now, and a 2px
+     trace along the floor of the well that fills as it goes. The key stays
+     down while it runs, so it cannot be pressed twice.
+       SUCCESS says what changed and leaves on its own after four seconds —
+     it needs no answer.
+       FAILURE STAYS. It prints git's own words, in the stop colour, with the
+     two things you would do next — try again, or open a terminal in the
+     folder — and a × to put it away. An error that times out is an error you
+     might never have read. */
+  const PULL = {
+    'Portrait-Typo':    { ok: true,  msg: '3 files changed · 41 insertions(+), 9 deletions(−)' },
+    'Portrait-ribbons': { ok: true,  msg: 'Already up to date.' },
+    'Portrait-Cubes':   { ok: false, msg: 'fatal: Not possible to fast-forward, aborting.' },
+    'Portrait-DNA':     { ok: false, msg: 'error: your local changes to settings.json would be overwritten' },
+  };
+  const STEPS = [[0, 'fetching origin…'], [30, 'receiving objects'], [80, 'fast-forwarding…']];
+  const pullLine = p => {
+    if (p._line) return p._line;
+    const line = el('div', 'pullbar');
+    line.setAttribute('role', 'status');
+    line.setAttribute('aria-live', 'polite');
+    line.append(el('span', 'pb-lamp'), el('span', 'pb-msg'), el('span', 'pb-acts'), el('i', 'pb-fill'));
+    p._line = line;
+    return line;
+  };
+  const paintPull = p => {
+    const s = p.pull, line = pullLine(p);
+    line.hidden = !s;
+    if (p._pullKey) {
+      p._pullKey.disabled = !!s && s.st === 'run';
+      p._pullKey.classList.toggle('is-down', !!s && s.st === 'run');
+    }
+    if (!s) return;
+    line.className = 'pullbar ' + s.st;
+    const msg = line.querySelector('.pb-msg'), acts = line.querySelector('.pb-acts');
+    msg.textContent = s.st === 'run'
+      ? `${STEPS.filter(([at]) => s.pct >= at).pop()[1]}${s.pct >= 30 && s.pct < 80 ? ` ${s.pct}%` : ''}`
+      : s.msg;
+    msg.title = msg.textContent;
+    line.querySelector('.pb-fill').style.width = (s.st === 'run' ? s.pct : 0) + '%';
+    acts.textContent = '';
+    if (s.st === 'err') {
+      acts.append(
+        key('<span>RETRY</span>', { cls: 'act aux', title: 'Run git pull --ff-only again', onClick: () => pull(p) }),
+        key(ICON.term, { cls: 'act aux ico', title: 'Open in terminal' }),
+        key(ICON.close, { cls: 'act aux ico', title: 'Dismiss', onClick: () => { p.pull = null; paintPull(p); } }));
+    }
+  };
+  const pull = p => {
+    if (p.pull && p.pull.st === 'run') return;
+    clearTimeout(p._hide);
+    p.pull = { st: 'run', pct: 0 };
+    paintPull(p);
+    const t = setInterval(() => {
+      p.pull.pct = Math.min(100, p.pull.pct + 4 + Math.round(Math.random() * 6));
+      // a failing pull dies where git dies: after the fetch, at the merge
+      const r = PULL[p.name];
+      if (!r.ok && p.pull.pct >= 82) {
+        clearInterval(t); p.pull = { st: 'err', msg: r.msg }; paintPull(p); return;
+      }
+      if (p.pull.pct >= 100) {
+        clearInterval(t); p.pull = { st: 'ok', msg: r.msg }; paintPull(p);
+        p._hide = setTimeout(() => { p.pull = null; paintPull(p); }, 4000);
+        return;
+      }
+      paintPull(p);
+    }, 110);
+  };
+
+  /* One module, built from a project. The rack draws them live; the state
+     sheet below the console poses copies of them. */
+  const buildModule = p => {
+    const m = el('div', 'module' + (p.up ? ' up' : ''));
+    const head = el('div', 'mod-head');
+    head.append(el('span', 'mod-ico', ICON.code), el('span', 'mod-name', p.name), el('span', 'stamp', 'NODE'));
+    m.append(head, el('p', 'mod-desc', p.desc));
+
+    if (p.up) {
+      const port = el('button', 'port', `${ICON.ext}<span>localhost:${p.port}</span><span>OPEN</span>`);
+      port.type = 'button';
+      port.title = 'Open in browser';
+      m.append(port);
+    }
+
+    const acts = el('div', 'mod-acts');
+    /* RUNNING IS THE ORANGE CAP and stopped is the plain one: the lit key is
+       the module that is doing something, so a rack of them reads at a
+       glance. Running, the key splits — STOP, and a restart segment welded
+       to it, because a restart is a stop and a launch in one press. */
+    const runKey = () => {
+      const split = el('div', 'split');
+      split.append(
+        key(`${ICON.stop}<span>STOP</span>`, { cls: 'act go stop',
+          title: `Stop ${p.name}`, onClick: () => { p.up = false; draw(); } }),
+        key(ICON.run, { cls: 'act go ico', title: `Restart ${p.name}` }));
+      return split;
+    };
+    acts.append(p.up
+      ? runKey()
+      : key(`${ICON.play}<span>LAUNCH</span>`, { cls: 'act aux start',
+          title: `Launch ${p.name}`, onClick: () => { p.up = true; draw(); } }));
+    /* THE FOUR TOOLS ARE ONE GROUP, at the far end: things you do TO the
+       folder, in the order the launchpad app carries them. */
+    const tools = el('div', 'mod-tools');
+    [[ICON.code,   'Open in editor'],
+     [ICON.folder, 'Reveal in Finder'],
+     [ICON.term,   'Open in terminal']].forEach(([ic, t]) =>
+      tools.append(key(ic, { cls: 'act aux ico', title: t })));
+    p._pullKey = key(ICON.settle, { cls: 'act aux ico', title: 'git pull --ff-only', onClick: () => pull(p) });
+    tools.append(p._pullKey);
+    acts.append(tools);
+    m.append(acts, pullLine(p));
+    paintPull(p);
+
+    const tags = el('div', 'mod-tags');
+    tags.append(el('span', 'tagcut folder', p.folder));
+    p.tags.forEach(t => tags.append(el('span', 'tagcut', t)));
+    m.append(tags, el('span', 'grip'));
+    return m;
+  };
 
   const draw = (keepFocus) => {
     root.textContent = '';
     const top = el('div', 'con-top');
     FOLDERS.forEach((f, i) => {
-      const n = f === 'All' ? PROJECTS.length : PROJECTS.filter(p => p.folder === f).length;
-      const c = el('button', 'chip' + (i === folder ? ' is-down' : ''), `${f}<span class="ct">${n}</span>`);
+      const n = PROJECTS.filter(p => inFolder(p, i)).length;
+      const c = el('button', 'chip' + (i === folder ? ' is-down' : '') + (i === 1 ? ' running' : ''),
+                   `${i === 1 ? '<span class="pilot"></span>' : ''}${f}<span class="ct">${n}</span>`);
       c.type = 'button';
       c.setAttribute('role', 'radio');
       c.setAttribute('aria-checked', String(i === folder));
@@ -2226,44 +2415,15 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     slot.append(inp);
     top.append(slot);
 
-    const running = PROJECTS.filter(p => p.up).length;
-    const lcd = el('div', 'lcd' + (running ? '' : ' dim'), `${running} RUNNING`);
-    lcd.style.marginLeft = 'auto';
-    top.append(lcd, el('div', 'lcd dim', `${visible().length} SHOWN`));
+    const shown = el('div', 'lcd dim', `${visible().length} SHOWN`);
+    shown.style.marginLeft = 'auto';
+    top.append(shown, upd, ver);
 
     const rack = el('div', 'rack');
     const list = visible();
-    if (!list.length) rack.append(el('div', 'empty', 'NO PROJECTS IN THIS FOLDER'));
+    if (!list.length) rack.append(el('div', 'empty', folder === 1 ? 'NOTHING IS RUNNING' : 'NO PROJECTS IN THIS FOLDER'));
 
-    list.forEach(p => {
-      const m = el('div', 'module' + (p.up ? ' up' : ''));
-      const head = el('div', 'mod-head');
-      head.append(el('span', 'pilot'), el('span', 'mod-name', p.name), el('span', 'stamp', 'NODE'));
-      m.append(head, el('p', 'mod-desc', p.desc));
-
-      if (p.up) {
-        const port = el('button', 'port', `${ICON.ext}<span>localhost:${p.port}</span><span>OPEN</span>`);
-        port.type = 'button';
-        port.title = 'Open in browser';
-        m.append(port);
-      }
-
-      const acts = el('div', 'mod-acts');
-      acts.append(p.up
-        ? key(`<span class="lens"></span>${ICON.stop}<span>STOP</span>`, { cls: 'act halt',
-            title: `Stop ${p.name}`, onClick: () => { p.up = false; draw(); } })
-        : key(`<span class="lens"></span>${ICON.play}<span>LAUNCH</span>`, { cls: 'act go',
-            title: `Launch ${p.name}`, onClick: () => { p.up = true; draw(); } }));
-      acts.append(key(`${ICON.term}<span>iTerm</span>`, { cls: 'act aux', title: 'Open in iTerm' }));
-      acts.append(key(`${ICON.folder}<span>Finder</span>`, { cls: 'act aux', title: 'Reveal in Finder' }));
-      m.append(acts);
-
-      const tags = el('div', 'mod-tags');
-      tags.append(el('span', 'tagcut folder', p.folder));
-      p.tags.forEach(t => tags.append(el('span', 'tagcut', t)));
-      m.append(tags, el('span', 'grip'));
-      rack.append(m);
-    });
+    list.forEach(p => rack.append(buildModule(p)));
 
     root.append(top, rack);
     if (keepFocus) {
@@ -2272,6 +2432,57 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     }
   };
   draw();
+
+  /* ── THE STATE SHEET — every state the console can be in, posed and still ──
+     A live panel shows one state at a time and the interesting ones are the
+     ones you have to provoke. These are copies built by the same functions,
+     frozen in each state, with the state named under it — so the whole
+     vocabulary can be read and judged at once. Nothing on the sheet responds. */
+  (function states() {
+    const sheet = document.getElementById('lp-states');
+    if (!sheet) return;
+    const cell = (cap, ...nodes) => {
+      const c = el('div', 'lp-cell');
+      const row = el('div', 'lp-row');
+      row.append(...nodes);
+      c.append(row, el('span', 'tagcut', cap));
+      return c;
+    };
+
+    // the version readout and its key, in each state
+    const verState = (txt, cls, upd) => {
+      const v = el('span', 'lcd verkey' + (cls ? ' ' + cls : ''), txt);
+      if (!upd) return [v];
+      return [key(`${ICON.settle}<span>${upd}</span>`, { cls: 'act go upd' })];
+    };
+    const vers = el('div', 'lp-grid lp-vers');
+    [['IDLE',             'V2.3.0',       ''],
+     ['CHECKING',         'CHECKING',     'busy'],
+     ['UP TO DATE',       'UP TO DATE',   ''],
+     ['UPDATE AVAILABLE', 'V2.3.0',       '', 'UPDATE 2.4.0'],
+     ['UPDATING',         'UPDATING 46%', 'busy'],
+     ['UPDATED',          'V2.4.0 ✓',     ''],
+     ['CHECK FAILED',     'CHECK FAILED', 'err'],
+    ].forEach(([cap, txt, cls, upd]) => vers.append(cell(cap, ...verState(txt, cls, upd))));
+
+    // modules: run states × pull states
+    const base = PROJECTS[0];
+    const pose = (name, up, pull) => {
+      const p = Object.assign({}, base, { name, up, pull, _line: null, _pullKey: null });
+      return buildModule(p);
+    };
+    const mods = el('div', 'lp-grid lp-mods');
+    [['RUNNING',                 true,  null],
+     ['STOPPED',                 false, null],
+     ['PULLING · 63%',           true,  { st: 'run', pct: 63 }],
+     ['PULLED · CHANGES',        true,  { st: 'ok',  msg: '3 files changed · 41 insertions(+), 9 deletions(−)' }],
+     ['PULLED · NOTHING NEW',    false, { st: 'ok',  msg: 'Already up to date.' }],
+     ['PULL FAILED',             false, { st: 'err', msg: 'fatal: Not possible to fast-forward, aborting.' }],
+    ].forEach(([cap, up, pull]) => mods.append(cell(cap, pose(base.name, up, pull))));
+
+    sheet.append(el('span', 'tagcut lp-head', 'THE VERSION CHECK'), vers,
+                 el('span', 'tagcut lp-head', 'A MODULE · RUN AND PULL'), mods);
+  })();
 })();
 
 /* THE BRIGHT SKIN IS GONE, and it is not coming back as a computed inversion

@@ -43,6 +43,7 @@
 pub mod sfx;
 pub mod tokens;
 
+mod console;
 mod fader;
 mod frame;
 mod icon;
@@ -55,17 +56,22 @@ mod press;
 mod switch;
 mod theme;
 
+pub use console::{
+    act, dim_readout, module_card, paint_act, paint_lens, paint_surround, paint_well, port_strip,
+    pull_line, pull_step, split_act, surround, version_readout, ActStyle, Lens, ModuleHit, ModuleView,
+    Part, PullHit, PullState, VerState, MODULE_MIN_W,
+};
 pub use fader::{fader, paint_fader, FaderState, FADER_SIZE};
 pub use frame::{label, panel_frame, section, well_frame, well_shadow};
 pub use knob::{knob, paint_knob, KnobKind, KNOB_D, KNOB_SIZE};
-pub use icon::{paint_icon, paint_icon_lit, Icon};
+pub use icon::{paint_icon, paint_icon_lit, paint_icon_solid, Icon};
 pub use press::{
     backlit, chevron, icon_key, micro, paint_icon_key, sep, BACKLIT_SIZE, CHEV_SIZE, ICON_KEY_SIZE,
     MICRO_SIZE,
 };
 pub use key::{btn, colored_btn, key, paint_key, paint_pkey_down, pkey_bar, KeyState, KeyStyle};
 pub use machine::{
-    bezel_edges, bezel_frame, cut, dro, jog_pad, lcd, paint_lcd, panel, JogPress,
+    bezel_edges, bezel_frame, cut, dro, jog_pad, lcd, paint_lcd, paint_lcd_ink, panel, JogPress,
 };
 pub use nav::{nav_bar, Nav, NavHit, NAV_GAP, NAV_HEIGHT};
 pub use paint::{hex, mix, rgb, vgrad};

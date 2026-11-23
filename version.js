@@ -1,6 +1,19 @@
-export const version = '1.117.0';
+export const version = '1.118.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.118.0',
+    date: '2026-11-23',
+    changes: [
+      "THE SELECTOR IS REDRAWN — A VALUE IS A READOUT, NOT A COMMAND. The light face was an orange GO key holding a value; it is a `--paper` well with the reading in `--ink` now, and the orange only rings it while the list is open. Face and list set the value in one face, `--font-read`. The current row lost the 2px brown focus ring and the `--pick` smudge: it is a `--primary-subtle` tint, `--primary-ink` and a lit tick. The list hangs from the face's left edge, at least as wide, 6px under (`openPlate` learned `align:'start'` and `gap`). Dark unselected rows went from 3.3:1 to 5:1, and the chevron turns to point back at the face while open.",
+      "ONE PANEL COLOUR — THE FADER BANK'S. Every light panel is `--paper` framed by `--surround`; a floating one (menu, modal, plate, picker, loupe, window) keeps its throw on top of the frame. The selector's list stays `--card`, because its rows highlight in `--paper`.",
+      "THE LAUNCHER CONSOLE IS FINISHED. Running is a category chip, first in the row; the four tools — editor, Finder, terminal, git pull — are one icon group at the far end of each card; a running module's key is orange and splits into STOP and a restart segment, a stopped one is a plain LAUNCH. The run keys carry one solid glyph and no lamp, and a module is marked by a code glyph that lights orange when it runs. No green anywhere on the rack: stamps and counts are printed labels, tags are words on the case.",
+      "THE VERSION IS THE UPDATE CHECK. Pressing it asks: CHECKING, UP TO DATE, CHECK FAILED — and when there is something to install an UPDATE key takes the readout's place, then the readout counts the install and lands on the new number.",
+      "AND GIT PULL REPORTS. A line opens under the keys in the localhost strip's well: what git is doing, a 2px trace filling as it goes, the key held down so it cannot be pressed twice. Success says what changed and leaves after four seconds; failure prints git's own words in the stop colour with RETRY, terminal and dismiss, and stays until answered.",
+      "A STATE SHEET UNDER THE CONSOLE poses every version state and every run/pull state as captioned, inert copies, so the whole vocabulary can be judged at once.",
+      "AND ALL OF IT IS IN THE CRATE. `console` ports the parts — `act` (a key whose legend is lamps, glyphs, words and counts), `split_act`, `port_strip`, `pull_line`, `version_readout`, `module_card`, `surround` — and the gallery draws the console and its state sheet under PANELS → Launchpad. Ten new stroke icons, solid transport glyphs, and `paint_lcd_ink` for a readout reporting a fault.",
+    ],
+  },
   {
     version: '1.117.0',
     date: '2026-11-23',

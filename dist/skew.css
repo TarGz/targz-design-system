@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.117.0
+     at       Skew v1.118.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -2613,10 +2613,21 @@ html{ -webkit-tap-highlight-color:transparent; }
 .lens{ width:8px; height:8px; border-radius:50%; flex:0 0 8px; }
 .act.go .lens{ background:radial-gradient(circle at 35% 30%, #fff, #7CFFB0 40%, #1FA85C);
   box-shadow:0 0 6px rgba(124,255,176,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
-.act.halt .lens{ background:radial-gradient(circle at 35% 30%, #fff, #FF9B9B 40%, #C21B1B);
+:is(.act.halt, .act.stop) .lens{ background:radial-gradient(circle at 35% 30%, #fff, #FF9B9B 40%, #C21B1B);
   box-shadow:0 0 6px rgba(255,80,80,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
 /* secondary keys — unlit, plain metal. They open something elsewhere. */
 .act.aux{ padding:0 11px; color:#9aa0aa; }
+/* the module's tool group: icon keys, square, pushed to the far end */
+.mod-tools{ display:flex; gap:7px; margin-left:auto; }
+.act.ico{ width:32px; padding:0; }
+.act.ico svg{ width:14px; height:14px; }
+/* a SPLIT key: two segments welded into one cap, a seam between them */
+.split{ display:flex; }
+.split > .act:first-child{ border-top-right-radius:0; border-bottom-right-radius:0; }
+.split > .act:last-child{
+  border-top-left-radius:0; border-bottom-left-radius:0;
+  border-left:1px solid rgba(255,255,255,.35);
+}
 /* …unless one of them LATCHES. `.act.aux` and `.key.is-down` have the same
    specificity and this file declares aux later, so a latched aux key was
    quietly keeping its grey glyph — the one thing the lit state is made of. */
@@ -8612,3 +8623,281 @@ span.nav-link{ cursor:default; }
   color:var(--pick);
   text-shadow:0 0 7px color-mix(in srgb, var(--pick) 38%, transparent);
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE SELECTOR, REDRAWN — A VALUE IS A READOUT, NOT A COMMAND
+   ──────────────────────────────────────────────────────────────────────────
+   FIVE FAULTS, AND THEY WERE ALL THE SAME FAULT: the face and the list were
+   drawn as two different objects.
+
+     1  THE LIGHT FACE WAS AN ORANGE KEY. `--primary-deep` with a wall under it
+        is how this skin says GO, and a selector does not go anywhere — it holds
+        a value. An action-coloured face beside a real action key made two
+        buttons out of one button and one field. It is a WELL now, the same cut
+        the micro key and the gate slot are: `--paper`, an inset `--edge-ctl`
+        ring, the value in `--ink`.
+     2  THE FACE AND THE LIST SET THE VALUE IN TWO FACES. Mixed-case mono on the
+        face, Silkscreen caps in the list — the same word spelled twice, so the
+        eye had to match them rather than see one. Both are `--font-read` now:
+        a selector's face IS a readout, and the list is the readouts it can show.
+     3  THE CURRENT ROW WORE A 2PX BROWN RING. Opening the list focuses the
+        current row, and the skin's generic `:focus-visible` outline landed on
+        it — so the row you already HAVE looked like an error. Focus inside the
+        list is the row's own highlight, an inset ring, not an outline 2px off
+        it; and the current row is marked by its lamp and its ink, not a box.
+     4  AND IT GLOWED. `.sel-row.is-cur` takes the `--pick` text-shadow at the
+        foot of this file, which is a lamp on dark glass and a smudge on cream.
+     5  THE LIST FLOATED. Centred under the face and narrower than it, so it
+        read as a tooltip rather than as the face opening. It hangs from the
+        face's LEFT edge now, at least as wide as it, 6px under — the face and
+        its list are one object with a seam.
+
+   And the chevron says which way the list is: it turns to point back at the
+   face while the list is open.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── the face, dark ─────────────────────────────────────────────────────── */
+.selwrap .sel{
+  height:32px; padding:0 10px 0 12px; gap:10px;
+  font-family:var(--font-read); font-size:12px; letter-spacing:.02em;
+  text-transform:uppercase;
+  -webkit-font-smoothing:none; -moz-osx-font-smoothing:grayscale;
+}
+.sel-chev{ transition:transform .16s cubic-bezier(.3,.7,.4,1), color .12s; }
+.selwrap .sel.is-down .sel-chev{ transform:rotate(-90deg); }
+
+/* ── the list, dark ─────────────────────────────────────────────────────── */
+.sellist .plate-body{ padding:4px; gap:2px; }
+.sel-row{
+  height:30px; padding:0 10px; gap:10px; border-radius:6px;
+  font-size:12px; color:#868d97;      /* 5:1 on the plate — #6b7079 was 3.3 */
+}
+.sel-row:focus-visible{ outline:none; }
+.sellist{ animation:sel-open .12s cubic-bezier(.3,.7,.4,1); }
+@keyframes sel-open{ from{ opacity:0; transform:translateY(-3px); } to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce){
+  .sellist{ animation:none; }
+  .sel-chev{ transition:none; }
+}
+
+/* ── the face, light: a well with a reading in it ───────────────────────── */
+[data-skin="light"] .selwrap .sel{
+  background-color:var(--paper); background-image:none;
+  border:0; border-radius:var(--r-key);
+  color:var(--ink); font-weight:400;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.10), inset 0 0 0 1px var(--edge-ctl);
+  transform:none;
+}
+[data-skin="light"] .selwrap .sel:hover{
+  background-color:var(--paper); color:var(--ink);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.12), inset 0 0 0 1px #C4BDB2;
+}
+[data-skin="light"] .selwrap .sel .sel-chev{ color:var(--ink-2); }
+[data-skin="light"] .selwrap .sel:hover .sel-chev{ color:var(--ink); }
+[data-skin="light"] .selwrap .sel.is-down{
+  background-color:var(--paper); transform:none;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.12), inset 0 0 0 1px var(--primary-ink);
+}
+[data-skin="light"] .selwrap .sel.is-down .sel-chev{ color:var(--primary-ink); }
+
+/* ── the list, light ────────────────────────────────────────────────────── */
+[data-skin="light"] .sellist{
+  padding:0; background:var(--card); border:1px solid var(--edge);
+  border-radius:var(--r-sm); box-shadow:var(--shadow-md);
+}
+[data-skin="light"] .sel-row{ color:var(--ink); background:transparent; text-shadow:none; }
+[data-skin="light"] .sel-row:hover{ background:var(--paper); color:var(--ink); }
+[data-skin="light"] .sel-row:focus-visible{
+  outline:none; background:var(--paper); color:var(--ink);
+  box-shadow:inset 0 0 0 1px var(--edge-ctl);
+}
+[data-skin="light"] .sel-row.is-cur,
+[data-skin="light"] .sel-row.is-cur:hover{
+  background:var(--primary-subtle); color:var(--primary-ink);
+  box-shadow:none; text-shadow:none;
+}
+[data-skin="light"] .sel-row.is-cur:focus-visible{
+  background:var(--primary-subtle); color:var(--primary-ink); text-shadow:none;
+  box-shadow:inset 0 0 0 1px var(--primary-ink);
+}
+[data-skin="light"] .sel-row.is-cur .sel-tick{
+  background:var(--primary); box-shadow:none;
+}
+[data-skin="light"] :is(.box,
+.module,
+.console,
+.palette,
+.drawer,
+.win-floor,
+.box.bulge,
+.demo-stage,
+.demo-stack {
+  background-color:var(--paper); background-image:none;
+  border:0; box-shadow:var(--surround);
+}
+[data-skin="light"] :is(.menu,
+.modal,
+.plate,
+.picker,
+.win):not(.sellist) {
+  background-color:var(--paper); background-image:none;
+  border:0; box-shadow:var(--surround), var(--shadow-card);
+}
+
+/* the split key's seam survives the light skin's halt border colour */
+[data-skin="light"] .split > .act:last-child{ border-left-color:rgba(255,255,255,.35); }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NO GREEN ON THE RACK — ONE ACCENT
+   ──────────────────────────────────────────────────────────────────────────
+   The launcher's rack spoke two lamp colours: green for "running" on the
+   pilot, the NODE stamp, the folder counts and the launch lamp, orange for
+   everything else this system lights. Two accents is two meanings to learn
+   for one meaning. Running is the orange cap now, so the pilot that says the
+   same thing takes the same lamp (`.act.fire .lens`'s own gradient); a stamp
+   and a count are LABELS, not lamps, so they go to ink on the case; and a
+   stopped module's LAUNCH lamp is unlit, because nothing is running.
+   ══════════════════════════════════════════════════════════════════════════ */
+.module.up .pilot{
+  background:radial-gradient(circle at 35% 30%, #fff, #FFC08A 40%, #E05A00);
+  box-shadow:0 0 6px rgba(255,106,0,.8), inset 0 -1px 1px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.5);
+}
+.act.start .lens{
+  background:radial-gradient(circle at 34% 28%, #4a4f57, #26282c 70%);
+  box-shadow:inset 0 -1px 1px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.6);
+}
+.stamp{ color:#c2c7cf; background:rgba(0,0,0,.45); box-shadow:inset 0 1px 2px rgba(0,0,0,.8); }
+.chip .ct{ color:#c2c7cf; text-shadow:none; }
+[data-skin="light"] .module.up .pilot{ box-shadow:0 0 5px rgba(255,106,0,.55); }
+[data-skin="light"] .act.start .lens{ background:var(--edge-ctl); box-shadow:inset 0 1px 1px rgba(0,0,0,.18); }
+[data-skin="light"] .stamp{
+  color:var(--ink-2); background:var(--paper);
+  box-shadow:inset 0 0 0 1px var(--edge-ctl);
+}
+[data-skin="light"] .chip .ct{
+  color:var(--ink-2); background:var(--paper);
+  box-shadow:inset 0 0 0 1px var(--edge-ctl); text-shadow:none;
+}
+[data-skin="light"] .chip.is-down .ct{ color:var(--primary-ink); }
+
+/* A MODULE'S TAGS ARE PRINTED, NOT DISPLAYED. Each one sat in its own sunk
+   window, which is what this system draws a SCREEN as — so a row of plain
+   labels read as a row of little readouts. They are words on the case: the
+   label face, `--ink-2`, no well, no bezel, no glass. */
+.mod-tags{ gap:10px; }
+.mod-tags .tagcut,
+[data-skin="light"] .mod-tags .tagcut{
+  background:none; border:0; box-shadow:none; text-shadow:none;
+  padding:0; border-radius:0;
+}
+[data-skin="light"] .mod-tags .tagcut{ color:var(--ink-2); }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE LAUNCHER CONSOLE: WIDER, A RUNNING FILTER, AN UPDATE CHECK, A PULL LINE
+   ══════════════════════════════════════════════════════════════════════════ */
+/* wide enough for three modules a row — 530 held one, and a rack of one is a list */
+.console{ width:880px; }
+
+/* RUNNING is a chip like the folders, and carries the running lamp so the
+   category and the module it selects say the same thing */
+.chip.running .pilot{
+  width:7px; height:7px; flex:0 0 7px; margin-right:2px;
+  background:radial-gradient(circle at 35% 30%, #fff, #FFC08A 40%, #E05A00);
+  box-shadow:0 0 5px rgba(255,106,0,.55);
+}
+.chip.running{ display:inline-flex; align-items:center; gap:6px; }
+
+/* ── the version readout: a readout you can press ───────────────────────── */
+.verkey{
+  cursor:pointer;
+  /* THE READOUT FACE, STATED: a <button> brings the UA's font with it, and
+     the version is a readout like the two beside it, not a sentence */
+  font-family:var(--font-read); font-size:12px; line-height:1; letter-spacing:.02em;
+  -webkit-font-smoothing:none; -moz-osx-font-smoothing:grayscale;
+}
+.verkey:disabled{ cursor:progress; }
+.verkey.busy{ animation:ver-busy 1s ease-in-out infinite; }
+.verkey.err{ color:#FF6B6B; }
+[data-skin="light"] .verkey.err{ color:var(--no-ink); border-color:var(--no-ink); }
+@keyframes ver-busy{ 50%{ opacity:.45; } }
+.act.upd[hidden], .verkey[hidden]{ display:none; }
+.act.upd{ height:28px; animation:upd-in .18s cubic-bezier(.3,.7,.4,1); }
+@keyframes upd-in{ from{ opacity:0; transform:translateX(6px); } to{ opacity:1; transform:none; } }
+
+/* ── the pull line: the localhost strip's well, reporting ───────────────── */
+.pullbar{
+  position:relative; overflow:hidden;
+  display:flex; align-items:center; gap:8px; height:30px; padding:0 4px 0 10px;
+  border-radius:6px; font-family:var(--font); font-size:10px; letter-spacing:.04em;
+  color:#c2c7cf;
+  background:linear-gradient(180deg,#0a0c0e,#12151a 55%,#0d1013);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), inset 0 -1px 1px rgba(255,255,255,.06);
+  animation:upd-in .16s cubic-bezier(.3,.7,.4,1);
+}
+.pullbar[hidden]{ display:none; }
+.pb-lamp{ flex:0 0 8px; height:8px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff, #FFC08A 40%, #E05A00); }
+.pullbar.run .pb-lamp{ animation:ver-busy .8s ease-in-out infinite; }
+.pullbar.ok .pb-lamp{ background:radial-gradient(circle at 35% 30%, #fff, #FFC08A 40%, #E05A00); }
+.pullbar.err .pb-lamp{ background:radial-gradient(circle at 35% 30%, #fff, #FF9B9B 40%, #C21B1B);
+  box-shadow:0 0 6px rgba(255,80,80,.9); }
+.pb-msg{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pullbar.err .pb-msg{ color:#FF6B6B; }
+.pb-acts{ display:flex; gap:4px; }
+.pb-acts .act{ height:22px; padding:0 8px; font-size:9px; }
+.pb-acts .act.ico{ width:22px; padding:0; }
+.pb-acts .act.ico svg{ width:11px; height:11px; }
+.pb-fill{ position:absolute; left:0; bottom:0; height:2px; width:0;
+  background:var(--led); transition:width .11s linear; }
+
+[data-skin="light"] .pullbar{
+  color:var(--ink); background:var(--paper);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.10), inset 0 0 0 1px var(--edge);
+}
+[data-skin="light"] .pullbar.err{
+  background:var(--no-bg); box-shadow:inset 0 0 0 1px var(--no-edge);
+}
+[data-skin="light"] .pullbar.err .pb-msg{ color:var(--no-ink); }
+[data-skin="light"] .pullbar.err .pb-lamp{ box-shadow:none; }
+[data-skin="light"] .pb-fill{ background:var(--primary); }
+
+@media (prefers-reduced-motion: reduce){
+  .verkey.busy, .pullbar.run .pb-lamp, .act.upd, .pullbar{ animation:none; }
+}
+
+/* THE CONSOLE TAKES THE COLUMN, and a module is never narrower than its run
+   key and its four tools side by side — 272 clipped the last tool off. */
+.console{ width:100%; }
+.rack{ grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); }
+
+/* the state sheet under it: posed copies, captioned, inert */
+.lp-states{ display:flex; flex-direction:column; gap:14px; margin-top:28px; pointer-events:none; }
+.lp-head{ align-self:flex-start; }
+.lp-grid{ display:grid; gap:14px; }
+.lp-vers{ grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); }
+.lp-mods{ grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); }
+.lp-cell{ display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.lp-cell > .lp-row{ display:flex; align-items:center; gap:8px; width:100%; }
+.lp-cell > .lp-row > .module{ flex:1; }
+
+/* THE RUN KEY SAYS IT WITH ONE GLYPH. A lamp AND a glyph AND a word was three
+   marks for one verb, and the lamp was a bead stuck on a cap. The glyph goes
+   SOLID — a filled square is stop and a filled triangle is play on every
+   transport ever built, where an outlined one is a drawing of a box — and the
+   STOP glyph carries the one effect, a soft light of its own colour. */
+:is(.act.stop, .act.start) svg{ fill:currentColor; }
+.act.stop svg{ filter:drop-shadow(0 0 3px rgba(255,255,255,.55)); }
+
+/* A MODULE IS MARKED BY WHAT IT IS — code — and the mark lights when it runs.
+   It was a pilot lamp, a second dot saying what the orange STOP key already
+   says; the glyph says which kind of thing the card is and still carries the
+   state, grey stopped and orange running. */
+.mod-ico{ display:flex; flex:0 0 14px; color:#5f6670; }
+.mod-ico svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2;
+  stroke-linecap:round; stroke-linejoin:round; }
+.module.up .mod-ico{ color:var(--led); }
+[data-skin="light"] .mod-ico{ color:var(--ink-3); }
+[data-skin="light"] .module.up .mod-ico{ color:var(--primary); }

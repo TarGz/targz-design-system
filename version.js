@@ -1,6 +1,13 @@
-export const version = '1.118.0';
+export const version = '1.118.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.118.1',
+    date: '2026-11-23',
+    changes: [
+      "THE NAV BAR IS ONE HEIGHT IN BOTH SKINS. Light grew it 16px over dark — the strip padded 11/13 against 8/11, and the generic light `.piano` rule outranked `.nav-pages`'s own 5px to pad the key row at 10. Both now carry the dark numbers, reach included, so the dock does not jump when the skin flips.",
+    ],
+  },
   {
     version: '1.118.0',
     date: '2026-11-23',

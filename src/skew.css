@@ -7919,7 +7919,12 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] .piano.sm{ padding:9px; gap:9px; --pkey-reach-x:4.5px; }
 [data-skin="light"] .keypad{ padding:10px; gap:12px 10px; --pkey-reach-x:5px; --pkey-reach-y:6px; }
 [data-skin="light"] .palette{ padding:11px; gap:12px; --pkey-reach-y:6px; }
-[data-skin="light"] .navdock > .strip{ padding:11px 13px; gap:10px; --pkey-reach-x:5px; --pkey-reach-y:11px; }
+/* THE NAV BAR KEEPS THE DARK METRICS. Every other group grows in light,
+   but the dock is the one bar that sits at the top of every document, so
+   its height has to read the same in both skins. Padding and reach are the
+   dark values, verbatim, on the strip and on the key row inside it. */
+[data-skin="light"] .navdock > .strip{ padding:8px 11px; gap:8px; --pkey-reach-x:3.5px; --pkey-reach-y:9px; }
+[data-skin="light"] .nav-pages{ padding:5px; gap:6px; --pkey-reach-x:3px; }
 
 /* THE WRAPPING TAB STRIP, which is a grid and whose reach is written as three
    literal offsets rather than as a token — they are the padding, so they move

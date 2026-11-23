@@ -768,7 +768,11 @@ let setRun = () => {};
   const box = document.getElementById('run');
   const head = el('div', 'box-head');
   head.append(el('span', 'nm', 'RUN'));
-  const st = el('div', 'lcd dim', 'IDLE');
+  /* `.state` IS A CLASS IN THE LANGUAGE, NOT A LOOK. A machine's own status
+     window keeps the phosphor the DRO and the pen bank keep — it is the
+     machine talking about itself — and the skin pins the readout token on
+     that class, so this is the one word that has to be here for it to. */
+  const st = el('div', 'lcd dim state', 'IDLE');
   head.append(st);
   box.append(head);
 

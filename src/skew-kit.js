@@ -1483,11 +1483,12 @@ function openPicker(anchor, value, onChange, swatches) {
     /* `align: 'start'` HANGS THE PLATE FROM THE ANCHOR'S LEFT EDGE, for a
        plate that is the anchor opening (the selector's list) rather than a
        thing it points at. */
-    let x = align === 'start' ? a.left : a.left + a.width / 2 - p.width / 2;
+    const B = plateBounds(anchor);
+    const x = align === 'start' ? a.left : a.left + a.width / 2 - p.width / 2;
     let y = a.bottom + 9;
-    if (y + p.height > innerHeight - 8) y = Math.max(8, a.top - p.height - 9);
-    plate.style.left = Math.max(8, Math.min(x, innerWidth - p.width - 8)) + 'px';
-    plate.style.top = y + 'px';
+    if (y + p.height > B.b) y = a.top - p.height - 9;
+    plate.style.left = plateClamp(x, B.l, B.r - p.width) + 'px';
+    plate.style.top  = plateClamp(y, B.t, B.b - p.height) + 'px';
   };
   place();
 
@@ -2591,6 +2592,33 @@ let plateOpen = null;
    directly over its key. The moment a wide plate slides off a window edge the
    tail is somewhere in the middle of the bar, pointing at whatever happens to
    be under it. */
+/* ── THE EDGE A PLATE IS NOT ALLOWED TO CROSS ──────────────────────────────
+   AN APP'S POPUP STOPS AT THE APP, NOT AT THE SCREEN. Every plate in here
+   measured itself against `innerWidth`/`innerHeight`, which is the right edge
+   for a plate hanging off a toolbar that IS the window — and the wrong one the
+   moment the toolbar belongs to an application drawn inside a window of its
+   own. The folders menu proved it: anchored to a key near the top of the
+   launcher, it had room above itself ON THE PAGE, so it opened upward, over
+   the title bar, over the masthead, and out into the document. A menu floating
+   above the window that owns it does not read as that window's menu; it reads
+   as a second, bigger window that appeared from nowhere.
+
+   SO THE EDGE IS THE NEAREST `.appwin`, and the page only when there is no
+   window above the anchor — which is every other specimen in the system, where
+   the two answers are the same. Eight pixels of margin either way, the same
+   figure the viewport answer used, so a plate that was already correct does
+   not move. */
+function plateBounds(anchor) {
+  const host = anchor.closest('.appwin');
+  const M = 8;
+  if (!host) return { l: M, r: innerWidth - M, t: M, b: innerHeight - M };
+  const r = host.getBoundingClientRect();
+  return { l: r.left + M, r: r.right - M, t: r.top + M, b: r.bottom - M };
+}
+/* clamp v into [lo, hi], and when the plate is bigger than the box it is being
+   put in, pin it to the near edge rather than pushing it off the far one */
+const plateClamp = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+
 function openPlate(anchor, body, { up = true, cls = '', onKey, align = 'center', gap = 11 } = {}) {
   if (plateOpen) {
     const same = plateOpen.anchor === anchor;
@@ -2608,14 +2636,18 @@ function openPlate(anchor, body, { up = true, cls = '', onKey, align = 'center',
      and the flip decision depends on the height. */
   const place = () => {
     const a = anchor.getBoundingClientRect(), p = plate.getBoundingClientRect();
-    const GAP = gap;
-    let above = up;
-    if (above && a.top - p.height - GAP < 8) above = false;
-    else if (!above && a.bottom + p.height + GAP > innerHeight - 8) above = true;
-    let x = a.left + a.width / 2 - p.width / 2;
-    x = Math.max(8, Math.min(x, innerWidth - p.width - 8));
-    plate.style.left = x + 'px';
-    plate.style.top  = Math.max(8, above ? a.top - p.height - GAP : a.bottom + GAP) + 'px';
+    const B = plateBounds(anchor), GAP = gap;
+    /* THE SIDE IT WAS ASKED FOR, UNLESS THAT SIDE HAS NO ROOM AND THE OTHER
+       ONE DOES. Written as two fits rather than as the old pair of flips: a
+       flip that fires on one test alone will happily send a plate from a side
+       with no room to a side with less. */
+    const fitsUp   = a.top    - p.height - GAP >= B.t;
+    const fitsDown = a.bottom + p.height + GAP <= B.b;
+    const above = up ? (fitsUp || !fitsDown) : (!fitsDown && fitsUp);
+    const x = a.left + a.width / 2 - p.width / 2;
+    const y = above ? a.top - p.height - GAP : a.bottom + GAP;
+    plate.style.left = plateClamp(x, B.l, B.r - p.width) + 'px';
+    plate.style.top  = plateClamp(y, B.t, B.b - p.height) + 'px';
   };
   place();
 
@@ -6465,7 +6497,7 @@ function lightDir({ label = 'Light', az = 315, el: elev = 45, size = 132, onChan
    over a machined part, it costs one keydown handler, and it is the actual
    answer to "the drum is not user friendly". */
 const TYPE_GAP = 900;
-function selector({ label, options, index = 0, width = 168, onChange }) {
+function selector({ label, options, index = 0, width = 168, onChange, actions = [] }) {
   const wrap = el('div', 'selwrap');
   const face = el('button', 'sel');
   face.type = 'button';
@@ -6488,11 +6520,20 @@ function selector({ label, options, index = 0, width = 168, onChange }) {
   };
 
   /* ── THE LIST ────────────────────────────────────────────────────────── */
-  let rows = [];
+  let rows = [], actRows = [];
   const build = () => {
     const body = el('div', 'plate-body');
-    body.setAttribute('role', 'listbox');
-    if (label) body.setAttribute('aria-label', label);
+    /* THE OPTIONS ARE A LISTBOX AND THE ACTIONS ARE NOT, so the listbox has
+       to stop somewhere — and `display:contents` is where. A role on the
+       plate itself would put the action buttons inside a listbox, which is
+       not a thing a listbox may contain; a real wrapper would make the rows
+       one flex child instead of many and collapse the 1px that separates
+       them. This box has the role and no geometry at all. */
+    const list = el('div');
+    list.setAttribute('role', 'listbox');
+    list.style.display = 'contents';
+    if (label) list.setAttribute('aria-label', label);
+    body.append(list);
     rows = options.map((o, n) => {
       const r = el('button', 'menu-row sel-row' + (n === i ? ' is-cur' : ''));
       r.type = 'button';
@@ -6505,9 +6546,42 @@ function selector({ label, options, index = 0, width = 168, onChange }) {
         face.focus();
       });
       clicky(r, SFX.tap, SFX.lift);
-      body.append(r);
+      list.append(r);
       return r;
     });
+
+    /* ── AND UNDER A CUT, THE THINGS THE LIST CANNOT SAY ──────────────────
+       A VALUE LIST HAS A ROW THAT IS ALREADY TRUE; AN ACTION HAS NONE. That
+       is the whole reason these are not options: picking `Portrait` tells the
+       app what you are looking at, and picking `New folder…` does not — it
+       opens a dialog and leaves the value exactly where it was. Given a tick
+       and a slot among the folders it would read as a folder you own called
+       New folder, and the next thing anyone does is try to filter by it.
+
+       SO IT KEEPS THE TICK COLUMN AND NOTHING ELSE. The empty gutter is what
+       makes the labels line up with the ones above the cut; the cut is what
+       says the two halves answer different questions. It commits nothing,
+       fires no `onChange` and never touches `i` — which is also why it must
+       not call `set()`: a row that is not a value cannot be the value.
+
+       IT DOES NOT TAKE FOCUS BACK EITHER. Every action here opens something
+       that wants the caret; handing focus to the face first steals it from
+       whatever the action just put on screen. */
+    actRows = actions.map(a => {
+      const r = el('button', 'menu-row sel-row sel-do');
+      r.type = 'button';
+      r.append(el('span', 'sel-tick', ''), el('span', 'menu-nm', a.label));
+      r.addEventListener('click', () => {
+        if (plateOpen) plateOpen.close();
+        a.onPick && a.onPick();
+      });
+      clicky(r, SFX.tap, SFX.lift);
+      return r;
+    });
+    if (actRows.length) {
+      body.append(el('div', 'menu-cut'));
+      actRows.forEach(r => body.append(r));
+    }
     return body;
   };
 
@@ -6517,9 +6591,14 @@ function selector({ label, options, index = 0, width = 168, onChange }) {
      Escape leaves it as it was — which `openPlate` already does, because it
      never touched the value in the first place. */
   const step = d => {
-    const at = rows.indexOf(document.activeElement);
-    const to = at < 0 ? i : (at + d + rows.length) % rows.length;
-    rows[to].focus();
+    /* THE WALK CROSSES THE CUT. An action you can see and cannot arrow to is
+       a mouse-only control in a list that is otherwise fully keyboard; the
+       cut is a visual grouping, not a wall. Type-ahead does NOT cross it —
+       that searches values, and `New folder…` is not one. */
+    const all = rows.concat(actRows);
+    const at = all.indexOf(document.activeElement);
+    const to = at < 0 ? i : (at + d + all.length) % all.length;
+    all[to].focus();
   };
 
   /* TYPE-AHEAD, and the buffer is what makes it a search rather than a jump to

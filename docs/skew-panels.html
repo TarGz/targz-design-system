@@ -52,9 +52,94 @@
   </div>
 
   <h2>06 <span>/</span> Launchpad</h2>
-  <div class="console" id="console"></div>
-  <!-- every state of the console, posed and still -->
-  <div class="lp-states" id="lp-states"></div>
+  <!-- `.port.off` MOVED INTO THE SYSTEM. It was posed here because the skin
+       had no rule for a port strip on a project that is not running; it does
+       now — `src/skew.css`, right under `.port` — because a stopped project
+       is a state the launcher really has and not a thing this page made up.
+       The light hover stays: in that skin a dead field is a hairline, not a
+       well, and the hairline has to survive the pointer. -->
+  <style>
+    [data-skin="light"] #console2 .port.off:hover{ box-shadow:inset 0 0 0 1px var(--edge); }
+    /* A SYSTEM BUG, PATCHED HERE AND NOT FIXED HERE: `.slot input` is the dark
+       skin's phosphor (#7CFFB0 and its bloom) and the light block never
+       restates it, so what you type in a filter comes out green on cream — on
+       § 06 too, and on every page with a slot. The honest fix is one line in
+       `src/skew.css` plus a `dist/` rebuild; this scopes the light answer to
+       § 07 so the section can be judged. */
+    [data-skin="light"] #console2 .slot input{ color:var(--ink); text-shadow:none; }
+    [data-skin="light"] #console2 .slot input::placeholder{ color:var(--ink-3); }
+
+    /* ── THE PALETTE, PREVIEWED ON § 07 ────────────────────────
+       THE FOUR CHOSEN COLOURS, and the three steps they make:
+
+         PAGE   #EFF4F7   cool and BRIGHT — the navy ramp near its top
+         PANEL  #FCF9F3   warm paper, a hair brighter than the page
+         WELL   #EAE6DC   a hole in that paper
+
+       THE SEPARATION IS TEMPERATURE, NOT DARKNESS. Page and panel sit within
+       a few levels of each other and still read apart, because one is cool and
+       one is warm. Dropping the page's value to force contrast is what made it
+       a stone bench and aged the whole screen.
+
+       NO WHITE AS A SURFACE. White is `--case-hi`, the lit top edge of a
+       moulding. A panel painted in it has spent the brightest thing on screen
+       on its own background and has nothing left to catch the light with.
+
+       INK IS THE NAVY, not a neutral black: #213E60 on the panel is 10.4:1,
+       and on cream a true grey goes muddy where a cold blue stays ink.
+
+       SCOPED PREVIEW. § 02 of `skew-system.html` is where this palette is
+       written down; the real change is the token blocks in `src/skew.css`. */
+    [data-skin="light"] #console2{
+      --paper:#EAE6DC;
+      --card:#FCF9F3;
+      --case-face:#F5F2EA;
+      --edge:#DED9CD;
+      --edge-soft:#EBE7DE;
+      --edge-ctl:#BFB8A6;
+      --ink:#213E60;
+      --ink-2:#476181;
+      --ink-3:#8197B1;
+      /* THE CAP IS THE POP. In the light skin a `.act.go` is painted in
+         `--primary-deep`, which is why a correct #FF6A00 was still arriving
+         on screen as brick: the deep step was doing the painting. */
+      --primary:#FF6A00;
+      --primary-light:#FF9A47;
+      --primary-deep:#FF5E00;
+      --ring-color:#C24A00;
+      /* THE PAGE AND ITS RULING MOVED OUT. They were posed here while the
+         palette was being argued; both are in `src/skew.css` now and the
+         stage around this console draws them, so repeating them here would
+         be a second grid at a second phase inside the first. */
+    }
+    [data-skin="light"] #console2 .module{ background-color:var(--card); }
+    /* EACH MARK IS ITS OWN PLATE, the way the NODE stamp was one: a stamped
+       plate reads as a separate fact, and two facts sharing one plate read as
+       one string. The row never wraps and never grows. */
+    #console2 .mod-stamps{ display:flex; align-items:center; gap:6px; flex:0 0 auto; flex-wrap:nowrap; }
+    /* the lit cap, full chroma, and its wall one step down */
+    [data-skin="light"] #console2 .act.go{ background:#FF6A00; border-color:#C24A00; }
+    [data-skin="light"] #console2 .act.go:hover{ background:#FF7D1F; }
+  </style>
+  <!-- THE CONSOLE STANDS ON A STAGE LIKE EVERY OTHER PANEL ON THIS PAGE, and
+       that is the only reason it is here: a stage is the desk, the desk is
+       ruled, and the launcher is a panel put down on one. Without it the
+       console floated on the bare page, which is the one place in this
+       document a panel is not supposed to be. -->
+  <div class="stage">
+    <!-- THE WINDOW IS PART OF THE ARGUMENT, not decoration round it. Every
+         other specimen on this page is a panel you build INTO an app; this
+         one IS the app, and a reader cannot tell those apart from a rounded
+         rectangle alone. The title bar says it in one glance, which is why
+         it is here and not in §05 with the panels that float inside a app. -->
+    <div class="appwin">
+      <div class="appwin-bar">
+        <span class="appwin-dots"><i></i><i></i><i></i></span>
+        <span class="appwin-name">Targz Launchpad</span>
+      </div>
+      <div class="console" id="console2"></div>
+    </div>
+  </div>
 
   <footer>targz design system · skew · exploration 01 · skew-panels.html</footer>
 </div>
@@ -661,6 +746,12 @@ Object.assign(ICON, {
   settle:svg('<line x1="12" y1="3" x2="12" y2="14"/><polyline points="7.5 9.5 12 14 16.5 9.5"/><line x1="4" y1="20" x2="20" y2="20"/>'),
   run:   svg('<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>'),
   close: svg('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
+  /* THE ONLY MARK ADDED FOR THIS STRIP, and it is the one every system has:
+     a tick drawn on the same 24 grid, same 1.8 stroke, same round joins as
+     the rest. A confirm key with no tick on it is a key labelled with a word,
+     and there is no room in a 32px cap for one. */
+  check: svg('<polyline points="20 6 9 17 4 12"/>'),
+  pencil:svg('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
   hand:  svg('<path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v7M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8v-1a2 2 0 1 1 4 0"/>'),
   orbit: svg('<circle cx="12" cy="12" r="3"/><path d="M12 3a9 9 0 0 1 0 18"/><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)"/>'),
   arrow: svg('<polygon points="4 2 4 18 8.5 13.5 11.5 20 14 19 11 12.5 17 12.5"/>'),
@@ -2180,117 +2271,89 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 })();
 
 /* ══════════════════════════════════════════════════════════════════════════
-   04 · LAUNCHPAD
+   06 · LAUNCHPAD — one list
+
+   THE CARD GRID IT REPLACED IS GONE. It was kept for a while as the first
+   answer, to be read against this one; once this is the launcher, a second
+   posed console is a second thing to keep true and a reader's first guess at
+   what the part looks like.
+
+   WHAT WAS WRONG WITH 06, in the app that ships it:
+     · The folders were TABS, so a choice you make once a week sat in the band
+       the eye lands on first. Five tabs for forty-three projects, most of
+       which are in no folder at all — the tab bar hid the list behind ALL and
+       then charged the top of the window for it.
+     · The filter field was in the chrome, away from the thing it narrows. A
+       filter belongs to its list the way a tap belongs to its basin.
+     · There was a page title saying what the window title already said.
+
+   SO: ONE LIST, AND EVERYTHING ELSE IS A FILTER OF IT. The rack is always
+   every project. Three filters narrow it — text, folder, running — and they
+   sit together on one strip directly over the rack, left of the channel. To
+   the right of the channel is the workspace: what you do to the app rather
+   than to the list. That split is the nav bar's own rule, and `.chan` is the
+   same part drawing it.
+
+   THE FOLDER IS NOW A PROPERTY OF THE PROJECT, NOT A PLACE IT LIVES. With no
+   tabs there is no drop target, so filing moves onto the card: every module
+   carries a folder selector, and NO FOLDER is a value in it rather than a
+   missing control. One consequence, and it is a real one — `selector` holds
+   ONE value and Skew has no multi-select, so a project is in one folder or
+   none. The grip is gone with the drag it served.
    ══════════════════════════════════════════════════════════════════════════ */
-(function launchpad() {
-  const root = document.getElementById('console');
+(function launchpadOneList() {
+  const root = document.getElementById('console2');
+  if (!root) return;
+  const K = window.SkewKit;
+
+  const ALL = 'ALL FOLDERS', NONE = 'NO FOLDER';
+  let FOLDERS = ['Portrait', 'Razo', 'Web'];
   const PROJECTS = [
-    { name:'Portrait-Typo', folder:'Portrait', port:2857, up:true,
-      desc:'Generative portrait engine — 3D letters dropped into a virtual box under gravity, settled by physics, then flattened into a hatch-filled pen-plotter drawing.',
-      tags:['dev'] },
-    { name:'Portrait-ribbons', folder:'Portrait', port:2855, up:true,
-      desc:'Generative portrait engine — 3D ribbons on a flow field, twisting from face-on to edge-on to draw a portrait in white on black.',
-      tags:['dev'] },
-    { name:'Portrait-Cubes', folder:'Portrait', port:2851, up:true,
-      desc:'Generative isometric cube grid with hatching for pen plotter — portrait encoding via grayscale density.',
-      tags:['dev','start'] },
-    { name:'Portrait-DNA', folder:'Portrait', port:2853, up:false,
-      desc:'Generative portrait engine — DNA-shaped pattern layered over a portrait image, plotter-ready.',
-      tags:['dev'] },
+    { name:'Portrait-Typo', folder:'Portrait', kind:'NODE', port:2857, up:true,
+      desc:'Generative portrait engine — 3D letters dropped into a virtual box under gravity, settled by physics, then flattened into a hatch-filled pen-plotter drawing.', tags:['dev'] },
+    { name:'Portrait-ribbons', folder:'Portrait', kind:'NODE', port:2855, up:true,
+      desc:'Generative portrait engine — 3D ribbons on a flow field, twisting from face-on to edge-on to draw a portrait in white on black.', tags:['dev'] },
+    { name:'Portrait-Cubes', folder:'Portrait', kind:'NODE', port:2851, up:true,
+      desc:'Generative isometric cube grid with hatching for pen plotter — portrait encoding via grayscale density.', tags:['dev','start'] },
+    { name:'Portrait-DNA', folder:'Portrait', kind:'NODE', port:2853, up:false,
+      desc:'Generative portrait engine — DNA-shaped pattern layered over a portrait image, plotter-ready.', tags:['dev'] },
+    { name:'targz-design-system', folder:'Targz', kind:'STATIC', port:2860, up:false,
+      desc:'Skew — the parts and the rules that make them one language.', tags:['dev'] },
+    { name:'targz.fr', folder:'Web', kind:'JEKYLL', port:4000, up:false,
+      desc:'The shop and the journal, built by Jekyll and served from the same folder.', tags:['serve'] },
+    /* TWO PROJECTS IN NO FOLDER, because that is the common case in the real
+       rack and a mock that hides it designs for a library nobody has. */
+    { name:'_divers/agent-tiktok', folder:'', kind:'NODE', port:3310, up:false,
+      desc:'TikTok automation agent with human-like posting behaviour.', tags:['dev'] },
+    { name:'_divers/plotter-bench', folder:'', kind:'STATIC', port:0, up:false,
+      desc:'A page of plotter test strips — pen pressure, paper, speed.', tags:[] },
   ];
-  /* RUNNING IS A CATEGORY, so it is a chip in the same radio row as the
-     folders rather than a readout beside it: "what is up right now" is a
-     question you FILTER by, and a number you can only look at answers half of
-     it. It sits second, after All, because it cuts across every folder. */
-  const FOLDERS = ['All', 'Running', 'Portrait', 'Razo', 'Web'];
-  const inFolder = (p, i) => i === 0 || (i === 1 ? p.up : p.folder === FOLDERS[i]);
-  let folder = 0, q = '';
 
-  const visible = () => PROJECTS.filter(p =>
-    inFolder(p, folder) && p.name.toLowerCase().includes(q.toLowerCase()));
-
-  /* ── THE VERSION READOUT IS THE UPDATE CHECK ───────────────────────────────
-     Clicking the version is where everyone already looks for "am I current?",
-     so that is where the question is asked. The readout itself reports the
-     check — CHECKING, UP TO DATE, CHECK FAILED — and only when there IS
-     something to install does a key appear beside it: an Update key that is
-     not there is an Update key nobody has to learn to ignore. The update runs
-     in the same readout, as a percentage, and the readout lands on the new
-     number. Built once and repainted in place, so a check in flight survives
-     the rack being redrawn under it. The demo cycles its three answers:
-     available, up to date, failed. */
-  const APP = { ver: '2.3.0', latest: '2.4.0', st: 'idle', pct: 0, n: 0 };
-  const ver = el('button', 'lcd verkey');
-  ver.type = 'button';
-  const upd = key(`${ICON.settle}<span></span>`, { cls: 'act go upd' });
-  let settleT = 0;
-  const paintVer = () => {
-    const txt = { idle: `V${APP.ver}`, checking: 'CHECKING', latest: 'UP TO DATE',
-                  failed: 'CHECK FAILED', available: `V${APP.ver}`,
-                  updating: `UPDATING ${APP.pct}%`, done: `V${APP.ver} ✓` }[APP.st];
-    ver.textContent = txt;
-    ver.className = 'lcd verkey' + (APP.st === 'checking' || APP.st === 'updating' ? ' busy' : '')
-                                 + (APP.st === 'failed' ? ' err' : '');
-    ver.title = APP.st === 'failed' ? 'Could not reach the update server — click to try again'
-              : APP.st === 'updating' ? 'Installing…' : 'Check for updates';
-    ver.disabled = APP.st === 'checking' || APP.st === 'updating';
-    // AN AVAILABLE UPDATE TAKES THE VERSION'S PLACE: the key is the readout's
-    // answer, so it stands where the readout stood rather than beside it
-    upd.hidden = APP.st !== 'available';
-    ver.hidden = APP.st === 'available';
-    upd.lastElementChild.textContent = `UPDATE ${APP.latest}`;
-    upd.title = `Install version ${APP.latest}`;
-  };
-  const later = (st, ms) => { clearTimeout(settleT); settleT = setTimeout(() => { APP.st = st; paintVer(); }, ms); };
-  ver.addEventListener('click', () => {
-    if (ver.disabled) return;
-    APP.st = 'checking'; paintVer();
-    const answer = ['available', 'latest', 'failed'][APP.n++ % 3];
-    setTimeout(() => {
-      APP.st = answer === 'available' && APP.ver === APP.latest ? 'latest' : answer;
-      paintVer();
-      if (APP.st === 'latest') later('idle', 2400);
-    }, 900);
+  /* ── the filter, as one value ─────────────────────────────────────────── */
+  let q = '', folder = ALL, onlyUp = false;
+  const opts = () => [ALL, NONE, ...FOLDERS];
+  const filtered = () => PROJECTS.filter(p => {
+    const byFolder = folder === ALL || (folder === NONE ? !p.folder : p.folder === folder);
+    const byUp = !onlyUp || p.up;
+    const hay = `${p.name} ${p.desc} ${p.kind} ${p.folder} ${p.tags.join(' ')}`.toLowerCase();
+    return byFolder && byUp && hay.includes(q.trim().toLowerCase());
   });
-  upd.addEventListener('click', () => {
-    APP.st = 'updating'; APP.pct = 0; paintVer();
-    const t = setInterval(() => {
-      APP.pct = Math.min(100, APP.pct + 7 + Math.round(Math.random() * 9));
-      paintVer();
-      if (APP.pct >= 100) {
-        clearInterval(t);
-        APP.ver = APP.latest; APP.st = 'done'; paintVer();
-        later('idle', 2400);
-      }
-    }, 140);
-  });
-  paintVer();
+  const filtering = () => q.trim() !== '' || folder !== ALL || onlyUp;
 
-  /* ── GIT PULL: A STATUS LINE THAT SAYS WHAT IT IS DOING ────────────────────
-     A pull is the one tool on the card that takes time and can fail, so it is
-     the one that reports. Pressing it opens a line under the keys, in the same
-     well as the localhost strip: a lamp, what git is doing now, and a 2px
-     trace along the floor of the well that fills as it goes. The key stays
-     down while it runs, so it cannot be pressed twice.
-       SUCCESS says what changed and leaves on its own after four seconds —
-     it needs no answer.
-       FAILURE STAYS. It prints git's own words, in the stop colour, with the
-     two things you would do next — try again, or open a terminal in the
-     folder — and a × to put it away. An error that times out is an error you
-     might never have read. */
+  /* ── git pull, as in 06: the one tool that takes time and can fail ────── */
   const PULL = {
-    'Portrait-Typo':    { ok: true,  msg: '3 files changed · 41 insertions(+), 9 deletions(−)' },
-    'Portrait-ribbons': { ok: true,  msg: 'Already up to date.' },
-    'Portrait-Cubes':   { ok: false, msg: 'fatal: Not possible to fast-forward, aborting.' },
-    'Portrait-DNA':     { ok: false, msg: 'error: your local changes to settings.json would be overwritten' },
+    'Portrait-Typo':    { ok:true,  msg:'3 files changed · 41 insertions(+), 9 deletions(−)' },
+    'Portrait-ribbons': { ok:true,  msg:'Already up to date.' },
+    'Portrait-Cubes':   { ok:false, msg:'fatal: Not possible to fast-forward, aborting.' },
+    'Portrait-DNA':     { ok:false, msg:'error: your local changes to settings.json would be overwritten' },
   };
-  const STEPS = [[0, 'fetching origin…'], [30, 'receiving objects'], [80, 'fast-forwarding…']];
+  const STEPS = [[0,'fetching origin…'],[30,'receiving objects'],[80,'fast-forwarding…']];
   const pullLine = p => {
     if (p._line) return p._line;
     const line = el('div', 'pullbar');
-    line.setAttribute('role', 'status');
-    line.setAttribute('aria-live', 'polite');
-    line.append(el('span', 'pb-lamp'), el('span', 'pb-msg'), el('span', 'pb-acts'), el('i', 'pb-fill'));
+    line.setAttribute('role','status');
+    line.setAttribute('aria-live','polite');
+    line.append(el('span','pb-lamp'), el('span','pb-msg'), el('span','pb-acts'), el('i','pb-fill'));
     p._line = line;
     return line;
   };
@@ -2310,27 +2373,22 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     msg.title = msg.textContent;
     line.querySelector('.pb-fill').style.width = (s.st === 'run' ? s.pct : 0) + '%';
     acts.textContent = '';
-    if (s.st === 'err') {
-      acts.append(
-        key('<span>RETRY</span>', { cls: 'act aux', title: 'Run git pull --ff-only again', onClick: () => pull(p) }),
-        key(ICON.term, { cls: 'act aux ico', title: 'Open in terminal' }),
-        key(ICON.close, { cls: 'act aux ico', title: 'Dismiss', onClick: () => { p.pull = null; paintPull(p); } }));
-    }
+    if (s.st === 'err') acts.append(
+      key('<span>RETRY</span>', { cls:'act aux', title:'Run git pull --ff-only again', onClick:() => pull(p) }),
+      key(ICON.term,  { cls:'act aux ico', title:'Open in terminal' }),
+      key(ICON.close, { cls:'act aux ico', title:'Dismiss', onClick:() => { p.pull = null; paintPull(p); } }));
   };
   const pull = p => {
     if (p.pull && p.pull.st === 'run') return;
     clearTimeout(p._hide);
-    p.pull = { st: 'run', pct: 0 };
+    p.pull = { st:'run', pct:0 };
     paintPull(p);
     const t = setInterval(() => {
       p.pull.pct = Math.min(100, p.pull.pct + 4 + Math.round(Math.random() * 6));
-      // a failing pull dies where git dies: after the fetch, at the merge
-      const r = PULL[p.name];
-      if (!r.ok && p.pull.pct >= 82) {
-        clearInterval(t); p.pull = { st: 'err', msg: r.msg }; paintPull(p); return;
-      }
+      const r = PULL[p.name] || { ok:true, msg:'Already up to date.' };
+      if (!r.ok && p.pull.pct >= 82) { clearInterval(t); p.pull = { st:'err', msg:r.msg }; paintPull(p); return; }
       if (p.pull.pct >= 100) {
-        clearInterval(t); p.pull = { st: 'ok', msg: r.msg }; paintPull(p);
+        clearInterval(t); p.pull = { st:'ok', msg:r.msg }; paintPull(p);
         p._hide = setTimeout(() => { p.pull = null; paintPull(p); }, 4000);
         return;
       }
@@ -2338,152 +2396,560 @@ const PORTRAIT = "#1b1a18 url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     }, 110);
   };
 
-  /* One module, built from a project. The rack draws them live; the state
-     sheet below the console poses copies of them. */
+  /* ── the version readout, unchanged from 06: the check lives in it ────── */
+  const APP = { ver:'2.3.0', latest:'2.4.0', st:'idle', pct:0, n:0 };
+  const ver = el('button','lcd verkey'); ver.type = 'button';
+  const upd = key(`${ICON.settle}<span></span>`, { cls:'act go upd' });
+  let settleT = 0;
+  const paintVer = () => {
+    ver.textContent = { idle:`V${APP.ver}`, checking:'CHECKING', latest:'UP TO DATE', failed:'CHECK FAILED',
+                        available:`V${APP.ver}`, updating:`UPDATING ${APP.pct}%`, done:`V${APP.ver} ✓` }[APP.st];
+    ver.className = 'lcd verkey' + (APP.st === 'checking' || APP.st === 'updating' ? ' busy' : '')
+                                 + (APP.st === 'failed' ? ' err' : '');
+    ver.title = APP.st === 'failed' ? 'Could not reach the update server — click to try again'
+              : APP.st === 'updating' ? 'Installing…' : 'Check for updates';
+    ver.disabled = APP.st === 'checking' || APP.st === 'updating';
+    upd.hidden = APP.st !== 'available';
+    ver.hidden = APP.st === 'available';
+    upd.lastElementChild.textContent = `UPDATE ${APP.latest}`;
+    upd.title = `Install version ${APP.latest}`;
+  };
+  const later = (st, ms) => { clearTimeout(settleT); settleT = setTimeout(() => { APP.st = st; paintVer(); }, ms); };
+  ver.addEventListener('click', () => {
+    if (ver.disabled) return;
+    APP.st = 'checking'; paintVer();
+    const answer = ['available','latest','failed'][APP.n++ % 3];
+    setTimeout(() => {
+      APP.st = answer === 'available' && APP.ver === APP.latest ? 'latest' : answer;
+      paintVer();
+      if (APP.st === 'latest') later('idle', 2400);
+    }, 900);
+  });
+  upd.addEventListener('click', () => {
+    APP.st = 'updating'; APP.pct = 0; paintVer();
+    const t = setInterval(() => {
+      APP.pct = Math.min(100, APP.pct + 7 + Math.round(Math.random() * 9));
+      paintVer();
+      if (APP.pct >= 100) { clearInterval(t); APP.ver = APP.latest; APP.st = 'done'; paintVer(); later('idle', 2400); }
+    }, 140);
+  });
+  paintVer();
+
+  /* ── one module ───────────────────────────────────────────────────────── */
   const buildModule = p => {
     const m = el('div', 'module' + (p.up ? ' up' : ''));
-    const head = el('div', 'mod-head');
-    head.append(el('span', 'mod-ico', ICON.code), el('span', 'mod-name', p.name), el('span', 'stamp', 'NODE'));
-    m.append(head, el('p', 'mod-desc', p.desc));
+    const head = el('div','mod-head');
+    /* THE STAMP SAYS WHAT THE PROJECT IS, and it reads the project. 06 printed
+       NODE on everything, which is a label that cannot be wrong and therefore
+       cannot be read. */
+    /* THE FOLDER AND THE TAGS SIT WHERE THE STAMP WAS. NODE was the kind of
+       runtime, which is the launcher's business and not yours — it never
+       changed what you did next. The folder does, so it takes the slot. */
+    const tags = el('div','mod-stamps');
+    tags.append(el('span','stamp folder', p.folder || NONE));
+    p.tags.forEach(t => tags.append(el('span','stamp',t)));
+    head.append(el('span','mod-ico',ICON.code), el('span','mod-name',p.name), tags);
+    m.append(head);
 
-    if (p.up) {
-      const port = el('button', 'port', `${ICON.ext}<span>localhost:${p.port}</span><span>OPEN</span>`);
-      port.type = 'button';
-      port.title = 'Open in browser';
-      m.append(port);
-    }
+    /* THE PORT IS ON THE CARD WHETHER OR NOT IT IS UP. It is the project's
+       address — the thing you came to the rack to type somewhere — and a
+       launcher that only tells you the port of what is already running is
+       answering the one case where you could have read it off the browser.
+       Running, it is a door you press. Stopped, it is the door's number.
+       The description is gone with it: forty-three cards of prose is a page
+       you scroll past, and the name and the folder are what you scan for. */
+    const live = p.up && p.port > 0;
+    const port = el(live ? 'button' : 'div', 'port' + (live ? '' : ' off'),
+      `${ICON.ext}<span>${p.port > 0 ? `localhost:${p.port}` : 'PORT ASSIGNED ON LAUNCH'}</span>`
+      + (live ? '<span>OPEN</span>' : ''));
+    if (live) { port.type = 'button'; port.title = 'Open in browser'; }
+    m.append(port);
 
-    const acts = el('div', 'mod-acts');
-    /* RUNNING IS THE ORANGE CAP and stopped is the plain one: the lit key is
-       the module that is doing something, so a rack of them reads at a
-       glance. Running, the key splits — STOP, and a restart segment welded
-       to it, because a restart is a stop and a launch in one press. */
-    const runKey = () => {
-      const split = el('div', 'split');
-      split.append(
-        key(`${ICON.stop}<span>STOP</span>`, { cls: 'act go stop',
-          title: `Stop ${p.name}`, onClick: () => { p.up = false; draw(); } }),
-        key(ICON.run, { cls: 'act go ico', title: `Restart ${p.name}` }));
-      return split;
-    };
+    const acts = el('div','mod-acts');
     acts.append(p.up
-      ? runKey()
-      : key(`${ICON.play}<span>LAUNCH</span>`, { cls: 'act aux start',
-          title: `Launch ${p.name}`, onClick: () => { p.up = true; draw(); } }));
-    /* THE FOUR TOOLS ARE ONE GROUP, at the far end: things you do TO the
-       folder, in the order the launchpad app carries them. */
-    const tools = el('div', 'mod-tools');
-    [[ICON.code,   'Open in editor'],
+      ? (() => {
+          const split = el('div','split');
+          split.append(
+            key(`${ICON.stop}<span>STOP</span>`, { cls:'act go stop', title:`Stop ${p.name}`,
+              onClick:() => { p.up = false; drawRack(); } }),
+            key(ICON.run, { cls:'act go ico', title:`Restart ${p.name}` }));
+          return split;
+        })()
+      : key(`${ICON.play}<span>LAUNCH</span>`, { cls:'act aux start', title:`Launch ${p.name}`,
+          onClick:() => { p.up = true; drawRack(); } }));
+    const tools = el('div','mod-tools');
+    /* EDIT IS A TOOL, NOT A FIELD ON THE FACE. Filing is something you do to
+       the project now and then, so it is a key in the group with the other
+       things you do to it — and the folder goes back to being what it reads
+       as everywhere else on this card: a printed mark. */
+    [[ICON.pencil, `Edit ${p.name} — its folder`, () => { editing = editing === p.name ? null : p.name; drawRack(); }],
+     [ICON.code,   'Open in editor'],
      [ICON.folder, 'Reveal in Finder'],
-     [ICON.term,   'Open in terminal']].forEach(([ic, t]) =>
-      tools.append(key(ic, { cls: 'act aux ico', title: t })));
-    p._pullKey = key(ICON.settle, { cls: 'act aux ico', title: 'git pull --ff-only', onClick: () => pull(p) });
+     [ICON.term,   'Open in terminal']]
+      .forEach(([ic, t, onClick], n) => tools.append(
+        key(ic, { cls:'act aux ico', title:t, onClick, down: n === 0 && editing === p.name })));
+    p._pullKey = key(ICON.settle, { cls:'act aux ico', title:'git pull --ff-only', onClick:() => pull(p) });
     tools.append(p._pullKey);
     acts.append(tools);
     m.append(acts, pullLine(p));
     paintPull(p);
 
-    const tags = el('div', 'mod-tags');
-    tags.append(el('span', 'tagcut folder', p.folder));
-    p.tags.forEach(t => tags.append(el('span', 'tagcut', t)));
-    m.append(tags, el('span', 'grip'));
+    /* ── the folder drawer ────────────────────────────────────────────────
+       NOT A DIALOG. Filing is a one-field change to the thing you are already
+       looking at, and a modal for it covers the rack to ask about one card.
+       EDIT opens the row here, on the panel, with the key held down while it
+       is open — the same thing a latched key means everywhere else. */
+    if (editing === p.name) {
+      const list = [NONE, ...FOLDERS];
+      const drawer = el('div','mod-fold');
+      drawer.append(K.selector({
+        label:'FOLDER', options:list, width:176,
+        index: Math.max(0, list.indexOf(p.folder || NONE)),
+        onChange:(i, v) => { p.folder = v === NONE ? '' : v; drawRack(); },
+      }));
+      m.append(drawer);
+    }
+
     return m;
   };
 
-  const draw = (keepFocus) => {
-    root.textContent = '';
-    const top = el('div', 'con-top');
-    FOLDERS.forEach((f, i) => {
-      const n = PROJECTS.filter(p => inFolder(p, i)).length;
-      const c = el('button', 'chip' + (i === folder ? ' is-down' : '') + (i === 1 ? ' running' : ''),
-                   `${i === 1 ? '<span class="pilot"></span>' : ''}${f}<span class="ct">${n}</span>`);
-      c.type = 'button';
-      c.setAttribute('role', 'radio');
-      c.setAttribute('aria-checked', String(i === folder));
-      c.addEventListener('click', () => engage(c, () => { folder = i; draw(); }, 'is-down'));
-      top.append(c);
-    });
-    const nf = el('button', 'chip new', '+ NEW FOLDER');
-    nf.type = 'button';
-    top.append(nf);
+  /* WHICH CARD HAS ITS FOLDER ROW OPEN, by name. It is kept out here so the
+     row survives the rack being redrawn under it — filing a project repaints
+     the rack, and a drawer that shut every time you used it would be a drawer
+     you had to open twice. */
+  let editing = null;
 
-    const slot = el('div', 'slot', ICON.search);
-    const inp = el('input');
-    inp.type = 'search'; inp.placeholder = 'SEARCH'; inp.value = q;
-    inp.setAttribute('aria-label', 'Search projects');
-    inp.addEventListener('input', () => { q = inp.value; draw(true); });
-    slot.append(inp);
-    top.append(slot);
+  /* ── the strip: two rows, and the folder leads ─────────────────────────
+     ONE FLEX LINE THAT WRAPS IS NOT A LAYOUT. Letting `.con-top` wrap put the
+     toggle under the field and left the app keys floating at the height of
+     whichever line won — so the rows are declared instead of discovered.
+     THE FOLDER IS THE FIRST ROW because it is the one filter that answers
+     "which projects am I looking at"; the field and the switch narrow what
+     that row already chose, so they sit under it. */
+  const strip = el('div');
+  const slot = el('div','slot', ICON.search);
+  const inp = el('input');
+  inp.type = 'search'; inp.placeholder = 'FILTER';
+  inp.setAttribute('aria-label','Filter projects');
+  /* THE STRIP IS BUILT ONCE AND ONLY THE RACK IS REDRAWN, so the field keeps
+     its focus and its caret while you type. 06 rebuilt everything and had to
+     put the caret back by hand. */
+  inp.addEventListener('input', () => { q = inp.value; drawRack(); });
+  slot.append(inp);
 
-    const shown = el('div', 'lcd dim', `${visible().length} SHOWN`);
-    shown.style.marginLeft = 'auto';
-    top.append(shown, upd, ver);
+  let folderSel = null;
+  /* NO LABEL. `ALL FOLDERS` is already the word FOLDERS on the face, so the
+     caption above it was the same noun twice in a column — and it was the
+     only label in the strip, which left the whole row sitting a line lower
+     than it needed to for the sake of a word the control says itself. */
+  const buildFolderSel = () => K.selector({
+    options:opts(), width:186,
+    index: Math.max(0, opts().indexOf(folder)),
+    /* IT REPAINTS THE KEYS AND IT DOES NOT REBUILD THE STRIP. Picking a
+       folder changes which of the two folder keys apply, so they have to be
+       told — but `drawStrip()` would throw this very selector away while the
+       list it was picked from is still closing, and the focus that was on its
+       face would go to a node that is no longer in the document. */
+    onChange:(i, v) => { folder = v; paintFolderKeys(); drawRack(); },
+    /* THE ONE COMMAND THAT DOES NOT NEED A FOLDER lives in the list, because
+       the list is where you go when you are thinking about folders and it is
+       the only place the answer could be. NEW is not a value — the kit keeps
+       it under a cut, with no tick and no commit. */
+    actions:[{ label:'New folder…', onPick:startNew }],
+  });
 
-    const rack = el('div', 'rack');
-    const list = visible();
-    if (!list.length) rack.append(el('div', 'empty', folder === 1 ? 'NOTHING IS RUNNING' : 'NO PROJECTS IN THIS FOLDER'));
+  const running = K.toggle({ label:'RUNNING', lamp:'#FF6A00', value:false,
+    title:'Show only what is up', onChange:v => { onlyUp = v; drawRack(); } });
 
-    list.forEach(p => rack.append(buildModule(p)));
+  /* ── THE FOLDER COMMANDS, SPLIT BY WHAT THEY NEED ─────────────────────
+     THEY WERE ONE MENU BEHIND ONE KEY, and that key had to be pressed before
+     you could find out that two of its three rows were greyed. A menu whose
+     contents depend on a value somewhere else on the strip is a menu you open
+     to READ, which is the one thing a menu is not for.
 
-    root.append(top, rack);
-    if (keepFocus) {
-      const f = root.querySelector('.slot input');
-      f.focus(); f.setSelectionRange(f.value.length, f.value.length);
+     SO THEY GO WHERE THEIR CONDITION IS. NEW needs nothing and lives in the
+     list, under the folders, because that is where you already are when you
+     think about folders. RENAME and DELETE need a named folder, so they are
+     keys that are on the strip exactly when there is one — present or absent
+     rather than enabled or greyed, because a key that is there and dead still
+     has to be read before it can be dismissed.
+
+     AND THE KEY THAT OPENED THE MENU IS GONE, because the menu is. */
+  const named = () => folder !== ALL && folder !== NONE;
+  /* IT IS AN AUX KEY, NOT A DOCK PLATE. `K.plateKey` hard-codes `dock-plate`,
+     which is sized and marked for the app dock — in this strip it collapsed to
+     a stray colon beside the selector, which is what "unprofessional" looks
+     like close up. The strip already has a key shape: RESCAN's. This takes it,
+     so the two icon keys and the two word keys in the row are one family. */
+  /* ── NAMING A FOLDER HAPPENS WHERE THE NAME IS ────────────────────────
+     A MODAL TO TYPE ONE WORD IS A ROOM YOU ARE SENT TO FOR A SENTENCE. It
+     dims the rack, takes the whole window for a field the width of the
+     window, and asks you to find SAVE with the mouse when your hands are
+     already on the keys. Worse, it hides the one thing you are renaming: the
+     list it belongs to is behind the dim.
+
+     SO THE SELECTOR BECOMES THE FIELD. Same place, same 186px, same row — the
+     control that SHOWS the name is the control that TAKES it, which is how a
+     file gets renamed in every file browser there has ever been. Nothing
+     moves, nothing dims, and the rack behind stays readable while you type.
+
+     ENTER COMMITS, ESCAPE PUTS IT BACK, CLICKING AWAY COMMITS. That is the
+     inline-rename contract, and the one key beside the field is the CONFIRM,
+     so the whole of it is reachable with the mouse: type, then press the
+     orange cap. Escape is the way out, which is where it is in every field
+     in this system.
+
+     DELETE KEEPS ITS DIALOG, and the asymmetry is the point. Renaming is
+     typing and is undone by typing again; deleting empties a folder and
+     cannot be taken back, so it stops you, names the folder and counts the
+     projects that are about to come loose. A destructive action that happens
+     at the speed of a rename is a destructive action you will do by accident. */
+  let editF = null;   // null | { mode:'new'|'rename', was }
+
+  const startNew    = () => { editF = { mode:'new',    was:'' };     drawStrip(); };
+  const startRename = () => { editF = { mode:'rename', was:folder }; drawStrip(); };
+  /* EVERY EXIT NULLS THE STATE BEFORE IT REDRAWS, and that is what makes the
+     three of them safe to fire in any order. Tearing the field out of the DOM
+     fires its own `blur`, which would commit a second time — but by then
+     there is no edit to commit, so the handler returns on its first line. */
+  const endEdit = () => { editF = null; drawStrip(); };
+
+  const commitEdit = raw => {
+    const e = editF, v = raw.trim();
+    if (!e) return;
+    if (!v) { endEdit(); return; }
+    editF = null;
+    if (e.mode === 'new') {
+      if (!FOLDERS.includes(v)) FOLDERS.push(v);
+    } else if (v !== e.was) {
+      FOLDERS = FOLDERS.map(f => f === e.was ? v : f);
+      PROJECTS.forEach(p => { if (p.folder === e.was) p.folder = v; });
     }
+    folder = v;
+    drawStrip(); drawRack();
   };
-  draw();
 
-  /* ── THE STATE SHEET — every state the console can be in, posed and still ──
-     A live panel shows one state at a time and the interesting ones are the
-     ones you have to provoke. These are copies built by the same functions,
-     frozen in each state, with the state named under it — so the whole
-     vocabulary can be read and judged at once. Nothing on the sheet responds. */
-  (function states() {
-    const sheet = document.getElementById('lp-states');
-    if (!sheet) return;
-    const cell = (cap, ...nodes) => {
-      const c = el('div', 'lp-cell');
-      const row = el('div', 'lp-row');
-      row.append(...nodes);
-      c.append(row, el('span', 'tagcut', cap));
-      return c;
+  const buildNameEditor = () => {
+    const e = editF;
+    const f = el('div','slot');
+    /* THE SELECTOR'S OWN WIDTH, STATED THREE WAYS, because `.slot` ships
+       `flex:1 1 190px` for the filter it was drawn for and would otherwise
+       eat the line the moment it replaced a fixed-width part. */
+    f.style.flex = '0 0 186px'; f.style.width = '186px'; f.style.maxWidth = '186px';
+    const i = el('input');
+    i.type = 'text';
+    i.value = e.mode === 'rename' ? e.was : '';
+    i.placeholder = e.mode === 'new' ? 'NEW FOLDER' : 'FOLDER NAME';
+    i.setAttribute('aria-label', e.mode === 'new'
+      ? 'Name for the new folder' : `New name for ${e.was}`);
+    i.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter')  { ev.preventDefault(); commitEdit(i.value); }
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); endEdit(); }
+    });
+    i.addEventListener('blur', () => commitEdit(i.value));
+    f.append(i);
+    /* SELECTED, NOT JUST FOCUSED. A rename that opens with the caret at the
+       end makes you clear the old name by hand; one that opens with it
+       selected lets you either type over it or arrow out and edit. */
+    setTimeout(() => { i.focus(); i.select(); }, 0);
+
+    /* THE CONFIRM IS BUILT HERE AND NOWHERE ELSE, because it is the only
+       control on the strip that needs to read a value out of another one. A
+       key made once at the top would be holding a reference to the field from
+       the LAST edit, which is a bug that only shows up on the second rename.
+
+       IT IS THE CAP, NOT AN AUX KEY. Orange is this app's "this is the thing
+       you came to do" — it is on LAUNCH and it was on the dialog's SAVE, and
+       a confirm that looks like RESCAN is a confirm you have to read.
+
+       POINTERDOWN, AHEAD OF THE BLUR. A click lands after the field has
+       already blurred and committed on its own, so by the time it arrived
+       there would be no edit left and the key would do nothing — a control
+       that visibly does nothing, which is worse than one that is missing. */
+    const ok = key(ICON.check, { cls:'act go ico', title:'Save this name' });
+    ok.addEventListener('pointerdown', ev => { ev.preventDefault(); commitEdit(i.value); });
+
+    /* ── AND THE BIN LIVES HERE, NOT ON THE RESTING ROW ────────────────
+       DELETING IS AN EDIT, SO IT IS BEHIND THE EDIT KEY. On the resting
+       strip the bin was a loaded control one press from a folder, sitting
+       beside a selector you click all day — the kind of neighbour that
+       eventually gets hit. Here it is two presses deep and the second one
+       is the armed row, which is the protection the dialog used to be.
+
+       IT IS ALSO WHERE YOU ALREADY ARE. Rename and delete are the same
+       thought from the same place: this folder, the one named in the field
+       in front of you. One key opens that thought, and both answers to it
+       are inside.
+
+       POINTERDOWN FOR THE SAME REASON THE TICK HAS IT, and it matters more
+       here: on a plain click the field blurs first and COMMITS the rename,
+       so the bin would arrive to arm a folder that had just been renamed
+       out from under it. Arming ahead of the blur leaves nothing to commit. */
+    /* AND THERE IS NO BIN WHEN THERE IS NOTHING TO BIN. A folder being named
+       for the first time does not exist yet; a key offering to delete it
+       would be offering to delete the empty string. Escape is how you leave
+       a new folder you have changed your mind about. */
+    if (e.mode !== 'rename') return [f, ok];
+
+    const bin = key(ICON.trash, { cls:'act aux ico', title:'Delete this folder' });
+    bin.addEventListener('pointerdown', ev => { ev.preventDefault(); armDelete(); });
+
+    /* THE BIN GOES ON THE FAR SIDE OF THE FIELD FROM THE TICK. They are the
+       two ways out of this row and they do opposite things, so putting them
+       side by side makes a pair of 32px caps where the only difference is the
+       mark on the face — and the one you hit by mistake empties a folder. The
+       field between them is 186px of separation that costs nothing, and it
+       puts the commit where a commit belongs: at the end of what you typed. */
+    return [bin, f, ok];
+  };
+
+  /* ── AND DELETE ASKS IN THE ROW TOO ──────────────────────────────────
+     THE LAST DIALOG GOES FOR THE SAME REASON THE FIRST ONE DID. Every fact
+     it carried — which folder, how many projects come loose — is about what
+     is on screen BEHIND it, and it was covering all of it. You cannot check
+     a warning against a rack you have just been shut out of.
+
+     IT IS STILL TWO PRESSES, AND THAT IS THE WHOLE OF THE PROTECTION. The
+     bin arms; the row states the consequence in words and offers CANCEL and
+     DELETE. What is gone is the room you had to be sent to, not the stop.
+
+     CANCEL TAKES THE FOCUS, NEVER DELETE. The armed row is the one place in
+     this app where a stray Return could empty a folder, so the key under it
+     is the harmless one — and Escape leaves as well, which is what every
+     other field here already does. */
+  let delArm = null;
+
+  /* IT TAKES THE NAME OFF THE EDIT WHEN THERE IS ONE, and drops the edit.
+     The bin is reachable only from inside a rename now, and a half-typed new
+     name is not what you meant to delete — `was` is the folder as it stands
+     on disk, which is the only thing there is to remove. */
+  const armDelete  = () => {
+    delArm = editF ? editF.was : folder;
+    editF = null;
+    drawStrip();
+  };
+  const dropDelete = () => { delArm = null; drawStrip(); };
+  const doDelete = () => {
+    const was = delArm;
+    if (!was) return;
+    delArm = null;
+    FOLDERS = FOLDERS.filter(f => f !== was);
+    PROJECTS.forEach(p => { if (p.folder === was) p.folder = ''; });
+    folder = ALL;
+    drawStrip(); drawRack();
+  };
+
+  const buildDeleteBar = () => {
+    const n = PROJECTS.filter(p => p.folder === delArm).length;
+    const say = el('span','con-say');
+    say.append(
+      el('span','', 'Delete '),
+      el('b','', delArm),
+      el('span','', n
+        ? ` — ${n} project${n === 1 ? '' : 's'} go back to no folder. Nothing on disk is touched.`
+        : ' — it is empty. Nothing on disk is touched.'),
+    );
+    const no  = key('<span>CANCEL</span>', { cls:'act aux', onClick:dropDelete });
+    const yes = key(`${ICON.trash}<span>DELETE</span>`, { cls:'act halt', onClick:doDelete });
+    setTimeout(() => no.focus(), 0);
+    return [say, no, yes];
+  };
+
+  /* ONE KEY ON THE RESTING ROW, AND IT IS THE DOOR. Everything you can do
+     to a folder is behind it, which is why it is a pencil and not a gear:
+     what is on the other side is this folder's name and what happens to it.
+
+     `display`, NOT `hidden`. `.act` sets its own display, so the attribute
+     does nothing to a key — which is why `.act.upd[hidden]` had to be
+     written out longhand in the stylesheet. One key is not worth a rule. */
+  const renKey = key(ICON.pencil, { cls:'act aux ico', title:'Edit this folder', onClick:startRename });
+  const paintFolderKeys = () => { renKey.style.display = named() ? '' : 'none'; };
+  paintFolderKeys();
+
+  const rescan = key(`${ICON.run}<span>RESCAN</span>`, { cls:'act aux', title:'Look for projects again' });
+  /* ONE CHANNEL, AND IT IS THE ONE CUT THAT MATTERS: left of it is what you
+     do to your projects, right of it is what the program is. The app dock
+     makes the same split with the same part, for the same reason. */
+  const chan = el('span','chan');
+
+  /* ── THE SKIN KEY, AND IT DELEGATES RATHER THAN DECIDING ────────────────
+     A launcher is a window onto a machine that is in a room, and the room is
+     either lit or it is not — so the app carries the switch, not just the
+     documentation around it. It sits beside the version because that corner
+     is already what-this-program-is rather than what-your-projects-are.
+
+     IT CLICKS THE NAV'S KEY WHEN THERE IS ONE. Two controls writing the same
+     attribute and the same storage key is two chances to disagree about
+     which one is true; this one presses the other and lets it do the work,
+     and only falls back to flipping the attribute itself when it is running
+     somewhere the nav bar is not — which is what an adopting app would do. */
+  const skinOn = () => document.documentElement.dataset.skin === 'light';
+  const skinKey = key(ICON.sun, { cls:'act aux ico', title:'Light or dark' });
+  const paintSkin = () => {
+    skinKey.classList.toggle('is-down', skinOn());
+    skinKey.setAttribute('aria-pressed', String(skinOn()));
+  };
+  skinKey.addEventListener('click', () => {
+    const nav = document.querySelector('.nav-skin');
+    if (nav) nav.click();
+    else {
+      const on = !skinOn();
+      if (on) document.documentElement.dataset.skin = 'light';
+      else delete document.documentElement.dataset.skin;
+      try { localStorage.setItem('skew-skin', on ? 'light' : 'dark'); } catch {}
+    }
+    paintSkin();
+  });
+  paintSkin();
+
+  const drawStrip = () => {
+    strip.textContent = '';
+    folderSel = buildFolderSel();
+    /* ── A LINE OF BOXES, AND A SWITCH UNDER IT ───────────────────────────
+       THE STRIP IS SPLIT BY WHAT A PART IS, not by what it does. The first
+       line is everything cut as a box of one height — the folder selector,
+       the filter field, the keys — and it reads left to right as a sentence:
+       which folder, then what matches, then, past the gap, what the program
+       is. The switch sits under them because a milled slot with a grip in it
+       is not a box, and a part with no edge dropped into a run of edges reads
+       as having fallen out of the run.
+
+       WHAT CUTS THE RACK DOWN IS ON THE LEFT, in the order you would say it:
+       which folder, then what matches, then only-what-is-running — three
+       narrowings of one list, each one applied to the result of the last, and
+       the third one on its own line directly under the first two. RESCAN
+       closes the group on the right because it is what REFILLS the list; it
+       is the same question as the folder, a minute apart.
+
+       WHAT THE PROGRAM IS, IS ON THE RIGHT, past the gap: the skin and the
+       version. Neither has anything to do with your projects, and the channel
+       between them says so more plainly than any grouping of boxes could. */
+    /* AND IT DOES NOT WRAP. `.con-top` wraps by default, which is right for a
+       strip of chips and wrong for a strip that MEANS something left to right:
+       the selector, the switch and the field each come out of the kit as a
+       block that will happily claim a line of its own, so the row broke into
+       three and the reading order with it. */
+    const lead = el('div','con-top');
+    /* TEN UNDER THE FIRST LINE, because the switch belongs to the row above
+       it: a folder, a field and then only-what-is-running are three
+       narrowings of one list, and a break the size of the one under the whole
+       strip would cut the third one off from the two it follows. */
+    lead.style.cssText = 'display:flex;align-items:center;flex-wrap:nowrap;gap:0;margin-bottom:10px';
+
+    /* THREE GROUPS, AND THE GAPS INSIDE THEM ARE SMALLER THAN THE GAPS
+       BETWEEN. That is the whole of the grouping — no boxes, no borders, no
+       second background. 8px binds, 18px separates, and the one channel marks
+       the single cut that matters: left of it is your projects, right of it is
+       the program. A row of nine controls at one spacing is a row of nine
+       unrelated controls, which is what it looked like. */
+    const grp = (...kids) => {
+      const g = el('span');
+      g.style.cssText = 'display:flex;align-items:center;gap:8px;min-width:0';
+      g.append(...kids);
+      return g;
     };
+    const gapWide = () => { const s = el('span'); s.style.width = '18px'; s.style.flex = '0 0 18px'; return s; };
 
-    // the version readout and its key, in each state
-    const verState = (txt, cls, upd) => {
-      const v = el('span', 'lcd verkey' + (cls ? ' ' + cls : ''), txt);
-      if (!upd) return [v];
-      return [key(`${ICON.settle}<span>${upd}</span>`, { cls: 'act go upd' })];
-    };
-    const vers = el('div', 'lp-grid lp-vers');
-    [['IDLE',             'V2.3.0',       ''],
-     ['CHECKING',         'CHECKING',     'busy'],
-     ['UP TO DATE',       'UP TO DATE',   ''],
-     ['UPDATE AVAILABLE', 'V2.3.0',       '', 'UPDATE 2.4.0'],
-     ['UPDATING',         'UPDATING 46%', 'busy'],
-     ['UPDATED',          'V2.4.0 ✓',     ''],
-     ['CHECK FAILED',     'CHECK FAILED', 'err'],
-    ].forEach(([cap, txt, cls, upd]) => vers.append(cell(cap, ...verState(txt, cls, upd))));
+    /* THE FIELD IS THE ONLY THING THAT GIVES, and it never gives everything:
+       at 200px the placeholder still reads, and a field narrower than its own
+       label is a field you cannot tell from a button. Everything else in the
+       row is fixed, because everything else is the size of its words. */
+    slot.style.flex = '1 1 240px';
+    slot.style.minWidth = '200px';
+    slot.style.maxWidth = '420px';
 
-    // modules: run states × pull states
-    const base = PROJECTS[0];
-    const pose = (name, up, pull) => {
-      const p = Object.assign({}, base, { name, up, pull, _line: null, _pullKey: null });
-      return buildModule(p);
-    };
-    const mods = el('div', 'lp-grid lp-mods');
-    [['RUNNING',                 true,  null],
-     ['STOPPED',                 false, null],
-     ['PULLING · 63%',           true,  { st: 'run', pct: 63 }],
-     ['PULLED · CHANGES',        true,  { st: 'ok',  msg: '3 files changed · 41 insertions(+), 9 deletions(−)' }],
-     ['PULLED · NOTHING NEW',    false, { st: 'ok',  msg: 'Already up to date.' }],
-     ['PULL FAILED',             false, { st: 'err', msg: 'fatal: Not possible to fast-forward, aborting.' }],
-    ].forEach(([cap, up, pull]) => mods.append(cell(cap, pose(base.name, up, pull))));
+    /* ── AND THE SWITCH GETS ITS OWN LINE, UNDER THE SELECTOR ─────────────
+       IT IS THE ONLY CONTROL IN THE STRIP THAT IS NOT A BOX. The selector,
+       the field and the keys are all cut rectangles of about one height; a
+       slide switch is a slot milled in the face with a grip standing proud of
+       it and its name set beside it in the open. Dropped into that line it
+       was the one part with no edge, so it read as having come loose and
+       fallen out of the row — which is exactly what it looked like, and no
+       amount of centring fixes a part that does not belong in the run.
 
-    sheet.append(el('span', 'tagcut lp-head', 'THE VERSION CHECK'), vers,
-                 el('span', 'tagcut lp-head', 'A MODULE · RUN AND PULL'), mods);
-  })();
+       ON ITS OWN LINE IT IS A SETTING, which is what it is: the other two
+       narrowings are things you type and pick, and this one is a thing you
+       leave on. `.tog` is `width:100%` for the settings column it comes from,
+       so it still has to be told it is not claiming the line.
+
+       THE NEGATIVE MARGIN IS THE ALIGNMENT, not a nudge. `.tog` carries 6px
+       of padding so the whole line can light under the pointer, which means
+       its first mark starts 6px in while the selector's edge starts at zero.
+       Pulling those 6px back puts the pipe on the selector's left edge, and
+       the two lines read as one block with a left margin instead of two
+       things that nearly line up. */
+    running.style.width = 'auto';
+    running.style.flex = '0 0 auto';
+    running.style.marginLeft = '-6px';
+
+    /* THE VALUE LEADS AND ITS COMMANDS FOLLOW IT. The selector says which
+       folder; the two keys act on THAT folder, so they come after it and
+       vanish with it. Putting them first would be a verb with no object for
+       as long as ALL FOLDERS is up. */
+    const scope  = editF ? grp(...buildNameEditor())
+                         : grp(folderSel, renKey);          // which projects
+    const app    = grp(rescan, chan, skinKey, upd, ver); // the program itself
+    app.style.marginLeft = 'auto';
+    app.style.flex = '0 0 auto';
+
+    if (delArm) {
+      /* THE WHOLE ROW, not a group inside it: the sentence needs the width
+         the selector and the field were using, and leaving them in place
+         beside a warning would let you change the folder you are deleting
+         while the warning for the old one is still on screen. */
+      const [say, no, yes] = buildDeleteBar();
+      const keys = grp(no, yes);
+      keys.style.marginLeft = '18px';
+      keys.style.flex = '0 0 auto';
+      lead.append(say, keys);
+      lead.addEventListener('keydown', ev => {
+        if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); dropDelete(); }
+      });
+    } else {
+      lead.append(scope, gapWide(), slot, app);
+    }
+
+    /* THIRTY-TWO UNDER THE WHOLE STRIP. This is the break between the
+       window's chrome and the window's contents, and it is the only gap here
+       that has to be bigger than the 14px between two cards — a band of
+       controls sitting one card-gap above the rack reads as the first row of
+       the rack. */
+    const under = el('div');
+    under.style.cssText = 'display:flex;align-items:center;margin-bottom:32px;position:relative;z-index:1';
+    under.append(running);
+
+    paintFolderKeys();
+    strip.append(lead, under);
+  };
+
+  /* ── the rack ─────────────────────────────────────────────────────────── */
+  const rack = el('div','rack');
+  const clearAll = () => {
+    q = ''; inp.value = ''; folder = ALL; onlyUp = false;
+    if (running.classList.contains('off') === false) running.click();
+    drawStrip(); drawRack();
+  };
+  const drawRack = () => {
+    rack.textContent = '';
+    const list = filtered();
+    /* NOTHING MATCHING IS A STATE WITH A WAY OUT OF IT. A rack that is empty
+       because of a filter you set two minutes ago is not an empty rack, and
+       the key that says so is the only one that can be pressed here. */
+    if (!list.length) {
+      const empty = el('div','empty');
+      empty.append(el('span','', filtering() ? 'NOTHING MATCHES' : 'NO PROJECTS FOUND'));
+      if (filtering()) empty.append(key('<span>CLEAR FILTERS</span>', { cls:'act aux', onClick:clearAll }));
+      rack.append(empty);
+      return;
+    }
+    list.forEach(p => rack.append(buildModule(p)));
+  };
+
+  drawStrip();
+  drawRack();
+  root.append(strip, rack);
 })();
+
 
 /* THE BRIGHT SKIN IS GONE, and it is not coming back as a computed inversion
    either. Every effect in this document is light modelling against a dark

@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.118.0
+     at       Skew v1.119.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -75,6 +75,18 @@
 :root{
   /* ── the material palette ─────────────────────────────────────────────── */
   --room:        #0b0b0d;   /* the desk it sits on                          */
+  /* ── THE DESK IS RULED IN BOTH SKINS ──────────────────────────────────
+     A drafting grid is what makes a surface a BENCH — something a part was
+     put down on, with a measure already in it — and that is as true of a
+     black desk as of a white one. Same pitches, same alphas, same fixed
+     attachment so every surface drawing it shares one phase; only the ink
+     flips, because here the light in the room is what the lines are made of
+     and there it is the graphite. */
+  --desk-grid:
+    repeating-linear-gradient(to right,  rgba(255,255,255,.085) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.085) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(to right,  rgba(255,255,255,.035) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0 1px, transparent 1px 24px);
   --case:        #191a1d;   /* anodised aluminium chassis                    */
   --case-lo:     #101113;   /* the shaded half of every bevel                */
   --case-hi:     #2e3137;   /* the lit half                                  */
@@ -106,13 +118,48 @@
 
    AND THE RUNNING COLOUR HAD TWO ANSWERS. launchpad2 says teal; Terminass
    says #7CFFB0, which is its LCD green doing duty as a success colour. Teal
-   wins, because #7CFFB0 is a DISPLAY value — it is what a lit readout is made
+   wins, because var(--read) is a DISPLAY value — it is what a lit readout is made
    of — and a system where "the number is showing" and "the process is alive"
    are the same colour cannot say either one.
 
    NO `--info` IN DARK. No app has one, and picking a blue that reads on a
    near-black panel with nothing to check it against is exactly the guess this
    pass is here to stop making. Named as an open decision, not filled in. */
+  /* ── RUNNING IS BLUE, AND IT WAS NEVER A SEMANTIC GREEN ────────────────
+     The launchpad spoke green for "this process is alive": a green cap, a
+     green port well, a green light pipe, a green jewel. Green is the one
+     colour in this system with no job — `--ok` is a SEMANTIC, used for a
+     passing check and a healthy value, and a running server is not a verdict.
+     Worse, it put a second saturated hue beside the orange and left the rack
+     speaking two accents for two unrelated things.
+
+     THE BLUE IS THE ONE § 02 WROTE DOWN. It was posed there as the accent
+     candidate and rejected for that job — it sits at the ink's own hue, so a
+     blue cap beside blue words is one family and cannot shout. That is the
+     exact reason it works HERE: running is a STATE, reported, not a command
+     shouted at you, and the one thing in the rack that must still shout is
+     the orange it no longer has to compete with. `#7FB2E5` is already in this
+     file as the layer and ruling blue, so the lit tint is not new either. */
+  /* ── AND LIT GLASS IS BLUE, EXCEPT WHERE THE MACHINE IS TALKING ────────
+     `--read` is what a readout GLOWS. It was var(--read) everywhere, hard-coded
+     in a dozen rules, which meant the only lit colour in the system was the
+     one colour the system had no other use for — and once running went blue
+     a green number in the same panel read as a third state rather than as a
+     display.
+
+     THE EXCEPTION IS THE MACHINE'S OWN READOUTS. A DRO, a work offset, a
+     feed rate and the pen bank's three heights stay green, because there the
+     phosphor is not a signal at all: it is what that glass is made of, the
+     way a plotter's own panel is made of it. They re-pin the token rather
+     than restating the colour, so the glass, the bloom and the dim state all
+     follow one value in both directions. */
+  --read:        #7FB2E5;   /* what lit glass glows                          */
+  --read-dim:    color-mix(in srgb, var(--read) 42%, #0b0b0d);
+  --read-glow:   color-mix(in srgb, var(--read) 70%, transparent);
+  --run:         #1A79DC;   /* the lamp, and a cap's top stop                */
+  --run-fill:    #0768C1;   /* the cap's body — white on it is 5.59:1        */
+  --run-deep:    #0057A8;   /* the far wall of the same cap                  */
+  --run-lit:     #7FB2E5;   /* what a lit readout of it is made of           */
   --ok:          #2DD4BF;   /* running — launchpad2's Launch key fill        */
   --ok-bg:       #134E4A;
   --ok-edge:     #0F766E;
@@ -420,7 +467,26 @@ body::after{
   --grid-minor:  3px;     /* subline spacing. AN EXACT DIVISOR of it */
   --grid-w:      1px;     /* major weight                            */
   --grid-subw:   1px;     /* subline weight                          */
-  --grid-ink:    #7FB2E5;
+  /* ── THE RULING IS GRAPHITE, NOT BLUEPRINT ─────────────────────────────
+     #7FB2E5 was a pale blue, and a pale blue is the one ink that cannot do
+     this job in both skins: on the cream sheet of the light room it is the
+     faintest thing on screen AND the nearest in hue to the cold desk behind
+     the paper, so the measure dissolves into the room it is measured against.
+
+     Near-black works on both, because the sheet is the one surface that is
+     pale in either skin — white on the dark desk, cream on the lit one. And
+     it is not drawn at full strength: a 0.5mm major lands under one device
+     pixel, so `ink()` spends the remainder as ALPHA and the line arrives at
+     about half, with the sublines near fifteen per cent. That is a pencil
+     ruling on paper, which is what the thing is.
+
+     AND IT IS A MID GREY, NOT A BLACK. #6B6B6B is this system's own second
+     ink — the value the light skin set its secondary words in before they
+     went navy — and the point of a rule is that it is BELOW the work: at
+     near-black the majors arrived heavier than anything that would ever be
+     drawn on them, which is a sheet you read instead of a sheet you draw on.
+     Two stops lighter and the measure is still countable and stops competing. */
+  --grid-ink:    #6B6B6B;
   --grid-op:     1;
   --grid-subink: color-mix(in srgb, var(--grid-ink) 40%, transparent);
 
@@ -620,7 +686,7 @@ h2 span{ color:#3d4149; }
     inset 0 -1px 0 rgba(255,255,255,.06),
     0 1px 0 rgba(255,255,255,.06);
   font-family:var(--font); font-size:13px; font-weight:700;
-  color:#7CFFB0; text-shadow:0 0 7px rgba(124,255,176,.75), 0 0 18px rgba(124,255,176,.35);
+  color:var(--read); text-shadow:0 0 7px color-mix(in srgb, var(--read) 75%, transparent), 0 0 18px color-mix(in srgb, var(--read) 35%, transparent);
   font-variant-numeric:tabular-nums;
 }
 
@@ -2138,10 +2204,32 @@ html{ -webkit-tap-highlight-color:transparent; }
     inset 0 -1px 0 rgba(255,255,255,.06),
     0 1px 0 rgba(255,255,255,.07);
   font-family:var(--font); font-size:10.5px; letter-spacing:.09em;
-  color:#7CFFB0; text-shadow:0 0 6px rgba(124,255,176,.7);
+  color:var(--read); text-shadow:0 0 6px color-mix(in srgb, var(--read) 70%, transparent);
   font-variant-numeric:tabular-nums;
 }
-.lcd.dim{ color:#3f6d55; text-shadow:none; }
+.lcd.dim{ color:var(--read-dim); text-shadow:none; }
+
+/* ── AND THE MACHINE KEEPS ITS PHOSPHOR ───────────────────────────────────
+   Everything lit now runs on `--read`, which is blue; these four re-pin it to
+   the green it was. A DRO, the work offset beside it, the feed rate and the
+   pen bank's three heights are the one family where the colour is not a
+   signal — it is the material of a plotter's own panel, the way a seven
+   segment display is red because of what it is made of. Re-pinning the TOKEN
+   rather than restating the colour means the well, the bloom, the dim state
+   and anything added to those panels later all follow without a second rule.
+
+   THE TEST IS WHO IS TALKING, AND IT IS NARROW. Three things are the machine
+   speaking about itself: WHERE THE HEAD IS (the DRO), WHERE THE PEN IS (the
+   bank's three heights) and WHAT IT IS DOING (the status window). Those keep
+   the phosphor.
+
+   EVERYTHING ELSE IN THE SAME PANELS IS BLUE, and that is deliberate, not an
+   oversight. A work offset is which datum you CHOSE; a feed rate is a number
+   you SET and the machine obeys; both sit inside the position panel and
+   neither is the machine reporting back. Pinning the whole box would have
+   been the easy rule and the wrong one — it would make the panel the unit of
+   meaning instead of the reading. */
+:is(.dro, .dro-col, .penbox, .lcd.state){ --read:#7CFFB0; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE PAGE SWITCHER — piano keys with a mechanical interlock
@@ -2445,9 +2533,24 @@ html{ -webkit-tap-highlight-color:transparent; }
 /* ═══════════════════════════════════════════════════════════════════════════
    LAUNCHPAD — one rack module per project
    ═══════════════════════════════════════════════════════════════════════════ */
+/* ── THE CONSOLE IS AN APPLICATION, NOT A PANEL ──────────────────────────
+   Everything else in this file is a part you BUILD INTO something: a dock, a
+   bay, a bank, a window — they stand on a desk, and the desk is the page.
+   The launcher is not that. It is a whole program with its own window, and
+   what is inside that window is its OWN page: the rack is a set of cards laid
+   out on the launcher's desk, not a set of keys mounted on the launcher's
+   case. So the ruling goes INSIDE it, and the stage it is demonstrated on
+   stays plain — the opposite arrangement to every other section, because the
+   relationship is the opposite way round.
+
+   THE RULING IS NOT FIXED HERE. Everywhere else `--desk-grid` is pinned to
+   the viewport so the page and its stages share one phase; this one is a
+   window with its own origin, and a grid that slid under it when you scrolled
+   would say the desk belongs to the document rather than to the app. */
 .console{
   border-radius:16px; padding:18px;
-  background:linear-gradient(176deg,#1d1f23,#141517 60%,#17181b);
+  background-color:#141517;
+  background-image:var(--desk-grid), linear-gradient(176deg,#1d1f23,#141517 60%,#17181b);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.10),
     inset 0 -1px 0 rgba(0,0,0,.85),
@@ -2459,6 +2562,53 @@ html{ -webkit-tap-highlight-color:transparent; }
   background-image:var(--grain); background-size:140px; opacity:.05; mix-blend-mode:overlay;
 }
 .con-top{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; position:relative; z-index:1; }
+/* ── A TOOLBAR HAS ONE CONTROL HEIGHT ─────────────────────────────────────
+   FOUR PARTS, FOUR HEIGHTS, AND NOT ONE SHARED EDGE IN THE WHOLE ROW. Every
+   part in here was drawn correctly for the place it was drawn FOR — a key is
+   32 because a key is pressed, a selector 28 because a column of them is a
+   list, a search slot 30, a readout 26 because a window cut in a faceplate is
+   smaller than the keys around it. Put four of them on one line, centre them,
+   and every one of those good decisions becomes a different top edge and a
+   different bottom edge. The eye does not read four heights as four kinds of
+   part; it reads them as a row that was never aligned.
+
+   32 IS THE KEY, AND THE KEY SETS THE BAR. The height of a strip of controls
+   is the height of the thing you press in it: the keys are the only parts
+   here with travel, so they are the only ones with a height that is already
+   an answer to something. The rest follow.
+
+   THE READOUT COMES UP TOO, and loses its 3px nudge. A readout that is
+   shorter than the row reads as inset into a faceplate; there is no faceplate
+   here, so it reads as having sunk. The margin was spacing for a bar with no
+   gap of its own and is a fifth value in a row that now has one. */
+.con-top :is(.sel, .slot, .lcd){ height:32px; }
+.con-top .lcd{ margin-left:0; }
+
+/* ── THE STRIP ASKS, INSTEAD OF A DIALOG ASKING ───────────────────────────
+   A CONFIRMATION IS NOT A DESTINATION. The dialog dimmed the whole rack,
+   covered the folder being deleted and the projects about to come loose, and
+   put the question in a window that had to be dismissed before the answer
+   could be checked against anything. Every fact in it is about what is on
+   screen behind it, which is the one place the question cannot be asked from.
+
+   SO THE ROW TURNS INTO THE QUESTION. The controls stand down, the sentence
+   takes the width they were using, and the two keys land where the eye is
+   already going — right-hand end of the row, cancel then commit, the order
+   the dialog had. Nothing moves, nothing dims, and the rack behind stays
+   readable while you decide.
+
+   THE SENTENCE TRUNCATES RATHER THAN WRAPS. A row that grows a second line
+   when a folder has a long name is a row that shoves the rack down at the
+   exact moment you are reading a warning. */
+.con-say{
+  flex:1 1 auto; min-width:0;
+  font-family:var(--font); font-size:10.5px; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--txt-dim);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+/* THE NAME IS THE ONE THING IN IT YOU MUST NOT MISREAD, so it is the one
+   thing set in full ink. The rest is the consequence, which you read once. */
+.con-say b{ color:var(--txt); font-weight:700; }
 /* folder chips are latching radio keys, same interlock as the page switcher */
 .chip{
   height:28px; padding:0 12px; display:inline-flex; align-items:center; gap:7px;
@@ -2480,7 +2630,7 @@ html{ -webkit-tap-highlight-color:transparent; }
 .chip.is-down{ color:var(--led); text-shadow:0 0 6px rgba(255,130,30,.5); }
 .chip .ct{
   font-size:9.5px; padding:1px 5px; border-radius:3px;
-  background:rgba(0,0,0,.45); color:#7CFFB0; text-shadow:0 0 5px rgba(124,255,176,.5);
+  background:rgba(0,0,0,.45); color:var(--read); text-shadow:0 0 5px color-mix(in srgb, var(--read) 50%, transparent);
   box-shadow:inset 0 1px 2px rgba(0,0,0,.8);
 }
 .chip.is-down .ct{ color:#FFD9BC; text-shadow:0 0 5px rgba(255,140,60,.6); }
@@ -2498,8 +2648,8 @@ html{ -webkit-tap-highlight-color:transparent; }
 .slot svg{ width:13px; height:13px; stroke:#5b6069; fill:none; stroke-width:1.8; flex:0 0 13px; }
 .slot input{
   flex:1; min-width:0; background:none; border:0; outline:0; padding:0;
-  font-family:var(--font); font-size:11px; letter-spacing:.06em; color:#7CFFB0;
-  text-shadow:0 0 6px rgba(124,255,176,.5);
+  font-family:var(--font); font-size:11px; letter-spacing:.06em; color:var(--read);
+  text-shadow:0 0 6px color-mix(in srgb, var(--read) 50%, transparent);
 }
 .slot input::placeholder{ color:#3f444c; text-shadow:none; letter-spacing:.1em; }
 
@@ -2528,8 +2678,8 @@ html{ -webkit-tap-highlight-color:transparent; }
   transition:background .2s, box-shadow .2s;
 }
 .module.up::before{
-  background:linear-gradient(180deg,#7CFFB0,#22C55E);
-  box-shadow:0 0 7px rgba(60,230,140,.8), 0 0 18px rgba(60,230,140,.35), inset 0 0 3px rgba(255,255,255,.7);
+  background:linear-gradient(180deg,var(--run-lit),var(--run));
+  box-shadow:0 0 7px rgba(26,121,220,.85), 0 0 18px rgba(26,121,220,.4), inset 0 0 3px rgba(255,255,255,.7);
 }
 .mod-head{ display:flex; align-items:center; gap:9px; }
 /* the status LED — a jewel, dark until the process is alive */
@@ -2561,15 +2711,59 @@ html{ -webkit-tap-highlight-color:transparent; }
 .port{
   display:flex; align-items:center; gap:8px; height:30px; padding:0 10px;
   border-radius:6px; cursor:pointer; border:0; width:100%; text-align:left;
-  background:linear-gradient(180deg,#06110c,#0c1a13);
-  box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 0 12px rgba(60,230,140,.10),
+  /* THE WELL IS THE ROOM WITH THE LAMP MIXED INTO IT, not a picked hex. The
+     green pair #06110c / #0c1a13 were the desk tinted by the lamp standing in
+     it; these are the same two steps with the same lamp, so the strip keeps
+     its depth and changes only what is glowing in it. */
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--run-fill) 7%, #06080b),
+    color-mix(in srgb, var(--run-fill) 11%, #0c0e12));
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 0 12px rgba(26,121,220,.12),
              inset 0 -1px 0 rgba(255,255,255,.05), 0 1px 0 rgba(255,255,255,.06);
   font-family:var(--font); font-size:11px; letter-spacing:.06em;
-  color:#7CFFB0; text-shadow:0 0 7px rgba(124,255,176,.7);
+  color:var(--run-lit); text-shadow:0 0 7px rgba(127,178,229,.7);
 }
-.port:hover{ box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 0 16px rgba(60,230,140,.2), 0 0 8px rgba(60,230,140,.2); }
-.port span:last-child{ margin-left:auto; font-size:9px; color:#3f7a5c; text-shadow:none; letter-spacing:.1em; }
+.port:hover{ box-shadow:inset 0 2px 5px rgba(0,0,0,.9), inset 0 0 16px rgba(26,121,220,.24), 0 0 8px rgba(26,121,220,.24); }
+.port span:last-child{ margin-left:auto; font-size:9px;
+  color:color-mix(in srgb, var(--run-lit) 55%, #0b0b0d);
+  text-shadow:none; letter-spacing:.1em; }
 .port svg{ width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:1.8; }
+
+/* ── AND A PORT THAT IS NOT ANSWERING ─────────────────────────────────────
+   THE STRIP IS THE SAME WELL, UNLIT. A stopped project still has an address,
+   so the row is still there and still reports — it just has nothing running
+   behind it, so nothing in it glows: the lamp comes out of the well, out of
+   the text and out of the hover, and what is left is the plain milled slot
+   every other dead field in this skin is made of. The two stops are `.slot`'s
+   own, which is the nearest thing to it that was already here.
+
+   THE ADDRESS STAYS WHERE IT IS WHEN IT IS LIVE. A live strip is icon,
+   address, then OPEN pushed to the far end; a dead one has no OPEN, so its
+   address inherited the `margin-left:auto` meant for OPEN and slid to the
+   right. The line then moved as the project started and stopped, which is a
+   layout that animates on a state change for no reason — you read down a
+   column of addresses, and a column has one left edge. */
+.port.off{
+  cursor:default;
+  background:linear-gradient(180deg,#0a0b0d,#131518);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9),
+             inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.06);
+  color:#5b6069; text-shadow:none;
+}
+.port.off:hover{
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.9),
+             inset 0 -1px 0 rgba(255,255,255,.05),
+             0 1px 0 rgba(255,255,255,.06);
+}
+/* AND IT IS THE ADDRESS, NOT A TAG. `span:last-child` is OPEN's rule — 9px,
+   wide tracking, a dimmer ink — and with OPEN gone the address was wearing
+   it: the same string set two sizes depending on whether the server was up.
+   It takes the strip's own type back. */
+.port.off span:last-child{
+  margin-left:0; color:inherit;
+  font-size:inherit; letter-spacing:inherit;
+}
 
 .mod-acts{ display:flex; align-items:center; gap:7px; }
 /* LAUNCH — an illuminated green key. The lamp lens is INSIDE the cap, left of
@@ -2579,20 +2773,24 @@ html{ -webkit-tap-highlight-color:transparent; }
   font-family:var(--font); font-size:10.5px; font-weight:700; letter-spacing:.08em;
 }
 .act svg{ width:12px; height:12px; }
+/* THE CAP IS THE SAME MOULDING WITH THE BLUE POURED IN. Three stops down the
+   face, a wall under it, a bevel and a bloom — all of it unchanged; the three
+   greens are the three blues § 02 wrote down, and the wall is mixed from the
+   deepest of them rather than picked, so it can never drift off the family. */
 .act.go{
-  color:#CFFFE3;
-  background:linear-gradient(180deg,#1E7A47,#12613A 55%,#0C4529);
+  color:#fff;
+  background:linear-gradient(180deg,var(--run),var(--run-fill) 55%,var(--run-deep));
   box-shadow:
-    inset 0 1px 0 rgba(190,255,220,.35),
+    inset 0 1px 0 rgba(200,228,255,.35),
     inset 0 -1px 0 rgba(0,0,0,.6),
-    0 3px 0 #06301c,
+    0 3px 0 color-mix(in srgb, var(--run-deep) 55%, #000),
     0 5px 9px rgba(0,0,0,.65),
-    0 0 12px rgba(43,224,122,.22);
+    0 0 12px rgba(26,121,220,.26);
 }
-.act.go:hover{ background:linear-gradient(180deg,#279456,#167544 55%,#0F5533);
-  box-shadow:inset 0 1px 0 rgba(190,255,220,.45), 0 3px 0 #06301c, 0 5px 9px rgba(0,0,0,.65), 0 0 18px rgba(43,224,122,.4); }
+.act.go:hover{ background:linear-gradient(180deg,#2E87E6,#0F74CE 55%,#0062BC);
+  box-shadow:inset 0 1px 0 rgba(200,228,255,.45), 0 3px 0 color-mix(in srgb, var(--run-deep) 55%, #000), 0 5px 9px rgba(0,0,0,.65), 0 0 18px rgba(26,121,220,.45); }
 .act.go:active{ transform:translateY(3px);
-  box-shadow:inset 0 2px 6px rgba(0,0,0,.8), 0 0 0 #06301c, 0 1px 2px rgba(0,0,0,.5), 0 0 14px rgba(43,224,122,.35); }
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.8), 0 0 0 color-mix(in srgb, var(--run-deep) 55%, #000), 0 1px 2px rgba(0,0,0,.5), 0 0 14px rgba(26,121,220,.4); }
 /* STOP — red, and it reads as red BEFORE you read the word. The lens is lit
    because the thing it stops is running; a dark stop button is a lie. */
 .act.halt{
@@ -2611,8 +2809,8 @@ html{ -webkit-tap-highlight-color:transparent; }
   box-shadow:inset 0 2px 6px rgba(0,0,0,.85), 0 0 0 #2c0808, 0 1px 2px rgba(0,0,0,.5), 0 0 14px rgba(255,45,45,.4); }
 /* the lamp lens inside an illuminated key */
 .lens{ width:8px; height:8px; border-radius:50%; flex:0 0 8px; }
-.act.go .lens{ background:radial-gradient(circle at 35% 30%, #fff, #7CFFB0 40%, #1FA85C);
-  box-shadow:0 0 6px rgba(124,255,176,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
+.act.go .lens{ background:radial-gradient(circle at 35% 30%, #fff, var(--run-lit) 40%, var(--run-fill));
+  box-shadow:0 0 6px rgba(127,178,229,.95), inset 0 -1px 1px rgba(0,0,0,.4); }
 :is(.act.halt, .act.stop) .lens{ background:radial-gradient(circle at 35% 30%, #fff, #FF9B9B 40%, #C21B1B);
   box-shadow:0 0 6px rgba(255,80,80,.9), inset 0 -1px 1px rgba(0,0,0,.4); }
 /* secondary keys — unlit, plain metal. They open something elsewhere. */
@@ -2839,8 +3037,8 @@ html{ -webkit-tap-highlight-color:transparent; }
   display:flex; align-items:center; justify-content:center;
   background:linear-gradient(180deg,#080a09,#0f1211);
   box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 1px 0 rgba(255,255,255,.06);
-  font-family:var(--font); font-size:10.5px; color:#7CFFB0;
-  text-shadow:0 0 6px rgba(124,255,176,.65); font-variant-numeric:tabular-nums;
+  font-family:var(--font); font-size:10.5px; color:var(--read);
+  text-shadow:0 0 6px color-mix(in srgb, var(--read) 65%, transparent); font-variant-numeric:tabular-nums;
 }
 
 /* THE FIELD IS THE WINDOW, not a box drawn inside it. A readout being typed
@@ -2857,15 +3055,15 @@ html{ -webkit-tap-highlight-color:transparent; }
   width:100%; min-width:0; border:0; padding:0; margin:0; background:none;
   text-align:center; font:inherit; color:inherit; text-shadow:inherit;
   font-variant-numeric:tabular-nums; letter-spacing:inherit;
-  caret-color:#7CFFB0;
+  caret-color:var(--read);
 }
 .kval input.kedit:focus,
 .lcd input.kedit:focus{ outline:none; }
 /* the window brightens while it is taking input, the way a lit display does */
 .kval:has(input.kedit),
 .lcd:has(input.kedit){
-  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 0 0 1px rgba(124,255,176,.35),
-             0 0 7px rgba(124,255,176,.20);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.95), 0 0 0 1px color-mix(in srgb, var(--read) 35%, transparent),
+             0 0 7px color-mix(in srgb, var(--read) 20%, transparent);
 }
 
 /* ── the FADER, built like one ───────────────────────────────────────────
@@ -3468,7 +3666,7 @@ html{ -webkit-tap-highlight-color:transparent; }
 }
 .screen .cap{
   display:block; text-align:center; margin-top:7px;
-  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c;
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:var(--read-dim);
 }
 /* A SCREENSHOT IS A SCREEN AND NOT A THUMBNAIL, so it keeps the well and the
    diagonal reflection and loses the scanlines. The haze is a 3px repeat: right
@@ -4081,7 +4279,7 @@ html{ -webkit-tap-highlight-color:transparent; }
   color:inherit; text-shadow:inherit; font-variant-numeric:tabular-nums;
 }
 .pk-lcd input.hex{ width:62px; text-align:left; letter-spacing:.09em; }
-.pk-lcd input:focus{ outline:none; background:rgba(124,255,176,.10); border-radius:3px; }
+.pk-lcd input:focus{ outline:none; background:color-mix(in srgb, var(--read) 10%, transparent); border-radius:3px; }
 .pk-lcd .pk-sep{ opacity:.4; }
 /* the label strip under the window, engraved on the case */
 .pk-legend{
@@ -4272,6 +4470,13 @@ html{ -webkit-tap-highlight-color:transparent; }
   background:#2b3037; box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
   transition:background .12s, box-shadow .12s;
 }
+/* AN ACTION ROW HAS NO LAMP, AND KEEPS THE LAMP'S SPACE. The tick is an unlit
+   LED, which on a value is the truth — that folder exists and is not the one
+   you are on. On `New folder…` it would be a lamp for a state that cannot
+   exist, and the row would read as a folder of that name sitting dark. Taking
+   the dot out and leaving the gutter is what keeps every label in the plate on
+   one left edge, above the cut and below it. */
+.sel-do .sel-tick{ background:none; box-shadow:none; }
 /* CURRENT: the row has gone down into the plate. Same recess the panel uses
    for a latched key, and the tick is the lamp that comes on with it. */
 .sel-row.is-cur{
@@ -4503,7 +4708,7 @@ html{ -webkit-tap-highlight-color:transparent; }
 .con-m{ font-family:var(--font); font-size:11px; line-height:1.55; color:#98a0aa; }
 /* a RESULT — what got made, how many, how long. The lamp colour of the readout,
    because it is the same kind of fact. */
-.con-m.lit{ color:#7CFFB0; text-shadow:0 0 6px rgba(124,255,176,.30); }
+.con-m.lit{ color:var(--read); text-shadow:0 0 6px color-mix(in srgb, var(--read) 30%, transparent); }
 
 .con-foot{
   display:flex; align-items:center; justify-content:space-between;
@@ -4729,7 +4934,7 @@ html{ -webkit-tap-highlight-color:transparent; }
    ways, and a gap wide enough to be a border would make them two exhibits. */
 .hb-pair{ display:flex; gap:7px; }
 .hb-pair .hb-field{ flex:1 1 0; min-width:0; }
-.hb-legend{ color:#3f7a5c; opacity:.75; }
+.hb-legend{ color:var(--read-dim); opacity:.75; }
 /* THE FLOOD STILL NEEDS NO CODE. Strokes are drawn at the nib width, spacing
    apart; take spacing under the nib and they overlap into solid ink on their
    own. Below the nib there is no hatch, there is ink. */
@@ -4752,7 +4957,7 @@ html{ -webkit-tap-highlight-color:transparent; }
 
 .hb-scale{
   display:flex; justify-content:space-between; align-items:center; margin-top:7px;
-  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c;
+  font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:var(--read-dim);
 }
 
 /* ── the two columns under it: the turret, and the three straight controls ── */
@@ -5239,6 +5444,90 @@ html{ -webkit-tap-highlight-color:transparent; }
 /* ═══════════════════════════════════════════════════════════════════════════
    THE WINDOW — moved, and got out of the way exactly one way
    ═══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   THE APPLICATION WINDOW — the frame an app is actually seen through
+   ──────────────────────────────────────────────────────────────────────────
+   `.win` below is a PANEL that floats inside an app. This is the other thing:
+   the window the whole app arrives in, drawn by the operating system and not
+   by us. It exists in this language for one reason — a launcher shown as a
+   bare rounded rectangle reads as another panel on the page, and the single
+   fact a reader most needs about it is that it is a PROGRAM. A title bar and
+   three dots say that in one glance and nothing else does.
+
+   IT IS CHROME, SO IT IS INERT. No hover, no press, no focus ring: the dots
+   are a picture of a window's controls, because the controls belong to the
+   OS. Drawing them live would be the one thing in this file that promises
+   behaviour it cannot have.
+
+   THE BAR IS THE CASE AND THE BODY IS THE PAGE. That is the same figure and
+   ground as everywhere else — a strip of machined case along the top, and
+   under it the application's own desk, ruled. */
+/* IT TAKES THE WHOLE COLUMN, because `.console` inside it is `width:100%` and
+   a stage is a flex row — so the window was sizing to its contents, the
+   contents were sizing to the window, and the rack settled at one card a row.
+   The window is the app's frame and an app gets the width it is given. */
+.appwin{
+  width:100%;
+  border-radius:12px; overflow:hidden; position:relative;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 0 0 1px rgba(0,0,0,.55),
+    0 26px 44px -22px rgba(0,0,0,.9);
+}
+.appwin-bar{
+  display:flex; align-items:center; gap:9px;
+  height:30px; padding:0 11px;
+  background:linear-gradient(180deg,var(--case-hi),var(--case) 70%);
+  box-shadow:inset 0 -1px 0 rgba(0,0,0,.55);
+}
+.appwin-dots{ display:flex; align-items:center; gap:6px; flex:0 0 auto; }
+.appwin-dots i{
+  width:10px; height:10px; border-radius:50%; display:block;
+  box-shadow:inset 0 -1px 1px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.45);
+}
+/* THESE THREE ARE THE ONLY COLOURS IN THIS FILE THAT ARE NOT OURS, and that
+   is the entire reason they are right. They are macOS's own — the system
+   draws this bar, not us — and substituting our red, our amber and our green
+   would produce a window that looks ALMOST like the real one, which reads as
+   a mistake rather than as a quotation. A borrowed thing has to be borrowed
+   exactly or not at all. */
+.appwin-dots i:nth-child(1){ background:#FF5F57; }
+.appwin-dots i:nth-child(2){ background:#FEBC2E; }
+.appwin-dots i:nth-child(3){ background:#28C840; }
+/* AND THE NAME IS SET THE WAY THE OS SETS IT: beside the dots, title case, in
+   the interface face. Our own caps-and-tracking is how a PART is labelled,
+   and using it here would say the bar is something we built. */
+.appwin-name{
+  font-family:var(--font-ui, var(--font));
+  font-size:12px; font-weight:600; letter-spacing:0;
+  color:var(--txt); white-space:nowrap;
+}
+.appwin > .console{ border-radius:0; box-shadow:none; }
+.appwin > .console::before{ border-radius:0; }
+
+[data-skin="light"] .appwin{
+  box-shadow:
+    inset 0 0 0 1px var(--edge-ctl),
+    0 1px 2px rgba(33,62,96,.10),
+    0 14px 30px rgba(33,62,96,.13);
+}
+[data-skin="light"] .appwin-bar{
+  background:linear-gradient(180deg,#FFFFFF,var(--case-face) 70%);
+  box-shadow:inset 0 -1px 0 var(--edge);
+}
+/* AND IT TAKES THE RADIUS AND THE SHADOW OFF IT TOO, IN THIS SKIN, BY NAME.
+   `.appwin > .console` already says `border-radius:0; box-shadow:none` — but
+   the light block hands every panel `border-radius:var(--r)` and
+   `--shadow-card` through an `:is()` list that weighs exactly the same and
+   sits further down the file, so the later rule won and the app's page came
+   back as a rounded, bordered, drop-shadowed card floating inside a square
+   window, with the case showing through all four corners. A window's content
+   is flush to its frame; it is not a card sitting on one. Adding the skin
+   attribute puts this one class ahead of that list instead of level with it. */
+[data-skin="light"] .appwin > .console{
+  border:0; border-radius:0; box-shadow:none;
+}
+
 .win{ position:relative; will-change:transform; }
 /* THE WHOLE HEAD IS THE HANDLE, so it says so with the cursor and not with a
    grip glyph in the corner. A title bar is the one strip of a panel with
@@ -5675,7 +5964,7 @@ body.drawer-open .sliders i:nth-child(3),
 .set-dimrow{ padding:2px 0 0; justify-content:space-evenly; }
 .set-units{
   display:flex; justify-content:space-evenly; padding:1px 0 0;
-  font-family:var(--font); font-size:8px; letter-spacing:.14em; color:#3f7a5c;
+  font-family:var(--font); font-size:8px; letter-spacing:.14em; color:var(--read-dim);
 }
 .set-units span{ flex:1 1 0; text-align:center; }
 .set-orient.inert{ opacity:.3; pointer-events:none; }
@@ -5687,7 +5976,7 @@ body.drawer-open .sliders i:nth-child(3),
   font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#5d626b;
   text-shadow:0 1px 0 rgba(255,255,255,.09);
 }
-.set-dunit{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:#3f7a5c; }
+.set-dunit{ font-family:var(--font); font-size:8.5px; letter-spacing:.14em; color:var(--read-dim); }
 /* `cm` AND `mm` ARE A UNIT, NOT A READING. The dark theme gives them a green
    that belongs to the same family as a lit readout, which on black says
    "this is part of the display". On cream there is no lit display for them
@@ -5790,7 +6079,7 @@ body.drawer-open .sliders i:nth-child(3),
    running job, and only noticed when the part moved somewhere it was looked at.
    A state class on a shared element has to be as specific as the part is. */
 .meter i.on.hot{ background:var(--led-hot); box-shadow:0 0 10px rgba(255,178,115,.95); }
-.meter.done i.on{ background:#7CFFB0; box-shadow:0 0 7px rgba(124,255,176,.8); }
+.meter.done i.on{ background:var(--read); box-shadow:0 0 7px color-mix(in srgb, var(--read) 80%, transparent); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE MODAL — a plate that stops the desk
@@ -6029,7 +6318,7 @@ body.modal-open{ overflow:hidden; }
 .api-rule b{ color:#c6cad1; font-weight:600; }
 .api dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:5px 16px; align-items:baseline; }
 .api dt{
-  font-family:var(--font); font-size:11px; letter-spacing:.02em; color:#7CFFB0;
+  font-family:var(--font); font-size:11px; letter-spacing:.02em; color:var(--read);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .api dd{ margin:0; font-size:12.5px; line-height:1.5; color:#7d828b; }
@@ -6193,7 +6482,7 @@ body.modal-open{ overflow:hidden; }
 @media (prefers-reduced-motion:reduce){ .bay-pane{ transition:none; } }
 .bay-caps{
   display:flex; align-items:center; gap:9px;
-  font-family:var(--font); font-size:8px; letter-spacing:.10em; color:#3f7a5c;
+  font-family:var(--font); font-size:8px; letter-spacing:.10em; color:var(--read-dim);
 }
 .bay-caps .right{ margin-left:auto; }
 .bay-caps .lcd{ height:19px; padding:0 8px; font-size:8px; }
@@ -6273,7 +6562,7 @@ body.modal-open{ overflow:hidden; }
 .hh-sub{ margin:6px 0 0; font-size:11px; line-height:1.55; color:#7d828b; }
 .hh-sub .tag{
   display:block; font-family:var(--font); font-size:8px; letter-spacing:.14em;
-  text-transform:uppercase; color:#3f7a5c; margin-bottom:3px;
+  text-transform:uppercase; color:var(--read-dim); margin-bottom:3px;
 }
 /* ── THE CALL, AND IT IS NOT A PANEL ────────────────────────────────────
    It was a well under the sheet, which is a fourth surface holding one line of
@@ -6289,12 +6578,12 @@ body.modal-open{ overflow:hidden; }
   font-family:var(--font); font-size:10px; line-height:1.7; color:#7d828b;
 }
 .hh-call code b{ color:#c6cad1; font-weight:600; }
-.hh-call code i{ color:#3f7a5c; font-style:normal; }
+.hh-call code i{ color:var(--read-dim); font-style:normal; }
 .hh-call .micro{ flex:0 0 22px; }
 /* COPIED IS A STATE OF THE CALL, not a toast. There is nowhere on this page a
    toast could go that is not on top of a specimen, and the thing that changed
    is the call — so the call says so, where the eye already is. */
-.hh-call.is-copied code, .hh-call.is-copied code b{ color:#3f7a5c; }
+.hh-call.is-copied code, .hh-call.is-copied code b{ color:var(--read-dim); }
 .rig-cells .bay-cap{ font-size:8px; letter-spacing:.12em; }
 .hh-roll{ padding:0 11px; height:23px; font-family:var(--font); font-size:8.5px;
           letter-spacing:.16em; color:#8b919b; }
@@ -6491,16 +6780,30 @@ span.nav-link{ cursor:default; }
   --primary-ink:    #AF4E09;   /* orange AS TEXT — 5.19:1 on card           */
   --primary-deep:   #E55C00;   /* orange as a FILL UNDER WHITE — 3.58:1     */
 
-  --ink:            #1A1A1A;
-  --ink-2:          #6B6B6B;
-  /* ── #9B9B9B IS NOT A TEXT COLOUR HERE AND NEVER WAS ───────────────────
-     2.69:1 on a card, 2.40:1 on the page. The styleguide calls it
-     `--text-tertiary` and on ITS flat white page that is a defensible 3.0; on
-     this warm ground it is a smudge. Three greys that all clear 4.5 on cream
-     is not a hierarchy, it is three shades of the same grey — so this one
-     stops being text. It rules lines, ticks and leaders, and every word that
-     used to wear it now wears `--ink-2`, which clears at 5.15 / 4.61. */
-  --ink-3:          #9B9B9B;   /* MARKS ONLY — rules, ticks, leaders        */
+  /* ── THE INK IS NAVY, AND IT IS THE SAME DECISION AS THE PAGE ──────────
+     THREE GREYS ON CREAM IS NOT A HIERARCHY, IT IS ONE GREY THREE TIMES.
+     #1A1A1A / #6B6B6B / #9B9B9B were a neutral ladder printed on a warm
+     ground, and neutral on warm reads as dirty rather than as dark — the
+     third step had already stopped being a text colour because of it.
+
+     The ink takes a hue instead, and it takes the PAGE'S: #EFF4F7 is a cold
+     white, and these are that same cold at ink value. A warm panel, a cold
+     page and a cold ink is two temperatures doing all the separating and
+     nothing left over — which is why the skin holds together at near-equal
+     values, and why the one warm thing left on a panel is the accent, so the
+     accent is the only thing on it that can shout. */
+  --ink:            #213E60;
+  --ink-2:          #476181;
+  /* ── THE THIRD STEP IS NOT A TEXT COLOUR HERE AND NEVER WAS ────────────
+     It was #9B9B9B — 2.69:1 on a card, 2.40:1 on the page. The styleguide
+     calls that `--text-tertiary` and on ITS flat white page it is a
+     defensible 3.0; on this ground it was a smudge. Moving it into the navy
+     family does not change that and is not meant to: it rules lines, ticks
+     and leaders, and every word that used to wear it wears `--ink-2`. What
+     the hue buys is that a rule now belongs to the same light as the words
+     beside it, instead of sitting under them as grey. It is also what the
+     §11 rulers take, since a tick is a mark and not a word. */
+  --ink-3:          #8197B1;   /* MARKS ONLY — rules, ticks, leaders        */
   /* NOT PURE WHITE, AND IT NEVER SHOULD HAVE BEEN. #FFFFFF on the styleguide's
      #F5F3F0 page is 1.03:1 — a card with no edge of its own, which on a large
      panel stops reading as a card at all and starts reading as a hole in the
@@ -6508,8 +6811,8 @@ span.nav-link{ cursor:default; }
      list row or a small tile, not a four-hundred-pixel slab. Backed two per
      cent off white and the page pushed a step warmer underneath it, so the
      card has somewhere to sit without the hairline doing all the work. */
-  --paper:          #F1EEE9;
-  --card:           #FCFBF9;
+  --paper:          #EAE6DC;
+  --card:           #FCF9F3;
 /* ── AND A PANEL IS NOT A CAP ────────────────────────────────────────────
    THE CASE AND THE KEYS ON IT WERE THE SAME VALUE. `--card` is the raised
    cap — a key, a chip, a row — and the panel was taking it too, which left
@@ -6518,30 +6821,53 @@ span.nav-link{ cursor:default; }
    separation, and on a large slab that reads as white paper with white
    stickers on it rather than as a cream case with white caps.
 
-   `#F5F3F0` IS THE LAUNCHPAD STYLEGUIDE'S OWN `--bg` and therefore not a
-   new colour in this system — it is the value the Portrait apps already
-   call the surface. Here it is the CASE: a step under the caps, a step over
-   the milled value, and warm enough that the page reads as the room it
-   sits in rather than as more of the same panel. The order top to bottom is
-   now cap, case, milling, cut — four surfaces, four values, which is what
-   the dark theme has always had. */
-  --case-face:      #F5F3F0;
-  --card-hover:     #F7F5F2;
-  --edge:           #E8E5E1;   /* panel and row hairlines              */
-  --edge-soft:      #F0EDEA;
-  /* A CONTROL'S EDGE IS NOT A PANEL'S EDGE. #E8E5E1 is 1.21:1 against a card
-     — fine as a rule between two rows, and not fine as the only thing saying
-     "this is a button". A control gets a darker one. It does not reach the
-     3:1 that 1.4.11 asks of a boundary carrying a control ON ITS OWN, because
-     that lands around #8E867A and turns the panel into a wireframe; what it
-     does is make the edge findable. The strict version is one value away if
-     Julien wants it. */
-  --edge-ctl:       #D3CDC4;
+   THE CASE IS A STEP UNDER THE CAPS AND A STEP OVER THE MILLED VALUE. It
+   started as the launchpad styleguide's own `--bg`, #F5F3F0, and went one
+   notch warmer when the page went cold: a neutral case between a warm cap
+   and a cold page is a third temperature, and three is one too many to tell
+   apart. The order top to bottom is cap #FCF9F3, case #F5F2EA, milling
+   #EAE6DC, cut #DED9CD — four surfaces, four values, which is what the dark
+   theme has always had. THE PAGE IS NONE OF THEM, and that is the point:
+   everything in this list is the machine, and the page is the room it is
+   standing in.
+
+   AND THE PANEL SHARES THE CAP'S VALUE, deliberately this time. The note
+   above is about a panel that took the cap's colour while separating from it
+   with nothing; what separates them here is the BEVEL, which is the whole
+   argument of the shadow block further down — a lit case shows depth by the
+   way its edge turns through the light, not by a step in fill. Putting the
+   panel on the case value instead drops every slab a notch below its own
+   keys, which is a tray of caps and not a panel with caps on it. */
+  --case-face:      #F5F2EA;
+  /* THE HOVER IS MIXED, NOT PICKED. A cap lighting up is the cap moving one
+     step toward the case under it, so it is derived from the two it sits
+     between and cannot drift away from them when either moves. */
+  --card-hover:     color-mix(in srgb, var(--card) 62%, var(--case-face));
+  --edge:           #DED9CD;   /* panel and row hairlines              */
+  --edge-soft:      #EBE7DE;
+  /* A CONTROL'S EDGE IS NOT A PANEL'S EDGE. `--edge` is about 1.2:1 against
+     a card — fine as a rule between two rows, and not fine as the only thing
+     saying "this is a button". A control gets a darker one. It does not reach
+     the 3:1 that 1.4.11 asks of a boundary carrying a control ON ITS OWN,
+     because that lands around #8E867A and turns the panel into a wireframe;
+     what it does is make the edge findable. It is also the edge the SHEET
+     takes in §11, for the opposite reason — there it is not helping a
+     hairline, it IS the only boundary, because white on the cold page is
+     1.1:1. The strict version is one value away if Julien wants it. */
+  --edge-ctl:       #BFB8A6;
   /* THE SEMANTICS SPLIT THE SAME WAY: a dot is a fill, a word is not.
      #22C55E reads 2.20:1 and #EF4444 reads 3.64:1 on a card. */
   --ok:             #22C55E;   /* the lamp   */
   --no:             #EF4444;
   --info:           #0015FF;
+  /* NOTHING GLOWS IN DAYLIGHT. `--read` is what a LIT display is made of,
+     and this skin's displays are e-paper: no lamp, no bloom, ink on glass.
+     The token is pinned to the ink so anything reaching for it lands on the
+     one thing a readout can be here, rather than arriving as a blue glow on
+     a surface that does not glow. */
+  --read:           var(--ink);
+  --read-dim:       var(--ink-3);
+  --read-glow:      transparent;
   --ok-ink:         #15803D;   /* the word — 4.85:1 */
   --no-ink:         #C81E1E;   /* 5.55:1            */
 /* AND A SEMANTIC COLOUR IS THREE VALUES, NOT ONE. A styleguide button variant
@@ -6555,11 +6881,43 @@ span.nav-link{ cursor:default; }
   --no-bg:          #FEF2F2;
   --no-edge:        #FECACA;
 
-  /* THE PAGE KEEPS THE OLD DOCUMENT'S WARMTH, which is the one thing from
-     `old/index.html` that the styleguide also asks for: its own background
-     gradient runs #FDF0E6 → #F5F3F0, so the warm end is already sanctioned
-     and the reference panel is plainly sitting on it. */
-  --page: linear-gradient(135deg, #FAEFE4 0%, #F1EEE9 42%, #EBEDF1 100%);
+  /* ── THE ROOM, AND WHY IT IS COLD ───────────────────────────────────────
+     THE SEPARATION IS TEMPERATURE, NOT DARKNESS. The page was a warm
+     gradient ending on #F1EEE9, which is the value the panels were also
+     using — so page, panel and well were one cream and the whole skin read
+     as a single sheet with hairlines drawn on it. The obvious repair is to
+     drop the page's VALUE until the panels stand off it, and that repair is
+     wrong: cream at 88% is a stone bench, and everything on it looks old.
+
+     So the page moves in HUE instead. #EFF4F7 is a cold white — the light
+     coming in a window — and the panels stay warm cream under a warm lamp.
+     The two are within three per cent of each other in value and read as
+     plainly separate surfaces anyway, because the eye reads a warm/cool
+     boundary long before it reads a two-per-cent step. That is the whole
+     trick of this skin, and it is the reason nothing here is grey.
+
+     It is FLAT, not a gradient. The dark skin's desk gets a radial because a
+     lamp in a dark room has to land somewhere; a lit room has no such
+     somewhere, and a gradient on a near-white page is a smudge. */
+  --page: #EFF4F7;
+  /* ── THE DESK IS RULED, THE WAY THE LAUNCHPAD'S IS ─────────────────────
+     A flat cold white is a wall. The launcher's own page draws a drafting
+     grid on it and that is what makes it a BENCH — a surface with a measure
+     already on it, that the panels were put down onto rather than printed
+     on. The ruling is the ink, not a grey, so it belongs to the same light
+     as everything else here; 120px majors at 8.5% and 24px minors at 3.5%,
+     which is five minors to a major and both under the threshold where a
+     line starts competing with a word.
+
+     IT IS ONE GRID AND IT IS FIXED. Every surface that draws it draws this
+     token with `background-attachment: fixed`, so the page and the stages
+     share one phase and nothing steps at a seam. A per-element grid would
+     restart at every box and the desk would read as tiling. */
+  --desk-grid:
+    repeating-linear-gradient(to right,  rgba(33,62,96,.085) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(to bottom, rgba(33,62,96,.085) 0 1px, transparent 1px 120px),
+    repeating-linear-gradient(to right,  rgba(33,62,96,.035) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(to bottom, rgba(33,62,96,.035) 0 1px, transparent 1px 24px);
 
 /* THE SAME ALIASES, POINTED AT THE LIGHT VALUES. `--primary` is already a
    token of this skin's own, so it is not repeated here; the rest follow the
@@ -6625,7 +6983,7 @@ span.nav-link{ cursor:default; }
     inset 0 0 0 1px var(--edge-ctl);
 
   /* ── the case tokens the rest of the file already reads ────────────────── */
-  --room:     var(--paper);
+  --room:     #EFF4F7;
   --case:     var(--card);
   --case-lo:  var(--edge);
   --case-hi:  #FFFFFF;
@@ -6662,8 +7020,14 @@ span.nav-link{ cursor:default; }
 /* THE GRAIN GOES OFF. It is anodising, and nothing here is anodised. */
 [data-skin="light"] body::after{ opacity:0; }
 
+/* THE PAGE IS NOT RULED. The grid belongs to a BENCH — a surface a part was
+   put down on — and the page is not one: it is what the bench is standing in.
+   Ruling it turns the whole document into one enormous drafting table, with
+   the headings floating on the squares, and the stages stop reading as
+   regions because everything around them is already the same drawing. */
 [data-skin="light"] body{
-  background:var(--page);
+  background-color:var(--page);
+  background-image:none;
   background-attachment:fixed;
   color:var(--ink);
 }
@@ -6692,16 +7056,103 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] .warn svg{ stroke:var(--primary); }
 
 /* ── THE STAGE: a warm page, not a lit desk ──────────────────────────────── */
+/* ── A STAGE IS WHATEVER THE SPECIMEN WOULD ACTUALLY BE STANDING ON ───────
+   It was #FBF8F5, a value between the cap and the case, which put every
+   specimen on a surface that exists nowhere in an app. The replacement was
+   the ruled desk for all of them, and that is wrong in the other direction:
+   A CONTROL IS NEVER ON A DESK. A knob, a fader, a selector, a lever — none
+   of them is ever loose on a bench; they are mounted IN a panel, and a stage
+   that puts them on the ruling shows a thing the product cannot contain.
+
+   SO THE DEFAULT IS THE PANEL, and the desk is the exception. The exception
+   is small and it is decidable from the markup: a stage is a desk only when
+   the thing standing on it is itself a panel, a console or a sheet — the
+   parts that in a real app are put DOWN on something. Nothing is tagged by
+   hand; `:has()` reads the specimen. */
 [data-skin="light"] .stage{
-  background:#FBF8F5;
+  background-color:var(--card);
+  background-image:none;
   border-color:var(--edge-soft);
   box-shadow:none;
 }
+[data-skin="light"] .stage:has(> :is(.dock,
+.appdock,
+.navdock,
+.box,
+.module,
+.drawer,
+.win-floor,
+.bulge-wrap,
+.lp-states)),
+[data-skin="light"] .stage:has(> * > :is(.dock,
+.appdock,
+.navdock,
+.box,
+.module,
+.drawer,
+.win-floor,
+[data-skin="light"] .stage:has(:is(.navdock,
+.nav-strip,
+.drawer-tab)) {
+  background-color:var(--room);
+  background-image:var(--desk-grid);
+  background-attachment:fixed;
+}
+html:not([data-skin="light"]) .stage:has(> :is(.dock,
+.appdock,
+.navdock,
+.box,
+.module,
+.drawer,
+.bulge-wrap,
+.lp-states)):not(:has(.win-floor)),
+html:not([data-skin="light"]) .stage:has(> * > :is(.dock,
+.appdock,
+.navdock,
+.box,
+.module,
+.drawer,
+.deskdemo)):not(:has(.win-floor)),
+html:not([data-skin="light"]) .stage:has(:is(.navdock,
+.nav-strip,
+.drawer-tab)):not(:has(.win-floor)) {
+  background-image:
+    var(--desk-grid),
+    radial-gradient(70% 60% at 28% 0%, rgba(255,255,255,.055), transparent 60%),
+    linear-gradient(180deg,#141518,#0c0d0f);
+  /* six layers: four rules, then the lamp and the gradient. The list is
+     positional, so the four ruling layers are fixed and the two that belong
+     to the stage itself are not. */
+  background-attachment:fixed, fixed, fixed, fixed, scroll, scroll;
+}
 [data-skin="light"] .sheet{
-  background:#fff;
-  box-shadow:var(--shadow-card);
+  background:var(--case-face);
+  /* THE SAME TWO SHADOWS THE DARK SHEET HAS — the throw and the contact, at
+     the same offsets and the same blurs — with the colour swapped from black
+     to the ink. Nothing new is picked here; what changes is that the room is
+     lit, so the light landing in the shadow is the room's and not nothing. */
+  box-shadow:
+    0 0 0 1px var(--edge-ctl),
+    0 30px 60px -18px rgba(33,62,96,.22),
+    0 6px 16px -4px rgba(33,62,96,.16);
 }
 [data-skin="light"] .sheet.window{ box-shadow:none; }
+
+/* ── AND THE ENGRAVING RULE TURNS BACK THE RIGHT WAY UP ───────────────────
+   The ticks are white at 34% because the dark desk is near black. On a lit
+   desk that is a white line on a white ground: in the light skin the rulers
+   were not faint, they were ABSENT, and the sheet appeared to float with no
+   measure beside it. A cut in a lit surface is darker than the surface, which
+   is the normal rule and the one that applies everywhere else in this file,
+   so here the ticks simply obey it — `--ink-3`, which is the skin's mark
+   colour and already rules every other line that is not a word. The label
+   loses its black text-shadow for the same reason: a shadow that was lifting
+   8px type off a black desk only dirties it on a white one. */
+[data-skin="light"] .ruler-tick{ background:var(--ink-3); }
+[data-skin="light"] .ruler-label{ color:var(--ink-2); text-shadow:none; }
+
+/* THE RULING NEEDS NO SKIN RULE: `--grid-ink` is near-black in both, because
+   the sheet is pale in both. See the token's own note at the top of the file. */
 
 /* ══════════════════════════════════════════════════════════════════════════
    THE PANEL — white card, warm page, hairline edges
@@ -7424,6 +7875,23 @@ span.nav-link{ cursor:default; }
 .picker {
   box-shadow:var(--shadow-card);
 }
+
+/* ── AND THE LAUNCHER'S WINDOW HOLDS ITS OWN PAGE ────────────────────────
+   Every rule above hands `.console` the case, because every rule above is
+   about PANELS and that is what a panel is made of. The launcher is not a
+   panel — the note on `.console` says why — so it takes the room instead,
+   ruled, with the cards lying on it. Its edge goes to `--edge-ctl`: a case
+   meeting a case needs the panel hairline, but a window frame standing on a
+   lit page needs the darker one, the same way the §11 sheet does.
+
+   THE STAGE AROUND IT IS PLAIN, and that is the whole point of the pair: the
+   desk is INSIDE the window, because the window is the application. */
+[data-skin="light"] .console{
+  background-color:var(--room);
+  background-image:var(--desk-grid);
+  border-color:var(--edge-ctl);
+}
+
 /* A WINDOW BEING DRAGGED IS LIFTED AND KEEPS THE DEEPER EDGE. The nav is
    not: it is a strip of the case, and the ring inside `--shadow-lg` put the
    outline straight back on it the moment it seated. */
@@ -7505,7 +7973,12 @@ span.nav-link{ cursor:default; }
 [data-skin="light"] .piano.sm{ padding:9px; gap:9px; --pkey-reach-x:4.5px; }
 [data-skin="light"] .keypad{ padding:10px; gap:12px 10px; --pkey-reach-x:5px; --pkey-reach-y:6px; }
 [data-skin="light"] .palette{ padding:11px; gap:12px; --pkey-reach-y:6px; }
-[data-skin="light"] .navdock > .strip{ padding:11px 13px; gap:10px; --pkey-reach-x:5px; --pkey-reach-y:11px; }
+/* THE NAV BAR KEEPS THE DARK METRICS. Every other group grows in light,
+   but the dock is the one bar that sits at the top of every document, so
+   its height has to read the same in both skins. Padding and reach are the
+   dark values, verbatim, on the strip and on the key row inside it. */
+[data-skin="light"] .navdock > .strip{ padding:8px 11px; gap:8px; --pkey-reach-x:3.5px; --pkey-reach-y:9px; }
+[data-skin="light"] .nav-pages{ padding:5px; gap:6px; --pkey-reach-x:3px; }
 
 /* THE WRAPPING TAB STRIP, which is a grid and whose reach is written as three
    literal offsets rather than as a token — they are the padding, so they move
@@ -7617,13 +8090,22 @@ span.nav-link{ cursor:default; }
    not the value's. A black bar on a cream page is a hole punched through the
    document, and every key sitting in it has to be re-lit to survive.
 
-   So: the bar is MILLED (--paper, the value a section band takes) and the keys
-   in it are RAISED (--card, brighter than what they sit on). That is the same
-   figure-ground the rest of the skin uses, applied to the one place that was
-   still inverted. The throw stays short, because a light object an inch off a
-   light page casts a short shadow and anything longer is a lie about height. */
+   So: the bar is CASE and the keys in it are RAISED (--card, brighter than
+   what they sit on). That is the same figure-ground the rest of the skin uses,
+   applied to the one place that was still inverted. The throw stays short,
+   because a light object an inch off a light page casts a short shadow and
+   anything longer is a lie about height.
+
+   IT WAS `--paper` AND THAT WAS A STOP TOO FAR DOWN. `--paper` is the MILLED
+   floor — the bottom of a well, the darkest thing in the ladder — and a bar
+   is not a pit, it is the strip of case the keys are mounted in. Milled, it
+   came out dull against the cold page and the keys read as the only lit thing
+   in the bar rather than as caps on a surface. `--case-face` is the case, one
+   step under the caps, which is exactly the relation a key and its bar have.
+   The step from bar to cap is smaller now and it does not need to be large:
+   the bevel on each cap is what says raised, not the gap in value. */
 [data-skin="light"] .strip{
-  background-color:var(--paper);
+  background-color:var(--case-face);
   background-image:none;
   /* NO OUTLINE ON THE BAR. It had a border AND the ring inside `--shadow-md`,
      which is two lines; and a bar is a strip of the case sized to the keys
@@ -8726,22 +9208,35 @@ span.nav-link{ cursor:default; }
 }
 [data-skin="light"] :is(.box,
 .module,
-.console,
 .palette,
 .drawer,
-.win-floor,
 .box.bulge,
 .demo-stage,
 .demo-stack {
-  background-color:var(--paper); background-image:none;
+  background-color:var(--card); background-image:none;
   border:0; box-shadow:var(--surround);
+}
+/* ── A WINDOW FLOOR IS NOT A SURFACE AT ALL ───────────────────────────────
+   `.win-floor` was in the list above and came out a cream slab, which made
+   the floating windows in §05 read as cards lying on a bigger card. They are
+   not: a window floats over the WORK, and the work is on the bench the stage
+   already is. Giving the floor its own desk and its own ruling drew a second
+   gridded rectangle inside the first — one desk, two outlines, and the grids
+   agreeing only because both are fixed. So the floor keeps its SIZE and
+   nothing else: it is the area the windows may be dragged in, and an area is
+   a fact about behaviour, not a surface. */
+[data-skin="light"] .win-floor{
+  background:transparent;
+  background-image:none;
+  border:0;
+  box-shadow:none;
 }
 [data-skin="light"] :is(.menu,
 .modal,
 .plate,
 .picker,
 .win):not(.sellist) {
-  background-color:var(--paper); background-image:none;
+  background-color:var(--card); background-image:none;
   border:0; box-shadow:var(--surround), var(--shadow-card);
 }
 

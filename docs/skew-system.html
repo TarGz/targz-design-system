@@ -59,11 +59,346 @@
     </tbody>
   </table>
 
-  <h2>02 <span>/</span> Surfaces</h2>
-  <div class="stage">
-    <div class="stage-note">the same lamp at 158° on all four</div>
-    <div id="surfaces"></div>
+  <h2>02 <span>/</span> The palette</h2>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       ONE SKIN AT A TIME, AND IT IS THE SKIN YOU ARE STANDING IN. Posing
+       light and dark side by side made this sheet a comparison between two
+       themes, which is not a question anyone has: you are always IN one of
+       them. The LIGHT key in the nav switches the whole section, so what you
+       judge is the palette you are actually looking at.
+
+       THE SEPARATION IS TEMPERATURE, NOT DARKNESS. The light skin spent years
+       with `--room` aliased to `--paper`: page, panel and the wells cut into
+       that panel were one value, and a hairline carried the whole hierarchy.
+       The reflex fix — drop the page a few levels — produced a stone bench:
+       one hue walked down one axis, correct order, no air.
+
+       A COOL PAGE UNDER A WARM PANEL READS APART AT THE SAME VALUE. #EFF4F7
+       is brighter than the panel standing on it and still reads as behind it,
+       because the panel is the only warm thing in the stack.
+
+       AND THE INK IS THE PAGE'S OWN HUE. #213E60 is the darkest step of the
+       same blue, so every neutral belongs to one of two temperatures and the
+       ACCENT is the only thing from a third. That is the whole argument
+       against the blue candidate below.
+       ══════════════════════════════════════════════════════════════════════ -->
+  <style>
+    [data-skin="light"] .sk-dk{ display:none !important; }
+    html:not([data-skin="light"]) .sk-lt{ display:none !important; }
+    .pal-pane{ border-radius:12px; padding:18px 20px 20px; }
+    .pal-pane.sk-lt{ background:#EFF4F7; box-shadow:inset 0 0 0 1px #DEE5EC; color:#213E60; }
+    .pal-pane.sk-dk{ background:#0B0B0D; box-shadow:inset 0 0 0 1px #212327; color:#D3D6DC; }
+    .pal-cap{ font-family:var(--font); font-size:9px; letter-spacing:.18em;
+               display:block; margin:0 0 12px; color:var(--txt-dim); }
+    .pal-row{ display:flex; align-items:center; gap:10px; height:30px;
+               font-family:var(--font); font-size:10px; letter-spacing:.04em; }
+    .pal-row i{ width:46px; height:22px; flex:0 0 46px; border-radius:5px;
+                 display:flex; align-items:center; justify-content:center;
+                 font-style:normal; font-size:10px; font-weight:700;
+                 box-shadow:inset 0 0 0 1px rgba(0,0,0,.14); }
+    .pal-row b{ flex:0 0 108px; font-weight:700; }
+    .pal-row code{ flex:0 0 74px; font-family:var(--font); font-size:10px; }
+    .pal-row span{ opacity:.72; }
+    .pal-sep{ height:1px; margin:14px 0 12px; background:currentColor; opacity:.12; }
+    .pal-h{ font-family:var(--font); font-size:10px; letter-spacing:.18em;
+             text-transform:uppercase; color:var(--txt-dim); font-weight:700;
+             margin:30px 0 12px; }
+    .pal-acc{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+    @media (max-width:860px){ .pal-acc{ grid-template-columns:1fr; } }
+    .pal-card{ background:var(--card); border-radius:12px; padding:18px 20px 20px;
+                box-shadow:var(--surround, inset 0 0 0 1px var(--case-lo));
+                color:var(--txt); font-family:var(--font); }
+    .pal-key{ display:inline-flex; align-items:center; gap:8px; height:34px;
+               padding:0 16px; border-radius:7px; color:#fff; font-size:11px;
+               font-weight:700; letter-spacing:.12em; margin:4px 10px 10px 0; }
+    .pal-note{ font-size:10px; line-height:1.6; letter-spacing:.02em;
+                color:var(--txt-dim); margin:8px 0 0; }
+    /* the preview: one skin, both accents */
+    .pv{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    @media (max-width:860px){ .pv{ grid-template-columns:1fr; } }
+    .pv-floor{ border-radius:12px; padding:18px; display:flex; gap:14px; }
+    .pv-card{ flex:1 1 0; min-width:0; border-radius:10px; padding:13px 14px 14px;
+               font-family:var(--font); }
+    .pv-head{ display:flex; align-items:center; justify-content:space-between;
+               gap:8px; font-size:11px; font-weight:700; margin-bottom:11px; }
+    .pv-stamp{ font-size:8px; letter-spacing:.12em; padding:2px 6px;
+                border-radius:3px; font-weight:700; }
+    .pv-well{ height:26px; border-radius:6px; display:flex; align-items:center;
+               padding:0 9px; font-size:9.5px; letter-spacing:.05em; margin-bottom:11px; }
+    .pv-row{ display:flex; align-items:center; gap:7px; }
+    .pv-cap-key{ height:26px; display:flex; align-items:center; padding:0 13px;
+                  border-radius:6px; font-size:9.5px; font-weight:700; letter-spacing:.14em; }
+    .pv-key{ width:26px; height:26px; border-radius:6px; }
+    .pv-lab{ font-family:var(--font); font-size:9px; letter-spacing:.14em;
+              color:var(--txt-dim); margin:0 0 8px; }
+    /* the effects: one skin, twelve tiles */
+    .fx-pane{ border-radius:12px; padding:18px 18px 20px; }
+    .fx-pane.sk-lt{ background:#F5F3F0; box-shadow:inset 0 0 0 1px #E8E5E1; }
+    .fx-pane.sk-dk{ background:#0B0B0D; box-shadow:inset 0 0 0 1px #212327; }
+    .fx-cap{ font-family:var(--font); font-size:9px; letter-spacing:.16em;
+              margin:0 0 16px; color:var(--txt-dim); }
+    .fx{ display:grid; grid-template-columns:repeat(6,1fr); gap:22px 18px; }
+    @media (max-width:1100px){ .fx{ grid-template-columns:repeat(4,1fr); } }
+    @media (max-width:620px){ .fx{ grid-template-columns:repeat(2,1fr); } }
+    .fx-cell{ display:flex; flex-direction:column; align-items:center; gap:9px; }
+    .fx-no{ font-family:var(--font); font-size:8.5px; letter-spacing:.16em; color:var(--txt-dim); }
+    .fx-tile{ width:100%; height:66px; border-radius:10px; display:flex;
+               align-items:center; justify-content:center; }
+    .fx-tile b{ font-family:var(--font); font-size:12px; font-weight:700; letter-spacing:.18em; }
+    /* THE SCREEN IS NOT ONE THING, AND IT IS NOT BLACK IN BOTH SKINS. The
+       light skin's readout is E-PAPER — `--epaper` glass behind an
+       `--epaper-bezel` frame, ink at 9.95:1, no glow — because a backlit
+       black panel on a cream case is a hole in the furniture. The dark skin
+       keeps the phosphor. Both are posed at the two sizes the system
+       actually ships: the DRO's axis readout and the chip on a nav bar. */
+    /* A WINDOW IS THE ONE PART THAT LEAVES THE PAGE, so it is the one part
+       that throws a shadow. The tile is its title bar and its floor; the bar
+       has to sit AT THE TOP, which means overriding the grid's own centring
+       — `justify-content` is on `.fx-tile` and an inline `align-items` does
+       not touch it. That is what left the bar hanging in mid-air. */
+    .fx-win{ flex-direction:column; align-items:stretch;
+             justify-content:flex-start; padding:0; overflow:hidden; }
+    .fx-win-bar{ display:flex; align-items:center; gap:4px; padding:0 7px;
+                 height:18px; flex:0 0 18px; text-decoration:none; }
+    .fx-win-bar s{ width:5px; height:5px; border-radius:50%;
+                   background:currentColor; opacity:.3; text-decoration:none; }
+    /* ONE BIG SCREEN, NOT TWO CHIPS. A readout is the one part in this
+       system made of four things at once — a bezel standing above the case,
+       a well behind it, the cover glass with the lamp dying across its top
+       half, and a bitmap face that must never be smoothed — and at 46px wide
+       none of the four is visible. So it comes out of the tile grid and takes
+       the pane's full width, which is also the size it actually ships at. */
+    .fx-big{ margin-top:22px; }
+    .fx-glass{ position:relative; overflow:hidden; display:flex;
+               align-items:baseline; gap:16px; padding:14px 18px;
+               border-radius:5px; }
+    .sk-lt .fx-glass{ background:#D0CBC1; border:1px solid #A9A49A;
+                      box-shadow:inset 0 2px 5px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.9); }
+    .sk-dk .fx-glass{ background:linear-gradient(180deg,#080a09,#0f1211);
+                      border:1px solid #000;
+                      box-shadow:inset 0 2px 6px rgba(0,0,0,.9), 0 1px 0 var(--case-hi); }
+    .fx-dig{ font-family:var(--font-read); font-variant-numeric:tabular-nums;
+             font-size:30px; letter-spacing:.03em; line-height:1; }
+    .fx-dig.sm{ font-size:12px; letter-spacing:.08em; }
+    .sk-lt .fx-dig{ color:#23211C; }
+    .sk-dk .fx-dig{ color:#7CFFB0; text-shadow:0 0 8px rgba(124,255,176,.45); }
+    /* the lamp dying across the top half — `--glass-sheen` is the ceiling */
+    .fx-sheen{ position:absolute; inset:0; pointer-events:none;
+               background:linear-gradient(180deg, rgba(255,255,255,.35) 0%,
+                          rgba(255,255,255,.08) 42%, rgba(255,255,255,0) 58%); }
+    .fx-scr{ display:flex; align-items:center; justify-content:center;
+             font-family:var(--font-read); font-variant-numeric:tabular-nums;
+             border-radius:3px; font-style:normal; }
+    .sk-lt .fx-scr{ background:#D0CBC1; border:1px solid #A9A49A; color:#23211C;
+                    box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
+    .sk-dk .fx-scr{ background:linear-gradient(180deg,#080a09,#0f1211);
+                    border:1px solid #000; color:#7CFFB0;
+                    text-shadow:0 0 7px rgba(124,255,176,.5);
+                    box-shadow:inset 0 2px 5px rgba(0,0,0,.9); }
+    .fx-scr-lg{ width:84%; height:26px; font-size:15px; letter-spacing:.04em; }
+    .fx-scr-sm{ width:64%; height:17px; font-size:9px; letter-spacing:.08em; }
+    .fx-sub{ font-family:var(--font); font-size:9px; letter-spacing:.04em;
+              color:var(--txt-etch); text-align:center; }
+  </style>
+
+  <div class="pal-pane sk-lt">
+    <span class="pal-cap">FOUR SURFACES, TOP TO BOTTOM</span>
+        <div class="pal-row"><i style="background:#EFF4F7"></i><b>--page / --room</b><code>#EFF4F7</code><span>the desk · COOL</span></div>
+        <div class="pal-row"><i style="background:#FCF9F3"></i><b>--card</b><code>#FCF9F3</code><span>cap and panel · WARM</span></div>
+        <div class="pal-row"><i style="background:#F5F2EA"></i><b>--case-face</b><code>#F5F2EA</code><span>stage and bezel</span></div>
+        <div class="pal-row"><i style="background:#EAE6DC"></i><b>--paper</b><code>#EAE6DC</code><span>the milled floor</span></div>
+        <div class="pal-row"><i style="background:#DED9CD"></i><b>--edge</b><code>#DED9CD</code><span>hairline</span></div>
+        <div class="pal-row"><i style="background:#BFB8A6"></i><b>--edge-ctl</b><code>#BFB8A6</code><span>a control’s edge</span></div>
+    <div class="pal-sep"></div>
+    <span class="pal-cap">INK, ON THE PANEL</span>
+        <div class="pal-row"><i style="background:#FCF9F3;color:#213E60">Aa</i><b>--ink</b><code>#213E60</code><span>10.39:1</span></div>
+        <div class="pal-row"><i style="background:#FCF9F3;color:#476181">Aa</i><b>--ink-2</b><code>#476181</code><span>6.07:1</span></div>
+        <div class="pal-row"><i style="background:#FCF9F3;color:#8197B1">Aa</i><b>--ink-3</b><code>#8197B1</code><span>2.86:1</span></div>
   </div>
+  <div class="pal-pane sk-dk">
+    <span class="pal-cap">FOUR SURFACES, TOP TO BOTTOM</span>
+        <div class="pal-row"><i style="background:#0B0B0D"></i><b>--room</b><code>#0B0B0D</code><span>the desk</span></div>
+        <div class="pal-row"><i style="background:#191A1D"></i><b>--case</b><code>#191A1D</code><span>the chassis</span></div>
+        <div class="pal-row"><i style="background:#232529"></i><b>--plate</b><code>#232529</code><span>a raised face</span></div>
+        <div class="pal-row"><i style="background:#0E0F11"></i><b>--bay</b><code>#0E0F11</code><span>the well</span></div>
+        <div class="pal-row"><i style="background:#08090A"></i><b>--groove</b><code>#08090A</code><span>a milled channel</span></div>
+        <div class="pal-row"><i style="background:#2E3136"></i><b>--case-hi</b><code>#2E3136</code><span>the lit bevel</span></div>
+    <div class="pal-sep"></div>
+    <span class="pal-cap">INK, ON THE CHASSIS</span>
+        <div class="pal-row"><i style="background:#191A1D;color:#D3D6DC">Aa</i><b>--txt</b><code>#D3D6DC</code><span>11.95:1</span></div>
+        <div class="pal-row"><i style="background:#191A1D;color:#8A9099">Aa</i><b>--txt-dim</b><code>#8A9099</code><span>5.41:1</span></div>
+        <div class="pal-row"><i style="background:#191A1D;color:#5A6068">Aa</i><b>--txt-etch</b><code>#5A6068</code><span>2.74:1</span></div>
+  </div>
+
+  <div class="pal-acc">
+    <div class="pal-card">
+      <span class="pal-cap">ACCENT · ORANGE · SHIPPING</span>
+      <span class="pal-key" style="background:#FF5E00">STOP</span>
+      <span class="pal-key" style="background:#FF9A47">HOVER</span>
+      <div class="pal-row"><i style="background:#FF6A00"></i><b>--primary</b><code>#FF6A00</code><span>the lamp</span></div>
+      <div class="pal-row"><i style="background:#FF5E00"></i><b>--primary-deep</b><code>#FF5E00</code><span>the fill · white 3.06:1</span></div>
+      <div class="pal-row"><i style="background:#FF9A47"></i><b>--primary-light</b><code>#FF9A47</code><span>hover</span></div>
+      <div class="pal-row"><i style="background:#AF4E09"></i><b>--primary-ink</b><code>#AF4E09</code><span>orange as a WORD</span></div>
+      <p class="pal-note">THE ONLY WARM THING ON THE SCREEN. Page, panel, ink and
+      hairline are two temperatures of one family; the cap is from a third, so it
+      reads as an action before it reads as a colour.</p>
+    </div>
+    <div class="pal-card">
+      <span class="pal-cap">ACCENT · BLUE · CANDIDATE, NOT IN USE</span>
+      <span class="pal-key" style="background:#0768C1">STOP</span>
+      <span class="pal-key" style="background:#197ADB">HOVER</span>
+      <div class="pal-row"><i style="background:#1A79DC"></i><b>candidate</b><code>#1A79DC</code><span>the lamp</span></div>
+      <div class="pal-row"><i style="background:#0768C1"></i><b>fill</b><code>#0768C1</code><span>white 5.59:1</span></div>
+      <div class="pal-row"><i style="background:#197ADB"></i><b>hover</b><code>#197ADB</code><span>hover</span></div>
+      <div class="pal-row"><i style="background:#0057A8"></i><b>wall</b><code>#0057A8</code><span>blue as a WORD</span></div>
+      <p class="pal-note">NOT PULLED OUT OF THE AIR — it is the ink's own hue
+      (253.6°) walked up to accent chroma. THAT IS ALSO THE PROBLEM: the cap and
+      the words are then one hue family, and the one thing on the rack that must
+      be found at a glance stops being the only coloured thing on it. It clears
+      white far more easily than the orange does (5.59:1
+      against 3.06:1).</p>
+    </div>
+  </div>
+
+  <h3 class="pal-h">A panel, standing on that surface</h3>
+  <!-- THE ONLY TEST A PALETTE HAS. Six swatches in a row are six swatches: the
+       claim is not that these are six fills, it is that one of them is BEHIND
+       the others. So the sheet poses the thing the values are for — a card on a
+       floor, a hole cut in the card, a lit cap standing on it — and the only
+       thing that changes between the two is the ACCENT. If the card does not
+       separate from the floor here, no hairline will save it on a real page. -->
+  <div class="pv">
+    <div>
+      <div class="pv-lab">ORANGE · AS IT SHIPS</div>
+    <div class="pv-floor sk-lt" style="background-color:#EFF4F7;
+         background-image:
+           repeating-linear-gradient(to right,  rgba(33,62,96,.07) 0 1px, transparent 1px 72px),
+           repeating-linear-gradient(to bottom, rgba(33,62,96,.07) 0 1px, transparent 1px 72px);">
+      <div class="pv-card" style="background:#FCF9F3;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #DED9CD">
+        <div class="pv-head" style="color:#213E60">Portrait-Typo
+          <span class="pv-stamp" style="color:#8197B1;background:#EAE6DC;box-shadow:inset 0 0 0 1px #DED9CD">Portrait</span></div>
+        <div class="pv-well" style="background:#EAE6DC;color:#8197B1;box-shadow:inset 0 2px 4px rgba(0,0,0,.10)">localhost:2857</div>
+        <div class="pv-row">
+          <span class="pv-cap-key" style="background:#FF5E00;border:1px solid #C24A00;color:#FFF">STOP</span>
+          <span class="pv-key" style="background:#FCF9F3;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #DED9CD"></span>
+          <span class="pv-key" style="background:#FCF9F3;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #DED9CD"></span>
+        </div>
+      </div>
+    </div>
+    <div class="pv-floor sk-dk" style="background-color:#0B0B0D;
+         background-image:
+           repeating-linear-gradient(to right,  rgba(211,214,220,.05) 0 1px, transparent 1px 72px),
+           repeating-linear-gradient(to bottom, rgba(211,214,220,.05) 0 1px, transparent 1px 72px);">
+      <div class="pv-card" style="background:#232529;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #2E3136">
+        <div class="pv-head" style="color:#D3D6DC">Portrait-Typo
+          <span class="pv-stamp" style="color:#8A9099;background:#0E0F11;box-shadow:inset 0 0 0 1px #2E3136">Portrait</span></div>
+        <div class="pv-well" style="background:#0E0F11;color:#8A9099;box-shadow:inset 0 2px 4px rgba(0,0,0,.10)">localhost:2857</div>
+        <div class="pv-row">
+          <span class="pv-cap-key" style="background:#FF5E00;border:1px solid #C24A00;color:#FFF">STOP</span>
+          <span class="pv-key" style="background:#232529;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #2E3136"></span>
+          <span class="pv-key" style="background:#232529;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #2E3136"></span>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div>
+      <div class="pv-lab">BLUE · THE CANDIDATE</div>
+    <div class="pv-floor sk-lt" style="background-color:#EFF4F7;
+         background-image:
+           repeating-linear-gradient(to right,  rgba(33,62,96,.07) 0 1px, transparent 1px 72px),
+           repeating-linear-gradient(to bottom, rgba(33,62,96,.07) 0 1px, transparent 1px 72px);">
+      <div class="pv-card" style="background:#FCF9F3;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #DED9CD">
+        <div class="pv-head" style="color:#213E60">Portrait-Typo
+          <span class="pv-stamp" style="color:#8197B1;background:#EAE6DC;box-shadow:inset 0 0 0 1px #DED9CD">Portrait</span></div>
+        <div class="pv-well" style="background:#EAE6DC;color:#8197B1;box-shadow:inset 0 2px 4px rgba(0,0,0,.10)">localhost:2857</div>
+        <div class="pv-row">
+          <span class="pv-cap-key" style="background:#0768C1;border:1px solid #0057A8;color:#FFF">STOP</span>
+          <span class="pv-key" style="background:#FCF9F3;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #DED9CD"></span>
+          <span class="pv-key" style="background:#FCF9F3;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #DED9CD"></span>
+        </div>
+      </div>
+    </div>
+    <div class="pv-floor sk-dk" style="background-color:#0B0B0D;
+         background-image:
+           repeating-linear-gradient(to right,  rgba(211,214,220,.05) 0 1px, transparent 1px 72px),
+           repeating-linear-gradient(to bottom, rgba(211,214,220,.05) 0 1px, transparent 1px 72px);">
+      <div class="pv-card" style="background:#232529;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #2E3136">
+        <div class="pv-head" style="color:#D3D6DC">Portrait-Typo
+          <span class="pv-stamp" style="color:#8A9099;background:#0E0F11;box-shadow:inset 0 0 0 1px #2E3136">Portrait</span></div>
+        <div class="pv-well" style="background:#0E0F11;color:#8A9099;box-shadow:inset 0 2px 4px rgba(0,0,0,.10)">localhost:2857</div>
+        <div class="pv-row">
+          <span class="pv-cap-key" style="background:#0768C1;border:1px solid #0057A8;color:#FFF">STOP</span>
+          <span class="pv-key" style="background:#232529;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #2E3136"></span>
+          <span class="pv-key" style="background:#232529;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px #2E3136"></span>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <h3 class="pal-h">The effects · twelve, in this skin</h3>
+  <!-- EVERY TILE IS ONE BOX WEARING ONE TOKEN THIS FILE ALREADY SHIPS —
+       `--lift`, `--well`, `--surround`, `--chamfer`, `--grain`, `--sink`, the
+       lamp. Nothing is drawn for the sheet, so changing a token changes the
+       tile and every part in every app that reads it.
+
+       WORTH KNOWING: `--lift`, `--well`, `--surround` and `--sink` are declared
+       in the LIGHT block only. On the dark side the same four constructions are
+       the bevel pair plus `--recess`, which is what the dark parts have always
+       used — so the two skins build these differently on purpose. -->
+  <div class="fx-pane sk-lt">
+    <div class="fx-cap">THE SAME LAMP AT 158° ON ALL TWELVE</div>
+    <div class="fx">
+        <div class="fx-cell"><span class="fx-no">01. CHASSIS</span><i class="fx-tile" style="box-shadow:var(--lift);background:var(--card)"></i><span class="fx-sub">proud · out of the metal</span></div>
+        <div class="fx-cell"><span class="fx-no">02. WELL</span><i class="fx-tile" style="box-shadow:var(--well);background:var(--paper)"></i><span class="fx-sub">recessed · into it</span></div>
+        <div class="fx-cell"><span class="fx-no">03. BEZEL</span><i class="fx-tile" style="box-shadow:var(--surround);background:var(--paper)"></i><span class="fx-sub">a frame · around a part</span></div>
+        <div class="fx-cell"><span class="fx-no">04. STAGE</span><i class="fx-tile" style="box-shadow:none;border:1px solid var(--edge);background:var(--case-face)"></i><span class="fx-sub">neither · a field</span></div>
+        <div class="fx-cell"><span class="fx-no">05. CHAMFER</span><i class="fx-tile" style="box-shadow:var(--lift);background:var(--card);background-image:var(--chamfer)"></i><span class="fx-sub">the broken edge, concave</span></div>
+        <div class="fx-cell"><span class="fx-no">06. GRAIN</span><i class="fx-tile" style="box-shadow:var(--lift);background-color:var(--card);background-image:var(--grain);background-size:140px"></i><span class="fx-sub">metal is never flat</span></div>
+        <div class="fx-cell"><span class="fx-no">07. LAMP</span><i class="fx-tile" style="box-shadow:var(--lift),0 0 14px rgba(255,106,0,.55);background:var(--primary-deep)"></i><span class="fx-sub">the accent is a light</span></div>
+        <div class="fx-cell"><span class="fx-no">08. SPECULAR</span><i class="fx-tile" style="box-shadow:var(--lift);background:radial-gradient(circle at 34% 28%, #fff, var(--card) 62%)"></i><span class="fx-sub">up and left · 34% / 28%</span></div>
+        <div class="fx-cell"><span class="fx-no">09. SINK</span><i class="fx-tile" style="box-shadow:var(--sink);background:var(--card)"></i><span class="fx-sub">pressed · the key goes down</span></div>
+        <div class="fx-cell"><span class="fx-no">10. ENGRAVING</span><i class="fx-tile" style="box-shadow:none;background:var(--case-face)"><b style="color:var(--txt-etch);text-shadow:0 1px 0 var(--case-hi)">SKEW</b></i><span class="fx-sub">cut, not printed</span></div>
+        
+        <div class="fx-cell"><span class="fx-no">11. WINDOW</span><i class="fx-tile fx-win" style="background:var(--card);box-shadow:var(--surround),0 10px 22px rgba(0,0,0,.28)"><u class="fx-win-bar" style="background:var(--case-face);box-shadow:inset 0 -1px 0 rgba(0,0,0,.10)"><s></s><s></s><s></s></u></i><span class="fx-sub">lifted · the one thing that throws</span></div>
+    </div>
+    <div class="fx-big sk-lt">
+      <div class="fx-no" style="margin-bottom:9px">12. SCREEN · the readout, at size</div>
+      <div class="fx-glass">
+        <span class="fx-dig">0.000</span>
+        <span class="fx-dig sm">1.000 MM</span>
+        <i class="fx-sheen"></i>
+      </div>
+      <div class="fx-sub" style="margin-top:9px">bezel · well · cover glass · a bitmap face, never smoothed</div>
+    </div>
+  </div>
+  <div class="fx-pane sk-dk">
+    <div class="fx-cap">THE SAME LAMP AT 158° ON ALL TWELVE</div>
+    <div class="fx">
+        <div class="fx-cell"><span class="fx-no">01. CHASSIS</span><i class="fx-tile" style="background:var(--plate);box-shadow:inset 0 1px 0 var(--case-hi),inset 0 -1px 0 rgba(0,0,0,.9),0 2px 5px rgba(0,0,0,.6)"></i><span class="fx-sub">proud · out of the metal</span></div>
+        <div class="fx-cell"><span class="fx-no">02. WELL</span><i class="fx-tile" style="background:var(--bay);box-shadow:var(--recess)"></i><span class="fx-sub">recessed · into it</span></div>
+        <div class="fx-cell"><span class="fx-no">03. BEZEL</span><i class="fx-tile" style="background:var(--case);box-shadow:inset 0 1px 0 var(--case-hi),inset 0 0 0 1px var(--case-lo),0 3px 7px rgba(0,0,0,.65)"></i><span class="fx-sub">a frame · around a part</span></div>
+        <div class="fx-cell"><span class="fx-no">04. STAGE</span><i class="fx-tile" style="background:var(--case);box-shadow:inset 0 0 0 1px var(--case-lo)"></i><span class="fx-sub">neither · a field</span></div>
+        <div class="fx-cell"><span class="fx-no">05. CHAMFER</span><i class="fx-tile" style="background-color:var(--plate);background-image:var(--chamfer);box-shadow:inset 0 1px 0 var(--case-hi)"></i><span class="fx-sub">the broken edge, concave</span></div>
+        <div class="fx-cell"><span class="fx-no">06. GRAIN</span><i class="fx-tile" style="background-color:var(--plate);background-image:var(--grain);background-size:140px;box-shadow:inset 0 1px 0 var(--case-hi)"></i><span class="fx-sub">metal is never flat</span></div>
+        <div class="fx-cell"><span class="fx-no">07. LAMP</span><i class="fx-tile" style="background:var(--led);box-shadow:0 0 18px rgba(255,106,0,.75),inset 0 1px 0 rgba(255,255,255,.4)"></i><span class="fx-sub">the accent is a light</span></div>
+        <div class="fx-cell"><span class="fx-no">08. SPECULAR</span><i class="fx-tile" style="background:radial-gradient(circle at 34% 28%, #6c7179, var(--plate) 62%);box-shadow:inset 0 1px 0 var(--case-hi)"></i><span class="fx-sub">up and left · 34% / 28%</span></div>
+        <div class="fx-cell"><span class="fx-no">09. SINK</span><i class="fx-tile" style="background:var(--bay);box-shadow:var(--recess)"></i><span class="fx-sub">pressed · the key goes down</span></div>
+        <div class="fx-cell"><span class="fx-no">10. ENGRAVING</span><i class="fx-tile" style="background:var(--case);box-shadow:inset 0 0 0 1px var(--case-lo)"><b style="color:var(--txt-etch);text-shadow:0 1px 0 var(--case-hi)">SKEW</b></i><span class="fx-sub">cut, not printed</span></div>
+        
+        <div class="fx-cell"><span class="fx-no">11. WINDOW</span><i class="fx-tile fx-win" style="background:var(--case);box-shadow:inset 0 1px 0 var(--case-hi),0 14px 28px rgba(0,0,0,.7)"><u class="fx-win-bar" style="background:var(--plate);box-shadow:inset 0 -1px 0 rgba(0,0,0,.6)"><s></s><s></s><s></s></u></i><span class="fx-sub">lifted · the one thing that throws</span></div>
+    </div>
+    <div class="fx-big sk-dk">
+      <div class="fx-no" style="margin-bottom:9px">12. SCREEN · the readout, at size</div>
+      <div class="fx-glass">
+        <span class="fx-dig">0.000</span>
+        <span class="fx-dig sm">1.000 MM</span>
+        <i class="fx-sheen"></i>
+      </div>
+      <div class="fx-sub" style="margin-top:9px">bezel · well · cover glass · a bitmap face, never smoothed</div>
+    </div>
+  </div>
+
   <table class="spec">
     <tbody>
       <tr>
@@ -558,32 +893,11 @@
   </table>
 
   <h2>10 <span>/</span> The settings panel</h2>
-  <div class="setrow">
-  <div class="api">
-      <div class="api-rule">
-        <b>Off-canvas, push variant.</b> Two transforms, one curve, one flag:
-        <code>body.drawer-open</code>.
-      </div>
-      <dl>
-        <dt>markup</dt><dd><code>&lt;aside class="drawer" id="drawer"&gt;</code>, sibling of
-          <code>.wrap</code>. Never a child: the wrap is what moves.</dd>
-        <dt>handles</dt><dd>any <code>[aria-controls="drawer"]</code>. Each keeps its own
-          <code>aria-expanded</code>.</dd>
-        <dt>tokens</dt><dd><code>--drawer-w</code> 404 · <code>--drawer-tab</code> 38 ·
-          <code>--drawer-ease</code></dd>
-        <dt>z-index</dt><dd>page 1–3 · panels 80 · picker 99 · drawer 200 · tab 201</dd>
-        <dt>mark</dt><dd>sliders shut, cross open. Same element, same tracks.</dd>
-        <dt>closes on</dt><dd>tab · <code>Escape</code> · outside click</dd>
-        <dt class="warn">outside click</dt><dd>captured <code>pointerdown</code>, not
-          <code>click</code>. A control that rebuilds its row on release leaves the pointer on a
-          detached node.</dd>
-        <dt class="warn">exempt</dt><dd><code>.drawer</code> · <code>.picker</code> (its plate is
-          a child of <code>body</code>) · <code>.tab-demo</code></dd>
-        <dt class="warn">Escape</dt><dd>bound only while open. Ignored inside
-          <code>.kedit</code>, so it cancels the edit first.</dd>
-      </dl>
-    </div>
-    <div class="stage">
+  <!-- THE API CARD IS GONE. It was a second description of the drawer, in a
+       second voice, beside the thing itself: markup, handles, tokens, z-index
+       and three traps, all of it already in the spec table under this stage.
+       Two copies of one contract is two things to keep true. -->
+  <div class="stage">
       <div class="stage-note">one control · two positions</div>
       <div class="tab-pair">
         <div class="tab-cell">
@@ -602,9 +916,15 @@
           <span class="tab-sub">what the next press does</span>
         </div>
       </div>
-    </div>
   </div>
 
+  <style>
+    /* A SKIN MARK, NOT A HEADING. Four of the rows below hold for one skin
+       only, and a reader in the wrong skin would take them for the rule. The
+       mark is the faintest ink in the row, because it qualifies the name and
+       is not part of it. */
+    .spec .dk, .spec .lt{ color:var(--txt-dim); font-weight:400; letter-spacing:.04em; }
+  </style>
   <h2>11 <span>/</span> The room and the sheet</h2>
   <div class="stage">
     <div class="stage-note">a square unit, and the panel that is not the work</div>
@@ -626,10 +946,24 @@
     <thead><tr><th>Surface</th><th>What it is</th></tr></thead>
     <tbody>
       <tr>
-        <td>The desk</td>
-        <td><code>--room #0b0b0d</code>, plus one radial from high centre so the top of the page is
+        <td>The desk <span class="dk">· dark</span></td>
+        <td><code>--room #0B0B0D</code>, plus one radial from high centre so the top of the page is
             lit and the bottom falls away. The lamp of §02 lands somewhere, and this is the
             somewhere. A flat fill reads as a void; a gradient reads as a room</td>
+      </tr>
+      <tr>
+        <td>The desk <span class="lt">· light</span></td>
+        <td><code>--room #EFF4F7</code>, flat. <b>The separation is temperature, not
+            darkness.</b> The page used to be a warm gradient landing on the same cream the
+            panels were made of, so page, panel and well were one surface with hairlines drawn
+            on it. Dropping the page's <em>value</em> until the panels stood off it is the
+            obvious repair and the wrong one — cream at 88% is a stone bench and everything on
+            it looks old. So the page moves in <b>hue</b> instead: a cold white, the light
+            coming in a window, under warm cream panels lit by a warm lamp. Two surfaces within
+            three per cent of each other in value, read apart instantly, because the eye takes a
+            warm/cool boundary long before it takes a two-per-cent step. And no gradient: a lamp
+            in a dark room has to land somewhere, a lit room has no somewhere, and a gradient on
+            a near-white page is a smudge</td>
       </tr>
       <tr>
         <td>The air</td>
@@ -640,11 +974,24 @@
       </tr>
       <tr>
         <td>.sheet</td>
-        <td>White, two shadows, and <b>nothing reaches inside it</b>: no grain, no tint, no
-            filter, no blend mode. The shadow is ten times a panel's throw, because a white
-            sheet on a near-black desk at panel numbers reads as a sticker. <code>.window</code>
-            drops it, for a 3D view or a depth map: a window onto something is not paper on a
-            desk and does not throw</td>
+        <td>White, and <b>nothing reaches inside it</b>: no grain, no tint, no filter, no blend
+            mode. It is also the <b>one thing in the light skin that casts</b> — every other
+            part there says "I am above you" with a bevel, because a drop shadow on cream is a
+            grey smudge, but paper is not moulded into the case, it is lying on the desk, and a
+            sheet with no throw is a white rectangle printed on the page. On black the throw is
+            ten times a panel's, or a white sheet at panel numbers reads as a sticker; on the
+            cold white desk it is small, and mixed from the <em>ink</em> rather than from black
+            so it stays the same light as the room. <code>.window</code> drops it either way,
+            for a 3D view or a depth map: a window onto something is not paper on a desk and
+            does not throw</td>
+      </tr>
+      <tr>
+        <td>The cut edge <span class="lt">· light</span></td>
+        <td>White on <code>#EFF4F7</code> is about <b>1.1:1</b>, so on a lit desk the hairline is
+            not trim, it is the entire boundary between the paper and the thing it is lying on.
+            It takes <code>--edge-ctl</code> — a <em>control's</em> edge, the darkest hairline
+            the skin owns — and not the panel hairline, which would leave the sheet's outline
+            fainter than the rules printed on it</td>
       </tr>
       <tr>
         <td>.grid</td>
@@ -653,13 +1000,26 @@
             mistaken for a stroke. Two weights, majors and sublines, and the sublines are
             thinner <em>and</em> fainter — below about 0.3mm a line stops getting lighter as it
             gets thinner, so alpha has to carry the hierarchy. Every number is a custom
-            property, because every one is a setting the Grid bay writes</td>
+            property, because every one is a setting the Grid bay writes.
+            <b>And the blue does not move for the light skin.</b> The desk there is a cold white
+            and the ruling is a pale blue — one hue family, and exactly the confusion to avoid,
+            because a rule on the paper must never look like a tint on the desk. But the fix for
+            that is the paper, not the ink: a white field, a cut edge and a throw say "an object
+            is lying there", and nothing on the desk has any of the three. Re-colouring the grid
+            would be changing the drawing to fix the room — and since every number in it belongs
+            to an app's Grid bay, there is none in it the language gets to pick</td>
       </tr>
       <tr>
         <td>.ruler-tick</td>
-        <td>Engraved on the desk, so <b>light</b> lines. This is the one place the engraving
-            rule inverts: everywhere else a cut is darker than its surface, but the desk is
-            already near black and a near-black tick on it is not a tick</td>
+        <td>Engraved on the desk, so on black they are <b>light</b> lines — the one place the
+            engraving rule inverts, because a near-black tick on a near-black desk is not a
+            tick. <b>On the lit desk it turns back the right way up</b>: a cut in a lit surface
+            is darker than the surface, which is the normal rule and the one the rest of the
+            file obeys, so the ticks take <code>--ink-3</code>, the skin's mark colour. Without
+            that override they are white at 34% on a white desk — not faint, <em>absent</em>,
+            and the sheet floats with no measure beside it. The label drops its black
+            text-shadow at the same time: a shadow lifting 8px type off a black desk only
+            dirties it on a white one</td>
       </tr>
     </tbody>
   </table>
@@ -956,6 +1316,7 @@
     </tbody>
   </table>
 
+
   <footer>targz design system · skew · 00 · skew-system.html</footer>
 </div>
 
@@ -1005,7 +1366,12 @@ window.ENGAGE_ROOTS = '#mats, #surfaces, #klayouts, #togrig, #intrig, #setglobal
    comes from, and what inverts when a body goes into the metal instead of out
    of it. */
 (function surfaces() {
+  /* THE SWATCH ROW IS GONE — § 02 is the palette now. The function stays
+     because it is the only written record of what the four surfaces are, and
+     it returns on a missing node instead of throwing: a crash here takes
+     every section below it down with it. */
   const row = document.getElementById('surfaces');
+  if (!row) return;
   row.style.cssText =
     'display:flex; gap:38px; align-items:flex-start; justify-content:center; flex-wrap:wrap';
 
@@ -2257,7 +2623,11 @@ document.getElementById('navspec').replaceWith(navBar({
   const zoomFor = pitch =>
     Math.min(24, Math.max(1, Math.round((GLASS / (pitch * CELLS)) * 10) / 10));
 
-  const st = { lines: 20, sub: 5, w: 0.5, subw: 0.2, ink: '#7FB2E5', op: 1 };
+  /* GRAPHITE, NOT BLUEPRINT — the bay's starting colour is the library's own
+     `--grid-ink` default, and the panel writes it inline, so this hex is what
+     actually reaches the sheet. The two have to agree or the specimen shows a
+     ruling no app would get. */
+  const st = { lines: 20, sub: 5, w: 0.5, subw: 0.2, ink: '#6B6B6B', op: 1 };
 
   function paint() {
     /* THE MAJOR IS ROUNDED TO A WHOLE PIXEL AND THE MINOR IS ITS EXACT

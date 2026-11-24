@@ -1,6 +1,14 @@
-export const version = '1.121.0';
+export const version = '1.121.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.121.1',
+    date: '2026-11-24',
+    changes: [
+      "THE APP ICON RULE IS WRITTEN DOWN, AND IT IS WRITTEN AFTER THE WORK RATHER THAN BEFORE IT. `docs/APP-ICONS.md` is Terminass's icon taken apart — the 824 plate inset by 100 so the shadow has somewhere to fall, `rx` at 22.5% of the width, the diagonal ramp, `feDropShadow dy=20`, and a white rim at a fifth, which is one line and does most of the work. The first draft of the file invented its rules ahead of the drawings and produced a set that had to be thrown away, so two of them are recorded as mistakes: each app on its own step of a warm hue, which at dock size is three near-misses of one colour rather than three colours, and a mark that is never filled, which deleted the one part of the launcher's drawing that carried its meaning. One plate for every app now, and the mark does the telling apart.",
+      "AND THE THREE MARKS ARE BUILT THREE DIFFERENT WAYS ON PURPOSE. Solid masses, a stroked line at 62, and solids whose corners are radiused by a stroke of their own ink — what they share is FINISH, not construction. No sharp vertex anywhere, because a needle-pointed triangle beside a 185px squircle is the single thing that reads as unfinished; a hole is filled with the plate's own ramp under `userSpaceOnUse`, so it cannot drift out of step; and a shape perfectly square to the frame reads as a diagram, so the plotter's barrel sits twelve off the horizontal. The file also carries the `potrace` recipe for lifting a mark off a PNG, because three attempts at redrawing the launcher's sheets by eye each came out worse than the tracing.",
+    ],
+  },
   {
     version: '1.121.0',
     date: '2026-11-24',

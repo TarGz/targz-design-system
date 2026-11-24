@@ -155,17 +155,36 @@ given. macOS masks the `.icns` in a bundle, and only that. So a PNG flattened
 onto white looks right in Finder and Launchpad, and shows a white square behind
 the curve in the Dock. That is the one failure this pipeline exists to prevent.
 
+### A runtime icon is not the full-bleed one
+
+macOS does two things to a bundle `.icns` and neither to an icon set at
+runtime: it masks it, and it insets it to 824 of 1024 and draws the shadow in
+the margin that leaves. Hand it the full-bleed file and it fills the whole
+slot — about a quarter larger than every neighbour in the Dock.
+
+So an app that sets its own icon needs a second file, built with a fourth
+argument:
+
+```bash
+tools/build-app-icons.sh icon.svg icon.png icon.icns icon-window.png
+```
+
+`icon-window.png` is the same art on the 824 plate inside 1024, with the
+shadow the system would have drawn. `icon.png` and the `.icns` stay full
+bleed. An app with no runtime icon — Electron on macOS, which takes the
+`.icns` — does not need one.
+
 Where each app wants them:
 
 | app | repo | build |
 |---|---|---|
-| Targz Launchpad | `targz-launchpad2` | `build-app-icons.sh icon.svg icon.png icon.icns` |
+| Targz Launchpad | `targz-launchpad2` | `build-app-icons.sh icon.svg icon.png icon.icns icon-window.png` |
 | Terminass | `Terminass` | `build-app-icons.sh assets/icon.svg assets/icon.png assets/Terminass.icns` |
 | Pen Plotter Control | `TargzPenPlotterCtrl` | `build-app-icons.sh icon.svg app/icon.png build/icon.icns`, then copy `app/icon.png` to `build/icon.png` |
 
-Terminass also ships `assets/icon-window.png`, built by its own
-`assets/make_icon.py`: an inset plate with its own corners and shadow, for the
-icon it sets at runtime. Its `icon.png` is full bleed and feeds the `.icns`.
+Terminass's `assets/icon-window.png` predates the fourth argument and is still
+built by its own `assets/make_icon.py`. Same geometry: an 824 plate in 1024.
+Pen Plotter Control needs none — Electron on macOS takes the `.icns`.
 
 ---
 
@@ -174,7 +193,9 @@ icon it sets at runtime. Its `icon.png` is full bleed and feeds the `.icns`.
 At 32px, with the others beside it:
 
 0. `magick icon.png -format "%[pixel:p{0,0}]\n" info:` must print
-   `srgba(0,0,0,0)`. White there means the render flattened. The gallery in
+   `srgba(0,0,0,0)`. And if the app sets its own icon, is the tile the same
+   size as its neighbours in the Dock? Bigger means it was given the full-bleed
+   file instead of the window one. White there means the render flattened. The gallery in
    `docs/skew-system.html` draws the SVGs, not the PNGs, so no amount of
    looking at it catches this.
 1. Is there any white between the icon and its neighbours? Then something in

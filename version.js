@@ -1,6 +1,14 @@
-export const version = '1.122.2';
+export const version = '1.122.3';
 
 export const CHANGELOG = [
+  {
+    version: '1.122.3',
+    date: '2026-11-24',
+    changes: [
+      "A RUNTIME ICON IS NOT THE FULL-BLEED ONE, AND FULL BLEED IS WHY IT CAME OUT TOO BIG. macOS does two things to a bundle `.icns` and neither to an icon set at runtime: it masks it, and it insets it to 824 of 1024 and draws the shadow in the margin that leaves. Handed the full-bleed file, Targz Launchpad's dock tile filled the whole slot and read about a quarter larger than every icon beside it — the corners were fixed and the size was not. `tools/build-app-icons.sh` takes a fourth argument, `out-window.png`, and writes the same art on the 824 plate with that shadow; `icon.png` and the `.icns` stay full bleed. Terminass already had this file from its own `assets/make_icon.py`, at the same geometry.",
+      "`docs/APP-ICONS.md` carries it, and the checking list now asks whether an app that sets its own icon sits at the same size as its neighbours. Pen Plotter Control needs no window icon: Electron on macOS takes the `.icns`.",
+    ],
+  },
   {
     version: '1.122.2',
     date: '2026-11-24',

@@ -1,6 +1,14 @@
-export const version = '1.120.0';
+export const version = '1.120.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.120.1',
+    date: '2026-11-24',
+    changes: [
+      "A LIVE PORT IS A LIT HOLE IN THE LIGHT SKIN, NOT A WARM PLATE. The blanket that flattens every cut and hole in this skin sends `.port` to plain `--paper` with `--ink` on it, which is right for a hole and wrong for the one row on a card that reports a RUNNING SERVER: it came out drawn exactly like the row that reports a dead address. The first fix put the accent in the floor and again in a ring, and a ring is the giveaway — an outline is what a RAISED part has, so a strip wearing one reads as a warm plate stuck on the card. A hole has the panel's overhang casting down into it, a hairline on the inside of the cut, and its far wall catching light; those four lines are `.gate-slot`'s, the light skin's own deep cut, taken as they are. The only thing added is the lamp, and it is inside: a 14px bloom on the inner face, and a floor warming 3% to 9% toward the bottom where the light would pool. What tells you the server is up is the address glowing out of the hole, not the hole being orange.",
+      "AND OPEN IS LIT BY THE SAME LAMP, AT THE SAME VALUE. `.port span:last-child` carries a dimmer ink and `text-shadow:none` — written for the dark strip, where OPEN is a quieter step of `--run-lit`. In this skin that left a cold grey word inside a warm hole: the one part of the strip the light does not reach. It takes `color:inherit` and `text-shadow:inherit`, which is the strip's own colour and the strip's own glow and not a second orange that is nearly the same. It stays the smaller, wider-tracked word — that is what makes it a label, and a different colour was never doing that job.",
+    ],
+  },
   {
     version: '1.120.0',
     date: '2026-11-23',

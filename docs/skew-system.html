@@ -1275,7 +1275,93 @@
     </tbody>
   </table>
 
-  <h2>15 <span>/</span> Traps</h2>
+  <h2>15 <span>/</span> App icons</h2>
+
+  <!-- THE SPECIMENS ARE THE SHIPPED FILES, COPIED. Each app owns its own
+       `icon.svg`; these are copies, because a static page cannot reach into
+       three other repositories. `docs/APP-ICONS.md` says where each one lives
+       and how to refresh them — a copy that goes stale is the known cost here,
+       and the alternative was inlining nine thousand characters of traced path
+       into this file. -->
+  <div class="stage">
+    <div class="box" style="display:flex; gap:34px; align-items:flex-end; background:none; border:0; box-shadow:none;">
+      <figure style="margin:0; text-align:center;">
+        <img src="icons/launchpad.svg" width="128" height="128" alt="Targz Launchpad">
+        <img src="icons/launchpad.svg" width="32" height="32" alt="" style="display:block; margin:14px auto 0;">
+        <figcaption class="stage-note" style="position:static; margin-top:10px;">LAUNCHPAD</figcaption>
+      </figure>
+      <figure style="margin:0; text-align:center;">
+        <img src="icons/terminass.svg" width="128" height="128" alt="Terminass">
+        <img src="icons/terminass.svg" width="32" height="32" alt="" style="display:block; margin:14px auto 0;">
+        <figcaption class="stage-note" style="position:static; margin-top:10px;">TERMINASS</figcaption>
+      </figure>
+      <figure style="margin:0; text-align:center;">
+        <img src="icons/plotter.svg" width="128" height="128" alt="Pen Plotter Control">
+        <img src="icons/plotter.svg" width="32" height="32" alt="" style="display:block; margin:14px auto 0;">
+        <figcaption class="stage-note" style="position:static; margin-top:10px;">PLOTTER</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <table class="spec">
+    <tbody>
+      <tr>
+        <td>the plate</td>
+        <td><code>x=100 y=100 w=824 h=824 rx=185.4</code> on the 1024 canvas. <code>rx</code> is
+            <b>22.5% of the width</b> — below about 20% the corner reads as a square with its edges
+            knocked off, above about 25% it starts to read as a pill, and the macOS squircle sits
+            between. The 100 of margin is not padding: it is where the shadow falls, and an icon
+            drawn edge to edge has its shadow clipped, which is a grey line.</td>
+      </tr>
+      <tr>
+        <td>one fill, every app</td>
+        <td><code>#ffda6b → #de920d</code> on the diagonal, <code>gradientUnits="userSpaceOnUse"</code>.
+            The diagonal and not straight down: a vertical ramp reads as a cylinder, the diagonal as
+            a flat plate lit from up and to the left, which is where every other light here comes
+            from. <b>Every app takes the same one</b> — three steps of a warm family at dock size
+            are not three colours, they are three near-misses of one, so the mark does the telling
+            apart instead.</td>
+      </tr>
+      <tr>
+        <td>user space, not bounding box</td>
+        <td>Without it the ramp is relative to whatever shape fills with it, so a hole in a knob or
+            a counter in a letter samples the whole ramp inside itself and comes out a different
+            colour from the plate behind it. In user space every shape samples the one ramp, and a
+            hole is invisible because it <b>is</b> the plate.</td>
+      </tr>
+      <tr>
+        <td>shadow and rim</td>
+        <td><code>feDropShadow dy=20 stdDeviation=15 opacity=.3</code>, straight down, in a filter
+            region grown to 140% or the blur is cut off at the edge of the box. Then the same rect
+            again with <code>stroke:#fff</code> at <b>.20</b>, 4 wide. One line, and it does most of
+            the work — a hue-tinted rim reads as a border, a white one reads as light.</td>
+      </tr>
+      <tr>
+        <td>the mark</td>
+        <td>White, and that is the only rule about how it is made. These three are built three
+            different ways: solid masses, a stroked line at 62, and solids whose corners are
+            radiused by a stroke of their own ink. What they share is <b>finish</b>, not
+            construction — no sharp vertex anywhere, because a needle-pointed triangle beside a
+            185px squircle is the single thing that reads as unfinished.</td>
+      </tr>
+      <tr class="trap">
+        <td>rules written before the drawings</td>
+        <td>The first version of <code>docs/APP-ICONS.md</code> invented its rules ahead of the
+            work and produced a set that had to be thrown away. Two are kept on record as mistakes:
+            <b>a hue per app</b>, which at dock size is three near-misses of one colour; and
+            <b>a mark is never filled</b>, which deleted the one part of the launcher's drawing
+            that carried its meaning. The file is written after the work now.</td>
+      </tr>
+      <tr class="trap">
+        <td>redrawing a mark you already have</td>
+        <td>Don't. Three attempts at copying the launcher's sheets by eye each came out worse than
+            the original. <code>magick … -threshold 80% -negate</code> then <code>potrace</code>
+            over the shipped PNG gives the real outline, with the weights and angles it always had.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>16 <span>/</span> Traps</h2>
   <table class="spec">
     <tbody>
       <tr class="trap">

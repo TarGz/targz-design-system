@@ -1,6 +1,14 @@
-export const version = '1.121.1';
+export const version = '1.121.2';
 
 export const CHANGELOG = [
+  {
+    version: '1.121.2',
+    date: '2026-11-24',
+    changes: [
+      "THE APP ICONS ARE ON THE PAGE NOW, NOT ONLY IN A MARKDOWN FILE BESIDE IT. § 15 of SYSTEM shows all three at 128 and again at 32 — which is the size that actually decides a mark — with the plate anatomy as a spec table and the two rules that were wrong kept as traps rather than deleted: a hue per app, which at dock size is three near-misses of one colour, and a mark is never filled, which deleted the one part of the launcher's drawing that carried its meaning. It sits before TRAPS, because TRAPS is the closer.",
+      "The specimens are copies of the three shipped `icon.svg` files, in `docs/icons/`. A static page cannot reach into three other repositories, and the alternative was inlining nine thousand characters of traced path into the document — so the copy is the known cost, and `docs/APP-ICONS.md` carries where each original lives and the command that refreshes them.",
+    ],
+  },
   {
     version: '1.121.1',
     date: '2026-11-24',

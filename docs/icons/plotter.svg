@@ -1,0 +1,39 @@
+<!-- Pen Plotter Control - the app icon.
+     Built to targz-design-system/docs/APP-ICONS.md.
+
+     ONE PLATE FOR ALL THREE APPS. The hue is not what tells them apart - the
+     mark is. Three steps of one family read as three near-misses of the same
+     colour at dock size; one plate reads as a suite, and then the drawing has
+     to do its own work. The ramp is Terminass's, which was right first.
+
+     THE MARK IS THE TOOL, NOT ITS OUTPUT. A field of strokes is what any
+     drawing machine leaves; the tip is what THIS one holds. A marker and not a
+     pen, because this machine's PUMP dips BELOW pen-down to re-prime, which is
+     something only an ink-fed tip needs. Barrel, collar, nib, with air between
+     them - the two gaps are what make it a made object rather than one
+     tapering blob - and the barrel's top edge is off level by twelve, because
+     a drawn object perfectly square to the frame reads as a diagram.
+
+     The PNG and the .icns are built FROM this file, see the doc. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse"
+                    x1="100" y1="100" x2="924" y2="924">
+      <stop offset="0" stop-color="#ffda6b"/>
+      <stop offset="1" stop-color="#de920d"/>
+    </linearGradient>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="15" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="185.4"
+        fill="url(#g)" filter="url(#s)"/>
+  <rect x="100" y="100" width="824" height="824" rx="185.4"
+        fill="none" stroke="#ffffff" stroke-opacity="0.20" stroke-width="4"/>
+  <g fill="#ffffff" stroke="#ffffff" stroke-linejoin="round">
+    <path d="M369 288 L655 276 L655 392 L369 392 Z" stroke-width="52"/>
+    <path d="M433 454 L591 454 L568 544 L456 544 Z" stroke-width="32"/>
+    <path d="M470 606 L554 606 C554 706 530 772 512 792 C494 772 470 706 470 606 Z"
+          stroke-width="16"/>
+  </g>
+</svg>

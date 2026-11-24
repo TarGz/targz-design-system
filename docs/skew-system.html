@@ -1340,13 +1340,14 @@
     <tbody>
       <tr>
         <td>full bleed</td>
-        <td>No corners, no shadow, no margin of our own: macOS 26 masks the icon and draws its
-            own shadow, so art that arrives with a 100px inset, its own squircle and its own
-            <code>feDropShadow</code> is a smaller icon sitting on a <b>white plate the system
-            puts behind it</b>. The colour runs edge to edge across the whole 1024, and the mark
+        <td>What macOS 26 puts a white plate behind is the <b>margin</b>, not the curve: a 100px
+            inset leaves a band of nothing around the art and the system fills it. So the inset
+            goes, the drop shadow goes (the system draws its own) and the white rim goes (it sat
+            on the edge a mask eats) — and the corner stays, at <code>rx=229</code>, which is
+            22.37% of 1024, the radius macOS masks with. Drawn at full size the two agree: there
+            is no band for a plate, and if the system does not mask, the curve is ours. The mark
             is scaled by <code>1024/824</code> about the centre so it keeps the size it had
-            against the plate it used to sit in. On an older macOS the same file renders as a
-            square tile, because there is nothing there to round it.</td>
+            against the plate it used to sit in.</td>
       </tr>
       <tr>
         <td>one fill, every app</td>

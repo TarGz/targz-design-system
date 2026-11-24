@@ -1,12 +1,16 @@
 <!-- Pen Plotter Control - the app icon.
      Built to targz-design-system/docs/APP-ICONS.md.
 
-     FULL BLEED. NO CORNERS, NO SHADOW, NO MARGIN OF OUR OWN. macOS 26 masks
-     the icon itself and draws its own shadow, so art that arrives with a 100px
-     inset, its own squircle and its own drop shadow is a smaller icon sitting
-     on a WHITE PLATE the system puts behind it. Everything the system supplies
-     has to come out: the colour runs edge to edge across the whole 1024, and
-     the mark is scaled by 1024/824 so it keeps the size it had relative to the
+     FULL BLEED, AND THE CORNER IS ON THE CANVAS EDGE. What macOS 26 puts a
+     white plate behind is the MARGIN, not the curve: a 100px inset leaves a
+     band of nothing around the art and the system fills it. So the inset goes,
+     the drop shadow goes (the system draws its own), the white rim goes (it
+     sat on the edge a mask eats) - and the corner stays, at `rx=229`, which is
+     22.37% of 1024, the radius macOS masks with. Drawn at full size the two
+     agree: there is no band for a plate, and if the system does not mask, the
+     curve is ours. A plain square would have neither.
+
+     The mark is scaled by 1024/824 so it keeps the size it had relative to the
      plate it used to sit in.
 
      ONE PLATE FOR ALL THREE APPS. The hue is not what tells them apart - the
@@ -27,7 +31,7 @@
       <stop offset="1" stop-color="#de920d"/>
     </linearGradient>
   </defs>
-  <rect width="1024" height="1024" fill="url(#g)"/>
+  <rect width="1024" height="1024" rx="229" fill="url(#g)"/>
   <!-- the mark, grown by 1024/824 about the centre: it used to be measured
        against the 824 plate, and the plate is the whole canvas now -->
   <g transform="translate(512,512) scale(1.24272) translate(-512,-512)">

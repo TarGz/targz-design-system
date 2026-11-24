@@ -1,6 +1,13 @@
-export const version = '1.122.0';
+export const version = '1.122.1';
 
 export const CHANGELOG = [
+  {
+    version: '1.122.1',
+    date: '2026-11-24',
+    changes: [
+      "THE CORNER WAS NOT THE BUG, THE MARGIN WAS. Stripping an app icon to full bleed for macOS 26 took the squircle out with the inset, and only one of the two was ever the problem: what the system puts a white plate behind is the BAND OF NOTHING a 100px inset leaves around the art. The inset stays gone, and so do the drop shadow and the white rim — the system draws its own shadow and a mask eats an edge rim — but the corner is drawn again at `rx=229`, which is the same 22.37% as before, taken on the full 1024 rather than on an 824 box inside it. Drawn at canvas size the two agree: there is no band for a plate, and if the system does not mask, the curve is ours. A plain square had neither.",
+    ],
+  },
   {
     version: '1.122.0',
     date: '2026-11-24',

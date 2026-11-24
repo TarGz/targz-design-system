@@ -15,21 +15,26 @@ away. What follows is what the three icons actually do.
 
 ```xml
 <svg width="1024" height="1024" viewBox="0 0 1024 1024">
-  <rect width="1024" height="1024" fill="url(#g)"/>
+  <rect width="1024" height="1024" rx="229" fill="url(#g)"/>
 ```
 
-**No corners, no shadow, no margin of our own.** macOS 26 masks the icon and
-draws its own shadow. Art that arrives with a 100px inset, its own squircle and
-its own `feDropShadow` is a smaller icon sitting on a **white plate** the system
-puts behind it — which is exactly the bug that was filed against these icons
-after the first version of this file told everyone to draw them that way.
+**What macOS 26 puts a white plate behind is the MARGIN, not the curve.** A
+100px inset leaves a band of nothing around the art and the system fills it —
+which is exactly the bug that was filed against these icons after the first
+version of this file told everyone to draw them that way.
+
+So the inset goes, the drop shadow goes (the system draws its own) and the white
+rim goes (it sat on the edge a mask eats). **The corner stays**, at `rx=229` —
+22.37% of 1024, the radius macOS masks with. Drawn at full size the two agree:
+there is no band for a plate, and if the system does not mask, the curve is
+ours. A plain square would have neither.
 
 So everything the system supplies comes out:
 
 | was | now |
 |---|---|
 | `x=100 y=100 w=824 h=824` | the whole 1024 |
-| `rx=185.4` (22.5% of the width) | nothing — the system masks |
+| `rx=185.4` on the 824 box | `rx=229` on the full 1024 — the same 22.37%, at canvas size |
 | `feDropShadow dy=20 stdDeviation=15` | nothing — the system shadows |
 | a white rim at 20%, 4 wide | nothing — it sat on the edge the mask eats |
 
@@ -41,8 +46,8 @@ relative to its ground:
 <g transform="translate(512,512) scale(1.24272) translate(-512,-512)">
 ```
 
-This is the macOS 26 contract, not a style. On an older macOS the same file
-renders as a square tile, because there is nothing there to round it.
+This is the macOS 26 contract, not a style — but the corner is drawn rather
+than assumed, so the file is right whether or not the system masks it.
 
 ---
 

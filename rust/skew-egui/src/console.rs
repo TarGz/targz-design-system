@@ -30,7 +30,7 @@
 use crate::icon::{paint_icon, paint_icon_solid, Icon};
 use crate::key::{clicky, paint_key, paint_pkey_down, paint_pkey_held, KeyState, KeyStyle};
 use crate::machine::paint_lcd_ink;
-use crate::paint::hex;
+use crate::paint::{hex, mix};
 use crate::theme::{read_font, Theme};
 use egui::text::{LayoutJob, TextFormat};
 use egui::{pos2, vec2, Align, Color32, FontId, Layout, Pos2, Rect, Rounding, Sense, Stroke, Ui};
@@ -319,20 +319,138 @@ pub fn port_strip(ui: &mut Ui, th: &Theme, port: u16, live: bool) -> egui::Respo
     };
     if ui.is_rect_visible(rect) {
         let p = ui.painter();
-        let ring = if live && resp.hovered() { th.edge_ctl } else { th.edge };
-        paint_well(p, rect, th.paper, ring);
+        // A LIVE STRIP IS A LIT HOLE; A DEAD ONE IS THE SAME HOLE, UNLIT. The
+        // blanket that flattens every cut in this skin sends `.port` to plain
+        // `--paper` with `--ink` on it, which is right for a hole and wrong
+        // for the one row on a card that reports a RUNNING SERVER: it came out
+        // drawn exactly like the row that reports a dead address.
+        if live {
+            paint_port_hole(p, th, rect, resp.hovered());
+        } else {
+            paint_well(p, rect, th.paper, th.edge);
+        }
         let cy = rect.center().y;
-        let ink = if live { th.ink } else { th.ink_2 };
+        // THE LIT LEGEND IS ORANGE INK, NOT NAVY UNDER AN ORANGE HALO. That is
+        // the system's own rule for a thing that is ON — `--primary-deep` under
+        // a 7px `--primary` shadow — and the brighter value is what makes it
+        // read as LIT rather than as merely coloured. A warm halo stacked
+        // behind cold ink instead just fills the gaps between the letters,
+        // which is a highlighter pen and not a lamp.
+        let ink = if live { th.primary_deep } else { th.ink_2 };
         paint_icon(p, Icon::Ext, pos2(rect.left() + 16.0, cy), 12.0, 1.8, ink, 0.0);
         let txt = if port > 0 { format!("localhost:{port}") } else { "PORT ASSIGNED ON LAUNCH".into() };
+        let at = pos2(rect.left() + 30.0, cy - word(p, &txt, 11.0, 0.04, ink).rect.height() / 2.0);
+        // `text-shadow:0 0 7px color-mix(--primary 70%, transparent)` as eight
+        // offsets of ONE ring, which is what a painter with no blur has. Eight
+        // compounding passes reach 70% at 36 each.
+        // AND THERE IS NO HALO, BECAUSE A PAINTER CANNOT MAKE ONE. `text-shadow:
+        // 0 0 7px` is a BLUR: the accent fades to nothing over seven pixels and
+        // never sits anywhere at a readable strength. Eight hard copies of the
+        // word is what a painter has instead, and eight copies of an orange at
+        // low alpha over cream is not a soft orange — it is an ochre ring with
+        // an edge, because the blend walks the hue up as the coverage drops.
+        // Three attempts at tuning it produced three yellows. The lit reading
+        // is carried by the ink and the warm floor, which is enough: a glow
+        // that has to be apologised for is not a glow.
         let g = word(p, &txt, 11.0, 0.04, ink);
-        p.galley(pos2(rect.left() + 30.0, cy - g.rect.height() / 2.0), g, ink);
+        p.galley(at, g, ink);
+        // AND OPEN IS LIT BY THE SAME LAMP, AT THE SAME VALUE. Its own rule
+        // gives it a dimmer ink and takes the shadow off — written for the dark
+        // strip, where OPEN is a quieter step of `--run-lit`. Here that left a
+        // cold grey word inside a warm hole: the one part of the strip the
+        // light does not reach. It is the strip's colour and the strip's glow,
+        // exactly; it stays the smaller, wider-tracked word, and that is what
+        // makes it a label.
         if live {
-            let g = word(p, "OPEN", 9.0, 0.1, th.ink_2);
-            p.galley(pos2(rect.right() - 10.0 - g.rect.width(), cy - g.rect.height() / 2.0), g, th.ink_2);
+            let g = word(p, "OPEN", 9.0, 0.1, ink);
+            let at = pos2(rect.right() - 10.0 - g.rect.width(), cy - g.rect.height() / 2.0);
+            p.galley(at, g, ink);
         }
     }
     resp
+}
+
+/// A LIVE PORT IS A HOLE WITH A LAMP IN IT, NOT A WARM PLATE ON THE CARD.
+///
+/// The first attempt put the accent in the floor and again in a ring, and the
+/// ring is the giveaway: an outline is what a RAISED part has, so a strip
+/// wearing one reads as a plate stuck on the card rather than a slot cut into
+/// it. A hole has three things and none of them is an outline — the panel's
+/// overhang casting down into it, a hairline on the inside of the cut, and its
+/// far wall catching the light. Those are `.gate-slot`'s, the light skin's own
+/// deep cut, taken as they are.
+///
+/// THE ONLY THING ADDED IS THE LAMP, AND IT IS INSIDE: a bloom on the inner
+/// face, and a floor warming 3% to 9% toward the bottom where the light would
+/// pool. What tells you the server is up is the address glowing out of the
+/// hole — not the hole being orange.
+fn paint_port_hole(p: &egui::Painter, th: &Theme, rect: Rect, hover: bool) {
+    // THE LAMP IS `--primary-deep`, NOT `--primary`. 255,106,0 is orange at
+    // full strength and YELLOW laid thin over cream — every low-alpha pass of
+    // it walks the hue up, so a bloom and a halo built out of it end up a
+    // yellow smear around an orange word. The deep value stays orange all the
+    // way down to nothing, which is the only thing a glow is made of.
+    let acc = th.primary_deep;
+    let warm = |a: f32| Color32::from_rgba_unmultiplied(
+        acc.r(), acc.g(), acc.b(), a.clamp(0.0, 255.0) as u8);
+
+    // the floor — `--paper` under a 3% → 9% wash of the lamp, brighter at the
+    // bottom because that is where light inside a slot pools
+    p.rect_filled(rect, Rounding::same(6.0), th.paper);
+    crate::paint::vgrad(p, rect.shrink(1.0), 5.0,
+        mix(th.paper, acc, 0.03), mix(th.paper, acc, 0.09));
+
+    // `inset 0 0 14px` — AND A 14px BLUR INSIDE A 30px BOX IS NOT A RING, IT
+    // IS THE WHOLE BOX. Four strokes walking inward from the edge was the
+    // wrong translation: at 2.8px each they reached the centre line, stacked
+    // to about a quarter of the accent across the entire strip, and painted
+    // the peach plate this is supposed to be the opposite of. A painter has no
+    // blur, so what is left of that shadow is ONE pass just inside the cut —
+    // the inner face catching the lamp, which is all of it you would see.
+    p.rect_stroke(
+        rect.shrink(1.5),
+        Rounding::same(4.5),
+        Stroke::new(2.0, warm(if hover { 22.0 } else { 13.0 })),
+    );
+
+    // A SHADOW IN A ROUNDED HOLE TURNS THE CORNER WITH IT. These were straight
+    // segments stopped 6px short of each end, so the lit top edge and the far
+    // wall both ended in mid-air next to the curve — the one detail that makes
+    // a drawn object look printed rather than made. An inset shadow has no
+    // ends: it runs the whole way round and you only SEE the part the light
+    // reaches. So each is a rounded stroke on the hole's own curve, clipped to
+    // the band it belongs to, and it follows the corner because it is the
+    // corner.
+    let band = |y0: f32, y1: f32| p.with_clip_rect(Rect::from_min_max(
+        pos2(rect.left() - 2.0, y0), pos2(rect.right() + 2.0, y1)));
+
+    // `inset 0 2px 4px rgba(0,0,0,.16)` — the panel's overhang cast down into
+    // the cut. THIS IS THE ONE THING THAT SAYS SUNK, so it goes over the lamp
+    // and not under it.
+    let top = band(rect.top() - 2.0, rect.top() + 6.0);
+    for (k, a) in [(1.2f32, 26u8), (2.4, 15), (3.8, 7)] {
+        top.rect_stroke(
+            rect.shrink(k), Rounding::same((6.0 - k).max(0.5)),
+            Stroke::new(1.3, Color32::from_rgba_unmultiplied(0, 0, 0, a)),
+        );
+    }
+
+    // `inset 0 0 0 1px var(--edge-ctl)` — the hairline is on the INSIDE of the
+    // cut, and it is neutral: a warm one would read as an outline again.
+    p.rect_stroke(rect.shrink(0.5), Rounding::same(5.5), Stroke::new(1.0, th.edge_ctl));
+
+    // `inset 0 -1px 0 rgba(255,255,255,.75)` — the far wall of the hole, and
+    // ONLY that. The lip below it, `0 1px 0 rgba(255,255,255,.9)`, is the same
+    // shape offset down a pixel: in CSS the two are one line thick apart and
+    // read as one edge, but drawn as two rounded strokes their corners do not
+    // share a centre, so the arcs diverge and each bottom corner got a little
+    // white fork in it. One pixel of extra relief is not worth a seam in the
+    // one place the eye is already looking for the shape.
+    let bot = band(rect.bottom() - 5.0, rect.bottom() + 1.0);
+    bot.rect_stroke(
+        rect.shrink(1.2), Rounding::same(4.8),
+        Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 255, 255, 191)),
+    );
 }
 
 // ── the strip's own parts ───────────────────────────────────────────────────
@@ -827,13 +945,29 @@ pub fn paint_surround(p: &egui::Painter, th: &Theme, rect: Rect, radius: f32) {
 
 /// A framed `--paper` panel with `margin` inside, the size of what it holds.
 pub fn surround<R>(ui: &mut Ui, th: &Theme, radius: f32, margin: f32, add: impl FnOnce(&mut Ui) -> R) -> R {
+    surround_in(ui, th, radius, margin, th.paper, th.edge_ctl, add)
+}
+
+/// A CARD IS NOT A HOLE, AND THE TWO WERE THE SAME FILL. `surround` is a part
+/// cut INTO a face, so it is floored with `--paper`, the darkest cream in the
+/// skin — the milled value. A module card is the opposite thing: it is a card
+/// LYING ON the desk, which the stylesheet files with `.box`, `.console` and
+/// `.drawer` at `--case-face` inside an `--edge` hairline. Drawn in `--paper`
+/// it came out a shade of tan against the web's near-white, and a rack of them
+/// read as holes punched in the desk rather than cards resting on it. Same two
+/// lines of relief either way — `--shadow-card` is a white top edge and a soft
+/// dark bottom one, and nothing else, because a card on paper does not float.
+pub fn surround_in<R>(
+    ui: &mut Ui, _th: &Theme, radius: f32, margin: f32,
+    fill: Color32, edge: Color32, add: impl FnOnce(&mut Ui) -> R,
+) -> R {
     let where_ = ui.painter().add(egui::Shape::Noop);
     let out = egui::Frame::none().inner_margin(margin).show(ui, add);
     let rect = out.response.rect;
     let p = ui.painter();
     // the frame goes into the slot reserved before the content, so it sits under it
     let mut shapes = Vec::new();
-    shapes.push(egui::Shape::rect_filled(rect, Rounding::same(radius), th.paper));
+    shapes.push(egui::Shape::rect_filled(rect, Rounding::same(radius), fill));
     shapes.push(egui::Shape::line_segment(
         [pos2(rect.left() + radius, rect.top() + 1.5), pos2(rect.right() - radius, rect.top() + 1.5)],
         Stroke::new(1.0, Color32::WHITE),
@@ -842,7 +976,7 @@ pub fn surround<R>(ui: &mut Ui, th: &Theme, radius: f32, margin: f32, add: impl 
         [pos2(rect.left() + radius, rect.bottom() - 1.75), pos2(rect.right() - radius, rect.bottom() - 1.75)],
         Stroke::new(1.5, Color32::from_rgba_unmultiplied(0, 0, 0, 28)),
     ));
-    shapes.push(egui::Shape::rect_stroke(rect.shrink(0.5), Rounding::same(radius - 0.5), Stroke::new(1.0, th.edge_ctl)));
+    shapes.push(egui::Shape::rect_stroke(rect.shrink(0.5), Rounding::same(radius - 0.5), Stroke::new(1.0, edge)));
     p.set(where_, egui::Shape::Vec(shapes));
     out.inner
 }
@@ -869,7 +1003,21 @@ pub fn surround<R>(ui: &mut Ui, th: &Theme, radius: f32, margin: f32, add: impl 
 /// window, and a desk that slid under the cards when you scrolled would say
 /// the desk belongs to the document rather than to the app.
 pub fn console<R>(ui: &mut Ui, th: &Theme, margin: f32, add: impl FnOnce(&mut Ui) -> R) -> R {
-    let radius = 16.0;
+    console_in(ui, th, margin, Rounding::same(16.0), true, add)
+}
+
+/// The desk itself, at a given set of corners and with or without its own edge.
+///
+/// IT TAKES A `Rounding` AND NOT A RADIUS BECAUSE OF THE WINDOW. Dropped into
+/// an [`appwin`], the desk is the window's content and runs flush to the frame:
+/// `.appwin{ overflow:hidden }` with `.appwin > .console{ border-radius:0;
+/// box-shadow:none }`. There is no clip in a painter, so the two corners the
+/// title bar does not cover are rounded here instead, which is the same
+/// picture by the only means available.
+fn console_in<R>(
+    ui: &mut Ui, th: &Theme, margin: f32, r: Rounding, edge: bool,
+    add: impl FnOnce(&mut Ui) -> R,
+) -> R {
     let where_ = ui.painter().add(egui::Shape::Noop);
     let out = egui::Frame::none().inner_margin(margin).show(ui, add);
     let rect = out.response.rect;
@@ -882,14 +1030,125 @@ pub fn console<R>(ui: &mut Ui, th: &Theme, margin: f32, add: impl FnOnce(&mut Ui
     // ONE SLOT, RESERVED BEFORE THE CONTENT AND FILLED AFTER. The fill, then
     // the ruling, then the edge — all three in the shape that was put down
     // first, so the cards lie ON the desk instead of under it.
-    let mut shapes = vec![egui::Shape::rect_filled(rect, Rounding::same(radius), fill)];
+    let mut shapes = vec![egui::Shape::rect_filled(rect, r, fill)];
     // inset by the radius so the ruling does not run out past the rounded
     // corners; the window's own top-left is the grid's zero
     shapes.extend(crate::frame::grid_shapes(th, rect.shrink(1.0), rect.min));
-    shapes.push(egui::Shape::rect_stroke(
-        rect.shrink(0.5), Rounding::same(radius - 0.5), Stroke::new(1.0, th.edge_ctl)));
+    if edge {
+        shapes.push(egui::Shape::rect_stroke(
+            rect.shrink(0.5), r, Stroke::new(1.0, th.edge_ctl)));
+    }
     ui.painter().set(where_, egui::Shape::Vec(shapes));
     out.inner
+}
+
+/// `.appwin-bar`'s height. The title bar is a fixed 30px in every skin.
+pub const APPWIN_BAR: f32 = 30.0;
+
+/// `.appwin` — THE LAUNCHER IS AN APPLICATION, SO IT IS SHOWN IN A WINDOW.
+///
+/// Every other specimen on the page is a PART, and a part is drawn as the part:
+/// a key is a key, a fader is a fader. The launcher is not a part, it is a
+/// program — and a program is something you meet as a window on a desktop,
+/// with the system's own bar across the top of it. Leaving that bar off does
+/// not make the specimen more neutral, it makes it a panel, which is the one
+/// thing this object is not.
+///
+/// THE THREE DOTS ARE macOS'S OWN COLOURS AND THAT IS WHY THEY ARE RIGHT.
+/// `src/skew.css` says it at the rule: the system draws this bar, not us, and
+/// substituting our red, our amber and our green would produce a window that
+/// looks ALMOST like the real one, which reads as a mistake rather than as a
+/// quotation. A borrowed thing is borrowed exactly or not at all. The name is
+/// set the same way — the interface face, title case, no tracking — because
+/// our caps-and-tracking is how a PART is labelled, and using it here would
+/// claim we built the bar.
+pub fn appwin<R>(
+    ui: &mut Ui, th: &Theme, title: &str, margin: f32, add: impl FnOnce(&mut Ui) -> R,
+) -> R {
+    let radius = 12.0;
+    // TWO SLOTS, NOT ONE. The lift goes UNDER the window and the frame's
+    // hairline goes OVER its contents, so they cannot be the same shape.
+    let under = ui.painter().add(egui::Shape::Noop);
+    let out = ui.vertical(|ui| {
+        let w = ui.available_width();
+        let (bar, _) = ui.allocate_exact_size(vec2(w, APPWIN_BAR), Sense::hover());
+        paint_appwin_bar(ui.painter(), th, bar, title, radius);
+        console_in(
+            ui, th, margin,
+            Rounding { nw: 0.0, ne: 0.0, sw: radius, se: radius },
+            false, add,
+        )
+    });
+    let rect = out.response.rect;
+
+    let mut below = Vec::new();
+    match th.skin {
+        crate::Skin::Light => {
+            // `0 14px 30px rgba(33,62,96,.13), 0 1px 2px rgba(33,62,96,.10)` —
+            // a painter has no blur, so it is the throw walked out in steps.
+            for (dy, grow, a) in [(14.0, 10.0, 8), (9.0, 6.0, 12), (5.0, 3.0, 16), (1.0, 0.0, 26)] {
+                below.push(egui::Shape::rect_filled(
+                    rect.translate(vec2(0.0, dy)).expand(grow),
+                    Rounding::same(radius + grow),
+                    Color32::from_rgba_unmultiplied(33, 62, 96, a),
+                ));
+            }
+        }
+        crate::Skin::Dark => {
+            for (dy, grow, a) in [(20.0, 6.0, 40), (12.0, 3.0, 70), (5.0, 1.0, 110)] {
+                below.push(egui::Shape::rect_filled(
+                    rect.translate(vec2(0.0, dy)).expand(grow),
+                    Rounding::same(radius + grow),
+                    Color32::from_rgba_unmultiplied(0, 0, 0, a),
+                ));
+            }
+        }
+    }
+    ui.painter().set(under, egui::Shape::Vec(below));
+    // `inset 0 0 0 1px var(--edge-ctl)` — the window's own edge, over the
+    // content, because the frame is in front of what it holds.
+    let ring = match th.skin {
+        crate::Skin::Light => th.edge_ctl,
+        crate::Skin::Dark => Color32::from_rgba_unmultiplied(0, 0, 0, 140),
+    };
+    ui.painter().rect_stroke(
+        rect.shrink(0.5), Rounding::same(radius - 0.5), Stroke::new(1.0, ring));
+    out.inner
+}
+
+/// `.appwin-bar` — the title bar: the dots, then the name, on a light ramp.
+fn paint_appwin_bar(p: &egui::Painter, th: &Theme, rect: Rect, title: &str, radius: f32) {
+    let r = Rounding { nw: radius, ne: radius, sw: 0.0, se: 0.0 };
+    let (top, bottom, line) = match th.skin {
+        // `linear-gradient(180deg,#FFFFFF,var(--case-face) 70%)`
+        crate::Skin::Light => (Color32::WHITE, th.case_face, th.edge),
+        crate::Skin::Dark => (th.pal.case_hi, th.pal.case, Color32::from_rgba_unmultiplied(0, 0, 0, 140)),
+    };
+    p.rect_filled(rect, r, bottom);
+    crate::paint::vgrad(p, rect.shrink(0.6), radius, top, bottom);
+    // `inset 0 -1px 0` — the bar's own floor, which is the window's one seam
+    p.line_segment(
+        [pos2(rect.left(), rect.bottom() - 0.5), pos2(rect.right(), rect.bottom() - 0.5)],
+        Stroke::new(1.0, line),
+    );
+    // the dots: 10px, 6px apart, 11px in from the left
+    let cy = rect.center().y;
+    for (i, c) in [hex(0xFF5F57), hex(0xFEBC2E), hex(0x28C840)].into_iter().enumerate() {
+        let c0 = pos2(rect.left() + 11.0 + 5.0 + i as f32 * 16.0, cy);
+        p.circle_filled(c0, 5.0, c);
+        // `inset 0 1px 1px rgba(255,255,255,.45)` over `inset 0 -1px 1px
+        // rgba(0,0,0,.35)` — a bead, lit from above like everything else here
+        p.circle_stroke(c0, 4.6, Stroke::new(0.9, Color32::from_rgba_unmultiplied(0, 0, 0, 40)));
+    }
+    // THE NAME IS SET THE WAY THE OS SETS IT — the interface face, title case,
+    // no tracking, beside the dots and not centred in the bar.
+    let g = p.layout_no_wrap(
+        title.to_owned(),
+        egui::FontId::new(12.0, egui::FontFamily::Proportional),
+        th.ink,
+    );
+    let x = rect.left() + 11.0 + 3.0 * 10.0 + 2.0 * 6.0 + 9.0;
+    p.galley(pos2(x, cy - g.rect.height() / 2.0), g, th.ink);
 }
 
 // ── the module ──────────────────────────────────────────────────────────────
@@ -941,7 +1200,11 @@ pub enum ModuleHit {
 /// `.module` — one project card, the full width it is given.
 pub fn module_card(ui: &mut Ui, th: &Theme, m: &ModuleView) -> Option<ModuleHit> {
     let mut hit = None;
-    surround(ui, th, th.r, 0.0, |ui| {
+    // `.module` IS A CARD ON THE DESK, NOT A HOLE IN IT — `--case-face` inside
+    // an `--edge` hairline, which is what `src/skew.css` files it under with
+    // `.box`, `.console` and `.drawer`. `--paper` is the milled value and it
+    // made the rack read tan against the web's near-white.
+    surround_in(ui, th, th.r, 0.0, th.case_face, th.edge, |ui| {
         ui.set_width(ui.available_width());
         ui.spacing_mut().item_spacing.y = 9.0;
         // ── head: the mark, the name, the stamps, and the rule under them
@@ -958,10 +1221,15 @@ pub fn module_card(ui: &mut Ui, th: &Theme, m: &ModuleView) -> Option<ModuleHit>
         //    is laid last and ends up leftmost of the group.
         let mut x = head.right() - 16.0;
         for t in m.tags.iter().rev() {
-            x -= paint_stamp(p, th, pos2(x, cy), &t.to_uppercase()) + 6.0;
+            // AS THE PROJECT WRITES IT. A stamp is already caps-and-tracked
+            // type on a plate; upper-casing the string on top of that is the
+            // same emphasis applied twice, and it loses the one thing the
+            // tag carries that the plate does not — `dev` and `Portrait` are
+            // not the same kind of word, and the project said which is which.
+            x -= paint_stamp(p, th, pos2(x, cy), t) + 6.0;
         }
-        let f = if m.folder.is_empty() { "NO FOLDER".to_string() } else { m.folder.to_uppercase() };
-        paint_stamp(p, th, pos2(x, cy), &f);
+        let f = if m.folder.is_empty() { "NO FOLDER" } else { m.folder };
+        paint_stamp(p, th, pos2(x, cy), f);
         p.line_segment(
             [pos2(head.left() + 16.0, head.bottom() - 0.5), pos2(head.right() - 16.0, head.bottom() - 0.5)],
             Stroke::new(1.0, th.edge),

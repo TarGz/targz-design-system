@@ -57,14 +57,14 @@ mod switch;
 mod theme;
 
 pub use console::{
-    act, con_say, console, dim_readout, empty_rack, module_card, paint_act, paint_lens, paint_sel,
+    act, appwin, con_say, console, dim_readout, empty_rack, module_card, paint_act, paint_lens, paint_sel,
     paint_sel_list, paint_stamp, paint_surround, paint_well, port_strip, pull_line, pull_step, sel,
     sel_list, sel_list_size, slot_field, split_act, surround, version_readout, version_readout_h,
     ActStyle, Lens, ModuleHit, ModuleView, Part, PullHit, PullState, VerState, MODULE_MIN_W,
-    SEL_CUT, SEL_PAD, SEL_ROW,
+    APPWIN_BAR, SEL_CUT, SEL_PAD, SEL_ROW,
 };
 pub use fader::{fader, paint_fader, FaderState, FADER_SIZE};
-pub use frame::{grid_shapes, label, page_fill, paint_grid, panel_frame, section, well_frame, well_shadow};
+pub use frame::{grid_shapes, label, page_fill, paint_grid, panel_frame, section, stage, well_frame, well_shadow};
 pub use knob::{knob, paint_knob, KnobKind, KNOB_D, KNOB_SIZE};
 pub use icon::{paint_icon, paint_icon_lit, paint_icon_solid, Icon};
 pub use press::{

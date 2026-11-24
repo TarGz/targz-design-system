@@ -43,6 +43,36 @@ pub fn well_shadow(ui: &Ui, th: &Theme, rect: Rect) {
     );
 }
 
+/// `.stage` — THE GROUND A WHOLE PRODUCT IS PUT DOWN ON.
+///
+/// It is not the desk and it is not a panel. `.stage` is the page's own plate:
+/// `--card` with an `--edge-soft` hairline and 18px corners, and nothing else —
+/// no shadow, because a plate the page is printed on does not float. What sits
+/// on it is a product photographed, which is why the padding is as large as it
+/// is: 64px down the page and 40px across, so the thing has room around it and
+/// reads as an object rather than as a block of the layout.
+///
+/// IN THIS SKIN IT IS WARM AND THE PAGE AROUND IT IS COOL. That is the whole
+/// separation — temperature, not darkness. Dropping the page's value to force
+/// contrast is what ages a screen.
+pub fn stage<R>(ui: &mut Ui, th: &Theme, add: impl FnOnce(&mut Ui) -> R) -> R {
+    let fill = match th.skin {
+        crate::Skin::Light => th.pal.card.unwrap_or(th.case_face),
+        crate::Skin::Dark => Color32::from_rgb(0x10, 0x11, 0x13),
+    };
+    let edge = match th.skin {
+        crate::Skin::Light => th.pal.edge_soft.unwrap_or(th.edge),
+        crate::Skin::Dark => Color32::from_rgb(0x1e, 0x20, 0x24),
+    };
+    egui::Frame::none()
+        .fill(fill)
+        .stroke(Stroke::new(1.0, edge))
+        .rounding(Rounding::same(18.0))
+        .inner_margin(egui::Margin::symmetric(40.0, 64.0))
+        .show(ui, add)
+        .inner
+}
+
 /// Section title, after Skew's `.bay-cap`: a small accent jewel, then etched caps.
 pub fn section(ui: &mut Ui, th: &Theme, title: &str) {
     ui.horizontal(|ui| {

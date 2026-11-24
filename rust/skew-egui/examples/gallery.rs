@@ -20,7 +20,7 @@
 use egui::{vec2, Align, Color32, Layout, Rect, Sense, Ui, Vec2};
 use skew_egui::{
     btn, colored_btn, cut, dro, fader, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
-    console, page_fill, paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
+    appwin, stage, page_fill, paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
     act, channel, con_say, empty_rack, module_card, pull_line, sel, sel_list, sel_list_size,
     slot_field, version_readout, version_readout_h, ActStyle,
@@ -861,7 +861,14 @@ impl Gallery {
         // that desk, and the page around it stays plain. Every other section
         // on this page is the opposite way round, because every other section
         // is a part MOUNTED IN a face.
-        console(ui, &th, 18.0, |ui| {
+        // AND IT IS SHOWN THE WAY YOU MEET IT: a window, on a plate. Every
+        // other specimen on this page is a PART and is drawn as the part. The
+        // launcher is a PROGRAM, and a program is something you meet as a
+        // window on a desktop with the system's bar across the top of it —
+        // leaving that off does not make the specimen neutral, it makes it a
+        // panel, which is the one thing this object is not.
+        stage(ui, &th, |ui| {
+        appwin(ui, &th, "Targz Launchpad", 18.0, |ui| {
             ui.set_width(ui.available_width());
 
             // ══ ROW ONE: A LINE OF BOXES ════════════════════════════════════
@@ -1175,6 +1182,7 @@ impl Gallery {
                     other => self.live = format!("{name} · {other:?}"),
                 }
             }
+        });
         });
 
         self.lp_states(ui);

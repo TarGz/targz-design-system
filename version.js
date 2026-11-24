@@ -1,6 +1,17 @@
-export const version = '1.120.1';
+export const version = '1.121.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.121.0',
+    date: '2026-11-24',
+    changes: [
+      "THE EGUI GALLERY SHOWS THE LAUNCHER THE WAY YOU MEET IT: A WINDOW, ON A PLATE. Every other specimen on the page is a PART and is drawn as the part — a key is a key, a fader is a fader. The launcher is not a part, it is a PROGRAM, and a program is something you meet as a window on a desktop with the system's own bar across the top of it; leaving that off does not make the specimen neutral, it makes it a panel, which is the one thing this object is not. `appwin` is the bar — 30px, the three macOS dots at macOS's own #FF5F57 / #FEBC2E / #28C840 because a borrowed thing is borrowed exactly or not at all, the name beside them in the interface face at title case because our caps-and-tracking is how a PART is labelled — and `stage` is the `--card` plate it stands on. The desk now takes a `Rounding` rather than a radius so it runs flush inside the frame, which is what `.appwin{ overflow:hidden }` does where there is a clip to do it with.",
+      "A MODULE CARD IS A CARD ON THE DESK, NOT A HOLE CUT INTO IT. It was drawn with `surround`, which floors a part with `--paper` — the milled value, the darkest cream in the skin — while `src/skew.css` files `.module` with `.box`, `.console` and `.drawer` at `--case-face` inside an `--edge` hairline. The difference is one step of cream and it was the whole look of the rack: eight tan plates against the web's eight near-white ones, reading as holes punched in the desk rather than cards resting on it. The relief is identical either way, because `--shadow-card` is a white top edge and a soft dark bottom one and nothing else — a card on paper does not float.",
+      "AND A TAG IS PRINTED THE WAY THE PROJECT WRITES IT. The stamps were being upper-cased on the way to a plate that is already caps-and-tracked type, which is the same emphasis applied twice and loses the one thing the tag carries that the plate does not: `dev` and `Portrait` are not the same kind of word, and the project said which is which.",
+      "A GLOW IS A BLUR, AND A PAINTER HAS NO BLUR. `text-shadow:0 0 7px` fades the accent to nothing over seven pixels and never sits anywhere at a readable strength; eight hard copies of the word is what a painter has instead, and eight copies of an orange at low alpha over cream is not a soft orange — it is an ochre ring with an edge, because the blend walks the hue up as the coverage drops. Three goes at tuning the colour produced three yellows. The halo is gone from the port and the lit reading is carried by `--primary-deep` ink on a warm floor, which was always doing the work. `inset 0 0 14px` went the same way: a 14px blur inside a 30px box is not a ring, it is the whole box, and four strokes walking in from the edge reached the centre line and painted the peach plate the hole is meant to be the opposite of.",
+      "A SHADOW IN A ROUNDED HOLE TURNS THE CORNER WITH IT. The overhang and the far wall were straight segments stopped short of each end, so both finished in mid-air beside the curve — the one detail that makes a drawn object look printed rather than made. An inset shadow has no ends: it runs the whole way round and you see only the part the light reaches, so each is a rounded stroke on the hole's own curve, clipped to its band. The lip below the far wall came off with the same argument: in CSS the two sit a line's width apart and read as one edge, but as two rounded strokes their corners do not share a centre, so the arcs diverged and each bottom corner grew a white fork.",
+    ],
+  },
   {
     version: '1.120.1',
     date: '2026-11-24',

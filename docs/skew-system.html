@@ -1279,28 +1279,61 @@
 
   <!-- THE SPECIMENS ARE THE SHIPPED FILES, COPIED. Each app owns its own
        `icon.svg`; these are copies, because a static page cannot reach into
-       three other repositories. `docs/APP-ICONS.md` says where each one lives
-       and how to refresh them — a copy that goes stale is the known cost here,
-       and the alternative was inlining nine thousand characters of traced path
-       into this file. -->
+       three other repositories. `docs/APP-ICONS.md` says where each lives and
+       how to refresh them.
+
+       THEY GO STRAIGHT INTO THE STAGE. `.stage` is already a centred flex row
+       with its own gaps and its own plate — wrapping them in a `.box` with the
+       background turned off fights all three and leaves the specimens adrift
+       in a large empty rectangle. -->
   <div class="stage">
-    <div class="box" style="display:flex; gap:34px; align-items:flex-end; background:none; border:0; box-shadow:none;">
-      <figure style="margin:0; text-align:center;">
-        <img src="icons/launchpad.svg" width="128" height="128" alt="Targz Launchpad">
-        <img src="icons/launchpad.svg" width="32" height="32" alt="" style="display:block; margin:14px auto 0;">
-        <figcaption class="stage-note" style="position:static; margin-top:10px;">LAUNCHPAD</figcaption>
-      </figure>
-      <figure style="margin:0; text-align:center;">
-        <img src="icons/terminass.svg" width="128" height="128" alt="Terminass">
-        <img src="icons/terminass.svg" width="32" height="32" alt="" style="display:block; margin:14px auto 0;">
-        <figcaption class="stage-note" style="position:static; margin-top:10px;">TERMINASS</figcaption>
-      </figure>
-      <figure style="margin:0; text-align:center;">
-        <img src="icons/plotter.svg" width="128" height="128" alt="Pen Plotter Control">
-        <img src="icons/plotter.svg" width="32" height="32" alt="" style="display:block; margin:14px auto 0;">
-        <figcaption class="stage-note" style="position:static; margin-top:10px;">PLOTTER</figcaption>
-      </figure>
-    </div>
+    <div class="stage-note">the three, at 128 and at the size the dock uses</div>
+    <figure style="margin:0; display:flex; flex-direction:column; align-items:center;">
+      <img src="icons/launchpad.svg" width="128" height="128" alt="Targz Launchpad">
+      <img src="icons/launchpad.svg" width="32" height="32" alt="" style="margin-top:16px;">
+      <figcaption style="font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2); margin-top:12px;">Launchpad</figcaption>
+    </figure>
+    <figure style="margin:0; display:flex; flex-direction:column; align-items:center;">
+      <img src="icons/terminass.svg" width="128" height="128" alt="Terminass">
+      <img src="icons/terminass.svg" width="32" height="32" alt="" style="margin-top:16px;">
+      <figcaption style="font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2); margin-top:12px;">Terminass</figcaption>
+    </figure>
+    <figure style="margin:0; display:flex; flex-direction:column; align-items:center;">
+      <img src="icons/plotter.svg" width="128" height="128" alt="Pen Plotter Control">
+      <img src="icons/plotter.svg" width="32" height="32" alt="" style="margin-top:16px;">
+      <figcaption style="font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2); margin-top:12px;">Plotter</figcaption>
+    </figure>
+  </div>
+
+  <!-- AND EACH MARK AT THE SIZE THAT BREAKS IT. The tray glyph sits beside its
+       own icon rather than in a section of its own: the only thing worth
+       saying about it is how far it had to move from the icon to stay legible,
+       and you cannot see that unless the two are in one eyeline. The lower row
+       is each icon put through a straight reduction to 36 — it is the
+       argument, not an illustration of it. -->
+  <div class="stage">
+    <div class="stage-note">the menu bar &middot; and why it is not the icon made small</div>
+    <figure style="margin:0; display:flex; flex-direction:column; align-items:center;">
+      <img src="icons/tray-launchpad.svg" width="72" height="72" alt="Launchpad tray glyph">
+      <img src="icons/launchpad.svg" width="36" height="36" alt="Launchpad icon reduced to 36"
+           style="margin-top:22px;">
+      <figcaption style="font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2); margin-top:12px;">Launchpad</figcaption>
+      <figcaption style="font-family:var(--font); font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-top:6px;">tray &middot; then the icon at 36</figcaption>
+    </figure>
+    <figure style="margin:0; display:flex; flex-direction:column; align-items:center;">
+      <img src="icons/tray-terminass.svg" width="72" height="72" alt="Terminass tray glyph">
+      <img src="icons/terminass.svg" width="36" height="36" alt="Terminass icon reduced to 36"
+           style="margin-top:22px;">
+      <figcaption style="font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2); margin-top:12px;">Terminass</figcaption>
+      <figcaption style="font-family:var(--font); font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-top:6px;">tray &middot; then the icon at 36</figcaption>
+    </figure>
+    <figure style="margin:0; display:flex; flex-direction:column; align-items:center;">
+      <img src="icons/tray-plotter.svg" width="72" height="72" alt="Plotter tray glyph">
+      <img src="icons/plotter.svg" width="36" height="36" alt="Plotter icon reduced to 36"
+           style="margin-top:22px;">
+      <figcaption style="font-family:var(--font); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-2); margin-top:12px;">Plotter</figcaption>
+      <figcaption style="font-family:var(--font); font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-top:6px;">tray &middot; then the icon at 36</figcaption>
+    </figure>
   </div>
 
   <table class="spec">
@@ -1343,6 +1376,16 @@
             radiused by a stroke of their own ink. What they share is <b>finish</b>, not
             construction — no sharp vertex anywhere, because a needle-pointed triangle beside a
             185px squircle is the single thing that reads as unfinished.</td>
+      </tr>
+      <tr>
+        <td>the tray glyph</td>
+        <td>A menu-bar glyph is <b>not the icon reduced</b>. Put the launcher's three sheets
+            through a straight reduction to 36 and their gaps land under a pixel: they merge into
+            one blob and the thin trailing edges break off it entirely — the third specimen above
+            is that reduction, at the size it is actually used. The tray file is the same idea
+            drawn for a size where only three or four strokes fit. Black with alpha and nothing
+            else, because macOS treats it as a template and inverts it for the dark bar, so any
+            colour in the file is thrown away.</td>
       </tr>
       <tr class="trap">
         <td>rules written before the drawings</td>

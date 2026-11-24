@@ -1,0 +1,17 @@
+<!-- The menu-bar glyph for Terminass: the app icon's mark, REDRAWN for 36 pixels.
+
+     It is not the icon scaled down. At this size the gaps inside the mark land
+     under a pixel, so a straight reduction merges the parts and drops the thin
+     ones off entirely. A tray glyph is the same IDEA at a size where only
+     three or four strokes fit.
+
+     Black with alpha, because macOS treats a menu-bar image as a template and
+     inverts it for the dark bar - any colour in here is thrown away.
+
+     `tray.png` is built from this file - see targz-design-system/docs/APP-ICONS.md. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+  <g fill="none" stroke="#000000" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="9,11 16.5,18 9,25"/>
+    <line x1="21" y1="25" x2="28" y2="25"/>
+  </g>
+</svg>

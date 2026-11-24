@@ -1,6 +1,14 @@
-export const version = '1.121.2';
+export const version = '1.121.3';
 
 export const CHANGELOG = [
+  {
+    version: '1.121.3',
+    date: '2026-11-24',
+    changes: [
+      "THE MENU BAR IS IN THE ICON SECTION NOW, AND IT IS THREE COLUMNS RATHER THAN ONE. Each app shows its tray glyph over its own icon reduced to 36, so the rule — a menu-bar glyph is not the icon made small — is demonstrated three times instead of asserted once, and you can watch each mark fail in its own way. The launcher's is the LOGO ITSELF, cropped to its own bounds: three attempts at redrawing it for 36 all threw something away, and none of them was necessary, because the mark survives that size intact. What made it look like it could not was a trace carrying the plate's white rim as a scatter of thin arcs, which inflated the bounding box by half and shrank the real drawing to fit around junk. `-t 12000` on the trace, and there is no second drawing to keep in step with the first.",
+      "AND THE SPECIMENS GO STRAIGHT INTO `.stage`. They were wrapped in a `.box` with its background, border and shadow turned off and its own flexbox on top — which fights all three of the things `.stage` already is (a centred flex row, with gaps, on a plate) and left the icons adrift in two large empty rectangles with their captions wrapping onto three lines. A part of this system that has to be switched off to be used is being used wrong.",
+    ],
+  },
   {
     version: '1.121.2',
     date: '2026-11-24',

@@ -137,17 +137,35 @@ that in `scale(0.5)` to land in the 1024 canvas.
 
 One `icon.svg` per app, in the app's own repo, 1024×1024. The PNG and the
 `.icns` are built from it and are not edited by hand — if a corner is wrong, it
-is wrong in the SVG. `scratchpad/icons/build_icons.sh` is the build; it renders
-the 1024 master with `qlmanage` because `rsvg-convert` is not installed, then
-`sips` + `iconutil` for the rest.
+is wrong in the SVG. `tools/build-app-icons.sh` in this repo is the build:
+
+```bash
+tools/build-app-icons.sh <icon.svg> <out.png> [out.icns]
+```
+
+It renders a 1024 master with `magick -background none`, then every size off
+that master. **Never `qlmanage` or `sips`** — both drop the alpha channel and
+flatten the corners onto white.
+
+### The corners must stay transparent
+
+An icon handed to the window system *at runtime* — eframe's
+`ViewportBuilder::with_icon`, Electron's `dock.setIcon` — is shown exactly as
+given. macOS masks the `.icns` in a bundle, and only that. So a PNG flattened
+onto white looks right in Finder and Launchpad, and shows a white square behind
+the curve in the Dock. That is the one failure this pipeline exists to prevent.
 
 Where each app wants them:
 
-| app | png | icns |
+| app | repo | build |
 |---|---|---|
-| Targz Launchpad | `icon.png` | `icon.icns` |
-| Terminass | `assets/icon.png` | `assets/Terminass.icns` |
-| Pen Plotter Control | `app/icon.png`, `build/icon.png` | `build/icon.icns` |
+| Targz Launchpad | `targz-launchpad2` | `build-app-icons.sh icon.svg icon.png icon.icns` |
+| Terminass | `Terminass` | `build-app-icons.sh assets/icon.svg assets/icon.png assets/Terminass.icns` |
+| Pen Plotter Control | `TargzPenPlotterCtrl` | `build-app-icons.sh icon.svg app/icon.png build/icon.icns`, then copy `app/icon.png` to `build/icon.png` |
+
+Terminass also ships `assets/icon-window.png`, built by its own
+`assets/make_icon.py`: an inset plate with its own corners and shadow, for the
+icon it sets at runtime. Its `icon.png` is full bleed and feeds the `.icns`.
 
 ---
 
@@ -155,6 +173,10 @@ Where each app wants them:
 
 At 32px, with the others beside it:
 
+0. `magick icon.png -format "%[pixel:p{0,0}]\n" info:` must print
+   `srgba(0,0,0,0)`. White there means the render flattened. The gallery in
+   `docs/skew-system.html` draws the SVGs, not the PNGs, so no amount of
+   looking at it catches this.
 1. Is there any white between the icon and its neighbours? Then something in
    the file is still drawing a margin, a corner or a shadow that macOS wants to
    draw itself.

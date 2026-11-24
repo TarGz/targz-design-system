@@ -1,6 +1,14 @@
-export const version = '1.122.1';
+export const version = '1.122.2';
 
 export const CHANGELOG = [
+  {
+    version: '1.122.2',
+    date: '2026-11-24',
+    changes: [
+      "THE PIPELINE FLATTENED EVERY ICON ONTO WHITE AND THE GALLERY COULD NOT SEE IT. `qlmanage`, which this document named as the renderer because `rsvg-convert` was not installed, drops the alpha channel: every app PNG built from an SVG came out with opaque white corners. macOS masks the `.icns` in a bundle, so Finder and Launchpad looked right and the fault stayed hidden until an icon was handed to the window system at runtime — eframe's `with_icon`, Electron's `dock.setIcon` — which shows it exactly as given. Targz Launchpad's dock tile was a rounded plate inside a white square.",
+      "`tools/build-app-icons.sh <icon.svg> <out.png> [out.icns]` replaces the script that lived in a scratchpad and is gone. It renders a 1024 master with `magick -background none` and takes every size off that master; `qlmanage` and `sips` are named in it as the two commands that must never touch an icon. `docs/APP-ICONS.md` carries the rule it was missing — the corners of a runtime icon must be transparent, and only the `.icns` is masked — and the checking list opens with the test that catches it, which is that the built PNG reads alpha 0 at pixel 0,0. The gallery draws the SVGs, never the PNGs, so no amount of looking at it would have shown this.",
+    ],
+  },
   {
     version: '1.122.1',
     date: '2026-11-24',

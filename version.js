@@ -1,6 +1,14 @@
-export const version = '1.121.3';
+export const version = '1.122.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.122.0',
+    date: '2026-11-24',
+    changes: [
+      "AN APP ICON IS FULL BLEED, AND THE RULE THAT SAID OTHERWISE WAS THE BUG. macOS 26 masks the icon and draws its own shadow, so art arriving with a 100px inset, its own squircle and its own `feDropShadow` is a smaller icon sitting on a WHITE PLATE the system puts behind it. `docs/APP-ICONS.md` had all three written down as virtues — the margin \"is where the shadow falls\", `rx` at 22.5% of the width, a white rim at a fifth that \"does most of the work\" — while a bug was already filed against the icons for exactly that white border. Everything the system supplies comes out: the colour runs edge to edge across the whole 1024, and the mark is scaled by `1024/824` about the centre so it keeps the size it had relative to the plate it used to sit in.",
+      "It is a contract and not a style: on an older macOS the same file renders as a square tile, because nothing is left in it to round the corners. The page's traps row now carries this as the third rule invented ahead of the work and got wrong, beside a hue per app and a mark is never filled — and the checking list asks the one question that would have caught it, which is whether there is any white between an icon and its neighbours.",
+    ],
+  },
   {
     version: '1.121.3',
     date: '2026-11-24',

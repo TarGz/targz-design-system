@@ -11,23 +11,38 @@ away. What follows is what the three icons actually do.
 
 ---
 
-## The plate
+## The plate — full bleed
 
-One rounded square, on the 1024 canvas Apple asks for, inset so the shadow has
-somewhere to fall:
-
-```
-x=100  y=100  w=824  h=824  rx=185.4
+```xml
+<svg width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="url(#g)"/>
 ```
 
-`rx` is **22.5% of the width**. That is the figure, not a look: below about 20%
-the corner reads as a square with the edges knocked off, above about 25% it
-starts to read as a pill, and the macOS squircle sits in between. Every icon
-uses the same one, so a row of them shares a silhouette.
+**No corners, no shadow, no margin of our own.** macOS 26 masks the icon and
+draws its own shadow. Art that arrives with a 100px inset, its own squircle and
+its own `feDropShadow` is a smaller icon sitting on a **white plate** the system
+puts behind it — which is exactly the bug that was filed against these icons
+after the first version of this file told everyone to draw them that way.
 
-**It is inset by 100 on every side.** The 824 box is the icon; the 100 of
-margin is where the shadow goes. An icon drawn edge to edge has to have its
-shadow clipped, and a clipped shadow is a grey line.
+So everything the system supplies comes out:
+
+| was | now |
+|---|---|
+| `x=100 y=100 w=824 h=824` | the whole 1024 |
+| `rx=185.4` (22.5% of the width) | nothing — the system masks |
+| `feDropShadow dy=20 stdDeviation=15` | nothing — the system shadows |
+| a white rim at 20%, 4 wide | nothing — it sat on the edge the mask eats |
+
+**The mark grows with the plate.** It used to be measured against the 824 box,
+so it is scaled by `1024/824` about the centre and keeps the size it had
+relative to its ground:
+
+```xml
+<g transform="translate(512,512) scale(1.24272) translate(-512,-512)">
+```
+
+This is the macOS 26 contract, not a style. On an older macOS the same file
+renders as a square tile, because there is nothing there to round it.
 
 ---
 
@@ -35,48 +50,27 @@ shadow clipped, and a clipped shadow is a grey line.
 
 ```xml
 <linearGradient id="g" gradientUnits="userSpaceOnUse"
-                x1="100" y1="100" x2="924" y2="924">
+                x1="0" y1="0" x2="1024" y2="1024">
   <stop offset="0" stop-color="#ffda6b"/>
   <stop offset="1" stop-color="#de920d"/>
 </linearGradient>
 ```
 
 The diagonal, never straight down: a vertical ramp reads as a cylinder, the
-diagonal reads as a flat plate lit from up and to the left, which is where
-every other light in this system comes from.
+diagonal reads as a flat plate lit from up and to the left, which is where every
+other light in this system comes from.
 
-**Every app gets the same one, and the mark does the telling apart.** The
-earlier draft of this file gave each app its own step along a warm family —
-orange, mid, amber — and three steps of one hue at dock size are not three
-colours, they are three near-misses of the same colour. One plate reads as a
-suite, and then the drawing has to do its own work instead of leaning on a
-tint. If a drawing only works because its plate is a different orange from the
-one next to it, the drawing is not finished.
+**Every app gets the same one, and the mark does the telling apart.** An earlier
+draft gave each app its own step along a warm family — orange, mid, amber — and
+three steps of one hue at dock size are not three colours, they are three
+near-misses of the same colour. One plate reads as a suite, and then the drawing
+has to do its own work instead of leaning on a tint.
 
 `gradientUnits="userSpaceOnUse"` is not optional. Without it the ramp is
-relative to whatever shape fills with it, so a small shape — a hole in a knob,
-a counter in a letter — samples the whole ramp inside itself and comes out a
-different colour from the plate behind it. In user space every shape samples
-the one ramp, and a hole is invisible because it *is* the plate.
-
----
-
-## The shadow and the rim
-
-```xml
-<filter id="s" x="-20%" y="-20%" width="140%" height="140%">
-  <feDropShadow dx="0" dy="20" stdDeviation="15" flood-opacity="0.3"/>
-</filter>
-```
-
-Straight down, never offset sideways. The filter region has to be grown or the
-blur is cut off at the edge of the box.
-
-Then the same rounded rect again, no fill, `stroke="#ffffff"
-stroke-opacity="0.20" stroke-width="4"`. It is one line and it does most of the
-work: without it the plate ends at the dock background with nothing happening.
-White at a fifth, not a lighter version of the hue — a hue-tinted rim reads as
-a border, a white one reads as light.
+relative to whatever shape fills with it, so a small shape — a hole in a knob, a
+counter in a letter — samples the whole ramp inside itself and comes out a
+different colour from the plate behind it. In user space every shape samples the
+one ramp, and a hole is invisible because it *is* the plate.
 
 ---
 
@@ -156,8 +150,10 @@ Where each app wants them:
 
 At 32px, with the others beside it:
 
-1. Is the silhouette the same as its neighbours? If one corner looks tighter,
-   `rx` is not 22.5%.
+1. Is there any white between the icon and its neighbours? Then something in
+   the file is still drawing a margin, a corner or a shadow that macOS wants to
+   draw itself.
 2. Cover the other two. Is the mark still about *this* app?
-3. Is the lit top edge there?
-4. Does any vertex look sharp?
+3. Does any vertex look sharp?
+4. Does the mark sit at the same scale as its neighbours', or is one of them
+   still measured against the old 824 box?

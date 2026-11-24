@@ -1339,12 +1339,14 @@
   <table class="spec">
     <tbody>
       <tr>
-        <td>the plate</td>
-        <td><code>x=100 y=100 w=824 h=824 rx=185.4</code> on the 1024 canvas. <code>rx</code> is
-            <b>22.5% of the width</b> — below about 20% the corner reads as a square with its edges
-            knocked off, above about 25% it starts to read as a pill, and the macOS squircle sits
-            between. The 100 of margin is not padding: it is where the shadow falls, and an icon
-            drawn edge to edge has its shadow clipped, which is a grey line.</td>
+        <td>full bleed</td>
+        <td>No corners, no shadow, no margin of our own: macOS 26 masks the icon and draws its
+            own shadow, so art that arrives with a 100px inset, its own squircle and its own
+            <code>feDropShadow</code> is a smaller icon sitting on a <b>white plate the system
+            puts behind it</b>. The colour runs edge to edge across the whole 1024, and the mark
+            is scaled by <code>1024/824</code> about the centre so it keeps the size it had
+            against the plate it used to sit in. On an older macOS the same file renders as a
+            square tile, because there is nothing there to round it.</td>
       </tr>
       <tr>
         <td>one fill, every app</td>
@@ -1361,13 +1363,6 @@
             a counter in a letter samples the whole ramp inside itself and comes out a different
             colour from the plate behind it. In user space every shape samples the one ramp, and a
             hole is invisible because it <b>is</b> the plate.</td>
-      </tr>
-      <tr>
-        <td>shadow and rim</td>
-        <td><code>feDropShadow dy=20 stdDeviation=15 opacity=.3</code>, straight down, in a filter
-            region grown to 140% or the blur is cut off at the edge of the box. Then the same rect
-            again with <code>stroke:#fff</code> at <b>.20</b>, 4 wide. One line, and it does most of
-            the work — a hue-tinted rim reads as a border, a white one reads as light.</td>
       </tr>
       <tr>
         <td>the mark</td>
@@ -1390,10 +1385,13 @@
       <tr class="trap">
         <td>rules written before the drawings</td>
         <td>The first version of <code>docs/APP-ICONS.md</code> invented its rules ahead of the
-            work and produced a set that had to be thrown away. Two are kept on record as mistakes:
-            <b>a hue per app</b>, which at dock size is three near-misses of one colour; and
+            work and produced a set that had to be thrown away. Three are kept on record as
+            mistakes: <b>a hue per app</b>, which at dock size is three near-misses of one colour;
             <b>a mark is never filled</b>, which deleted the one part of the launcher's drawing
-            that carried its meaning. The file is written after the work now.</td>
+            that carried its meaning; and <b>the 100px margin</b>, written down as a virtue — "the
+            margin is where the shadow falls" — which is the thing macOS 26 puts a white plate
+            behind. That one was filed as a bug against the icons while the file was still
+            recommending it.</td>
       </tr>
       <tr class="trap">
         <td>redrawing a mark you already have</td>

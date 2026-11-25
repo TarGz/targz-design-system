@@ -336,22 +336,44 @@ pub fn port_strip(ui: &mut Ui, th: &Theme, port: u16, live: bool) -> egui::Respo
         // read as LIT rather than as merely coloured. A warm halo stacked
         // behind cold ink instead just fills the gaps between the letters,
         // which is a highlighter pen and not a lamp.
-        let ink = if live { th.primary_deep } else { th.ink_2 };
+        // THE LIT INK IS THE SKIN'S OWN LAMP. The dark strip has been a blue
+        // well since it was written — `--run-lit` on `--run-fill`, the colour
+        // of a thing that is RUNNING — and the warm value belongs to the light
+        // skin, where the accent is what marks a live control. Painting the
+        // light skin's orange into the dark well would be a second lamp in a
+        // room that already has one.
+        let ink = if live {
+            match th.skin {
+                crate::Skin::Light => th.primary_deep,
+                crate::Skin::Dark => th.pal.run_lit,
+            }
+        } else {
+            th.ink_2
+        };
         paint_icon(p, Icon::Ext, pos2(rect.left() + 16.0, cy), 12.0, 1.8, ink, 0.0);
         let txt = if port > 0 { format!("localhost:{port}") } else { "PORT ASSIGNED ON LAUNCH".into() };
         let at = pos2(rect.left() + 30.0, cy - word(p, &txt, 11.0, 0.04, ink).rect.height() / 2.0);
         // `text-shadow:0 0 7px color-mix(--primary 70%, transparent)` as eight
         // offsets of ONE ring, which is what a painter with no blur has. Eight
         // compounding passes reach 70% at 36 each.
-        // AND THERE IS NO HALO, BECAUSE A PAINTER CANNOT MAKE ONE. `text-shadow:
-        // 0 0 7px` is a BLUR: the accent fades to nothing over seven pixels and
+        // THE HALO IS THE DARK SKIN'S AND ONLY THE DARK SKIN'S. `text-shadow:
+        // 0 0 7px` is a BLUR — the lamp fades to nothing over seven pixels and
         // never sits anywhere at a readable strength. Eight hard copies of the
-        // word is what a painter has instead, and eight copies of an orange at
-        // low alpha over cream is not a soft orange — it is an ochre ring with
-        // an edge, because the blend walks the hue up as the coverage drops.
-        // Three attempts at tuning it produced three yellows. The lit reading
-        // is carried by the ink and the warm floor, which is enough: a glow
-        // that has to be apologised for is not a glow.
+        // word is what a painter has instead, and that works over near-black,
+        // where every copy only ever adds light; over cream it does not,
+        // because the blend walks the hue up as the coverage drops and eight
+        // passes of an orange come out an ochre ring with an edge. So the
+        // light skin carries its lit reading in the ink and the warm floor,
+        // which were always doing the work, and the dark skin keeps its glow.
+        if live && th.skin == crate::Skin::Dark {
+            let halo = Color32::from_rgba_unmultiplied(
+                th.pal.run_lit.r(), th.pal.run_lit.g(), th.pal.run_lit.b(), 36);
+            for k in 0..8 {
+                let t = k as f32 * std::f32::consts::FRAC_PI_4;
+                let g = word(p, &txt, 11.0, 0.04, halo);
+                p.galley(at + vec2(1.6 * t.cos(), 1.6 * t.sin()), g, halo);
+            }
+        }
         let g = word(p, &txt, 11.0, 0.04, ink);
         p.galley(at, g, ink);
         // AND OPEN IS LIT BY THE SAME LAMP, AT THE SAME VALUE. Its own rule
@@ -361,10 +383,21 @@ pub fn port_strip(ui: &mut Ui, th: &Theme, port: u16, live: bool) -> egui::Respo
         // light does not reach. It is the strip's colour and the strip's glow,
         // exactly; it stays the smaller, wider-tracked word, and that is what
         // makes it a label.
+        // OPEN: LIT BY THE SAME LAMP IN THE LIGHT SKIN, A QUIETER STEP OF IT IN
+        // THE DARK. `.port span:last-child` is `color-mix(--run-lit 55%, #0b0b0d)`
+        // with the shadow off — written for the dark well, where OPEN is a
+        // label beside a glowing address. In the light skin that left a cold
+        // grey word inside a warm hole: the one part of the strip the light
+        // does not reach. It stays the smaller, wider-tracked word either way,
+        // and that is what makes it a label.
         if live {
-            let g = word(p, "OPEN", 9.0, 0.1, ink);
+            let col = match th.skin {
+                crate::Skin::Light => ink,
+                crate::Skin::Dark => mix(hex(0x0B0B0D), th.pal.run_lit, 0.55),
+            };
+            let g = word(p, "OPEN", 9.0, 0.1, col);
             let at = pos2(rect.right() - 10.0 - g.rect.width(), cy - g.rect.height() / 2.0);
-            p.galley(at, g, ink);
+            p.galley(at, g, col);
         }
     }
     resp
@@ -385,20 +418,30 @@ pub fn port_strip(ui: &mut Ui, th: &Theme, port: u16, live: bool) -> egui::Respo
 /// pool. What tells you the server is up is the address glowing out of the
 /// hole — not the hole being orange.
 fn paint_port_hole(p: &egui::Painter, th: &Theme, rect: Rect, hover: bool) {
-    // THE LAMP IS `--primary-deep`, NOT `--primary`. 255,106,0 is orange at
-    // full strength and YELLOW laid thin over cream — every low-alpha pass of
-    // it walks the hue up, so a bloom and a halo built out of it end up a
-    // yellow smear around an orange word. The deep value stays orange all the
-    // way down to nothing, which is the only thing a glow is made of.
-    let acc = th.primary_deep;
+    let dark = th.skin == crate::Skin::Dark;
+
+    // THE LAMP IS THE SKIN'S OWN, AND IN THE LIGHT SKIN IT IS `--primary-deep`
+    // AND NOT `--primary`. 255,106,0 is orange at full strength and YELLOW
+    // laid thin over cream — every low-alpha pass walks the hue up, so a bloom
+    // built out of it ends a yellow smear. The deep value stays orange all the
+    // way down to nothing, which is the only thing a glow is made of. The dark
+    // well's lamp is `--run`, the blue it has always been.
+    let acc = if dark { th.pal.run } else { th.primary_deep };
     let warm = |a: f32| Color32::from_rgba_unmultiplied(
         acc.r(), acc.g(), acc.b(), a.clamp(0.0, 255.0) as u8);
 
-    // the floor — `--paper` under a 3% → 9% wash of the lamp, brighter at the
-    // bottom because that is where light inside a slot pools
-    p.rect_filled(rect, Rounding::same(6.0), th.paper);
-    crate::paint::vgrad(p, rect.shrink(1.0), 5.0,
-        mix(th.paper, acc, 0.03), mix(th.paper, acc, 0.09));
+    // THE FLOOR IS THE ROOM WITH THE LAMP MIXED INTO IT, which is what `.port`
+    // says in both skins — `color-mix(--run-fill 7%, #06080b)` to `11%,
+    // #0c0e12` in the dark, and the same two steps of the accent into `--paper`
+    // in the light. Brighter at the bottom either way, because that is where
+    // light inside a slot pools.
+    let (floor_a, floor_b) = if dark {
+        (mix(hex(0x06080B), th.pal.run_fill, 0.07), mix(hex(0x0C0E12), th.pal.run_fill, 0.11))
+    } else {
+        (mix(th.paper, acc, 0.03), mix(th.paper, acc, 0.09))
+    };
+    p.rect_filled(rect, Rounding::same(6.0), floor_b);
+    crate::paint::vgrad(p, rect.shrink(1.0), 5.0, floor_a, floor_b);
 
     // `inset 0 0 14px` — AND A 14px BLUR INSIDE A 30px BOX IS NOT A RING, IT
     // IS THE WHOLE BOX. Four strokes walking inward from the edge was the
@@ -407,11 +450,15 @@ fn paint_port_hole(p: &egui::Painter, th: &Theme, rect: Rect, hover: bool) {
     // the peach plate this is supposed to be the opposite of. A painter has no
     // blur, so what is left of that shadow is ONE pass just inside the cut —
     // the inner face catching the lamp, which is all of it you would see.
-    p.rect_stroke(
-        rect.shrink(1.5),
-        Rounding::same(4.5),
-        Stroke::new(2.0, warm(if hover { 22.0 } else { 13.0 })),
-    );
+    // the dark well is lit harder — `rgba(26,121,220,.12)` over near-black
+    // reads as a sheen, the same value over cream reads as paint
+    let lamp = match (dark, hover) {
+        (true, true) => 34.0,
+        (true, false) => 20.0,
+        (false, true) => 22.0,
+        (false, false) => 13.0,
+    };
+    p.rect_stroke(rect.shrink(1.5), Rounding::same(4.5), Stroke::new(2.0, warm(lamp)));
 
     // A SHADOW IN A ROUNDED HOLE TURNS THE CORNER WITH IT. These were straight
     // segments stopped 6px short of each end, so the lit top edge and the far
@@ -427,8 +474,15 @@ fn paint_port_hole(p: &egui::Painter, th: &Theme, rect: Rect, hover: bool) {
     // `inset 0 2px 4px rgba(0,0,0,.16)` — the panel's overhang cast down into
     // the cut. THIS IS THE ONE THING THAT SAYS SUNK, so it goes over the lamp
     // and not under it.
+    // `inset 0 2px 5px rgba(0,0,0,.9)` in the dark, `0 2px 4px rgba(0,0,0,.16)`
+    // in the light: the same cast, at the depth each room can carry.
     let top = band(rect.top() - 2.0, rect.top() + 6.0);
-    for (k, a) in [(1.2f32, 26u8), (2.4, 15), (3.8, 7)] {
+    let cast: &[(f32, u8)] = if dark {
+        &[(1.2, 150), (2.4, 95), (3.8, 45)]
+    } else {
+        &[(1.2, 26), (2.4, 15), (3.8, 7)]
+    };
+    for &(k, a) in cast {
         top.rect_stroke(
             rect.shrink(k), Rounding::same((6.0 - k).max(0.5)),
             Stroke::new(1.3, Color32::from_rgba_unmultiplied(0, 0, 0, a)),
@@ -436,8 +490,13 @@ fn paint_port_hole(p: &egui::Painter, th: &Theme, rect: Rect, hover: bool) {
     }
 
     // `inset 0 0 0 1px var(--edge-ctl)` — the hairline is on the INSIDE of the
-    // cut, and it is neutral: a warm one would read as an outline again.
-    p.rect_stroke(rect.shrink(0.5), Rounding::same(5.5), Stroke::new(1.0, th.edge_ctl));
+    // cut, and it is neutral: a warm one would read as an outline again. THE
+    // DARK WELL HAS NONE: its floor is five steps below the card and the cast
+    // shadow is almost opaque, so the cut is already unmistakable, and a ring
+    // round it would be a drawn line where there is a real edge.
+    if !dark {
+        p.rect_stroke(rect.shrink(0.5), Rounding::same(5.5), Stroke::new(1.0, th.edge_ctl));
+    }
 
     // `inset 0 -1px 0 rgba(255,255,255,.75)` — the far wall of the hole, and
     // ONLY that. The lip below it, `0 1px 0 rgba(255,255,255,.9)`, is the same
@@ -446,10 +505,12 @@ fn paint_port_hole(p: &egui::Painter, th: &Theme, rect: Rect, hover: bool) {
     // share a centre, so the arcs diverge and each bottom corner got a little
     // white fork in it. One pixel of extra relief is not worth a seam in the
     // one place the eye is already looking for the shape.
+    // `inset 0 -1px 0 rgba(255,255,255,.75)` in the light, `.05` in the dark —
+    // the far wall catches as much light as the room has to give it.
     let bot = band(rect.bottom() - 5.0, rect.bottom() + 1.0);
     bot.rect_stroke(
         rect.shrink(1.2), Rounding::same(4.8),
-        Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 255, 255, 191)),
+        Stroke::new(1.0, Color32::from_rgba_unmultiplied(255, 255, 255, if dark { 13 } else { 191 })),
     );
 }
 
@@ -689,7 +750,19 @@ pub fn slot_field(
         }
     }
     let left = rect.left() + if mark.is_some() { 32.0 } else { 11.0 };
-    let field = Rect::from_min_max(pos2(left, rect.top() + 5.0), pos2(rect.right() - 8.0, rect.bottom() - 5.0));
+    // A TEXT EDIT DRAWS FROM THE TOP OF THE RECT IT IS HANDED. Given the well
+    // inset by five, it put the line at the top of THAT box rather than on the
+    // well's centre line — so the typing sat a couple of pixels high while the
+    // mark beside it sat on the middle, which is half a line of disagreement in
+    // a row whose whole argument is that everything in it is one height. The
+    // rect is one row plus the edit's own 2px margin, centred on the well, so
+    // there is nowhere else for the line to go.
+    let row = ui.fonts(|f| f.row_height(&FontId::monospace(11.0)));
+    let half = (row + 4.0) / 2.0;
+    let field = Rect::from_min_max(
+        pos2(left, rect.center().y - half),
+        pos2(rect.right() - 8.0, rect.center().y + half),
+    );
     ui.put(
         field,
         egui::TextEdit::singleline(buf)
@@ -1200,11 +1273,22 @@ pub enum ModuleHit {
 /// `.module` — one project card, the full width it is given.
 pub fn module_card(ui: &mut Ui, th: &Theme, m: &ModuleView) -> Option<ModuleHit> {
     let mut hit = None;
-    // `.module` IS A CARD ON THE DESK, NOT A HOLE IN IT — `--case-face` inside
-    // an `--edge` hairline, which is what `src/skew.css` files it under with
-    // `.box`, `.console` and `.drawer`. `--paper` is the milled value and it
-    // made the rack read tan against the web's near-white.
-    surround_in(ui, th, th.r, 0.0, th.case_face, th.edge, |ui| {
+    // `.module` IS A CARD ON THE DESK, NOT A HOLE IN IT — in the LIGHT skin,
+    // `--case-face` inside an `--edge` hairline, which is what `src/skew.css`
+    // files it under with `.box`, `.console` and `.drawer`. `--paper` is the
+    // milled value and it made the rack read tan against the web's near-white.
+    //
+    // THE DARK CARD IS THE OTHER WAY ROUND AND ALWAYS WAS: `--paper` under the
+    // `--surround` frame. That is not an inconsistency, it is what the two
+    // rooms can carry — in the dark, a panel is lifted off the desk by a lit
+    // top edge and a shadow, and the fill is the darker value because light
+    // comes from the edges; in the light there is no such edge to light, so a
+    // card is told apart from the desk by being the PALER of the two.
+    let (fill, edge) = match th.skin {
+        crate::Skin::Light => (th.case_face, th.edge),
+        crate::Skin::Dark => (th.paper, th.edge_ctl),
+    };
+    surround_in(ui, th, th.r, 0.0, fill, edge, |ui| {
         ui.set_width(ui.available_width());
         ui.spacing_mut().item_spacing.y = 9.0;
         // ── head: the mark, the name, the stamps, and the rule under them

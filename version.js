@@ -1,6 +1,17 @@
-export const version = '1.122.3';
+export const version = '1.123.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.123.0',
+    date: '2026-11-25',
+    changes: [
+      "THE LIT PORT STRIP IS TWO DRAWINGS, NOT ONE TINTED TWO WAYS. `port_strip` and `paint_port_hole` had the light skin's recipe with the dark skin's colours poured into it: a warm floor mixed from `--paper`, a hairline round the cut, a shadow cast at light-room strengths. On near-black that reads as a pale box with a dim lamp somewhere behind it. The dark strip now takes `--run-fill` into its own two floor steps, loses the hairline — there is no lit edge to catch in a dark room — and casts at 150/95/45 where the light skin casts at 26/15/7, because on black the shadow is the only thing saying the strip is a hole at all.",
+      "AND THE HALO IS THE DARK SKIN'S AND ONLY THE DARK SKIN'S. `text-shadow:0 0 7px` is a blur, and a painter has no blur — eight hard copies of the word at low alpha is what it has instead. Over near-black every copy only ever adds light, so it reads as a glow; over cream the blend walks the hue up as the coverage drops and eight passes of an orange come out an ochre ring with an edge. So the light skin carries its lit reading in the ink and the warm floor, which were always doing the work, and the dark skin gets its glow back: `--run-lit` at 36, eight copies round a 1.6px ring. OPEN takes a dimmer step of the same lamp rather than the strip's full value.",
+      "THE FILTER LINE SITS ON THE WELL'S CENTRE. `slot_field` handed its `TextEdit` the well inset five from the top, and a `TextEdit` draws from the top of the rect it is given — so the typing sat a couple of pixels high while the mark beside it sat on the middle, which is half a line of disagreement in a row whose whole argument is that everything in it is one height. The rect is now one row plus the edit's own 2px margin, centred on the well, so there is nowhere else for the line to go.",
+      "A module card in the dark skin is `--paper` with the control edge, not the light skin's `--case-face`: in the light a card is told from the desk by being the paler of the two, and in the dark that same move made it the one bright slab on a black board.",
+      "`tokens.rs` is regenerated at Skew v1.122.1.",
+    ],
+  },
   {
     version: '1.122.3',
     date: '2026-11-24',

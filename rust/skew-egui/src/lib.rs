@@ -69,8 +69,9 @@ pub use frame::{grid_shapes, label, page_fill, paint_grid, panel_frame, section,
 pub use knob::{knob, paint_knob, KnobKind, KNOB_D, KNOB_SIZE};
 pub use icon::{paint_icon, paint_icon_lit, paint_icon_solid, Icon};
 pub use shell::{
-    frow, hint, paint_rail_item, paint_tab, rail, slot_row, statline, tab, RailItem, Tone,
-    FROW_LAB_W, RAIL_ROW_H, TAB_H,
+    frow, hint, paint_rail_item, paint_tab, paint_tab_ledge, paint_tabpane, rail, slot_row,
+    statline, tabbar, RailItem, Tab, TabKind, Tone, FROW_LAB_W, RAIL_ROW_H, TABBAR_H,
+    TABBAR_PAD_T, TAB_H, TAB_H_OFF,
 };
 pub use press::{
     backlit, chevron, icon_key, micro, paint_icon_key, sep, BACKLIT_SIZE, CHEV_SIZE, ICON_KEY_SIZE,

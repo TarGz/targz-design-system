@@ -17,10 +17,10 @@
 //! state of a part is on screen at once and can be compared without moving
 //! anything.
 
-use egui::{pos2, vec2, Align, Color32, Layout, Rect, Sense, Ui, Vec2};
+use egui::{pos2, vec2, Align, Align2, Color32, FontId, Layout, Rect, Sense, Ui, Vec2};
 use skew_egui::{
-    frow, hint, paint_rail_item, paint_tab, rail, slot_row, statline, tab, RailItem, Tone,
-    RAIL_ROW_H, TAB_H,
+    frow, hint, paint_rail_item, paint_tab, paint_tab_ledge, paint_tabpane, rail, slot_row,
+    statline, tabbar, RailItem, Tab, TabKind, Tone, RAIL_ROW_H, TABBAR_H, TAB_H, TAB_H_OFF,
     btn, colored_btn, cut, dro, fader, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
     appwin, stage, page_fill, paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
@@ -213,7 +213,7 @@ struct Gallery {
     /// are left after a ×, the two slot rows' buffers and the three-way.
     t_rail: usize,
     t_tab: usize,
-    t_tabs: Vec<String>,
+    t_tabs: Vec<(String, TabKind)>,
     t_find: String,
     t_key: String,
     t_agent: usize,
@@ -275,7 +275,11 @@ impl Gallery {
             chev_open: false,
             t_rail: 0,
             t_tab: 0,
-            t_tabs: vec!["Local Terminal".into(), "Contabo".into(), "NextDraw".into()],
+            t_tabs: vec![
+                ("Local Terminal".into(), TabKind::Local),
+                ("Contabo".into(), TabKind::Remote),
+                ("NextDraw".into(), TabKind::Remote),
+            ],
             t_find: String::new(),
             t_key: String::new(),
             t_agent: 1,
@@ -1425,27 +1429,43 @@ impl Gallery {
         });
         ui.add_space(24.0);
 
-        // ── the tabs ────────────────────────────────────────────────────────
-        label(ui, &th, "THE WINDOW TAB — × ON HOVER AND ON THE ONE THAT IS DOWN");
+        // ── the tab bar ─────────────────────────────────────────────────────
+        // THE BAR AND THE PANE ARE ONE SPECIMEN AND CANNOT BE POSED APART.
+        // A tab bar's whole claim is that the open tab and the pane below it
+        // are THE SAME SURFACE, and a row of tabs with nothing under them is
+        // a row of keys. So the pane is drawn first, the bar overlaps its top
+        // edge by a pixel, and the open tab lays the pane's own fill back
+        // across that overlap.
+        label(ui, &th, "THE TAB BAR \u{2014} THE OPEN TAB AND THE PANE ARE ONE SURFACE");
         ui.add_space(8.0);
-        // the lamps are the three semantic tokens, in order, and they are a
-        // POSE — see this method's own note
-        let lamps = [th.primary, th.ok_ink, th.no];
-        let mut close = None;
-        ui.horizontal(|ui| {
-            ui.spacing_mut().item_spacing.x = 4.0;
-            for i in 0..self.t_tabs.len() {
-                let name = self.t_tabs[i].clone();
-                let (r, x) = tab(ui, &th, &name, lamps[i % lamps.len()], self.t_tab == i, 170.0);
-                if r.clicked() && !x {
-                    self.t_tab = i;
-                }
-                if x {
-                    close = Some(i);
-                }
+        let tabs: Vec<Tab> = self
+            .t_tabs
+            .iter()
+            .map(|(n, k)| Tab { name: n.as_str(), kind: *k })
+            .collect();
+        let (picked, closed) = tabbar(ui, &th, &tabs, self.t_tab);
+        {
+            // the pane: one pixel up, under the bar, so the cut has something
+            // to be cut into
+            let w = ui.available_width();
+            let (pane, _) = ui.allocate_exact_size(vec2(w, 74.0), Sense::hover());
+            let pane = pane.translate(vec2(0.0, -1.0));
+            if ui.is_rect_visible(pane) {
+                paint_tabpane(ui.painter(), &th, pane);
+                let name = self.t_tabs.get(self.t_tab).map(|(n, _)| n.as_str()).unwrap_or("");
+                ui.painter().text(
+                    pos2(pane.left() + 18.0, pane.top() + 20.0),
+                    Align2::LEFT_TOP,
+                    format!("$ {name}"),
+                    FontId::monospace(11.5),
+                    th.pal.read,
+                );
             }
-        });
-        if let Some(i) = close {
+        }
+        if let Some(i) = picked {
+            self.t_tab = i;
+        }
+        if let Some(i) = closed {
             self.t_tabs.remove(i);
             self.t_tab = self.t_tab.min(self.t_tabs.len().saturating_sub(1));
             self.live = "TAB CLOSED".into();
@@ -1516,25 +1536,69 @@ impl Gallery {
         // PARITY.md 1 and 5: a gallery has to be able to show a state no
         // pointer is producing, which is the only way to see all of them at
         // once. These are the painters, with no Response anywhere near them.
-        label(ui, &th, "THE TAB, EVERY STATE \u{2014} RAISED · HOVER · HOVER ON THE \u{d7} · DOWN");
+        label(ui, &th, "THE TAB, EVERY STATE \u{2014} CLOSED · HOVER · OPEN · OPEN, ON THE \u{d7}");
         ui.add_space(8.0);
-        let (strip, _) = ui.allocate_exact_size(vec2(ui.available_width(), TAB_H), Sense::hover());
+        let (strip, _) =
+            ui.allocate_exact_size(vec2(ui.available_width(), TABBAR_H + 26.0), Sense::hover());
         if ui.is_rect_visible(strip) {
             let p = ui.painter();
-            for (i, (st, hot)) in [
-                (KeyState::Raised, false),
-                (KeyState::Hover, false),
-                (KeyState::Hover, true),
-                (KeyState::Pressed, false),
+            // the ledge and a stub of pane under it, so each posed tab is
+            // sitting in the thing it is cut into rather than floating
+            let ledge = Rect::from_min_size(strip.min, vec2(strip.width(), TABBAR_H));
+            let pane = Rect::from_min_max(
+                pos2(strip.left(), ledge.bottom() - 1.0),
+                pos2(strip.right(), strip.bottom()),
+            );
+            paint_tabpane(p, &th, pane);
+            paint_tab_ledge(p, &th, ledge);
+            let t = Tab { name: "Local Terminal", kind: TabKind::Local };
+            for (i, (on, st, hot)) in [
+                (false, KeyState::Raised, false),
+                (false, KeyState::Hover, false),
+                (true, KeyState::Raised, false),
+                (true, KeyState::Raised, true),
             ]
             .iter()
             .enumerate()
             {
-                let r = Rect::from_min_size(
-                    pos2(strip.left() + i as f32 * 176.0, strip.top()),
-                    vec2(170.0, TAB_H),
+                let h = if *on { TAB_H } else { TAB_H_OFF };
+                let r = Rect::from_min_max(
+                    pos2(strip.left() + 8.0 + i as f32 * 176.0, ledge.bottom() - h),
+                    pos2(strip.left() + 8.0 + i as f32 * 176.0 + 170.0, ledge.bottom()),
                 );
-                paint_tab(p, &th, r, "Local Terminal", th.primary, *st, *hot);
+                paint_tab(p, &th, r, &t, *on, *st, *hot);
+            }
+        }
+        ui.add_space(10.0);
+        // AND THE OTHER KIND, because the mark and the ink are the only thing
+        // that separates them and a specimen with one of two is half a part
+        label(ui, &th, "AND THE KIND \u{2014} LOCAL IS THE BLUE, REMOTE IS THE ORANGE");
+        ui.add_space(8.0);
+        let (kstrip, _) =
+            ui.allocate_exact_size(vec2(ui.available_width(), TABBAR_H + 26.0), Sense::hover());
+        if ui.is_rect_visible(kstrip) {
+            let p = ui.painter();
+            let ledge = Rect::from_min_size(kstrip.min, vec2(kstrip.width(), TABBAR_H));
+            let pane = Rect::from_min_max(
+                pos2(kstrip.left(), ledge.bottom() - 1.0),
+                pos2(kstrip.right(), kstrip.bottom()),
+            );
+            paint_tabpane(p, &th, pane);
+            paint_tab_ledge(p, &th, ledge);
+            for (i, (name, kind, on)) in [
+                ("Local Terminal", TabKind::Local, true),
+                ("Contabo", TabKind::Remote, false),
+                ("NextDraw", TabKind::Remote, false),
+            ]
+            .iter()
+            .enumerate()
+            {
+                let h = if *on { TAB_H } else { TAB_H_OFF };
+                let r = Rect::from_min_max(
+                    pos2(kstrip.left() + 8.0 + i as f32 * 176.0, ledge.bottom() - h),
+                    pos2(kstrip.left() + 8.0 + i as f32 * 176.0 + 170.0, ledge.bottom()),
+                );
+                paint_tab(p, &th, r, &Tab { name, kind: *kind }, *on, KeyState::Raised, false);
             }
         }
         ui.add_space(24.0);

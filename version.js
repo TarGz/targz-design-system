@@ -1,6 +1,18 @@
-export const version = '1.125.0';
+export const version = '1.126.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.126.0',
+    date: '2026-11-25',
+    changes: [
+      "THE EGUI TAB BAR IS THE SHEET'S TAB BAR NOW, AND `PARITY.md` CAN STOP SAYING DO NOT COPY. The crate had been drawing the first sketch for two versions: three pills of equal height, each with an identity jewel in it, floating over nothing. That is a row of keys. A tab bar's whole claim is that the open tab and the pane below it are THE SAME SURFACE — which a key that is down cannot make, because a key stands ON a surface and a tab is a thing the surface is PART OF. `tabbar`, `paint_tab`, `paint_tab_ledge` and `paint_tabpane` make it the same way the sheet does, which is one rectangle: the bar overlaps the pane by a pixel and the open tab lays the pane's own fill back across that overlap, painting out the line that would have closed its bottom. The baseline runs past every closed folder and stops dead at the open one.",
+      "AND THE OPEN FACE IS FLAT WHILE THE CLOSED ONES ARE NOT. A closed folder is three stops down a moulding — lit top, body, far wall — and the open one is the pane's own fill with no gradient at all, because a moulding running on into the pane would draw a seam exactly where the part exists to have none. Hovering a closed one does not LIGHTEN those three stops, it swaps them for the next surface up (`--plate` where the resting face has `--case`, `--case` where it has `--groove`): a folder coming forward is a folder nearer the lamp, and this language has a name for every step of that. Brightening by a percentage would have invented a surface it does not have. Heights are the sheet's: 34 open, 27 closed, 12 of room above them.",
+      "THE LEDGE IS A WINDOW ONTO THE ROOM, DRAWN WITH THE CRATE'S OWN RULER. `grid_shapes` at the ledge's own top-left, which is what `background-attachment:fixed` does on the sheet — the ruling shares its phase with whatever the ledge is cut into, so it reads as a hole and not as a patterned strip. Three falling lines under the top edge for `inset 0 2px 5px rgba(0,0,0,.28)`, and those are the only alphas written as numbers in this file now; the jewel's two went with the jewel.",
+      "`Icon::Server` — the one mark in this crate's set drawn rather than lifted, and the same two rack units `ICON.server` draws on the sheet. A tab has to say LOCAL or REMOTE and the set had only half of it: `Icon::Term` is the prompt and covers local, and the remote half had nothing. `TabKind` carries the answer and the ink: `--run-lit` and `--led-hot` in the dark, `--run` and `--primary-deep` in the light, because the lit step is what a readout is made of and the deep step is what survives on cream. ONE INK FOR THE WHOLE OPEN TAB — the mark, the name and the close — since a tab is one object, and an orange mark beside orange text beside a grey × is three objects that happen to be touching. A closed tab carries its mark in dim ink: the SHAPE already says the kind.",
+      "THE GALLERY POSES THE BAR WITH ITS PANE, because it cannot be posed without one. Two strips, both drawing a stub of pane under the ledge: one tab in four states (closed, hover, open, open with the × hot), then local and remote side by side, which is the only way to see the thing that separates them. The old strip posed four tabs over empty space, which showed everything about the part except the part.",
+      "`--id-1` … `--id-12` reach the crate as twelve `Palette` fields. The swatch CONTROL is still unported and `PARITY.md` has the row.",
+    ],
+  },
   {
     version: '1.125.0',
     date: '2026-11-25',

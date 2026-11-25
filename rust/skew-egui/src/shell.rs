@@ -9,15 +9,15 @@
 //!
 //! The web side is the source, as always: `src/skew.css`, under
 //! **TERMINASS'S PARTS**. No part here picks a COLOUR — every one comes off
-//! [`Theme`]. Two ALPHAS are written as numbers, both in [`paint_tab`]'s
-//! jewel, and both are `.jewel`'s own: the seating rim is `rgba(0,0,0,.55)`
-//! and the highlight is the same white [`paint_lens`] already puts on a lamp.
-//! An alpha is not a value the palette carries, which is why the fader's own
-//! hardware is the other exception PARITY.md already records.
+//! [`Theme`]. The ALPHAS that are written as numbers are all in
+//! [`paint_tab_ledge`]'s near wall — `inset 0 2px 5px rgba(0,0,0,.28)` read as
+//! three lines falling away. An alpha is not a value the palette carries,
+//! which is why the fader's own hardware is the other exception PARITY.md
+//! already records.
 
 use crate::console::{paint_lens, paint_well, Lens};
 use crate::icon::{paint_icon, Icon};
-use crate::key::{paint_key, paint_pkey_down, KeyState, KeyStyle};
+use crate::key::{KeyState, KeyStyle};
 use crate::theme::{mono, Theme};
 use egui::{pos2, vec2, Align2, Color32, FontId, Rect, Rounding, Sense, Stroke, Ui, Vec2};
 
@@ -117,98 +117,280 @@ pub fn rail(ui: &mut Ui, th: &Theme, items: &[RailItem], current: &mut usize) ->
     hit
 }
 
-// ── the window tab ──────────────────────────────────────────────────────────
+// ── the tab bar ────────────────────────────────────────────────────────────
 
-/// `.pkey.tab` — the height the interlocked bar already uses.
+/// `.tab.on` — the open folder, and the tallest thing on the bar.
 pub const TAB_H: f32 = 34.0;
+/// `.tabbar .tab:not(.on)` — a closed folder stands seven pixels shorter.
+pub const TAB_H_OFF: f32 = 27.0;
+/// `.tabbar` — `padding:12px 8px 0`. The room showing above the folders.
+pub const TABBAR_PAD_T: f32 = 12.0;
+/// The whole ledge: the room above the tabs plus the tallest tab.
+pub const TABBAR_H: f32 = TABBAR_PAD_T + TAB_H;
 
-/// Paint one tab. `lamp` is the session's identity colour, which is the HOST'S
-/// to choose — this crate has no identity ramp and is not going to invent one
-/// (`docs/PORTING.md`, "a categorical ramp, and it is one set, not three").
+/// What KIND of session a tab is — and it is a kind, not an identity.
 ///
-/// THE CLOSE MARK IS ABSENT UNTIL IT IS WANTED. A × on every tab is a row of
-/// marks saying "you may destroy this" on a bar you are reading for names. It
-/// shows on hover and on the tab that is down — the one you could mean.
-pub fn paint_tab(
-    p: &egui::Painter, th: &Theme, rect: Rect, name: &str, lamp: Color32, state: KeyState,
-    x_hot: bool,
-) {
-    let down = state == KeyState::Pressed;
-    if down {
-        // `.pkey.is-down` IS A WELL, NOT A LIT CAP — PARITY.md says so for the
-        // whole interlocked family, and a tab is one key of that bar.
-        // "" with the bar's own size: the legend is painted below, with the
-        // lamp and the close mark, because a tab's name is not centred.
-        paint_pkey_down(p, th, rect, "", 11.0);
-    } else {
-        paint_key(p, th, rect, "", &KeyStyle::new(th.card, th.ink_2), state);
+/// Terminass tells its hosts apart by a letter and a colour, which is an
+/// identity and belongs to the host. This is the other question: is the thing
+/// at the end of this tab THIS machine or another one. Two answers, so two
+/// marks and two colours, and no ramp is involved.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum TabKind {
+    /// `ICON.term` — the prompt. This machine.
+    Local,
+    /// `ICON.server` — two rack units. Somewhere else.
+    Remote,
+}
+
+impl TabKind {
+    fn icon(self) -> Icon {
+        match self {
+            TabKind::Local => Icon::Term,
+            TabKind::Remote => Icon::Server,
+        }
     }
-    let cy = rect.center().y + if down { 1.0 } else { -1.0 };
-    // the jewel: 8px, the session's own colour, seated by a rim
-    let c = pos2(rect.left() + 13.0, cy);
-    p.circle_filled(c, 4.0, lamp);
-    // the highlight paint_lens already puts on every lamp in this crate
-    p.circle_filled(c + vec2(-1.2, -1.4), 1.2, Color32::from_rgba_unmultiplied(255, 255, 255, 70));
-    // `.jewel` — `0 0 0 1px rgba(0,0,0,.55)`, the bead's seating rim. The
-    // light skin takes it off (`:is(.jewel, .pilot){ box-shadow:none }`),
-    // because on paper a black rim round a colour is dirt and not depth.
-    if th.skin == crate::Skin::Dark {
-        p.circle_stroke(c, 4.0, Stroke::new(0.8, Color32::from_rgba_unmultiplied(0, 0, 0, 140)));
+    /// THE LIT STEP, NOT THE FILL. `--run` and `--led` are what a large cap is
+    /// PAINTED IN and arrive muddy at 13px; `--run-lit` and `--led-hot` are
+    /// what a READOUT is made of, which is what a 11px name on a tab is. The
+    /// light skin takes the deep step of each instead, because on cream the
+    /// lit value is the one that disappears.
+    fn ink(self, th: &Theme) -> Color32 {
+        match (self, th.skin) {
+            (TabKind::Local, crate::Skin::Dark) => th.pal.run_lit,
+            (TabKind::Local, crate::Skin::Light) => th.pal.run,
+            (TabKind::Remote, crate::Skin::Dark) => th.pal.led_hot,
+            (TabKind::Remote, crate::Skin::Light) => th.primary_deep,
+        }
+    }
+}
+
+/// One tab on the bar.
+#[derive(Clone, Copy, Debug)]
+pub struct Tab<'a> {
+    pub name: &'a str,
+    pub kind: TabKind,
+}
+
+/// The surface a tab bar is cut into: `--plate` under `--rim` and `--groove`.
+///
+/// Paint this FIRST and let the bar overlap its top edge by a pixel — the cut
+/// is the whole mechanism and it needs something to be cut into.
+pub fn paint_tabpane(p: &egui::Painter, th: &Theme, rect: Rect) {
+    let fill = pane_fill(th);
+    p.rect_filled(rect, Rounding::same(th.r_mod), fill);
+    p.rect_stroke(rect, Rounding::same(th.r_mod), Stroke::new(1.0, groove(th)));
+    p.line_segment(
+        [pos2(rect.left() + th.r_mod, rect.top() + 0.5), pos2(rect.right() - th.r_mod, rect.top() + 0.5)],
+        Stroke::new(1.0, rim(th)),
+    );
+}
+
+/// `.tabpane` background — and in the LIGHT skin it is not `--plate`.
+///
+/// `--case` and `--plate` BOTH alias to `--card` over there, so a closed
+/// folder painted in the pane's own fill is not a closed folder at all. The
+/// pane keeps `--card`; the step BACK is `--case-face`, which is what
+/// [`tab_face`] uses. Same inversion `module_card` already documents.
+fn pane_fill(th: &Theme) -> Color32 {
+    match th.skin {
+        crate::Skin::Dark => th.pal.plate,
+        crate::Skin::Light => th.card,
+    }
+}
+fn groove(th: &Theme) -> Color32 {
+    match th.skin {
+        crate::Skin::Dark => th.pal.groove,
+        crate::Skin::Light => th.edge,
+    }
+}
+fn rim(th: &Theme) -> Color32 {
+    match th.skin {
+        crate::Skin::Dark => th.pal.rim,
+        crate::Skin::Light => th.pal.case_hi,
+    }
+}
+/// The three stops down a closed folder's face: lit top, body, far wall.
+///
+/// Hovering does not LIGHTEN those three, it swaps them for the next surface
+/// up — `--plate` where the resting face has `--case`, `--case` where it has
+/// `--groove`. A folder coming forward is a folder nearer the lamp, and the
+/// file has a name for every step of that; brightening one by a percentage
+/// would be inventing a surface the language does not have.
+fn tab_face(th: &Theme, hover: bool) -> (Color32, Color32, Color32) {
+    match (th.skin, hover) {
+        (crate::Skin::Dark, false) => (th.pal.plate_hi, th.pal.case, th.pal.groove),
+        (crate::Skin::Dark, true) => (th.pal.plate_hi, th.pal.plate, th.pal.case),
+        (crate::Skin::Light, false) => (th.card, th.case_face, th.edge),
+        (crate::Skin::Light, true) => (Color32::WHITE, th.card_hover, th.edge),
+    }
+}
+
+/// `.tabbar` — THE LEDGE IS A WINDOW ONTO THE ROOM.
+///
+/// Not a strip of case with the tabs on it: a hole in the panel, with the
+/// room's own ruled ground at the bottom of it. The ruling is
+/// [`crate::grid_shapes`], the same 120px majors and 24px minors every other
+/// ruled surface in this crate uses, and its origin is the LEDGE'S OWN
+/// top-left so the phase matches whatever it is sitting in — the CSS gets
+/// this from `background-attachment:fixed` and this is that.
+///
+/// An earlier pass had the ground in `--run`, a saturated semantic blue spent
+/// on a surface nobody is reading. The room is the room.
+pub fn paint_tab_ledge(p: &egui::Painter, th: &Theme, rect: Rect) {
+    let r = th.r_key;
+    let round = Rounding { nw: r, ne: r, sw: 0.0, se: 0.0 };
+    p.rect_filled(rect, round, th.pal.room);
+    let clip = p.with_clip_rect(rect);
+    clip.extend(crate::grid_shapes(th, rect, rect.min));
+    // `inset 0 2px 5px rgba(0,0,0,.28)` — the near wall of the cut
+    for (i, a) in [(1.0_f32, 46u8), (2.0, 30), (3.5, 16)] {
+        clip.line_segment(
+            [pos2(rect.left() + r, rect.top() + i), pos2(rect.right() - r, rect.top() + i)],
+            Stroke::new(1.0, Color32::from_rgba_unmultiplied(0, 0, 0, a)),
+        );
+    }
+    // `.tabbar::after` — the baseline. It runs the width of the ledge and the
+    // open tab is the one place it stops, because that tab paints over it.
+    p.line_segment(
+        [pos2(rect.left(), rect.bottom() - 0.5), pos2(rect.right(), rect.bottom() - 0.5)],
+        Stroke::new(1.0, groove(th)),
+    );
+}
+
+/// Paint one tab, bottom-aligned inside the ledge.
+///
+/// THE CUT IS THE WHOLE MECHANISM, AND IT IS ONE RECTANGLE. A tab bar's claim
+/// is that the tab and the pane are THE SAME OBJECT — which a key that is down
+/// cannot make, because a key stands ON a surface and a tab is a thing the
+/// surface is PART OF. So the open tab overlaps the pane by a pixel and then
+/// lays the pane's OWN fill back across that overlap, painting out the line
+/// that would have closed its bottom. The baseline runs past every closed
+/// folder and stops dead at the open one.
+///
+/// AND THE OPEN TAB'S FACE IS FLAT. A moulding running on into the pane would
+/// draw a seam exactly where the part exists to have none.
+///
+/// THE KIND COLOURS THE WHOLE OPEN TAB OR NONE OF IT. One ink, and the mark
+/// and the close take it too — a tab is one object, and an orange mark beside
+/// orange text beside a grey × is three objects that happen to be touching.
+/// Closed tabs carry the mark in dim ink: the SHAPE already says the kind.
+pub fn paint_tab(
+    p: &egui::Painter, th: &Theme, rect: Rect, tab: &Tab, on: bool, state: KeyState, x_hot: bool,
+) {
+    let r = th.r_key;
+    let round = Rounding { nw: r, ne: r, sw: 0.0, se: 0.0 };
+    let hover = state == KeyState::Hover;
+
+    if on {
+        p.rect_filled(rect, round, pane_fill(th));
+    } else {
+        let (top, mid, bot) = tab_face(th, hover);
+        p.rect_filled(rect, round, mid);                      // the AA outline
+        let clip = p.with_clip_rect(rect.shrink(0.5));        // hide the meshes' hard edges
+        let split = rect.top() + rect.height() * 0.55;
+        crate::vgrad(&clip, Rect::from_min_max(rect.min, pos2(rect.right(), split)), 0.0, top, mid);
+        crate::vgrad(&clip, Rect::from_min_max(pos2(rect.left(), split), rect.max), 0.0, mid, bot);
+    }
+    // the hairline round the face and the lit lip under its top edge
+    p.rect_stroke(rect, round, Stroke::new(1.0, groove(th)));
+    p.line_segment(
+        [pos2(rect.left() + r, rect.top() + 0.5), pos2(rect.right() - r, rect.top() + 0.5)],
+        Stroke::new(1.0, rim(th)),
+    );
+    // AND THE BOTTOM EDGE OF THE OPEN ONE IS CUT: the pane's fill, laid back
+    // over the line that would close it.
+    if on {
+        p.rect_filled(
+            Rect::from_min_max(pos2(rect.left() + 1.0, rect.bottom() - 1.5), pos2(rect.right() - 1.0, rect.bottom())),
+            Rounding::ZERO,
+            pane_fill(th),
+        );
     }
 
-    let show_x = down || state == KeyState::Hover;
-    let right = if show_x { rect.right() - 28.0 } else { rect.right() - 9.0 };
-    let ink = if down { th.primary } else { th.ink_2 };
+    let ink = if on {
+        tab.kind.ink(th)
+    } else if hover {
+        th.pal.txt
+    } else {
+        th.pal.txt_dim
+    };
+    let cy = rect.center().y;
+
+    // the mark — 13px, `.tab-ico`
+    paint_icon(p, tab.kind.icon(), pos2(rect.left() + 16.5, cy), 13.0, 1.8, ink, 0.0);
+
+    // the close shows on hover and on the open one — the tab you could mean.
+    // A × on every tab is a row of marks saying "you may destroy this" on a
+    // bar you are reading for names.
+    let show_x = on || hover;
+    let right = if show_x { rect.right() - 26.0 } else { rect.right() - 10.0 };
+
     let mut job = egui::text::LayoutJob::single_section(
-        name.to_string(),
+        tab.name.to_string(),
         egui::TextFormat { font_id: FontId::monospace(11.0), color: ink, ..Default::default() },
     );
     job.wrap = egui::text::TextWrapping {
-        max_width: (right - rect.left() - 22.0).max(8.0),
+        max_width: (right - rect.left() - 31.0).max(8.0),
         max_rows: 1,
         break_anywhere: true,
         overflow_character: Some('…'),
     };
     let g = p.layout_job(job);
-    p.galley(pos2(rect.left() + 22.0, cy - g.rect.height() / 2.0), g, ink);
+    p.galley(pos2(rect.left() + 31.0, cy - g.rect.height() / 2.0), g, ink);
 
     if show_x {
         let xc = pos2(rect.right() - 16.0, cy);
         if x_hot {
             p.rect_filled(Rect::from_center_size(xc, Vec2::splat(16.0)), 4.0, hover_fill(th));
         }
-        paint_icon(
-            p, Icon::Close, xc, 11.0, 2.0,
-            if x_hot { th.primary_light } else { th.ink_2 }, 0.0,
-        );
+        paint_icon(p, Icon::Close, xc, 11.0, 2.0, if x_hot { th.pal.led_hot } else { ink }, 0.0);
     }
 }
 
-/// A tab. Returns its response and whether the × was the thing pressed.
+/// `.tabbar` live — the ledge, the tabs on it, and the pane under it.
+///
+/// Returns `(clicked, closed)`: which tab was selected, and which was asked to
+/// go away. `pane` is the rect the pane will occupy; the bar overlaps its top
+/// edge by a pixel, which is what makes the cut possible.
 ///
 /// THE × IS NOT THE TAB. A close mark inside a control that also selects is
 /// the one press on a tab bar you can make by accident, so the hit is tested
 /// against the mark's own box before the tab ever claims the click.
-pub fn tab(
-    ui: &mut Ui, th: &Theme, name: &str, lamp: Color32, down: bool, w: f32,
-) -> (egui::Response, bool) {
-    let (rect, resp) = ui.allocate_exact_size(vec2(w, TAB_H), Sense::click());
-    let resp = resp.on_hover_cursor(egui::CursorIcon::PointingHand);
-    let xr = Rect::from_center_size(pos2(rect.right() - 16.0, rect.center().y), Vec2::splat(18.0));
-    let over_x = resp.hover_pos().map_or(false, |q| xr.contains(q));
-    let state = if down {
-        KeyState::Pressed
-    } else if resp.hovered() {
-        KeyState::Hover
-    } else {
-        KeyState::Raised
-    };
-    if ui.is_rect_visible(rect) {
-        paint_tab(ui.painter(), th, rect, name, lamp, state, over_x);
+pub fn tabbar(
+    ui: &mut Ui, th: &Theme, tabs: &[Tab], current: usize,
+) -> (Option<usize>, Option<usize>) {
+    let w = ui.available_width();
+    let (bar, _) = ui.allocate_exact_size(vec2(w, TABBAR_H), Sense::hover());
+    let mut picked = None;
+    let mut closed = None;
+
+    if ui.is_rect_visible(bar) {
+        paint_tab_ledge(ui.painter(), th, bar);
     }
-    // middle-click closes a tab too — it is the one gesture every tab bar has
-    let close = (resp.clicked() && over_x) || resp.middle_clicked();
-    (resp, close)
+
+    let mut x = bar.left() + 8.0;
+    for (i, t) in tabs.iter().enumerate() {
+        let on = i == current;
+        let tw = 170.0_f32.min((bar.width() - 50.0) / tabs.len().max(1) as f32).max(96.0);
+        let h = if on { TAB_H } else { TAB_H_OFF };
+        let rect = Rect::from_min_max(pos2(x, bar.bottom() - h), pos2(x + tw, bar.bottom()));
+        let resp = ui.interact(rect, ui.id().with(("tab", i)), Sense::click());
+        let resp = resp.on_hover_cursor(egui::CursorIcon::PointingHand);
+        let xr = Rect::from_center_size(pos2(rect.right() - 16.0, rect.center().y), Vec2::splat(18.0));
+        let over_x = resp.hover_pos().map_or(false, |q| xr.contains(q));
+        let state = if resp.hovered() { KeyState::Hover } else { KeyState::Raised };
+        if ui.is_rect_visible(rect) {
+            paint_tab(ui.painter(), th, rect, t, on, state, over_x);
+        }
+        // middle-click closes a tab too — it is the one gesture every bar has
+        if (resp.clicked() && over_x) || resp.middle_clicked() {
+            closed = Some(i);
+        } else if resp.clicked() {
+            picked = Some(i);
+        }
+        x += tw + 2.0;
+    }
+    (picked, closed)
 }
 
 // ── the field and its action ────────────────────────────────────────────────

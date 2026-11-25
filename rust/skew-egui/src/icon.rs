@@ -35,6 +35,17 @@ pub enum Icon {
     Pencil,
     /// `ICON.check` — the tick on the orange cap that commits an inline edit.
     Check,
+    /// `ICON.server` — THE ONE MARK IN THIS SET DRAWN RATHER THAN LIFTED.
+    /// A tab has to say LOCAL or REMOTE and the set had only half of it:
+    /// [`Icon::Term`] is the prompt and covers local, and the remote half was
+    /// being carried by [`Icon::Ext`], which is the open-a-link arrow and
+    /// reads as "this goes to a web page". Nothing in this repo or in
+    /// Terminass had a server mark to take — that app tells its hosts apart by
+    /// a letter and a colour, which is an identity and not a kind. Two rack
+    /// units with their lamps, because it is already this language:
+    /// everything else in here is a machined box with a lamp on it. A globe
+    /// would have said the internet, which is the wire and not the machine.
+    Server,
 }
 
 /// A path in the 24-unit box, as open or closed polylines.
@@ -197,6 +208,17 @@ fn build(icon: Icon) -> Vec<(Vec<Pos2>, bool)> {
         Icon::Close => {
             p.m(18.0, 6.0).l(6.0, 18.0);
             p.m(6.0, 6.0).l(18.0, 18.0);
+        }
+        Icon::Server => {
+            // two rack units, 18 × 7 at a 2px round, and the lamp on each
+            for y in [4.0_f32, 13.0] {
+                p.m(5.0, y).l(19.0, y).arc(19.0, y + 2.0, 2.0, -90.0, 0.0)
+                    .l(21.0, y + 5.0).arc(19.0, y + 5.0, 2.0, 0.0, 90.0)
+                    .l(5.0, y + 7.0).arc(5.0, y + 5.0, 2.0, 90.0, 180.0)
+                    .l(3.0, y + 2.0).arc(5.0, y + 2.0, 2.0, 180.0, 270.0);
+                p.end(true);
+                p.circle(6.5, y + 3.5, 0.6);
+            }
         }
         // `M12 20h9` and the nib: a stroke from the tip up to the hinge, the
         // 2.12-radius corner at the top, then back down to the tail.

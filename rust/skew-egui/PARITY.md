@@ -79,12 +79,13 @@ Status: **done** · **partial** — drawn, but a state or a skin is missing ·
 | app dock | `.navdock` §09 | — | **open** |
 | settings drawer | `.drawer` | — | **open** |
 | tab strip | `.hb-tabs` | — | **open** — `pkey_bar` is most of it |
-| tab bar | `.tabbar`, `.tab`, `.tab-ico`, `.tab-nm`, `.tab-x`, `.tabpane` | `tab`, `paint_tab`, `TAB_H` | **STALE — DO NOT COPY.** The crate still draws the first sketch: a `.pkey` with a lamp in it. The sheet now has a real tab bar — one component, no variants — whose open tab is continuous with its pane, carries a local/remote mark instead of a colour jewel, and takes the kind's colour across the mark, the name and the close together when it is the open one. `skew-panels.html` § 07 |
+| tab bar | `.tabbar`, `.tab`, `.tab-ico`, `.tab-nm`, `.tab-x`, `.tabpane` | `tabbar`, `paint_tab`, `paint_tab_ledge`, `paint_tabpane`, `Tab`, `TabKind`, `TAB_H`, `TAB_H_OFF`, `TABBAR_H` | **done** — the cut is the mechanism in both: the bar overlaps the pane by a pixel and the open tab lays the pane's own fill back across the overlap, so the baseline runs past every closed folder and stops dead at the open one. The open face is FLAT, because a moulding running on into the pane would draw the seam the part exists to have none of. The ledge is `grid_shapes` at the ledge's own origin, which is what `background-attachment:fixed` does on the sheet. **Painted together, posed together:** the bar cannot be shown without its pane, so both posed strips in the gallery draw a stub of pane under the ledge |
 | vertical nav rail | `.rail`, `.rail-item`, `.rail-nm` | `rail`, `paint_rail_item`, `RailItem` | **done** — the selected row is a cut, not a cap |
 | form field | `.field`, `.field.sm` | — | **open** — a cut with ink in it, no phosphor. `.slot` is the FILTER field and is not this |
 | quiet danger key | `.act.quiet` | — | **open** — the only key in the sheet with no moulding, and that absence IS the state. `.act.halt` is the E-stop and is not this |
 | inline form row | `.frow.inline` | — | **open** — `frow` with the 150px gutter collapsed to the word |
-| identity swatches | `.swatches`, `.swatch`, `--id-1`…`--id-12` | `pal.id_1`…`id_12` (emitted) | **open** — the CONTROL is unported; the RAMP arrives in `tokens.rs` on the next `build-dist --write`, because it is twelve `:root` tokens and the manifest takes every one of those. Twelve fields, one value in both skins |
+| identity swatches | `.swatches`, `.swatch`, `--id-1`…`--id-12` | `pal.id_1`…`id_12` | **open** — the CONTROL is unported; the RAMP is in `tokens.rs`, twelve fields, one value in both skins |
+| local / remote mark | `ICON.server` | `Icon::Server` | **done** — the one mark in the set drawn rather than lifted. `Icon::Term` was already the local half |
 
 ---
 

@@ -2832,6 +2832,16 @@ html{ -webkit-tap-highlight-color:transparent; }
   text-shadow:0 0 6px color-mix(in srgb, var(--read) 50%, transparent);
 }
 .slot input::placeholder{ color:#3f444c; text-shadow:none; letter-spacing:.1em; }
+/* ── AND DAYLIGHT HAS NO PHOSPHOR ──────────────────────────────────────────
+   `.slot input` is lit glass: `--read` and a bloom round it. `--read` already
+   aliases to `--ink` in the light skin, so the COLOUR was always right — the
+   BLOOM was not, and a navy glow round navy text on cream is a smear on every
+   filter field in the kit. `docs/skew-panels.html` § 06 carried a scoped patch
+   for it with a comment calling it a system bug patched in the wrong place.
+   This is the right place. The placeholder goes with it: #3f444c is the dark
+   theme's dead ink and is unreadable on paper. */
+[data-skin="light"] .slot input{ text-shadow:none; }
+[data-skin="light"] .slot input::placeholder{ color:var(--ink-3); }
 
 .rack{ display:grid; grid-template-columns:repeat(auto-fill,minmax(272px,1fr)); gap:14px; position:relative; z-index:1; }
 
@@ -7136,6 +7146,466 @@ span.nav-link{ cursor:default; }
 
 
 
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TERMINASS'S PARTS — SIX THINGS AN SSH CLIENT NEEDS AND THIS FILE DID NOT HAVE
+
+   Lifted from `~/Documents/GIT/Terminass` (Rust, eframe/egui 0.29), which
+   `docs/APP-ALIGNMENT.md` already studies as one of the three adopting apps.
+   That app drew all six by hand in `src/theme.rs` and `src/app.rs` because
+   there was nothing here to reach for — the same way it hand-transcribed the
+   palette, which is the drift this repo exists to end.
+
+   NOTHING BELOW CARRIES A LITERAL COLOUR. Every value is a token, which means
+   the light skin resolves them through the alias block further down
+   (`--bay`, `--plate`, `--txt-dim`, `--recess`, `--rim`, `--led`) and these
+   parts have no second set of rules at all. That is not a shortcut: a part
+   that needs a `[data-skin="light"]` override is a part that was written in
+   hex, and the overrides in this file are all paying off exactly that debt.
+   The three places a skin genuinely disagrees are stated as overrides below.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── A FIELD AND ITS ACTION ARE ONE ROW ────────────────────────────────────
+   Terminass has this twice — the search bar with CONNECT on the end, and the
+   private-key field with KEYS on the end — and both were a `horizontal()` with
+   the field's width computed as `available_width() - 70.0`, which is a number
+   that has to be re-guessed every time the button's label changes.
+
+   THE BUTTON IS NOT INSIDE THE WELL. A key sunk into the slot it sits beside
+   would be a cap at the bottom of a hole; the two stand side by side at one
+   height, which is what `.con-top :is(.sel, .slot, .lcd)` already says about
+   every box in a row. `align-items:stretch` is what makes that true without a
+   height being named here — the row's own height is the key's. */
+.slotrow{ display:flex; align-items:center; gap:6px; width:100%; }
+.slotrow > .slot{ flex:1 1 auto; max-width:none; }
+/* THE ACTION IS AN `.act`, WHICH IS THE TEXT KEY. `.key` is the ICON key —
+   `padding:0` and no size of its own, so it is given one by `.strip .key` or
+   by an `.add` — and a word put in one collapses to the width of the word with
+   nothing round it. `.act` is 32px with `0 13px` of padding and the engraved
+   type, which is the same height `.con-top` gives every box in a row.
+   NOTHING HERE SETS A HEIGHT: the row takes the key's, which is the point. */
+.slotrow > :is(.act, .chip, .sel){ flex:0 0 auto; }
+
+/* ── THE SETTINGS FORM ROW ─────────────────────────────────────────────────
+   A right-aligned name, then the controls it names in a column. `.setrow` is
+   the documentation's two-column layout and is dropped from `dist/`; this is
+   the part, and an app gets it.
+
+   THE NAME IS RIGHT-ALIGNED AND THAT IS THE WHOLE POINT. A column of
+   left-aligned labels puts a ragged edge against the controls, so the eye has
+   to cross a different gap on every line; right-aligned, the names end on one
+   rule and every control starts on the next. 150px is Terminass's own
+   `FORM_LABEL_W`, which is the longest name it has plus room.
+
+   THE BODY IS A COLUMN, not a row, because a setting is a control AND the
+   sentence under it — see `.hint` below — and those stack. */
+.frow{ display:flex; align-items:flex-start; gap:14px; width:100%; padding:4px 0; }
+.frow-lab{
+  flex:0 0 150px; text-align:right; padding-top:7px;
+  font-family:var(--font); font-size:11.5px; letter-spacing:.02em;
+  color:var(--txt-dim);
+}
+.frow-body{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px; }
+
+/* ── THE SENTENCE UNDER A CONTROL ──────────────────────────────────────────
+   Not a label and not a caption: a full sentence, in sentence case, saying
+   what the control will do. Terminass has five of them and every one earns its
+   room ("Passwords aren't saved: ssh asks in the terminal…").
+
+   IT IS SET AT THE ROW'S SIZE, NOT UNDER IT. The instinct is to shrink a note,
+   and a note nobody reads is a note that is not there — `.mod-desc` already
+   settled this at 11.5/1.5 for the same kind of text on a card, and this is
+   that rule where a card is not involved.
+
+   `.hint.ok` IS THE CONFIRMATION LINE — the green "On — set on this host"
+   under the three-way switch. `--ok-ink` and not `--ok`: the lamp value is a
+   FILL, it reads 2.20:1 as a word on a card, and the token block says so. */
+.hint{
+  font-family:var(--font); font-size:11.5px; line-height:1.5; margin:0;
+  color:var(--txt-dim);
+}
+.hint.ok{ color:var(--ok-ink); }
+.hint.no{ color:var(--no-ink); }
+
+/* ── THE TAB BAR ──────────────────────────────────────────────────────────
+   A FILE TAB IN A DRAWER, which is where tabs came from and the only reading
+   that survives being drawn in metal. The pane is the drawer front. The open
+   folder's tab IS THAT FRONT, standing up above the others — one surface, no
+   seam. The closed folders sit back, with the front's own edge running across
+   them and breaking at the one that is open.
+
+   THIS IS NOT `.piano`, AND THE DIFFERENCE IS NOT COSMETIC. An interlocked
+   bar is a SEGMENTED CONTROL: n keys, one down, and what is below it is
+   unrelated to which one. A tab bar's whole claim is that the tab and the
+   pane are THE SAME OBJECT — press a tab and you have not set a value, you
+   have pulled a different drawer out. A key that is down cannot say that,
+   because a key is a thing standing ON a surface and a tab is a thing the
+   surface is PART OF.
+
+   IT WAS THREE DRAWINGS AND IS ONE. `.outline` drew the same break with a
+   hairline and bare labels; `.pill` broke nothing and was a strip with a cap
+   on it. Both were posed on `skew-panels.html` § 07 beside this one, both
+   were looked at, and both are gone — CONTRIBUTING's rule is that a variant
+   nobody picked is not a variant, it is an unmade decision left in the sheet.
+   The modifier went with them: a `.cut` that has no sibling is a class you
+   have to know to type and that can only ever have one value.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── the geometry, which all three share ───────────────────────────────── */
+.tabbar{
+  display:flex; align-items:flex-end; gap:2px;
+  position:relative; min-width:0;
+}
+.tab{
+  position:relative; display:flex; align-items:center; gap:8px;
+  flex:0 1 auto; min-width:0; max-width:190px;
+  height:30px; padding:0 10px;
+  border:0; background:transparent; cursor:pointer; text-align:left;
+  font-family:var(--font); font-size:11px; letter-spacing:.02em;
+  color:var(--txt-dim);
+  transition:background .12s, color .12s, height .1s, box-shadow .12s;
+}
+/* the hit pad — half the 2px gutter, square, for the reason `.pkey::before`
+   gives at length a few hundred lines up */
+.tab::before{ content:''; position:absolute; inset:0 -1px; border-radius:0; }
+.tab-nm{
+  flex:1 1 auto; min-width:0; position:relative; z-index:2;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* ── WHAT KIND OF SESSION, NOT WHICH ONE ──────────────────────────────
+   A COLOURED BEAD SAYS "THIS ONE IS THE BLUE ONE", WHICH IS NOT A FACT ABOUT
+   ANYTHING. It was a jewel off an identity ramp, and three objections landed
+   on it at once: the ramp is not a token (`docs/PORTING.md` rules it system-
+   owned and unbuilt), a bead carries no meaning you can read without having
+   learnt it, and at 8px on a tab it is a dot — the eye files it as a bullet.
+
+   THE ONE THING A TAB CAN SAY THAT YOU WOULD WANT TO KNOW is whether the
+   thing on the other end is THIS MACHINE or SOMEWHERE ELSE. That is a
+   two-value fact, it is never ambiguous, and it changes what a command you
+   type is about to do. Two marks the kit already has:
+
+     `ICON.term`  — the prompt. Local. It is Terminass's own app mark.
+     `ICON.ext`   — out of the box and away. Remote.
+
+   AND THE TWO KINDS ARE TWO COLOURS, ON THE OPEN TAB ONLY. It is not
+   identity — it does not say WHICH machine — it says WHOSE: blue is here,
+   orange is elsewhere, and that is a two-value fact you want to read without
+   stopping.
+
+   IT IS THE WHOLE TAB AND NOT THE MARK. Colouring every icon on the bar put
+   six saturated marks on a row you are reading for NAMES, and it spent the
+   signal on five tabs that are not the one you are in. On the open tab the
+   mark, the name and the close all take it together, because a tab is one
+   object and a row with an orange icon, orange text and a blue × is three
+   objects that happen to be touching. Closed tabs carry the mark in dim ink,
+   which still tells you the kind — the shape is doing that, not the colour.
+
+   WHICH IS ALSO WHY `color` CARRIES IT. One declaration on the tab, and the
+   mark and the close follow through `currentColor` and cannot be left behind
+   when it changes.
+
+   THE BLUE IS `--run` AND IT IS THE ONLY ONE SAFE IN BOTH SKINS. `--blue`
+   aliases to `--info`, which the manifest emits as `None` in dark ON PURPOSE
+   — no app has a dark one, and picking a blue for a near-black panel with
+   nothing to check it against is the guess this repo exists to stop. `--run`
+   is a real value in both. Light takes `--run-fill`, one stop down, because
+   #1A79DC is a cap FILL and a 1.8px stroke of it on cream is a thin bright
+   line rather than a mark.
+
+   THE ORANGE FOLLOWS THE SHEET'S OWN RULE: `--led` in the dark and
+   `--primary-ink` in the light, because #FF6A00 is a fill and reads 2.78:1 as
+   a mark on a card. The token block argues it at length. */
+.tab-ico{
+  flex:0 0 13px; width:13px; height:13px; position:relative; z-index:2;
+  stroke:currentColor; fill:none; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round;
+}
+/* the lamps on the rack units are dots: they fill, they do not stroke */
+.tab-ico circle{ stroke:none; fill:currentColor; }
+/* THE KIND, ON THE OPEN TAB ONLY. `color`, so the mark and the close follow.
+   ── AND IT IS THE LIT STEP, NOT THE FILL ──────────────────────────────
+   `--run` and `--led` are what a CAP is painted in — a large area, seen
+   against the case. A 13px mark and an 11px name are neither, and at that
+   size a fill value arrives as a muddy middle: the ladder already has the
+   right rung for this and it is the one the readouts use. `--run-lit` is
+   what a lit blue readout is made of; `--led-hot` is the lamp at
+   temperature. Both are `:root` tokens in both skins.
+
+   THE GLOW IS A LAMP BEHIND GLASS AND IT IS THE DARK SKIN'S ONLY. `.pkey`
+   already lights its legend exactly this way when it is down; the mark gets
+   the same bloom through a drop-shadow, because a stroke cannot carry a
+   text-shadow. Both are the tab's own colour at low alpha — a glow in any
+   other hue is a halo, which is a sticker effect and not a light. */
+.tab.on.local { color:var(--run-lit); }
+.tab.on.remote{ color:var(--led-hot); }
+.tab.on.local  .tab-nm{ text-shadow:0 0 7px color-mix(in srgb, var(--run-lit) 55%, transparent); }
+.tab.on.remote .tab-nm{ text-shadow:0 0 7px color-mix(in srgb, var(--led-hot) 55%, transparent); }
+.tab.on .tab-ico{ filter:drop-shadow(0 0 4px color-mix(in srgb, currentColor 60%, transparent)); }
+/* THE CLOSE MARK IS ABSENT UNTIL IT IS WANTED. A × on every tab is a row of
+   marks saying "you may destroy this" on a bar you are reading for names. It
+   shows on hover and on the open one — the one you could mean.
+
+   IT KEEPS ITS SLOT WHEN IT IS INVISIBLE. `opacity` and not `display`, so a
+   name never reflows under the pointer: a tab that re-lays itself out as you
+   arrive is a tab you will mis-click.
+
+   AND IT HAS A PAD. 16px is the MARK; `::before` reaches it out to a real
+   target without moving, resizing or restyling anything drawn. */
+.tab-x{
+  flex:0 0 16px; width:16px; height:16px; position:relative; z-index:2;
+  border:0; padding:0; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  background:transparent; cursor:pointer; color:inherit;
+  opacity:0; transition:opacity .12s, color .12s, background .12s;
+}
+.tab-x::before{ content:''; position:absolute; inset:-6px -5px; border-radius:0; }
+.tab:hover .tab-x,
+.tab.on .tab-x{ opacity:1; }
+.tab-x:hover{ color:var(--led-hot); background:var(--rim); }
+.tab-x svg{ width:11px; height:11px; stroke:currentColor; fill:none;
+            stroke-width:2; stroke-linecap:round; }
+/* the + is the kit's own small key, on the ledge beside the last tab */
+.tabbar .add{ align-self:center; margin:0 0 4px 6px; flex:0 0 26px; }
+
+/* The drawer front the tabs belong to. It carries the edge; the open tab's
+   ::after is what cuts a hole in it. */
+.tabpane{
+  position:relative; border-radius:var(--r-mod);
+  background:var(--plate);
+  box-shadow:inset 0 1px 0 var(--rim), inset 0 0 0 1px var(--groove);
+}
+
+/* ── THE DRAWING ──────────────────────────────────────────────────────
+   Closed folders are plates sitting back in the case; the open one is the
+   pane's own surface standing up. The cut is one pseudo-element: the bar
+   overlaps the pane by 1px and `.on::after` lays the pane's fill across that
+   overlap, painting out the line that would close the tab's bottom. Take the
+   ::after away and you have buttons sitting on a box. */
+/* ── THE LEDGE IS A WINDOW ONTO THE ROOM ───────────────────────────────
+   THE BAR IS NOT A STRIP, IT IS A GAP IN THE CASE. Everything in this
+   language stands on something; a tab bar whose ground is the same metal as
+   the pane has the folders floating on the front they are supposed to be
+   pulled out of. Cut the ledge through to the ROOM — the cold ruled ground
+   the whole machine stands in — and the drawer front is suddenly a thing
+   with a BEHIND. The closed folders are seen against it, which is what makes
+   them read as sitting back rather than as being painted darker.
+
+   IT IS `--room` AND `.grid`, BOTH AS DECLARED, and it is the second answer
+   to this. The first was `--run`, which is a bright saturated blue and is
+   the RUNNING colour — a semantic value spent on a ground, and too loud to
+   put a name on besides. `--room` is the right one for the same reason § 11
+   gives: the room is what a part is seen against, it is already cold, and it
+   already carries this ruling. The ledge is not decorated with a grid; it is
+   a hole through to the surface that has one.
+
+   THE RULING IS `--desk-grid`, WHICH IS THE WHOLE POINT OF IT BEING A TOKEN.
+   The first attempt built a grid by hand at `.grid`'s pitches — 3px sublines
+   and 15px majors in graphite — and on a 46px ledge that is not a ruled
+   surface, it is a crosshatch, dark enough to fight the names sitting on it.
+   `.grid` is the SHEET: a drawing surface you measure on, at drawing scale.
+   The room is not that. Its ruling is 120px majors at 8.5% and 24px minors at
+   3.5%, which at the size of a tab bar is two faint lines and a hint of a
+   third — felt, not read.
+
+   AND IT IS `background-attachment:fixed`, as every other ruled surface in
+   this sheet is. That is what makes it a WINDOW: the ledge is not decorated
+   with its own grid, it shows the same continuous ruling the stage behind it
+   shows, in the same phase, so the two line up and the bar reads as a hole
+   rather than as a patterned strip.
+
+   AND THERE IS ROOM ABOVE THE TABS. A ledge that stops at the top of the
+   tallest folder is a background, not a space: the gap over the open tab is
+   what says the drawer is standing IN something rather than against it. */
+.tabbar{
+  padding:12px 8px 0; margin-bottom:-1px; z-index:1;
+  border-radius:var(--r-key) var(--r-key) 0 0;
+  background-color:var(--room);
+  background-image:var(--desk-grid);
+  background-attachment:fixed;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.28);
+}
+/* THE BASELINE RUNS THE WHOLE WIDTH, LEDGE INCLUDED, so the bar stands ON a
+   line rather than floating above one. The open tab breaking it is the entire
+   component. */
+.tabbar::after{
+  content:''; position:absolute; left:0; right:0; bottom:0; height:1px;
+  background:var(--groove); z-index:0;
+}
+/* ── AND A FOLDER HAS A THICKNESS ─────────────────────────────────────
+   A FLAT CHIP IS A STICKER. `.key` has carried the answer since the first
+   page of this sheet: three stops down the face so the light falls off, a lit
+   top edge where the moulding turns through the lamp, and a throw under it
+   so the part is standing on something. A tab is the same moulding with the
+   bottom taken off, and against a ruled blue ground it needs all of it —
+   there is nothing else on the ledge for the eye to judge the depth by. */
+.tabbar .tab{
+  border-radius:var(--r-key) var(--r-key) 0 0;
+  background:linear-gradient(180deg,var(--plate-hi),var(--case) 55%,var(--groove));
+  box-shadow:
+    inset 0 1px 0 var(--rim),
+    inset 0 0 0 1px var(--groove),
+    0 -1px 3px rgba(0,0,0,.35);
+}
+/* A CLOSED FOLDER SITS BACK — three pixels, no more. Fill and ink are already
+   saying it, and a bigger step turns the bar into a row of different-sized
+   buttons. `align-items:flex-end` is what makes the short ones hang from the
+   line instead of floating above it. */
+.tabbar .tab:not(.on){ height:27px; }
+.tabbar .tab:not(.on):hover{
+  color:var(--txt);
+  background:linear-gradient(180deg,var(--plate-hi),var(--plate) 55%,var(--case));
+}
+/* THE OPEN FOLDER IS THE PANE, so its face is FLAT — the gradient stops at
+   the one tab that is continuous with the surface below it, because a
+   moulding that ran on into the pane would be a seam drawn in light where
+   the whole part exists to have no seam. It gets its height and its shadow
+   on the ledge instead, which is how it says it is in FRONT. */
+.tabbar .tab.on{
+  height:34px; z-index:2;
+  background:var(--plate);
+  box-shadow:
+    inset 0 1px 0 var(--rim),
+    inset 0 0 0 1px var(--groove),
+    0 -2px 6px rgba(0,0,0,.5);
+}
+/* inset by 1px so the tab's rounded shoulders survive — a full-width strip
+   squares them off and it stops reading as a tab */
+.tabbar .tab.on::after{
+  content:''; position:absolute; z-index:3;
+  left:1px; right:1px; bottom:-1px; height:2px;
+  background:var(--plate);
+}
+
+/* ── WHAT THE LIGHT SKIN HAS TO SAY FOR ITSELF ─────────────────────────
+   `--case` AND `--plate` ARE THE SAME VALUE IN THE LIGHT SKIN. Both alias to
+   `--card`, which is correct everywhere else in the sheet and fatal on `.cut`:
+   a closed folder painted in the pane's own fill is not a closed folder, it is
+   the pane with lines on it. The step back is `--case-face`, the token for
+   exactly that — a surface milled from the case, one notch under the caps.
+   It is the same inversion `module_card` documents in the crate: in the dark a
+   part is told from its ground by being DARKER, in the light by being PALER,
+   and a closed tab is on the losing side of that here.
+
+   `--plate-hi` IS PURE WHITE IN THIS SKIN, which is right for the pill's cap
+   and wrong for a hover: a closed tab going brighter than the pane it belongs
+   to reads as the open one. Hovers take `--card-hover`.
+
+   AND THE LAMP COLOUR GOES TO INK. `--led` is `--primary` here, a FILL that
+   reads 2.78:1 as a word on a card; `--primary-ink` is the same orange carried
+   into text at 5.19:1. The token block argues it at length. */
+/* THE MOULDING INVERTS, as every moulding in this sheet does. In the dark a
+   part is lit along its top edge and falls off into shadow; on cream there is
+   no edge to light, so the face runs the other way — the cap's own value at
+   the top, the case under it — and `--plate-hi` is pure white here, which at
+   the top of a 27px chip is a highlight the dark skin never had. */
+[data-skin="light"] .tabbar .tab{
+  background:linear-gradient(180deg,var(--card),var(--case-face) 70%,var(--edge));
+  box-shadow:inset 0 1px 0 var(--case-hi), inset 0 0 0 1px var(--edge), 0 -1px 3px rgba(0,0,0,.10);
+}
+[data-skin="light"] .tabbar .tab:not(.on):hover{
+  background:linear-gradient(180deg,#fff,var(--card-hover) 70%,var(--edge));
+}
+[data-skin="light"] .tabbar .tab.on{
+  background:var(--card);
+  box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px var(--edge), 0 -2px 6px rgba(0,0,0,.13);
+}
+[data-skin="light"] .tabbar .tab.on::after{ background:var(--card); }
+/* NO LIGHT OVERRIDE FOR THE RULING, and that is `.grid`'s finding, not an
+   omission: graphite is the one ink that reads on both the dark desk and the
+   lit one, which is the whole argument for it being graphite. */
+/* ── AND NOTHING GLOWS IN DAYLIGHT ────────────────────────────────────
+   The token block rules on this already: this skin's readouts are e-paper —
+   no lamp, no bloom — and `--read-glow` is `transparent` for exactly that
+   reason. A bloom on cream is not a light, it is a smudge round the letter.
+   So the light skin gets the BRIGHTNESS and not the glow, one rung up from
+   the ink step: `--run` where the mark was `--run-fill`, and `--primary-deep`
+   where it was `--primary-ink` — 3.58:1, which is the brightest orange this
+   ground can carry and still be read. */
+[data-skin="light"] .tab.on.local { color:var(--run); }
+[data-skin="light"] .tab.on.remote{ color:var(--primary-deep); }
+[data-skin="light"] .tab.on .tab-nm{ text-shadow:none; }
+[data-skin="light"] .tab.on .tab-ico{ filter:none; }
+[data-skin="light"] .tab-x:hover{ background:var(--card-hover); }
+
+/* ── THE VERTICAL NAV RAIL ─────────────────────────────────────────────────
+   `.strip.nav-strip` is the horizontal bar across the top of a document. This
+   is the other one: a column down the left of a window, where the destinations
+   are sections of the app rather than pages of a document, and where there are
+   more of them than a bar can hold.
+
+   THE SELECTED ROW IS A CUT, NOT A CAP. On a horizontal bar the current page
+   is a key that is down. In a column the rows are not keys — they have no
+   walls between them — so the mark is the row sinking into the case, which is
+   `--recess`, the token the whole file already uses for "this is below the
+   surface". Its lamp comes on at the same time.
+
+   THE LAMP IS ON THE LEFT AND IT IS THE ONLY COLOUR IN THE COLUMN. Terminass
+   lights `--led` on the active row and leaves the rest dark, which is a column
+   of unlit lamps with one lit — readable at a glance and across a room, which
+   is what a jewel is for and what a background tint is not. */
+.rail{ display:flex; flex-direction:column; gap:3px; width:100%; }
+.rail-item{
+  display:flex; align-items:center; gap:10px; width:100%;
+  height:34px; padding:0 12px; border:0; border-radius:var(--r-key);
+  background:transparent; cursor:pointer; text-align:left;
+  font-family:inherit; position:relative;
+  transition:background .12s;
+}
+/* the metal warming under the pointer — the same nothing-moves hover `.tog`
+   uses, and for the same reason: a row that lifts is a row that was a card */
+/* `:not(.on)` AND NOT `.rail-item:hover` — a hover rule is one class heavier
+   than `.rail-item.on`, so without it the pointer crossing the CURRENT row
+   paints over its cut and the column loses its mark exactly when you are
+   looking at it. */
+.rail-item:not(.on):hover{ background:var(--rim); }
+.rail-item.on{ background:var(--bay); box-shadow:var(--recess); }
+.rail-item .pilot{ flex:0 0 7px; width:7px; height:7px; }
+.rail-nm{
+  flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:var(--font); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--txt-dim);
+}
+.rail-item.on .rail-nm{ color:var(--led); }
+.rail-ico{ flex:0 0 14px; width:14px; height:14px; stroke:var(--txt-dim); fill:none;
+           stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.rail-item.on .rail-ico{ stroke:var(--led); }
+
+/* ── THE STATUS LINE ───────────────────────────────────────────────────────
+   A lamp and what it means, at the foot of a pane: BOOKMARKS SYNCED, UP TO
+   DATE, SYNC FOLDER MISSING. `.pilot` is already the lamp — 9px, off is a dead
+   bead and on is lit — and all this adds is the words beside it and the rule
+   that they are ETCHED rather than set: a status line is a legend stamped on
+   the case, not a sentence, so it takes the caption's tracking and caps.
+
+   IT IS NOT A TOAST AND IT DOES NOT GO AWAY. The thing it reports is true for
+   as long as it is true, and a message that leaves cannot be checked. */
+.statline{ display:flex; align-items:center; gap:9px; }
+.stat-cap{
+  font-family:var(--font); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--txt-dim);
+}
+.statline.ok .stat-cap{ color:var(--ok-ink); }
+.statline.no .stat-cap{ color:var(--no-ink); }
+
+/* ── THE THREE PLACES THE SKINS DISAGREE ───────────────────────────────────
+   Everything above is tokens, so light comes through the alias block. These
+   three are not a token's job.
+
+   1. THE HOVER IS A LIT EDGE IN THE DARK AND A SURFACE IN THE LIGHT. `--rim`
+      is white at 9% on anodised metal and white at 100% on cream — correct as
+      an EDGE in both, and as a FILL it is invisible in the light skin. The two
+      rows that use it as a fill take `--card-hover`, which is the token for
+      exactly this and is light-only.
+   2. A CUT ROW IS NOT A PALER ROW. `--bay` under `--recess` is the right pair
+      in both skins, but in the light skin the file's own rule for every hole
+      is `--paper` with an `--edge` hairline (see "EVERY REMAINING CUT, WELL
+      AND SLOT"), and `--bay` already aliases to `--paper` — so the only thing
+      left is the hairline, which `--recess` light already carries. Nothing to
+      do, recorded so the next reader does not go looking.
+   3. THE LAMP LOSES ITS HALO, which the file already says once for
+      `:is(.jewel, .pilot)` and applies here unchanged. */
+[data-skin="light"] .rail-item:not(.on):hover{ background:var(--card-hover); }
 /* ═══════════════════════════════════════════════════════════════════════════
    SKEW LIGHT — THE PANEL SKIN
 
@@ -9870,7 +10340,11 @@ html:not([data-skin="light"]) .stage:has(:is(.navdock, .nav-strip, .drawer-tab))
    and a count are LABELS, not lamps, so they go to ink on the case; and a
    stopped module's LAUNCH lamp is unlit, because nothing is running.
    ══════════════════════════════════════════════════════════════════════════ */
-.module.up .pilot{
+.module.up .pilot,
+/* AND A LAMP ON ITS OWN TAKES THE SAME DRAWING. `.statline` and `.rail-item`
+   need a lit pilot with no module round it, and a second copy of this gradient
+   would be a second thing to tune. One selector, one lamp. */
+.pilot.on{
   background:radial-gradient(circle at 35% 30%, #fff, #FFC08A 40%, #E05A00);
   box-shadow:0 0 6px rgba(255,106,0,.8), inset 0 -1px 1px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.5);
 }
@@ -9880,7 +10354,7 @@ html:not([data-skin="light"]) .stage:has(:is(.navdock, .nav-strip, .drawer-tab))
 }
 .stamp{ color:#c2c7cf; background:rgba(0,0,0,.45); box-shadow:inset 0 1px 2px rgba(0,0,0,.8); }
 .chip .ct{ color:#c2c7cf; text-shadow:none; }
-[data-skin="light"] .module.up .pilot{ box-shadow:0 0 5px rgba(255,106,0,.55); }
+[data-skin="light"] :is(.module.up .pilot, .pilot.on){ box-shadow:0 0 5px rgba(255,106,0,.55); }
 [data-skin="light"] .act.start .lens{ background:var(--edge-ctl); box-shadow:inset 0 1px 1px rgba(0,0,0,.18); }
 [data-skin="light"] .stamp{
   color:var(--ink-2); background:var(--paper);

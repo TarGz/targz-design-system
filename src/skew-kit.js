@@ -120,6 +120,21 @@ Object.assign(ICON, {
   /* the launchpad's OPEN IN EDITOR — Lucide's code, as the app ships it */
   code:  svg('<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>'),
   term:  svg('<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>'),
+  /* SERVER — A MACHINE OVER THERE, and the only mark in this set that was
+     drawn for a part rather than lifted from Portrait-Typo. Terminass needed
+     to say LOCAL or REMOTE on a tab and the set had neither half: `term` is
+     the prompt and covers local, and the remote half was being carried by
+     `ext`, which is the OPEN-A-LINK arrow and reads as "this goes to a web
+     page". Nothing in this repo or in Terminass had a server mark to lift —
+     that app tells its hosts apart by a letter and a colour, which is an
+     identity and not a kind.
+
+     TWO RACK UNITS WITH THEIR LAMPS. It is the one drawing of "a computer
+     that is not this one" that needs no label, and it is already this
+     language: every other thing in here is a machined box with a lamp on it.
+     A globe would have said "the internet", which is the wire and not the
+     machine; a tower would have said "a PC under a desk". */
+  server:svg('<rect x="3" y="4" width="18" height="7" rx="2"/><line x1="6.5" y1="7.5" x2="6.5" y2="7.5"/><circle cx="6.5" cy="7.5" r="0.6"/><rect x="3" y="13" width="18" height="7" rx="2"/><circle cx="6.5" cy="16.5" r="0.6"/>'),
   /* THE SPEAKER TAKES THE SAME SLASH EVERY OTHER `…Off` IN THIS SET TAKES —
      the plain drawing with a rule through it, so off is a SHAPE and not a
      second grey. The waves come off rather than being dimmed: what is gone is

@@ -53,6 +53,7 @@ mod machine;
 mod nav;
 mod paint;
 mod press;
+mod shell;
 mod switch;
 mod theme;
 
@@ -67,6 +68,10 @@ pub use fader::{fader, paint_fader, FaderState, FADER_SIZE};
 pub use frame::{grid_shapes, label, page_fill, paint_grid, panel_frame, section, stage, well_frame, well_shadow};
 pub use knob::{knob, paint_knob, KnobKind, KNOB_D, KNOB_SIZE};
 pub use icon::{paint_icon, paint_icon_lit, paint_icon_solid, Icon};
+pub use shell::{
+    frow, hint, paint_rail_item, paint_tab, rail, slot_row, statline, tab, RailItem, Tone,
+    FROW_LAB_W, RAIL_ROW_H, TAB_H,
+};
 pub use press::{
     backlit, chevron, icon_key, micro, paint_icon_key, sep, BACKLIT_SIZE, CHEV_SIZE, ICON_KEY_SIZE,
     MICRO_SIZE,

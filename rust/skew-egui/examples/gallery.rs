@@ -17,8 +17,10 @@
 //! state of a part is on screen at once and can be compared without moving
 //! anything.
 
-use egui::{vec2, Align, Color32, Layout, Rect, Sense, Ui, Vec2};
+use egui::{pos2, vec2, Align, Color32, Layout, Rect, Sense, Ui, Vec2};
 use skew_egui::{
+    frow, hint, paint_rail_item, paint_tab, rail, slot_row, statline, tab, RailItem, Tone,
+    RAIL_ROW_H, TAB_H,
     btn, colored_btn, cut, dro, fader, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
     appwin, stage, page_fill, paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
@@ -133,6 +135,7 @@ const PAGES: [(&str, &str, &[&str]); 5] = [
             "The hatch bay",
             "Windows",
             "Launchpad",
+            "Terminass",
         ],
     ),
     (
@@ -206,6 +209,15 @@ struct Gallery {
     lit: [bool; 3],
     sun: bool,
     chev_open: bool,
+    /// § 07. The rail's current row, the tab that is down, the tabs that
+    /// are left after a ×, the two slot rows' buffers and the three-way.
+    t_rail: usize,
+    t_tab: usize,
+    t_tabs: Vec<String>,
+    t_find: String,
+    t_key: String,
+    t_agent: usize,
+    t_hidden: bool,
     rack: Vec<Proj>,
     /// The folders, which rename and delete change — so they are owned state
     /// and not a `const` array of tabs.
@@ -261,6 +273,13 @@ impl Gallery {
             lit: [true, false, true],
             sun: true,
             chev_open: false,
+            t_rail: 0,
+            t_tab: 0,
+            t_tabs: vec!["Local Terminal".into(), "Contabo".into(), "NextDraw".into()],
+            t_find: String::new(),
+            t_key: String::new(),
+            t_agent: 1,
+            t_hidden: false,
             rack: projects(),
             folders: vec!["Portrait".into(), "Targz".into(), "Web".into()],
             lp_folder: ALL.into(),
@@ -1379,6 +1398,174 @@ impl Gallery {
         });
     }
 
+    /// § 07 — the six parts lifted out of Terminass.
+    ///
+    /// EVERY LAMP ON THIS SECTION IS POSED FROM A SEMANTIC TOKEN. A session's
+    /// colour belongs to the host: `docs/PORTING.md` rules the identity ramp
+    /// system-owned and NOT YET BUILT, and a gallery that pasted an app's six
+    /// hexes in would have answered that question by the back door.
+    fn terminass(&mut self, ui: &mut Ui) {
+        let th = self.th;
+
+        // ── the rail ────────────────────────────────────────────────────────
+        label(ui, &th, "THE VERTICAL RAIL — THE SELECTED ROW IS A CUT, NOT A CAP");
+        ui.add_space(8.0);
+        let items = [
+            RailItem { icon: Icon::Folder, name: "Hosts" },
+            RailItem { icon: Icon::Eye, name: "Keychain" },
+            RailItem { icon: Icon::Ext, name: "Port forwarding" },
+            RailItem { icon: Icon::Code, name: "Snippets" },
+            RailItem { icon: Icon::Term, name: "Logs" },
+        ];
+        panel_frame(&th, th.card).show(ui, |ui| {
+            ui.set_width(250.0);
+            if let Some(i) = rail(ui, &th, &items, &mut self.t_rail) {
+                self.live = items[i].name.to_uppercase();
+            }
+        });
+        ui.add_space(24.0);
+
+        // ── the tabs ────────────────────────────────────────────────────────
+        label(ui, &th, "THE WINDOW TAB — × ON HOVER AND ON THE ONE THAT IS DOWN");
+        ui.add_space(8.0);
+        // the lamps are the three semantic tokens, in order, and they are a
+        // POSE — see this method's own note
+        let lamps = [th.primary, th.ok_ink, th.no];
+        let mut close = None;
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = 4.0;
+            for i in 0..self.t_tabs.len() {
+                let name = self.t_tabs[i].clone();
+                let (r, x) = tab(ui, &th, &name, lamps[i % lamps.len()], self.t_tab == i, 170.0);
+                if r.clicked() && !x {
+                    self.t_tab = i;
+                }
+                if x {
+                    close = Some(i);
+                }
+            }
+        });
+        if let Some(i) = close {
+            self.t_tabs.remove(i);
+            self.t_tab = self.t_tab.min(self.t_tabs.len().saturating_sub(1));
+            self.live = "TAB CLOSED".into();
+        }
+        if self.t_tabs.is_empty() {
+            ui.add_space(6.0);
+            hint(ui, &th, Tone::No, "Every tab closed. Reopen the gallery to get them back.");
+        }
+        ui.add_space(24.0);
+
+        // ── the field and its action ────────────────────────────────────────
+        label(ui, &th, "A FIELD AND ITS ACTION ARE ONE ROW \u{2014} CONNECT IS DEAD UNTIL THE FIELD IS NOT");
+        ui.add_space(8.0);
+        ui.allocate_ui(vec2(520.0, 0.0), |ui| {
+            ui.set_width(520.0);
+            let armed = !self.t_find.trim().is_empty();
+            let (_, go) = slot_row(
+                ui, &th, Some(Icon::Search), "find a host or ssh user@hostname…",
+                &mut self.t_find, "CONNECT", 32.0, armed,
+            );
+            if go.clicked() {
+                self.live = "CONNECT".into();
+            }
+            ui.add_space(10.0);
+            let (_, keys) = slot_row(
+                ui, &th, None, "Private key file (optional)", &mut self.t_key, "KEYS", 32.0, true,
+            );
+            if keys.clicked() {
+                self.live = "KEYS".into();
+            }
+        });
+        ui.add_space(24.0);
+
+        // ── the form row, the sentence, the three-way ───────────────────────
+        label(ui, &th, "THE SETTINGS FORM ROW — NAMES END ON ONE RULE");
+        ui.add_space(8.0);
+        panel_frame(&th, th.card).show(ui, |ui| {
+            ui.set_width(600.0);
+            frow(ui, &th, "Agent forwarding", |ui| {
+                pkey_bar(ui, &th, &["INHERIT", "ON", "OFF"], &mut self.t_agent, vec2(84.0, 30.0));
+                hint(
+                    ui, &th,
+                    if self.t_agent == 1 { Tone::Ok } else { Tone::Plain },
+                    match self.t_agent {
+                        0 => "Inherit — from the group",
+                        1 => "On — set on this host",
+                        _ => "Off — set on this host",
+                    },
+                );
+                hint(
+                    ui, &th, Tone::Plain,
+                    "When on, your local SSH agent is forwarded so this server can use your keys.",
+                );
+            });
+            frow(ui, &th, "SFTP", |ui| {
+                ui.horizontal(|ui| {
+                    slide(ui, &th, "t_hidden", &mut self.t_hidden, SlideKind::Grip);
+                    ui.label(mono("Show hidden files", 11.5).color(th.ink));
+                });
+                if self.t_hidden {
+                    hint(ui, &th, Tone::No, "Hidden files include the keys in ~/.ssh.");
+                }
+            });
+        });
+        ui.add_space(24.0);
+
+        // ── the states, posed ───────────────────────────────────────────────
+        // PARITY.md 1 and 5: a gallery has to be able to show a state no
+        // pointer is producing, which is the only way to see all of them at
+        // once. These are the painters, with no Response anywhere near them.
+        label(ui, &th, "THE TAB, EVERY STATE \u{2014} RAISED · HOVER · HOVER ON THE \u{d7} · DOWN");
+        ui.add_space(8.0);
+        let (strip, _) = ui.allocate_exact_size(vec2(ui.available_width(), TAB_H), Sense::hover());
+        if ui.is_rect_visible(strip) {
+            let p = ui.painter();
+            for (i, (st, hot)) in [
+                (KeyState::Raised, false),
+                (KeyState::Hover, false),
+                (KeyState::Hover, true),
+                (KeyState::Pressed, false),
+            ]
+            .iter()
+            .enumerate()
+            {
+                let r = Rect::from_min_size(
+                    pos2(strip.left() + i as f32 * 176.0, strip.top()),
+                    vec2(170.0, TAB_H),
+                );
+                paint_tab(p, &th, r, "Local Terminal", th.primary, *st, *hot);
+            }
+        }
+        ui.add_space(24.0);
+
+        label(ui, &th, "THE RAIL ROW, EVERY STATE \u{2014} OFF · HOVER · ON");
+        ui.add_space(8.0);
+        let (col, _) =
+            ui.allocate_exact_size(vec2(250.0, RAIL_ROW_H * 3.0 + 6.0), Sense::hover());
+        if ui.is_rect_visible(col) {
+            let p = ui.painter();
+            let it = RailItem { icon: Icon::Folder, name: "Hosts" };
+            for (i, (on, hov)) in [(false, false), (false, true), (true, false)].iter().enumerate() {
+                let r = Rect::from_min_size(
+                    pos2(col.left(), col.top() + i as f32 * (RAIL_ROW_H + 3.0)),
+                    vec2(250.0, RAIL_ROW_H),
+                );
+                paint_rail_item(p, &th, r, &it, *on, *hov);
+            }
+        }
+        ui.add_space(24.0);
+
+        // ── the status line ─────────────────────────────────────────────────
+        label(ui, &th, "THE STATUS LINE — IT DOES NOT GO AWAY");
+        ui.add_space(8.0);
+        statline(ui, &th, true, Tone::Ok, "Bookmarks synced");
+        ui.add_space(8.0);
+        statline(ui, &th, false, Tone::No, "Sync folder missing");
+        ui.add_space(8.0);
+        statline(ui, &th, false, Tone::Plain, "Not checked");
+    }
+
     /// Which section draws what, and what the rest are waiting for. The strings
     /// are the ones `PARITY.md` uses.
     fn section(&mut self, ui: &mut Ui, page: usize, i: usize) {
@@ -1403,6 +1590,7 @@ impl Gallery {
             (0, 13) => self.open(ui, "modal · window · menu · picker"),
             (0, 14) => self.open(ui, "the traps are prose — docs/PORTING.md"),
             (1, 5) => self.launchpad(ui),
+            (1, 6) => self.terminass(ui),
             (2, 0) => self.jog(ui),
             (2, 1) => self.open(ui, "stick — stays dark in this skin"),
             (2, 2) => self.open(ui, "pen bank"),

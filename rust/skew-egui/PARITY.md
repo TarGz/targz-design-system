@@ -25,6 +25,8 @@ Status: **done** · **partial** — drawn, but a state or a skin is missing ·
 | switch | `swBtn()` | — | **open** |
 | picker | `openPicker()` | — | **open** |
 | select | `.sel`, `selector()` | `sel`, `paint_sel`, `paint_sel_list` | **face done** — the plate is `paint_sel_list`, a painter: a live popup is an overlay the host drives |
+| field + action | `.slotrow` | `slot_row` | **done** — one row, one height; the key is beside the well, never in it |
+| settings form row | `.frow`, `.frow-lab`, `.frow-body` | `frow`, `FROW_LAB_W` | **done** |
 
 ## The surfaces
 
@@ -48,7 +50,9 @@ Status: **done** · **partial** — drawn, but a state or a skin is missing ·
 | engraved caption | `.cut` | `cut` | **done** |
 | bay cap | `.bay-cap` | `section` | **done** |
 | field label | `.klab` and family | `label` | **done** |
-| jewel, pilot, lamp | `.jewel`, `.pilot` | — | **open** — and the unlit one is a filter (§4) |
+| jewel, pilot, lamp | `.jewel`, `.pilot`, `.pilot.on` | `paint_lens`, `Lens` | **partial** — the lamp is drawn lit and unlit; `.jewel`'s own glass bead is not, and the unlit one is a filter (§4) |
+| the sentence under a control | `.hint`, `.hint.ok`, `.hint.no` | `hint`, `Tone` | **done** |
+| status line | `.statline`, `.stat-cap` | `statline` | **done** — lamp, caption, three tones |
 | progress | `.meter` | — | **open** |
 | console | `.con-log` | — | **open** |
 | toast | the log as an event | — | **open** |
@@ -75,6 +79,8 @@ Status: **done** · **partial** — drawn, but a state or a skin is missing ·
 | app dock | `.navdock` §09 | — | **open** |
 | settings drawer | `.drawer` | — | **open** |
 | tab strip | `.hb-tabs` | — | **open** — `pkey_bar` is most of it |
+| tab bar | `.tabbar.cut` / `.outline` / `.pill`, `.tab`, `.tab-x`, `.tabpane` | `tab`, `paint_tab`, `TAB_H` | **STALE — DO NOT COPY.** The crate still draws the first sketch, a `.pkey` with a lamp in it; the sheet now has a real tab bar whose open tab is continuous with its pane, in three variants posed together on `skew-panels.html` § 07. The egui port waits on which one is chosen, because porting three drawings of one decision is three things to throw two of away |
+| vertical nav rail | `.rail`, `.rail-item`, `.rail-nm` | `rail`, `paint_rail_item`, `RailItem` | **done** — the selected row is a cut, not a cap |
 
 ---
 

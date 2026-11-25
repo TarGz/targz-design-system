@@ -150,9 +150,20 @@ These are the same requirement: *tell these N things apart, where N is not known
 the things have no inherent colour.* A layer is not red because it is hot; it is red because it is
 not the blue one.
 
-**Ruling: system, as one ramp, not yet built.** It needs to be ordered so the first six are maximally
-separable, extend to twelve without a reshuffle, and hold up in both skins — which is real work and
-is not a value to paste in. Named here so three apps stop each inventing a fourth.
+**Ruling: system, as one ramp.** It needed to be ordered so the first six are maximally separable,
+extend to twelve without a reshuffle, and hold up in both skins — which is real work and is not a
+value to paste in. Named here so three apps stop each inventing a fourth.
+
+**BUILT, as `--id-1` … `--id-12`** (`src/skew.css`, token block, beside `--pick`). It is
+`LOCAL_TAB_COLORS` in Terminass's own order, lifted rather than picked, because that order already
+satisfies the ruling: the first six are six different families (blue, green, orange, rose, violet,
+teal) and the second six are their neighbours, so a set of four and a set of seven are each as
+separable as they can be and nothing moves when the count grows. `HOST_COLORS` ×6 was the other
+candidate and it fails the test — it holds #cc2457 magenta *and* #c83a5a rose, two hues twenty
+degrees apart — so it is the set this one replaces. One value in both skins, for the same reason
+`--pick` is: a colour chosen to mean "the third one" cannot change when the lamp comes on.
+`STROKE_LAYER_COLORS` ×6 is still the plotter app's own and should now come off this ramp.
+The control that picks out of it is `.swatches` / `.swatch`, `skew-panels.html` § 07.
 
 ### App — not the system's
 

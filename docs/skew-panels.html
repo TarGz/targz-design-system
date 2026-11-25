@@ -231,11 +231,11 @@
     <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:12px">
       <div class="slotrow">
         <label class="slot"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg><input placeholder="find a host or ssh user@hostname…"></label>
-        <button type="button" class="act" disabled>CONNECT</button>
+        <button type="button" class="key act" disabled>CONNECT</button>
       </div>
       <div class="slotrow">
         <label class="slot"><input value="~/.ssh/id_ed25519"></label>
-        <button type="button" class="act">KEYS</button>
+        <button type="button" class="key act">KEYS</button>
       </div>
     </div>
   </div>
@@ -273,6 +273,76 @@
       <div class="statline ok"><span class="pilot on"></span><span class="stat-cap">Bookmarks synced</span></div>
       <div class="statline no"><span class="pilot"></span><span class="stat-cap">Sync folder missing</span></div>
       <div class="statline"><span class="pilot"></span><span class="stat-cap">Check failed</span></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       THE EDIT-HOST PANEL. Terminass's side panel, assembled out of the kit.
+       Four parts are new; one thing that looked new was not.
+
+       WHAT IS NEW: `.field` (a form field, which is not `.slot`), `.act.quiet`
+       (a danger key with the danger in the word and nowhere else),
+       `.frow.inline` (label left, short field, one line) and `.swatches` /
+       `.swatch` over the `--id-*` ramp.
+
+       WHAT WAS NOT: the × on the head. The drawer's own head has no × ON
+       PURPOSE and `skew-system.html` writes the argument out — "a second × in
+       the head was one control too many", because the pull tab is what opened
+       it and the tab's mark IS the state. That holds for `.drawer`, which has
+       a tab. Terminass's panel has no tab, so it needs the one control that
+       shuts it — and that is `.box` with a `.box-head`, which has carried a
+       `.win-btn` since the window section, `margin-left:auto` and all. No new
+       rule, and the drawer's decision left standing.
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="stage">
+    <div class="stage-note">the edit-host panel · the label is the placeholder · the danger is in the word, not in a cap</div>
+    <div class="box" style="width:var(--drawer-w)">
+      <div class="box-head">
+        <span class="jewel" style="--lyr:var(--id-1)"></span>
+        <span class="nm">EDIT HOST</span>
+        <button type="button" class="win-btn" aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <!-- ONE LEFT EDGE, AND THE ROW ORDER IS `app.rs:1140-1254`'s OWN.
+           The first draft put "General" and "SSH" in `.frow`'s 150px gutter,
+           which is a form the Settings PAGE has room for and this panel does
+           not: 150 off 404 leaves 208 for a field, so the username truncates
+           and twelve chips wrap onto two rows. Terminass does not have a
+           gutter here — `section()` is an etched caption across the width and
+           every field under it is `desired_width(available_width())`. So the
+           caption is `.bay-cap`, which is that part, and the only row with a
+           label is the one Terminass also gives one: Port. -->
+      <div class="box-body" style="display:flex;flex-direction:column;gap:9px">
+
+        <div class="bay-cap">General</div>
+        <input class="field" type="text" placeholder="Label" value="hestia">
+        <button type="button" class="sel" style="--selw:100%" aria-haspopup="listbox" aria-expanded="false" aria-label="Group">
+          <span class="sel-nm">No group</span>
+          <span class="sel-chev"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></span>
+        </button>
+
+        <div class="bay-cap">SSH</div>
+        <div class="frow inline"><span class="frow-lab">Port</span><div class="frow-body">
+          <input class="field sm" type="text" placeholder="22" inputmode="numeric">
+        </div></div>
+        <input class="field" type="text" placeholder="Username (not set: this Mac&rsquo;s own user name)">
+        <div class="slotrow">
+          <input class="field" type="text" placeholder="Private key file (optional)">
+          <button type="button" class="key act">KEYS</button>
+        </div>
+        <p class="hint">Passwords aren&rsquo;t saved: ssh asks in the terminal, SFTP asks in its pane.</p>
+
+        <div class="bay-cap">Colour</div>
+        <div class="swatches" id="e7sw" role="radiogroup" aria-label="Host colour"></div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-top:7px">
+          <button type="button" class="key act go">SAVE</button>
+          <button type="button" class="key act">CONNECT</button>
+          <button type="button" class="key act quiet">DELETE</button>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -4334,6 +4404,57 @@ windowise.top = 10;
     rail.querySelectorAll('.rail-item').forEach(n => n.classList.toggle('on', n === hit));
     window.SFX?.press?.();
   });
+
+  /* ── THE SWATCH ROW, BUILT FROM THE RAMP ──────────────────────────────
+     TWELVE BUTTONS AND NOT TWELVE LINES OF MARKUP. The ramp is twelve tokens
+     in a row, so the row is a loop over it — which also means the page cannot
+     drift out of step with the token block, because there is nowhere for a
+     thirteenth hex to be typed.
+
+     `--sw` CARRIES THE COLOUR AND NOTHING ELSE DOES. The part's own note says
+     why: the skin owns the material, never the data. So the only thing set
+     per element is which token it is showing.
+
+     RADIOGROUP, NOT A LIST OF BUTTONS. One of twelve is chosen, which is what
+     a radio group is; `aria-checked` says which, and a roving tabindex means
+     one Tab reaches the row and the arrows walk it. */
+  const sw = document.getElementById('e7sw');
+  if (sw) {
+    for (let i = 1; i <= 12; i++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'swatch' + (i === 1 ? ' on' : '');
+      b.style.setProperty('--sw', `var(--id-${i})`);
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', String(i === 1));
+      b.setAttribute('aria-label', `Colour ${i}`);
+      b.tabIndex = i === 1 ? 0 : -1;
+      sw.append(b);
+    }
+    const pick = n => {
+      const all = [...sw.querySelectorAll('.swatch')];
+      all.forEach(x => {
+        const on = x === n;
+        x.classList.toggle('on', on);
+        x.setAttribute('aria-checked', String(on));
+        x.tabIndex = on ? 0 : -1;
+      });
+      n.focus();
+      window.SFX?.press?.();
+    };
+    sw.addEventListener('click', e => {
+      const hit = e.target.closest('.swatch');
+      if (hit && sw.contains(hit)) pick(hit);
+    });
+    sw.addEventListener('keydown', e => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const all = [...sw.querySelectorAll('.swatch')];
+      const at = all.findIndex(x => x.classList.contains('on'));
+      pick(all[(at + step + all.length) % all.length]);
+    });
+  }
 
   /* ALL THREE BARS, ONE DRIVER. They differ in the sheet and nowhere else —
      if a variant needed its own script it would be a second component. */

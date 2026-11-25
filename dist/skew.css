@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.124.0
+     at       Skew v1.125.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -187,6 +187,45 @@
   --pick:        #FF6A00;
   --led-hot:     #FFB273;
   --led-red:     #FF2D2D;
+
+/* ── THE IDENTITY RAMP — TELL N THINGS APART ──────────────────────────────
+   NOT A SEMANTIC FAMILY AND THAT IS THE WHOLE DISTINCTION. `--ok` is green
+   because the thing is running; `--no` is warm because the thing stopped.
+   These twelve mean nothing. A host is not blue because it is cold, it is
+   blue because it is not the green one, and the next host is green because
+   the blue is taken. The colour is an INDEX wearing a hue.
+
+   THREE APPS EACH INVENTED THEIR OWN and `docs/PORTING.md` ruled it: one
+   ramp, system-owned, "ordered so the first six are maximally separable,
+   extend to twelve without a reshuffle". It named the three sets and left
+   the ramp unbuilt, which is where this comes in.
+
+   IT IS LIFTED, NOT PICKED. `Terminass/src/theme.rs:55-67`'s twelve, in that
+   file's own order, because that order already satisfies the ruling: the
+   first six are six different families — blue, green, orange, rose, violet,
+   teal — and the second six are their neighbours, so a set of four and a set
+   of seven are both as separable as they can be and nothing moves when the
+   count grows. `HOST_COLORS` ×6 was the other candidate and it fails the
+   test: it holds #cc2457 magenta AND #c83a5a rose, two hues 20 degrees
+   apart, and is the set this one replaces. CONTRIBUTING: a specimen is
+   lifted, not written.
+
+   ONE VALUE FOR BOTH SKINS, for the same reason `--pick` is: a colour chosen
+   to mean "the third one" cannot change when the lamp comes on, or the third
+   one stops being the third one. What the skin owns is the frame round it —
+   see `.swatch`. */
+  --id-1:   #4D8DF7;   /* blue       */
+  --id-2:   #2FB88A;   /* green      */
+  --id-3:   #F29D38;   /* orange     */
+  --id-4:   #E04F6E;   /* rose       */
+  --id-5:   #9B6BF2;   /* violet     */
+  --id-6:   #1FB5C9;   /* teal       */
+  --id-7:   #E8C53A;   /* yellow     */
+  --id-8:   #D85CD0;   /* magenta    */
+  --id-9:   #6CC04A;   /* lime       */
+  --id-10:  #F06A3E;   /* red-orange */
+  --id-11:  #5A7CD8;   /* indigo     */
+  --id-12:  #8C9AB0;   /* slate      */
 
   /* ── THE RECESS, ONCE ─────────────────────────────────────────────────
      Everything that goes IN uses these two, whatever its size. It took the
@@ -6794,6 +6833,8 @@ span.nav-link{ cursor:default; }
    height being named here — the row's own height is the key's. */
 .slotrow{ display:flex; align-items:center; gap:6px; width:100%; }
 .slotrow > .slot{ flex:1 1 auto; max-width:none; }
+/* …and the form field, now that there are two kinds of field to put in a row */
+.slotrow > .field{ flex:1 1 auto; width:auto; min-width:0; }
 /* THE ACTION IS AN `.act`, WHICH IS THE TEXT KEY. `.key` is the ICON key —
    `padding:0` and no size of its own, so it is given one by `.strip .key` or
    by an `.add` — and a word put in one collapses to the width of the word with
@@ -7203,9 +7244,161 @@ span.nav-link{ cursor:default; }
 .statline.ok .stat-cap{ color:var(--ok-ink); }
 .statline.no .stat-cap{ color:var(--no-ink); }
 
-/* ── THE THREE PLACES THE SKINS DISAGREE ───────────────────────────────────
+/* ── A FORM FIELD IS NOT A FILTER ──────────────────────────────────────────
+   `.slot` IS THE SEARCH SLOT AND IT SAYS SO. Lit glass, a magnifier in it,
+   `--read` ink with a bloom on it, `flex:1 1 190px; max-width:280px` — a
+   thing that sits in a toolbar and narrows what is already on screen.
+   Terminass's Edit host panel has seven fields that are none of that: full
+   width, and what you type into them is not a query, it is the record.
+
+   SO IT IS A SEPARATE PART AND `.slot` IS NOT TOUCHED. Splitting `.slot` into
+   a base and two modifiers would reach every filter field in the kit in order
+   to serve a field that is simply a different object.
+
+   THE LABEL IS THE PLACEHOLDER. Terminass's own `field()` passes the name as
+   hint text and draws no label at all (`app.rs:1141`), which on a drawer this
+   narrow is the right trade: a gutter would spend a third of the width
+   repeating a word the empty field is already saying. `.frow-lab` stays for
+   the Settings page, where there is room for it.
+
+   AND NO PHOSPHOR. `.slot input` glows because a filter field is a readout.
+   A field you type an address into is ink on the floor of a cut: `--txt`,
+   no shadow.
+
+   WRITTEN IN TOKENS, SO LIGHT NEEDS NOTHING. `--bay` already aliases to
+   `--paper` and light's `--recess` carries its own hairline. This part is
+   deliberately NOT in the "EVERY REMAINING CUT, WELL AND SLOT" list for that
+   reason: there is no dark hex in it to override. */
+.field{
+  display:block; width:100%; height:30px; padding:0 11px;
+  border:0; outline:0; border-radius:var(--r-key);
+  background:var(--bay);
+  box-shadow:var(--recess);
+  font-family:var(--font); font-size:11.5px; letter-spacing:.02em;
+  color:var(--txt);
+}
+.field::placeholder{ color:var(--txt-dim); letter-spacing:.02em; }
+.field:disabled{ color:var(--txt-dim); cursor:not-allowed; }
+/* a short one — 80px is Terminass's own `desired_width(80.0)` on the port */
+.field.sm{ width:80px; }
+
+/* ── THE QUIET DANGER KEY ──────────────────────────────────────────────────
+   `.act.halt` IS AN E-STOP: a filled red cap, a lit lens, `0 3px 0` of wall
+   under it and a bloom round it. Right for the one control that stops a
+   running machine, and far too loud for "Delete" at the foot of an edit form
+   next to "Save" — a red slab there reads as the panel's PRIMARY action,
+   which is the exact opposite of true.
+
+   SO THE DANGER GOES INTO THE WORD AND NOTHING ELSE. In the dark skin a plain
+   `.act` already carries no moulding, so this part is the word's colour plus
+   the findable edge the light skin's own note asks of a quiet key — no cap,
+   no wall, no travel. The thumb is not invited, and that IS the signal.
+
+   `--no-ink`, AND THERE IS NO RED TOKEN TO USE INSTEAD. `.act.halt`'s #8E1F1F
+   and #FFD6D6 are literals written at the one part that uses them. `--no` is
+   the family for "stopped", `--no-bg` / `--no-edge` / `--no-ink` are its
+   fill, edge and word, and all four are defined in BOTH skins at a contrast
+   the token block has already checked — which is why the hover needs no
+   invented alpha: it is the family's own wash, deep burnt in the dark and a
+   pale pink in the light. The dark `--no-ink` is warm (#FF8E3A) and will sit
+   near an orange primary; see the test list.
+
+   IT DOES NEED A LIGHT RULE. Line ~9170 fills `:is(.act, .chev, .add,
+   .win-btn)` with a white cap in the light skin, and a ghost with a white cap
+   is not a ghost. The override is in the light block below, at (0,3,0) so the
+   order of the two is not what decides it. */
+.act.quiet{
+  color:var(--no-ink);
+  background:none;
+  box-shadow:inset 0 0 0 1px var(--groove), inset 0 1px 0 var(--rim);
+}
+.act.quiet:hover{
+  color:var(--no-ink);
+  background:var(--no-bg);
+  box-shadow:inset 0 0 0 1px var(--no-edge), inset 0 1px 0 var(--rim);
+}
+/* AND IT MUST UNDO `.key`'s PRESS, NOT JUST RECOLOUR IT. `.act` is a modifier
+   ON `.key` — every moulding in the file comes from there — so `.key:active`
+   arrives with 2px of travel, a milled-down face and a pressed well, which is
+   a cap being pushed. There is no cap here. The press is the wash going one
+   step deeper and nothing moving, which is what pressing a word looks like. */
+.act.quiet:active{
+  transform:none;
+  background:var(--no-edge);
+  box-shadow:inset 0 0 0 1px var(--no-edge);
+}
+
+/* ── LABEL LEFT, FIELD SHORT, ONE LINE ─────────────────────────────────────
+   `.frow` IS THE SETTINGS PAGE'S ROW: a 150px right-aligned gutter against a
+   column of controls, which is the right shape when the names are long and
+   the page is wide. A drawer is `--drawer-w` and one of its rows is the word
+   "Port" against an 80px number — in a 150px gutter that is most of the panel
+   spent putting four characters on the far side of nothing.
+
+   SO THE GUTTER COLLAPSES TO THE WORD. `flex:0 0 auto` on the label, the body
+   turns back into a row, and the two sit side by side at their natural
+   widths. The same part with the column rule switched off, not a second row —
+   which is why it is a modifier and not `.irow`. */
+.frow.inline{ align-items:center; gap:10px; }
+.frow.inline > .frow-lab{ flex:0 0 auto; text-align:left; padding-top:0; }
+.frow.inline > .frow-body{ flex:0 1 auto; flex-direction:row; align-items:center; }
+
+/* ── THE COLOUR SWATCH ROW ─────────────────────────────────────────────────
+   THE CONTROL THAT PICKS OUT OF THE IDENTITY RAMP. Twelve discs, one of them
+   ringed. See the ramp's own note in the token block for why those twelve and
+   why that order.
+
+   THE COLOUR IS DATA AND THE SKIN NEVER TOUCHES IT. This file already says so
+   once, at `.pk-field` and the hue track: a skin may set the MATERIAL and
+   never the DATA. A hue track that goes grey because the lamp came on is a
+   broken instrument, and so is a host whose colour changes with the theme. So
+   the fill arrives as `--sw` ON THE ELEMENT, from the ramp, and neither skin
+   redefines it. What the skin owns is the frame — the hairline that keeps
+   #E8C53A yellow and #6CC04A lime off white paper.
+
+   THE SELECTED ONE IS RINGED AND NOT TICKED. A tick inside a 20px disc of
+   arbitrary colour is a tick you cannot promise is readable on it; a ring
+   outside the disc sits on the panel, which is a value we know. Two rings:
+   the case's own colour first, so the accent never touches the hue and no
+   pair of them ever reads as a gradient, then `--pick` — the accent, one
+   value in both skins, the same token the chosen word in a list wears.
+
+   The rim and the inner shade are `.jewel`'s, unchanged: a coloured disc on
+   this panel is a jewel, whatever it is for. */
+.swatches{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+/* A FLAT CHIP AND NOT A JEWEL. The instinct was a 20px disc with `.jewel`'s rim
+   and inner shade on it, and that is a lamp — a thing that is lit. These are
+   not lit; they are twelve pieces of coloured plastic you choose between.
+   Terminass draws `rect_filled(r, 6.0, c)` at 24px (`app.rs:1228`): flat, square,
+   6px round, no rim, nothing on top of the colour. That is the specimen.
+
+   NO RIM IN THE DARK, because on near-black every one of the twelve already has
+   one — its own edge. On cream #E8C53A and #6CC04A do not, which is the one
+   thing the light skin adds. */
+.swatch{
+  position:relative; width:24px; height:24px; flex:0 0 24px;
+  border:0; padding:0; border-radius:6px; cursor:pointer;
+  background:var(--sw);
+  transition:box-shadow .12s;
+}
+/* the hit pad: square, half the 7px gutter out on every side, so twenty-four
+   becomes thirty-one and the row stays a 7px row */
+.swatch::before{ content:''; position:absolute; inset:-3.5px; border-radius:0; }
+/* THE CHOSEN ONE IS RINGED, NOT TICKED. A tick inside a chip of arbitrary
+   colour is a tick you cannot promise is readable on it; a ring sits on the
+   panel, which is a value we know.
+
+   TWO PX OF GAP THEN TWO PX OF RING, which is Terminass's own
+   `rect_stroke(r.expand(2.0), 7.0, Stroke::new(2.0, TEXT))` read as shadows —
+   the gap wears the case so the ring never touches the hue and no two chips
+   can read as one gradient, and the ring wears `--txt`, which is a value in
+   both skins. Not `--pick`: the accent says "this is the action", and which of
+   twelve colours a host wears is not an action. */
+.swatch.on{ box-shadow:0 0 0 2px var(--case), 0 0 0 4px var(--txt); }
+
+/* ── THE PLACES THE SKINS DISAGREE ─────────────────────────────────────────
    Everything above is tokens, so light comes through the alias block. These
-   three are not a token's job.
+   six are not a token's job.
 
    1. THE HOVER IS A LIT EDGE IN THE DARK AND A SURFACE IN THE LIGHT. `--rim`
       is white at 9% on anodised metal and white at 100% on cream — correct as
@@ -7221,6 +7414,52 @@ span.nav-link{ cursor:default; }
    3. THE LAMP LOSES ITS HALO, which the file already says once for
       `:is(.jewel, .pilot)` and applies here unchanged. */
 [data-skin="light"] .rail-item:not(.on):hover{ background:var(--card-hover); }
+
+/* ── AND A CAPTION IS NOT A CUT ────────────────────────────────────────────
+   6. `.bay-cap` IS IN THE FORTY-TWO AND SHOULD NEVER HAVE BEEN. That list is
+      every hole in the case — a gap, a slot, a channel, a well — and it fills
+      each one with `--paper` plus an `--edge` hairline, which is right for a
+      hole and is a drawn white box with a line round it when the thing is a
+      row of etched capitals. It got swept in by its name: a `bay-cap` is the
+      CAPTION ON a bay, not the bay. Six parts of the sheet use it as a
+      section heading and all six had a box round the heading in the light
+      skin. So it comes out of the list, and what it actually needs is what
+      every etched word needs: ink instead of the dark theme's grey, no
+      embossing, and the rule running off it in `--edge` rather than near
+      black. `--ink-2` for the word (the token block: words wear `--ink-2`,
+      marks wear `--ink-3`) and `--edge` for the rule, which IS a mark. */
+[data-skin="light"] .bay-cap{ color:var(--ink-2); text-shadow:none; }
+[data-skin="light"] .bay-cap::after{ background:var(--edge); box-shadow:none; }
+
+/* ── AND TWO MORE, FROM THE EDIT-HOST PASS ────────────────────────────────
+   4. A GHOST MUST STAY A GHOST. The light skin gives every `.act` a white
+      cap, a findable edge and `--lift`, which is correct for the quiet key
+      that is the DEFAULT and wrong for the one part whose whole message is
+      that it has no cap. Restated at (0,3,0) rather than reordered, so the
+      two rules cannot be swapped into disagreement later.
+   5. A BLACK RIM IS NOT A RIM ON PAPER. The swatch's `rgba(0,0,0,.55)` is
+      `.jewel`'s, and on anodised metal it is the dark line where a jewel
+      meets its seat. On cream it is a drawn circle. `--edge` is the token
+      for the same job on this ground. The FILL is untouched — see the part. */
+[data-skin="light"] .act.quiet{
+  background:none; background-image:none;
+  border:0; box-shadow:inset 0 0 0 1px var(--edge);
+  color:var(--no-ink); text-shadow:none;
+}
+[data-skin="light"] .act.quiet:hover{
+  background-color:var(--no-bg); background-image:none;
+  border:0; box-shadow:inset 0 0 0 1px var(--no-edge);
+  color:var(--no-ink);
+}
+[data-skin="light"] .act.quiet:active{
+  background-color:var(--no-edge); background-image:none;
+  box-shadow:inset 0 0 0 1px var(--no-edge);
+  transform:none;
+}
+[data-skin="light"] .swatch{ box-shadow:0 0 0 1px var(--edge); }
+[data-skin="light"] .swatch.on{
+  box-shadow:0 0 0 1px var(--edge), 0 0 0 2px var(--case), 0 0 0 4px var(--txt);
+}
 /* ═══════════════════════════════════════════════════════════════════════════
    SKEW LIGHT — THE PANEL SKIN
 
@@ -8724,7 +8963,7 @@ html:not([data-skin="light"]) .stage:has(:is(.navdock,
    them rather than forty-two opinions about how dark a hole is.
    ══════════════════════════════════════════════════════════════════════════ */
 [data-skin="light"] :is(.gap, .slot, .chan, .sep, .port, .empty,
-                        .hb-deep, .hb-field, .bay-field, .bay-cap, .bay-deep,
+                        .hb-deep, .hb-field, .bay-field, .bay-deep,
                         .drum-bay, .menu-cut, .modal-well, .ld-well,
                         .pk-well, .oc, .oc-bar, .oc-field, .oc-tab,
                         .api, .api-more, .sliders,

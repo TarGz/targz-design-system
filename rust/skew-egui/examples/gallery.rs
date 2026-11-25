@@ -279,8 +279,14 @@ impl Gallery {
             sun: true,
             chev_open: false,
             t_rail: 0,
-            t_tab: 0,
+            t_tab: 3,
+            // the app's own pages first, then the sessions — one bar, and
+            // the difference carries itself: no close, no kind colour, own
+            // width. See `TabKind::Page`.
             t_tabs: vec![
+                ("Vaults".into(), TabKind::Page(Icon::Server)),
+                ("SFTP".into(), TabKind::Page(Icon::Upload)),
+                ("Settings".into(), TabKind::Page(Icon::Sliders)),
                 ("Local Terminal".into(), TabKind::Local),
                 ("Contabo".into(), TabKind::Remote),
                 ("NextDraw".into(), TabKind::Remote),

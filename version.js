@@ -1,6 +1,15 @@
-export const version = '1.129.0';
+export const version = '1.130.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.130.0',
+    date: '2026-11-25',
+    changes: [
+      "A PAGE IS A TAB TOO, AND THE THIRD KIND IS TWO ABSENCES RATHER THAN A THIRD COLOUR. `.tab.local` and `.tab.remote` answer one question — is the thing at the end of this tab THIS machine or another one — and an app's own pages are neither. They end up on the same bar as the sessions because that is what a tab bar IS: the list of what you can be looking at, which browsers settled years ago and call pinned. `.tab.page` on the sheet, `TabKind::Page(Icon)` in the crate.",
+      "AND THE DIFFERENCE CARRIES ITSELF, SO THERE IS NO SEPARATOR. Three things, all of them absences, which is why none of them is a new drawing. NO CLOSE: there is nothing at the end of a page to close, so it has no `.tab-x` in its markup at all — not a hidden one, not a disabled one — and `tabbar` never returns a page as closed, from a click or a middle-click. NO KIND COLOUR: the hue on an open tab is saying local-or-remote, a page has no answer, so it wears `--txt` — full ink, no hue, the same sentence with nothing to say. NO SHARE OF THE BAR: session names are arbitrary and many, which is what the 190px cap is for; an app has three or four pages and they are not going to grow, so a page costs the bar what its name costs and the sessions divide what is left. A separator between the groups was the other answer and it is worse — a fourth thing on a bar that already says it three ways, and wrong the first time an app puts a page on the right.",
+      "`ICON.sliders` AND `Icon::Sliders` — THE SETTINGS MARK ALREADY EXISTED AND IT IS NOT A GEAR. The drawer that holds SETTINGS is opened by a tab wearing three tracks and three handles, and that is the mark. But `.sliders` is 17×14 of positioned DOM painted in #0c0e11 for a 38px pull tab: it is not an icon and does not survive a 13px slot on a dark tab. So this is its geometry read back at icon scale in the icon stroke language — tracks at 0 / 6.2 / 12.4, handles at x 2 / 10 / 6, the 17×14 box centred in the 24 one. The same relationship `rail` and `tabbar` have to their CSS, and not a second opinion about it. A gear says \"machinery\", which is every part of every app; three sliders say \"things you set\".",
+    ],
+  },
   {
     version: '1.129.0',
     date: '2026-11-25',

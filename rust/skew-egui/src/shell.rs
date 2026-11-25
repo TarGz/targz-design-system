@@ -140,6 +140,24 @@ pub enum TabKind {
     Local,
     /// `ICON.server` — two rack units. Somewhere else.
     Remote,
+    /// A PAGE OF THE APP, not a session — and the third kind is not a third
+    /// colour, it is two absences.
+    ///
+    /// `Local` and `Remote` answer one question: is the thing at the end of
+    /// this tab THIS machine or another one. A page is neither, so it carries
+    /// its own mark rather than one of those two, and nothing in this enum
+    /// gets to choose it: the app knows what its pages are.
+    ///
+    /// IT CANNOT BE CLOSED, because there is nothing at the end of it to
+    /// close. So it draws no ×, the × is never hot on it, and [`tabbar`]
+    /// never returns it as closed — from a click or a middle-click. A × that
+    /// does nothing is worse than no × at all.
+    ///
+    /// AND IT TAKES NO KIND COLOUR WHEN IT IS OPEN. The hue on an open tab is
+    /// saying local-or-remote; a page has no answer, so it wears `--txt` —
+    /// full ink and no hue. That is not a missing case, it is the same
+    /// sentence the other two are saying, with nothing to say.
+    Page(Icon),
 }
 
 impl TabKind {
@@ -147,7 +165,12 @@ impl TabKind {
         match self {
             TabKind::Local => Icon::Term,
             TabKind::Remote => Icon::Server,
+            TabKind::Page(i) => i,
         }
+    }
+    /// A page cannot be closed, so it never draws the mark that says it can.
+    fn closable(self) -> bool {
+        !matches!(self, TabKind::Page(_))
     }
     /// THE LIT STEP, NOT THE FILL. `--run` and `--led` are what a large cap is
     /// PAINTED IN and arrive muddy at 13px; `--run-lit` and `--led-hot` are
@@ -160,6 +183,8 @@ impl TabKind {
             (TabKind::Local, crate::Skin::Light) => th.pal.run,
             (TabKind::Remote, crate::Skin::Dark) => th.pal.led_hot,
             (TabKind::Remote, crate::Skin::Light) => th.primary_deep,
+            // full ink, no hue — see the variant's own note
+            (TabKind::Page(_), _) => th.pal.txt,
         }
     }
 }
@@ -322,7 +347,7 @@ pub fn paint_tab(
     // the close shows on hover and on the open one — the tab you could mean.
     // A × on every tab is a row of marks saying "you may destroy this" on a
     // bar you are reading for names.
-    let show_x = on || hover;
+    let show_x = (on || hover) && tab.kind.closable();
     let right = if show_x { rect.right() - 26.0 } else { rect.right() - 10.0 };
 
     let mut job = egui::text::LayoutJob::single_section(
@@ -368,22 +393,49 @@ pub fn tabbar(
         paint_tab_ledge(ui.painter(), th, bar);
     }
 
+    // THE SHARE IS THE SESSIONS' SHARE. Pages take their own width, so
+    // dividing the bar by the total would hand the sessions a fraction that
+    // shrinks every time the app gains a page — which is backwards: a page
+    // costs the bar what its name costs and nothing more.
+    let sessions = tabs.iter().filter(|t| t.kind.closable()).count().max(1);
+    let pages_w: f32 = tabs
+        .iter()
+        .filter(|t| !t.kind.closable())
+        .map(|t| {
+            ui.painter().layout_no_wrap(t.name.to_owned(), FontId::monospace(11.0), th.pal.txt).rect.width()
+                + 41.0
+                + 2.0
+        })
+        .sum();
+
     let mut x = bar.left() + 8.0;
     for (i, t) in tabs.iter().enumerate() {
         let on = i == current;
-        let tw = 170.0_f32.min((bar.width() - 50.0) / tabs.len().max(1) as f32).max(96.0);
+        // A PAGE IS AS WIDE AS ITS NAME. The share-the-bar rule exists because
+        // session names are arbitrary and many; an app has three or four pages
+        // and they are not going to grow, so giving them a session's width
+        // would spend the bar on air. No × to reserve room for either.
+        let tw = if t.kind.closable() {
+            170.0_f32
+                .min((bar.width() - 50.0 - pages_w) / sessions as f32)
+                .max(96.0)
+        } else {
+            let g = ui.painter().layout_no_wrap(t.name.to_owned(), FontId::monospace(11.0), th.pal.txt);
+            g.rect.width() + 41.0
+        };
         let h = if on { TAB_H } else { TAB_H_OFF };
         let rect = Rect::from_min_max(pos2(x, bar.bottom() - h), pos2(x + tw, bar.bottom()));
         let resp = ui.interact(rect, ui.id().with(("tab", i)), Sense::click());
         let resp = resp.on_hover_cursor(egui::CursorIcon::PointingHand);
         let xr = Rect::from_center_size(pos2(rect.right() - 16.0, rect.center().y), Vec2::splat(18.0));
-        let over_x = resp.hover_pos().map_or(false, |q| xr.contains(q));
+        let over_x = t.kind.closable() && resp.hover_pos().map_or(false, |q| xr.contains(q));
         let state = if resp.hovered() { KeyState::Hover } else { KeyState::Raised };
         if ui.is_rect_visible(rect) {
             paint_tab(ui.painter(), th, rect, t, on, state, over_x);
         }
-        // middle-click closes a tab too — it is the one gesture every bar has
-        if (resp.clicked() && over_x) || resp.middle_clicked() {
+        // middle-click closes a tab too — it is the one gesture every bar has,
+        // and neither gesture reaches a page: there is nothing to close
+        if t.kind.closable() && ((resp.clicked() && over_x) || resp.middle_clicked()) {
             closed = Some(i);
         } else if resp.clicked() {
             picked = Some(i);

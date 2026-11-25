@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.129.0
+     at       Skew v1.130.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -7022,6 +7022,34 @@ span.nav-link{ cursor:default; }
 .tab-x svg{ width:11px; height:11px; stroke:currentColor; fill:none;
             stroke-width:2; stroke-linecap:round; }
 /* the + is the kit's own small key, on the ledge beside the last tab */
+/* ── A PAGE IS A TAB TOO, AND THE THIRD KIND IS TWO ABSENCES ──────────────
+   `.tab.local` AND `.tab.remote` ANSWER ONE QUESTION: is the thing at the end
+   of this tab THIS machine or another one. An app's own pages — a vault, a
+   transfer pane, a settings screen — are neither, and they end up on the same
+   bar as the sessions because that is what a tab bar IS: the list of what you
+   can be looking at. Browsers settled this years ago and call them pinned.
+
+   SO THE DIFFERENCE CARRIES ITSELF AND NEEDS NO SEPARATOR. Three things, all
+   of them absences, which is why none of them is a new drawing:
+
+     NO CLOSE. There is nothing at the end of a page to close, so it has no
+     `.tab-x` in its markup at all — not a hidden one, not a disabled one. A ×
+     that does nothing is worse than no × at all.
+     NO KIND COLOUR. The hue on an open tab is saying local-or-remote. A page
+     has no answer, so it wears `--txt`: full ink, no hue. Not a missing case —
+     the same sentence with nothing to say.
+     NO SHARE OF THE BAR. Session names are arbitrary and many, which is what
+     the 190px cap and `flex:0 1 auto` are for. An app has three or four pages
+     and they are not going to grow, so they take their own width.
+
+   A SEPARATOR BETWEEN THE GROUPS WAS THE OTHER ANSWER AND IT IS WORSE. It
+   would be a fourth thing on a bar that already says it three ways, and the
+   first time an app has pages on the right it would be in the wrong place. */
+.tab.page{ flex:0 0 auto; max-width:none; }
+.tab.page.on{ color:var(--txt); }
+.tab.page.on .tab-nm{ text-shadow:none; }
+.tab.page.on .tab-ico{ filter:none; }
+
 .tabbar .add{ align-self:center; margin:0 0 4px 6px; flex:0 0 26px; }
 
 /* The drawer front the tabs belong to. It carries the edge; the open tab's

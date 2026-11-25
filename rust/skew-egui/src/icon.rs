@@ -60,6 +60,20 @@ pub enum Icon {
     /// [`Icon::Term`], the prompt, which is where you type rather than where
     /// you read back.
     Clock,
+    /// `.sliders` — THREE TRACKS AND THREE HANDLES, AND IT IS THE SETTINGS
+    /// MARK IN THIS LANGUAGE ALREADY. The drawer that holds SETTINGS is opened
+    /// by a tab wearing exactly this, so a page of settings does not need a
+    /// new mark invented for it; it needs the one the drawer has been wearing.
+    ///
+    /// NOT A GEAR. A gear says "machinery", which is every part of every app;
+    /// three sliders say "things you set", which is what a settings page is.
+    /// The set has no gear and is not getting one.
+    ///
+    /// The geometry is `skew.css:6166`'s own, 1:1 in a 17×14 box centred in
+    /// the 24 one: tracks at 0 / 6.2 / 12.4, handles at x 2 / 10 / 6. This is
+    /// the CSS part ported, the way `rail` and `tabbar` are — not a second
+    /// drawing of it, which is what an `ICON.sliders` beside it would be.
+    Sliders,
 }
 
 /// A path in the 24-unit box, as open or closed polylines.
@@ -250,6 +264,14 @@ fn build(icon: Icon) -> Vec<(Vec<Pos2>, bool)> {
             // goes to a web page" — the one thing a local forward never does.
             p.m(4.0, 8.0).l(14.0, 8.0).l(20.0, 16.0);
             p.m(4.0, 16.0).l(14.0, 16.0).l(20.0, 8.0);
+        }
+        Icon::Sliders => {
+            // the 17×14 box, centred: x 3.5..20.5, y 5..19
+            for (i, (y, hx)) in [(5.8_f32, 7.5_f32), (12.0, 15.5), (18.2, 11.5)].iter().enumerate() {
+                let _ = i;
+                p.m(3.5, *y).l(20.5, *y);
+                p.m(*hx, y - 2.8).l(*hx, y + 2.8);
+            }
         }
         Icon::Clock => {
             // `<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>`

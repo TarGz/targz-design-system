@@ -144,6 +144,17 @@ Object.assign(ICON, {
   key:    svg('<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4"/>'),
   forward:svg('<path d="M4 8h10l6 8M4 16h10l6-8"/>'),
   clock:  svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),
+  /* `.sliders` AT ICON SCALE, AND NOT A SECOND OPINION ABOUT IT. The settings
+     mark in this language already exists: the drawer that holds SETTINGS is
+     opened by a tab wearing three tracks and three handles. But that part is
+     17×14 of positioned DOM painted in `#0c0e11` for a 38px pull tab — it is
+     not an icon and does not survive being put in a 13px slot on a dark tab.
+     This is its geometry read back at icon scale in the icon stroke language:
+     tracks at 0 / 6.2 / 12.4, handles at x 2 / 10 / 6, the 17×14 box centred
+     in the 24 one. Same relationship `rail` and `tabbar` have to their CSS.
+     NOT A GEAR: a gear says "machinery", which is every part of every app;
+     three sliders say "things you set". */
+  sliders:svg('<path d="M3.5 5.8h17M7.5 3v5.6M3.5 12h17M15.5 9.2v5.6M3.5 18.2h17M11.5 15.4v5.6"/>'),
   /* THE SPEAKER TAKES THE SAME SLASH EVERY OTHER `…Off` IN THIS SET TAKES —
      the plain drawing with a rule through it, so off is a SHAPE and not a
      second grey. The waves come off rather than being dimmed: what is gone is

@@ -84,6 +84,7 @@ Status: **done** · **partial** — drawn, but a state or a skin is missing ·
 | form field | `.field`, `.field.sm` | — | **open** — a cut with ink in it, no phosphor. `.slot` is the FILTER field and is not this |
 | quiet danger key | `.act.quiet` | — | **open** — the only key in the sheet with no moulding, and that absence IS the state. `.act.halt` is the E-stop and is not this |
 | inline form row | `.frow.inline` | — | **open** — `frow` with the 150px gutter collapsed to the word |
+| entry (host card) | `.entry`, `.entry-bay`, `.entry-ltr`, `.entry-txt`, `.entry-edit`, `.entry.on` | — | **open** — `.module` in a row, composed not copied (`class="module entry"`). The running rail comes off and its pseudo-element carries the hover wash instead; the chosen row is ringed in `outline`, which is what `.act.primed` already does and for the reason it gives |
 | identity swatches | `.swatches`, `.swatch`, `--id-1`…`--id-12` | `pal.id_1`…`id_12` | **open** — the CONTROL is unported; the RAMP is in `tokens.rs`, twelve fields, one value in both skins |
 | local / remote mark | `ICON.server` | `Icon::Server` | **done** — the one mark in the set drawn rather than lifted. `Icon::Term` was already the local half |
 

@@ -1,6 +1,18 @@
-export const version = '1.126.0';
+export const version = '1.127.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.127.0',
+    date: '2026-11-25',
+    changes: [
+      "`.entry` — THE ROW OF A LIST THAT STANDS FOR ONE THING, and it is the last gap the Terminass pass opened. A saved host, a saved connection, a saved anything: a mark you can tell from the others at a glance, a name, what it actually is underneath, and the one way to change it. Terminass has twenty of them down its Vaults page and `app.rs:3432` is the drawing. It was blocked on the identity ramp until v1.125.0 and is not blocked on anything now.",
+      "IT COMPOSES, IT DOES NOT COPY. `class=\"module entry\"`, the same move `.act` makes on `.key`. The chassis is already written — the three-stop face, the rims, the cast shadow, the grain — and already NAMED in both of the light skin's chassis lists, so an entry arrives in daylight correct without a line being written for it. A second chassis would be a second thing to tune and the first one to drift. What the modifier overrides is the layout and nothing about the metal.",
+      "AND THE RUNNING RAIL COMES OFF, WHICH IS NOT A TWEAK. `.module::before` is a light pipe answering \"is this up\". A saved host is not up or down, it is SAVED, and a dead rail down the left of twenty rows is a lamp that is off for a reason nobody can name. The pseudo-element carries the hover wash instead — which is why the rules say `.module.entry::before` and not `.entry::before`: the light skin hides the rail BY NAME at a weight that would otherwise take the wash with it. The wash itself is `.rail-item`'s own pair, `--rim` in the dark and `--card-hover` in the light, because an entry is the same object: a row in a list that you click.",
+      "THE BAY IS A CUT AND THE LETTER IS AT THE BOTTOM OF IT, 40px square at an 8px round — the one measurement in the part that is Terminass's rather than this file's, because it is the size of a thing and not a rule about one. `--bay` under `--recess` resolves in both skins without a word. The letter and the jewel both read ONE `--lyr` set on the bay: a host is one colour, and a letter in one orange beside a lamp in another is two hosts. The name is `.mod-name` and the line under it is `.stat-cap` — both already settled, both already light-handled, and `.stat-cap` is exact down to the capitals, because `etched_job` calls `to_uppercase` on that line too.",
+      "THE PENCIL IS NOT ON EVERY ROW. A column of twenty rows each carrying an edit key is twenty invitations to change something, on a page you are reading in order to CHOOSE something. It shows on hover and on the row that is already chosen — the one you could mean — which is the argument `.tab-x` makes, for the same reason. And the chosen row is ringed in `outline` rather than a shadow, which is `.act.primed`'s argument: the chassis spends its box-shadow on the rims and the cast, and a ring in that stack is a fourth thing competing for one property that would have to be restated in every state. Terminass draws a second stroke at alpha 50 round the first; that one is dropped, because `overflow:hidden` clips a pseudo-element and there is nowhere clean to put it — one lit line on a dark row is already the loudest thing on the page.",
+      "ONE THING LEFT FOR THE EYE, AND IT IS NOT A BUG YET: the letter is set in the host's own colour at 17px, and on `--paper` in the light skin `--id-7` yellow and `--id-9` lime may not hold. The swatch chips solved the same problem with an `--edge` hairline, which a letter cannot have. If it fails, the ramp owes the light skin a darker variant and that is a decision, not a fix.",
+    ],
+  },
   {
     version: '1.126.0',
     date: '2026-11-25',

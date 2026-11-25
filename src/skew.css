@@ -7781,6 +7781,106 @@ span.nav-link{ cursor:default; }
    twelve colours a host wears is not an action. */
 .swatch.on{ box-shadow:0 0 0 2px var(--case), 0 0 0 4px var(--txt); }
 
+/* ── THE ENTRY — A ROW OF A LIST THAT STANDS FOR ONE THING ────────────────
+   A saved host, a saved connection, a saved anything: a mark you can tell
+   from the others at a glance, a name, what it actually is underneath, and
+   the one way to change it. Terminass has twenty of them down its Vaults
+   page and `card()` / `host_card()` in `app.rs:3432` is the drawing.
+
+   IT IS `.module` IN A ROW, NOT A SECOND CARD. The chassis is already
+   written — the three-stop face, the rims, the cast shadow, the grain, and
+   BOTH light lists it is named in. A second chassis is a second thing to
+   tune and the first one to drift. So an entry composes: `class="module
+   entry"`, exactly the way `.act` sits on `.key`, and what it overrides is
+   the LAYOUT and nothing about the metal.
+
+   THE RUNNING RAIL COMES OFF, AND THAT IS NOT A TWEAK. `.module::before` is
+   a light pipe answering "is this up"; a saved host is not up or down, it is
+   SAVED, and a dead rail down the left of every row is a lamp that is off
+   for a reason nobody can name. The pseudo-element is re-used for the hover
+   wash instead, which is why the rule is `.module.entry::before` and not
+   `.entry::before`: the light skin hides the rail by name at a weight that
+   would otherwise hide the wash with it.
+
+   AND THE WASH IS `.rail-item`'s PAIR, because an entry is the same object —
+   a row in a list that you click. `--rim` is white on anodised metal and
+   invisible as a fill on cream; `--card-hover` is the token for that job and
+   is light-only. The file argues this once already, at the rail. */
+.entry{
+  flex-direction:row; align-items:center; gap:12px;
+  width:100%; min-height:60px; padding:10px 12px;
+  cursor:pointer; text-align:left;
+  transition:outline-color .12s;
+}
+.module.entry::before{
+  inset:0; width:auto; border-radius:inherit; z-index:0;
+  background:transparent; box-shadow:none;
+  transition:background .12s;
+}
+.module.entry:hover::before{ background:var(--rim); }
+/* the rail is behind the content; everything in the row is in front of it */
+.entry > *{ position:relative; z-index:1; }
+
+/* THE BAY IS A CUT, AND THE LETTER IS AT THE BOTTOM OF IT. 40px square, 8px
+   round — the one measurement in here that is Terminass's rather than this
+   file's, because it is the size of a thing and not a rule about one. The
+   floor is `--bay` under `--recess`, which is every hole in this language
+   and resolves in the light skin without a word. */
+.entry-bay{
+  position:relative; flex:0 0 40px; width:40px; height:40px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:8px;
+  background:var(--bay);
+  box-shadow:var(--recess);
+}
+/* THE LETTER WEARS THE IDENTITY AND SO DOES THE JEWEL, from the one
+   `--lyr` on the bay. Two marks, one value: a host is one colour, and a
+   letter in one orange beside a lamp in another is two hosts. */
+.entry-ltr{
+  font-family:var(--font); font-size:17px; font-weight:700; letter-spacing:.02em;
+  color:var(--lyr);
+}
+/* inside the bay's top-right corner, not hung off it — a lamp set into the
+   plate the letter is cut into, which is where `card()` puts it */
+.entry-bay .jewel{
+  position:absolute; top:4.5px; right:4.5px;
+  width:7px; height:7px; flex:0 0 7px;
+}
+.entry-txt{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:3px; }
+.entry-txt > *{ flex:0 0 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* `.mod-name` is the card name and `.stat-cap` is the etched line under a
+   lamp, both already settled and both already light-handled. Terminass sets
+   these at 14.5 and 9.5; the 9.5 is the same number and the 14.5 is that
+   app's type scale, not this one's. A specimen is lifted; a SIZE is a rule,
+   and the rule here is `.mod-name`. */
+
+/* THE PENCIL IS NOT ON EVERY ROW. A column of twenty rows each carrying an
+   edit key is twenty invitations to change something, on a page you are
+   reading to CHOOSE something. It shows on hover and on the row that is
+   already chosen — the one you could mean — which is the argument `.tab-x`
+   makes for the same reason. */
+.entry-edit{
+  flex:0 0 28px; width:28px; height:28px; padding:0;
+  opacity:0; transition:opacity .12s;
+}
+.entry-edit svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round; }
+.entry:hover .entry-edit, .entry.on .entry-edit{ opacity:1; }
+
+/* THE CHOSEN ROW IS RINGED IN `outline`, AND `.act.primed` ALREADY ARGUES
+   WHY. The chassis spends its box-shadow on the rims and the cast shadow; a
+   ring added to that stack is a fourth thing competing for one property and
+   would have to be restated in every hover and pressed state. An outline
+   follows the radius, sits outside the face, and belongs to no stack.
+
+   NO HALO. Terminass draws a second stroke at alpha 50 round the first, and
+   on this chassis there is nowhere clean to put it — `overflow:hidden` clips
+   a pseudo-element and the shadow stack is spoken for. `.act.primed` rings
+   the chosen key with one line and nothing else, which is the precedent in
+   this file, and one lit line on a dark row is already the loudest thing on
+   the page. */
+.entry.on{ outline:1px solid var(--led); outline-offset:0; }
+
 /* ── THE PLACES THE SKINS DISAGREE ─────────────────────────────────────────
    Everything above is tokens, so light comes through the alias block. These
    six are not a token's job.
@@ -7815,6 +7915,21 @@ span.nav-link{ cursor:default; }
       marks wear `--ink-3`) and `--edge` for the rule, which IS a mark. */
 [data-skin="light"] .bay-cap{ color:var(--ink-2); text-shadow:none; }
 [data-skin="light"] .bay-cap::after{ background:var(--edge); box-shadow:none; }
+
+/* ── AND THE ENTRY, WHICH NEEDS TWO WORDS ─────────────────────────────────
+   7. THE WASH, for the reason the rail's already gives: `--rim` is an EDGE
+      token and is invisible as a FILL on cream. `--card-hover` is the token
+      for this exact job. The selector carries `.module` as well as `.entry`
+      so it outranks `[data-skin="light"] .module::before{ display:none }` —
+      that rule hides the RUNNING RAIL, and on an entry this pseudo-element
+      is not the rail, it is the wash.
+   8. THE RING IS `--primary` AND NOT `--led`. `--led` is the lamp value and
+      on paper a lamp is not what a chosen row is; `--primary` is the accent
+      at a weight meant to be seen against cream, and it is the same token
+      the chosen word in every list wears over here. */
+[data-skin="light"] .module.entry::before{ display:block; background:transparent; }
+[data-skin="light"] .module.entry:hover::before{ background:var(--card-hover); }
+[data-skin="light"] .entry.on{ outline-color:var(--primary); }
 
 /* ── AND TWO MORE, FROM THE EDIT-HOST PASS ────────────────────────────────
    4. A GHOST MUST STAY A GHOST. The light skin gives every `.act` a white

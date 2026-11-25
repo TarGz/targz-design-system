@@ -1,6 +1,15 @@
-export const version = '1.128.0';
+export const version = '1.129.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.129.0',
+    date: '2026-11-25',
+    changes: [
+      "`add_fonts` — AND THE CRATE STOPS TAKING A DECISION THAT WAS NEVER ITS TO TAKE. `Theme::apply` called `install_fonts`, which built a fresh `FontDefinitions` and called `ctx.set_fonts`. That call REPLACES; it does not merge. So any app with a font of its own — a terminal face, a brand face — had its families deleted the moment it adopted this crate, and the first part to ask for the missing one panicked inside epaint with `FontFamily::Name(\"silkscreen\") is not bound to any fonts`. Which of the two sets survived depended on initialisation order, so it read as a bug in the app. It was not. THERE IS EXACTLY ONE `FontDefinitions` IN A PROGRAM AND EXACTLY ONE PLACE IT IS INSTALLED, AND THAT PLACE BELONGS TO WHOEVER OWNS `main`. The host now builds the set, adds its own faces, calls `add_fonts` to add Skew's, and installs it once. It EXTENDS rather than assumes: the monospace fallback behind Silkscreen is read off the set it is handed, so an app that has already put its own face into `Monospace` keeps it.",
+      "AND `Theme::apply_no_fonts`, BECAUSE HALF A FIX IS NOT ONE. `add_fonts` alone does not help an app that still calls `Theme::apply` — that method installs fonts, so it would undo the set the host just installed, whichever order the two ran in. `apply` is unchanged and is still the one-call path for an app with no fonts of its own; `apply_no_fonts` is everything else it does. `install_fonts` stays and is now documented as the convenience it always was, with the warning it never had.",
+      "`ICON.key`, `ICON.forward` AND `ICON.clock`, LIFTED OUT OF § 07 RATHER THAN DRAWN. All three have been on `skew-panels.html`'s rail since that stage was built — inline in the markup, never named here, so nothing could reach them and `skew-egui` could not see they existed. The crate was borrowing `Eye` for Keychain, `Ext` for Port forwarding and `Term` for Logs, and a borrowed mark is worse than a missing one: `Ext` does not mean \"nothing better was available\", it means \"this opens a web page\", which is the one thing a local port forward never does. The forward mark is TWO LINES THAT SWAP — what arrives here comes out there — and not a fork, because a fork is one line becoming two and that is a different claim. `ICON.server` keeps its note about being the only mark in the set drawn rather than lifted; it is still the only one.",
+    ],
+  },
   {
     version: '1.128.0',
     date: '2026-11-25',

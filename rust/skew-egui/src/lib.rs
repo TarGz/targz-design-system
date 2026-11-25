@@ -86,5 +86,7 @@ pub use machine::{
 pub use nav::{channel, nav_bar, Nav, NavHit, NAV_GAP, NAV_HEIGHT};
 pub use paint::{hex, mix, rgb, vgrad};
 pub use switch::{paint_slide, slide, SlideKind, SLIDE_SIZE};
-pub use theme::{id_color, mono, read_font, Skin, Theme, ID_RAMP_LEN};
+pub use theme::{
+    add_fonts, id_color, install_fonts, mono, read_font, Skin, Theme, ID_RAMP_LEN,
+};
 pub use tokens::{Palette, ShadowLayer};

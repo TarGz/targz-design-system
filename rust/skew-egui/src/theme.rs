@@ -223,9 +223,38 @@ impl Theme {
         fill == self.card || fill == self.case_face || fill == self.paper || fill == self.card_hover
     }
 
-    /// Fonts, visuals and spacing. Call once, at startup, after the palette is chosen.
+    /// Fonts, visuals and spacing. Call once, at startup, after the palette is
+    /// chosen.
+    ///
+    /// THIS IS THE ONE-CALL PATH AND IT INSTALLS FONTS. If your app has a font
+    /// of its own, this is the wrong door: it calls [`install_fonts`], which
+    /// calls `set_fonts`, which REPLACES — so it would undo the set you just
+    /// installed, whichever order the two run in. Use [`add_fonts`] with your
+    /// own faces and then [`Theme::apply_no_fonts`].
     pub fn apply(&self, ctx: &egui::Context) {
         install_fonts(ctx);
+        self.apply_no_fonts(ctx);
+    }
+
+    /// Visuals and spacing, and NOT fonts.
+    ///
+    /// FOR AN APP THAT OWNS ITS OWN `FontDefinitions`. There is exactly one of
+    /// those in a program and exactly one place it is installed, and that
+    /// place belongs to whoever owns `main` — a crate that calls `set_fonts`
+    /// has taken the host's decision away from it. So the host builds the set,
+    /// adds its own faces, calls [`add_fonts`] to add Skew's, installs it
+    /// once, and then calls this for everything else.
+    ///
+    /// ```no_run
+    /// # let ctx = egui::Context::default();
+    /// # let theme = skew_egui::Theme::new(skew_egui::Skin::Dark);
+    /// let mut defs = egui::FontDefinitions::default();
+    /// // ... the app's own faces ...
+    /// skew_egui::add_fonts(&mut defs);
+    /// ctx.set_fonts(defs);
+    /// theme.apply_no_fonts(&ctx);
+    /// ```
+    pub fn apply_no_fonts(&self, ctx: &egui::Context) {
         let mut v = match self.skin {
             Skin::Light => egui::Visuals::light(),
             Skin::Dark => egui::Visuals::dark(),
@@ -267,34 +296,77 @@ impl Theme {
     }
 }
 
-/// Register Silkscreen as the `"silkscreen"` family — `--font-read`, the pixel
-/// readout face, embedded as TTF because egui has no woff2 decoder. Called by
-/// [`Theme::apply`]; call it yourself only if you build `FontDefinitions`.
-pub fn install_fonts(ctx: &egui::Context) {
-    let mut fonts = egui::FontDefinitions::default();
-    fonts.font_data.insert(
+/// ADD Skew's faces to a set the host is building.
+///
+/// THIS IS THE ONE THE HOST WANTS, AND [`install_fonts`] IS THE CONVENIENCE.
+/// `Context::set_fonts` REPLACES — it does not merge — so a crate that calls
+/// it is a crate that deletes whatever families the app had registered. An app
+/// with a font of its own (a terminal face, a brand face) adopts one part that
+/// calls [`read_font`] and panics inside epaint the first time anything asks
+/// for the family that got erased:
+///
+/// ```text
+/// FontFamily::Name("silkscreen") is not bound to any fonts
+/// ```
+///
+/// Whichever of the two `set_fonts` calls runs last wins, so the failure
+/// depends on initialisation order and looks like a bug in the app. It is not;
+/// it is this crate having taken a decision that is the HOST'S to take. There
+/// is exactly one `FontDefinitions` in a program and exactly one place it is
+/// installed, and that place belongs to whoever owns `main`.
+///
+/// So: the host builds the set, adds its own faces, calls this to add Skew's,
+/// and installs it once.
+///
+/// ```no_run
+/// # let ctx = egui::Context::default();
+/// let mut defs = egui::FontDefinitions::default();
+/// // ... the app's own faces go in here ...
+/// skew_egui::add_fonts(&mut defs);
+/// ctx.set_fonts(defs);
+/// ```
+///
+/// It EXTENDS rather than assumes: the monospace fallback behind Silkscreen is
+/// read off the set it is handed, so an app that has already put its own face
+/// into `Monospace` keeps it as the fallback and does not get the default one
+/// back.
+pub fn add_fonts(defs: &mut egui::FontDefinitions) {
+    defs.font_data.insert(
         "silkscreen".into(),
         egui::FontData::from_static(include_bytes!("../assets/silkscreen-400.ttf")),
     );
-    fonts.font_data.insert(
+    defs.font_data.insert(
         "silkscreen-bold".into(),
         egui::FontData::from_static(include_bytes!("../assets/silkscreen-700.ttf")),
     );
     let mut fam: Vec<String> = vec!["silkscreen".into()];
     fam.extend(
-        fonts
-            .families
+        defs.families
             .get(&egui::FontFamily::Monospace)
             .cloned()
             .unwrap_or_default(),
     );
-    fonts
-        .families
+    defs.families
         .insert(egui::FontFamily::Name("silkscreen".into()), fam);
-    fonts.families.insert(
+    defs.families.insert(
         egui::FontFamily::Name("silkscreen-bold".into()),
         vec!["silkscreen-bold".into()],
     );
+}
+
+/// Register Silkscreen as the `"silkscreen"` family — `--font-read`, the pixel
+/// readout face, embedded as TTF because egui has no woff2 decoder.
+///
+/// THE ONE-CALL CASE, for an app that has no fonts of its own. It builds a
+/// default set, adds Skew's, and installs it. [`Theme::apply`] calls this, so
+/// a plain app needs to know none of it.
+///
+/// IF YOUR APP HAS A FONT OF ITS OWN, DO NOT USE THIS — use [`add_fonts`]. Two
+/// calls to `set_fonts` leave only the last one's families, whichever way
+/// round they go, and the loser panics in epaint. See `add_fonts`.
+pub fn install_fonts(ctx: &egui::Context) {
+    let mut fonts = egui::FontDefinitions::default();
+    add_fonts(&mut fonts);
     ctx.set_fonts(fonts);
 }
 

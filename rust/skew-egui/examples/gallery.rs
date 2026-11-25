@@ -1425,10 +1425,10 @@ impl Gallery {
         ui.add_space(8.0);
         let items = [
             RailItem { icon: Icon::Folder, name: "Hosts" },
-            RailItem { icon: Icon::Eye, name: "Keychain" },
-            RailItem { icon: Icon::Ext, name: "Port forwarding" },
+            RailItem { icon: Icon::Key, name: "Keychain" },
+            RailItem { icon: Icon::Forward, name: "Port forwarding" },
             RailItem { icon: Icon::Code, name: "Snippets" },
-            RailItem { icon: Icon::Term, name: "Logs" },
+            RailItem { icon: Icon::Clock, name: "Logs" },
         ];
         panel_frame(&th, th.card).show(ui, |ui| {
             ui.set_width(250.0);

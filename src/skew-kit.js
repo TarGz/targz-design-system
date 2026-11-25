@@ -135,6 +135,15 @@ Object.assign(ICON, {
      A globe would have said "the internet", which is the wire and not the
      machine; a tower would have said "a PC under a desk". */
   server:svg('<rect x="3" y="4" width="18" height="7" rx="2"/><line x1="6.5" y1="7.5" x2="6.5" y2="7.5"/><circle cx="6.5" cy="7.5" r="0.6"/><rect x="3" y="13" width="18" height="7" rx="2"/><circle cx="6.5" cy="16.5" r="0.6"/>'),
+  /* ── THE RAIL'S THREE, LIFTED OUT OF § 07 ───────────────────────────────
+     All three have been on `skew-panels.html` § 07's rail since it was built,
+     inline in the stage markup, and were never named here — so nothing could
+     reach them and `rust/skew-egui` could not see they existed. Same paths,
+     now with handles on them. `server` above is still the one mark in this set
+     drawn rather than lifted. */
+  key:    svg('<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4"/>'),
+  forward:svg('<path d="M4 8h10l6 8M4 16h10l6-8"/>'),
+  clock:  svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),
   /* THE SPEAKER TAKES THE SAME SLASH EVERY OTHER `…Off` IN THIS SET TAKES —
      the plain drawing with a rule through it, so off is a SHAPE and not a
      second grey. The waves come off rather than being dimmed: what is gone is

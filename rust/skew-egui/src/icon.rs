@@ -46,6 +46,20 @@ pub enum Icon {
     /// everything else in here is a machined box with a lamp on it. A globe
     /// would have said the internet, which is the wire and not the machine.
     Server,
+    /// `ICON.key` — a bit and a bow. KEYCHAIN, and before this the rail was
+    /// borrowing [`Icon::Eye`] for it, which means SHOW.
+    Key,
+    /// `ICON.forward` — two lines that SWAP. What arrives here comes out
+    /// there, which is what a forward is. PORT FORWARDING, which was borrowing
+    /// [`Icon::Ext`] — the open-a-link arrow, which says "this goes to a web
+    /// page" and is the one thing a local forward does not do. Not a fork:
+    /// a fork is one line becoming two, which is a different claim.
+    Forward,
+    /// `ICON.clock` — a dial and two hands. LOGS: a list of things that
+    /// happened, which is a list ordered by TIME. It was borrowing
+    /// [`Icon::Term`], the prompt, which is where you type rather than where
+    /// you read back.
+    Clock,
 }
 
 /// A path in the 24-unit box, as open or closed polylines.
@@ -208,6 +222,42 @@ fn build(icon: Icon) -> Vec<(Vec<Pos2>, bool)> {
         Icon::Close => {
             p.m(18.0, 6.0).l(6.0, 18.0);
             p.m(6.0, 6.0).l(18.0, 18.0);
+        }
+        // ── THE RAIL'S THREE, AND THEY ARE LIFTED AFTER ALL ───────────────
+        // The first draft of these was drawn, and that was wrong twice over.
+        // `skew-panels.html` § 07 has already been posing the rail with all
+        // three marks on it, inline in the stage — they were simply never
+        // named in `ICON`, so nothing could reach them and the crate could not
+        // see they existed. These are those paths, unchanged. CONTRIBUTING:
+        // a specimen is lifted, not written, and "already in the sheet but
+        // anonymous" still counts as there.
+        //
+        // `ICON.server` keeps its note about being the one mark drawn rather
+        // than lifted. It is still the one.
+        Icon::Key => {
+            // `<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4"/>`
+            // the bow, the shaft, and one ward — KEYCHAIN, where the rail was
+            // borrowing `Eye`, which means SHOW
+            p.circle(8.0, 12.0, 4.0);
+            p.m(12.0, 12.0).l(21.0, 12.0);
+            p.m(18.0, 12.0).l(18.0, 16.0);
+        }
+        Icon::Forward => {
+            // `<path d="M4 8h10l6 8M4 16h10l6-8"/>` — TWO LINES THAT SWAP,
+            // which is what a forward IS: what arrives here comes out there.
+            // Not a fork (one line becoming two) and emphatically not `Ext`,
+            // the open-a-link arrow the rail was borrowing, which says "this
+            // goes to a web page" — the one thing a local forward never does.
+            p.m(4.0, 8.0).l(14.0, 8.0).l(20.0, 16.0);
+            p.m(4.0, 16.0).l(14.0, 16.0).l(20.0, 8.0);
+        }
+        Icon::Clock => {
+            // `<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>`
+            // LOGS: a list of things that happened, which is a list ordered by
+            // TIME. The rail was borrowing `Term`, the prompt, which is where
+            // you type rather than where you read back.
+            p.circle(12.0, 12.0, 8.0);
+            p.m(12.0, 8.0).l(12.0, 12.0).l(15.0, 14.0);
         }
         Icon::Server => {
             // two rack units, 18 × 7 at a 2px round, and the lamp on each

@@ -283,3 +283,138 @@ pub fn fader(
     paint_fader(ui.painter(), th, rect, label, *v, min, max, state);
     (commit, dragging)
 }
+
+// ── the trim: the fader laid down, at form-field height ─────────────────────
+
+/// `.fader` WITHOUT `.vert` — one row high.
+pub const TRIM_H: f32 = 26.0;
+/// `.fcap` laid down: 17 across the travel, 24 tall.
+const TRIM_CAP: egui::Vec2 = egui::Vec2 { x: 17.0, y: 24.0 };
+/// `.ftrack{ height:9px }`.
+const TRIM_TRACK_H: f32 = 9.0;
+/// The readout at the right end, `paint_lcd`'s own height.
+const TRIM_LCD: egui::Vec2 = egui::Vec2 { x: 46.0, y: 18.0 };
+
+/// Paint a trim into `rect` with no interaction. [`trim`] is this plus the drag.
+pub fn paint_trim(
+    p: &egui::Painter, th: &Theme, rect: Rect, v: f32, min: f32, max: f32, text: &str,
+    state: FaderState,
+) {
+    let lcd = Rect::from_center_size(
+        pos2(rect.right() - TRIM_LCD.x / 2.0, rect.center().y),
+        TRIM_LCD,
+    );
+    paint_lcd(p, th, lcd, text);
+
+    let run = Rect::from_min_max(
+        pos2(rect.left() + TRIM_CAP.x / 2.0, rect.top()),
+        pos2(lcd.left() - 10.0 - TRIM_CAP.x / 2.0, rect.bottom()),
+    );
+    let cy = rect.center().y;
+    let track = Rect::from_min_max(
+        pos2(run.left() - TRIM_CAP.x / 2.0, cy - TRIM_TRACK_H / 2.0),
+        pos2(run.right() + TRIM_CAP.x / 2.0, cy + TRIM_TRACK_H / 2.0),
+    );
+    // the slot, same recipe as the upright one: the case's wall, the trench
+    // inside it, and one dark line under the near lip
+    p.rect_filled(track, Rounding::same(4.5), th.paper);
+    p.rect_stroke(track.shrink(0.5), Rounding::same(4.0), Stroke::new(1.0, th.edge_ctl));
+    let trench = track.shrink(2.0);
+    p.rect_filled(trench, Rounding::same(3.0), th.card);
+    p.line_segment(
+        [pos2(trench.left() + 1.5, trench.top() + 0.5), pos2(trench.right() - 1.5, trench.top() + 0.5)],
+        Stroke::new(1.0, Color32::from_rgba_unmultiplied(0, 0, 0, 13)),
+    );
+
+    let t = ((v - min) / (max - min)).clamp(0.0, 1.0);
+    let x = run.left() + run.width() * t;
+
+    // the fill runs from the near end to the cap, which is the other way round
+    // from the upright one for the same reason: a fader fills from the floor,
+    // and laid down the floor is the left
+    let fill = Rect::from_min_max(trench.left_top(), pos2(x, trench.bottom()));
+    if fill.width() > 1.0 {
+        p.rect_filled(fill, Rounding::same(2.5), th.ink);
+    }
+
+    let cap = Rect::from_center_size(pos2(x, cy), TRIM_CAP);
+    for (grow, a) in [(4.0_f32, 22u8), (2.5, 40), (1.0, 70)] {
+        p.rect_filled(
+            cap.translate(vec2(0.0, 3.0)).expand(grow),
+            Rounding::same(5.0 + grow),
+            Color32::from_rgba_unmultiplied(0, 0, 0, a),
+        );
+    }
+    let lift = match state {
+        FaderState::Rest => 0.0,
+        FaderState::Hover => 0.05,
+        FaderState::Dragging => 0.09,
+    };
+    p.rect_filled(cap, Rounding::same(5.0), cap_colour(0.5, lift));
+    hgrad(p, cap.shrink2(vec2(0.6, 0.6)), 4.4, |u| cap_colour(u, lift));
+    // `.fcap::after` — THE INDICATOR IS THE PART THAT CARRIES THE VALUE, and
+    // laid down it crosses the travel rather than running along it
+    p.rect_filled(
+        Rect::from_center_size(cap.center(), vec2(2.0, cap.height() - 4.0)),
+        Rounding::same(1.0),
+        th.primary,
+    );
+}
+
+/// A trim: the fader laid down, one row high, for a form.
+///
+/// `fader` IS A CHANNEL STRIP AND THIS IS A FORM FIELD. That one is 56 wide
+/// and 136 of travel under its own readout with its name beneath — a thing you
+/// reach for among others of its kind, on a surface built for them. A settings
+/// row is a name and a control, and a 78px-tall knob or a 180px-tall fader in
+/// one makes that row twice the height of every other row on the page.
+///
+/// IT IS NOT A NEW PART. `.fader` in `src/skew.css` is HORIZONTAL — `.fader.vert`
+/// is the modifier — so the upright one in this crate was the variant and this
+/// is the base, arriving second. Same track, same cap, same six-stop moulding;
+/// the indicator crosses the travel instead of running along it, and the fill
+/// comes from the left because laid down that is where the floor is.
+///
+/// THE VALUE READS AT THE RIGHT END, not under the cap: under it is where the
+/// scale goes on the upright one, and in a row there is no under.
+///
+/// Returns `true` on commit, with the fader's contract — the value moves live
+/// while dragging and `commit` fires once on release. NO RATCHET AND NO STEP:
+/// this is a setting someone touches twice, not a performance control, so the
+/// travel is continuous and the caller quantises in `fmt` if it wants to.
+pub fn trim(
+    ui: &mut Ui, th: &Theme, id: &str, v: &mut f32, min: f32, max: f32,
+    fmt: impl Fn(f32) -> String,
+) -> bool {
+    let w = ui.available_width();
+    let (rect, _) = ui.allocate_exact_size(vec2(w, TRIM_H), Sense::hover());
+    let hot = Rect::from_min_max(rect.left_top(), pos2(rect.right() - TRIM_LCD.x - 10.0, rect.bottom()));
+    let resp = ui
+        .interact(hot, ui.id().with(id), Sense::click_and_drag())
+        .on_hover_cursor(egui::CursorIcon::Grab);
+
+    let run_l = rect.left() + TRIM_CAP.x / 2.0;
+    let run_r = hot.right() - TRIM_CAP.x / 2.0;
+    let span = (run_r - run_l).max(1.0);
+    let mut commit = resp.drag_stopped();
+    if resp.dragged() || resp.clicked() {
+        if let Some(q) = resp.interact_pointer_pos() {
+            let t = ((q.x - run_l) / span).clamp(0.0, 1.0);
+            *v = min + (max - min) * t;
+        }
+        if resp.clicked() {
+            commit = true;
+        }
+    }
+    let state = if resp.dragged() {
+        FaderState::Dragging
+    } else if resp.hovered() {
+        FaderState::Hover
+    } else {
+        FaderState::Rest
+    };
+    if ui.is_rect_visible(rect) {
+        paint_trim(ui.painter(), th, rect, *v, min, max, &fmt(*v), state);
+    }
+    commit
+}

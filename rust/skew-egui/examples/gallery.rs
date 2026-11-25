@@ -20,9 +20,10 @@
 use egui::{pos2, vec2, Align, Align2, Color32, FontId, Layout, Rect, Sense, Ui, Vec2};
 use skew_egui::{
     frow, hint, paint_rail_item, paint_tab, paint_tab_ledge, paint_tabpane, rail, slot_row,
-    statline, swatches, tabbar, entry, field, frow_inline, id_color, EntryView, RailItem, Tab,
+    pane_fill, statline, swatches, tabbar, entry, field, frow_inline, id_color, EntryView,
+    RailItem, Tab,
     TabKind, Tone, ENTRY_H, FIELD_SM_W, RAIL_ROW_H, TABBAR_H, TAB_H, TAB_H_OFF,
-    btn, colored_btn, cut, dro, fader, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
+    btn, colored_btn, cut, dro, fader, trim, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
     appwin, stage, page_fill, paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
     act, channel, con_say, empty_rack, module_card, pull_line, sel, sel_list, sel_list_size,
@@ -218,6 +219,8 @@ struct Gallery {
     t_entry: usize,
     t_sw: usize,
     t_label: String,
+    t_grid: f32,
+    t_gain: f32,
     t_port: String,
     t_find: String,
     t_key: String,
@@ -294,6 +297,8 @@ impl Gallery {
             t_entry: 0,
             t_sw: 0,
             t_label: "hestia".into(),
+            t_grid: 0.35,
+            t_gain: 0.0,
             t_port: String::new(),
             t_find: String::new(),
             t_key: String::new(),
@@ -666,6 +671,41 @@ impl Gallery {
                 });
             });
             cap(ui, "FADER · VERTICAL BANK");
+        });
+        ui.add_space(24.0);
+        // ── THE SAME PART LAID DOWN, AT FORM HEIGHT ─────────────────────────
+        // `.fader` in the CSS is HORIZONTAL and `.fader.vert` is the modifier,
+        // so the bank above was the variant and this is the base, arriving
+        // second. The point of posing them together is the comparison: a
+        // channel strip is a thing you reach for among others of its kind, and
+        // a trim is a row in a form.
+        ui.vertical(|ui| {
+            let f = egui::Frame::none()
+                .fill(th.case_face)
+                .stroke(egui::Stroke::new(1.0, th.edge))
+                .rounding(egui::Rounding::same(th.r))
+                .inner_margin(egui::Margin::symmetric(16.0, 14.0));
+            f.show(ui, |ui| {
+                ui.set_width(300.0);
+                ui.spacing_mut().item_spacing.y = 8.0;
+                frow_inline(ui, &th, "Grid", |ui| {
+                    // THE RANGE IS FRACTIONAL ON PURPOSE. `knob` used to paint
+                    // `v.round()`, which gave this exact range two positions;
+                    // a trim has no rounding anywhere, so 0..=1 is a specimen
+                    // and a regression test at once.
+                    if trim(ui, &th, "t_grid", &mut self.t_grid, 0.0, 1.0, |x| {
+                        format!("{:.0}%", x * 100.0)
+                    }) {
+                        self.live = format!("GRID {:.0}%", self.t_grid * 100.0);
+                    }
+                });
+                frow_inline(ui, &th, "Gain", |ui| {
+                    if trim(ui, &th, "t_gain", &mut self.t_gain, -12.0, 12.0, |x| format!("{x:+.1}")) {
+                        self.live = format!("GAIN {:+.1}", self.t_gain);
+                    }
+                });
+            });
+            cap(ui, "TRIM · THE FADER LAID DOWN, IN A FORM");
         });
     }
 
@@ -1458,7 +1498,10 @@ impl Gallery {
             .iter()
             .map(|(n, k)| Tab { name: n.as_str(), kind: *k })
             .collect();
-        let (picked, closed) = tabbar(ui, &th, &tabs, self.t_tab);
+        // THE GALLERY'S PANE IS JUST A PANEL, so it passes the default — but it
+        // passes it, rather than letting the part assume. See `paint_tab`.
+        let pane_col = pane_fill(&th);
+        let (picked, closed) = tabbar(ui, &th, &tabs, self.t_tab, pane_col);
         {
             // the pane: one pixel up, under the bar, so the cut has something
             // to be cut into
@@ -1466,7 +1509,7 @@ impl Gallery {
             let (pane, _) = ui.allocate_exact_size(vec2(w, 74.0), Sense::hover());
             let pane = pane.translate(vec2(0.0, -1.0));
             if ui.is_rect_visible(pane) {
-                paint_tabpane(ui.painter(), &th, pane);
+                paint_tabpane(ui.painter(), &th, pane, pane_col);
                 let name = self.t_tabs.get(self.t_tab).map(|(n, _)| n.as_str()).unwrap_or("");
                 ui.painter().text(
                     pos2(pane.left() + 18.0, pane.top() + 20.0),
@@ -1627,7 +1670,8 @@ impl Gallery {
                 pos2(strip.left(), ledge.bottom() - 1.0),
                 pos2(strip.right(), strip.bottom()),
             );
-            paint_tabpane(p, &th, pane);
+            let pane_col = pane_fill(&th);
+            paint_tabpane(p, &th, pane, pane_col);
             paint_tab_ledge(p, &th, ledge);
             let t = Tab { name: "Local Terminal", kind: TabKind::Local };
             for (i, (on, st, hot)) in [
@@ -1644,7 +1688,7 @@ impl Gallery {
                     pos2(strip.left() + 8.0 + i as f32 * 176.0, ledge.bottom() - h),
                     pos2(strip.left() + 8.0 + i as f32 * 176.0 + 170.0, ledge.bottom()),
                 );
-                paint_tab(p, &th, r, &t, *on, *st, *hot);
+                paint_tab(p, &th, r, &t, *on, *st, *hot, pane_col);
             }
         }
         ui.add_space(10.0);
@@ -1661,7 +1705,8 @@ impl Gallery {
                 pos2(kstrip.left(), ledge.bottom() - 1.0),
                 pos2(kstrip.right(), kstrip.bottom()),
             );
-            paint_tabpane(p, &th, pane);
+            let pane_col = pane_fill(&th);
+            paint_tabpane(p, &th, pane, pane_col);
             paint_tab_ledge(p, &th, ledge);
             for (i, (name, kind, on)) in [
                 ("Local Terminal", TabKind::Local, true),
@@ -1676,7 +1721,7 @@ impl Gallery {
                     pos2(kstrip.left() + 8.0 + i as f32 * 176.0, ledge.bottom() - h),
                     pos2(kstrip.left() + 8.0 + i as f32 * 176.0 + 170.0, ledge.bottom()),
                 );
-                paint_tab(p, &th, r, &Tab { name, kind: *kind }, *on, KeyState::Raised, false);
+                paint_tab(p, &th, r, &Tab { name, kind: *kind }, *on, KeyState::Raised, false, pane_col);
             }
         }
         ui.add_space(24.0);

@@ -196,13 +196,15 @@ pub struct Tab<'a> {
     pub kind: TabKind,
 }
 
-/// The surface a tab bar is cut into: `--plate` under `--rim` and `--groove`.
+/// The surface a tab bar is cut into: `pane` under `--rim` and `--groove`.
 ///
 /// Paint this FIRST and let the bar overlap its top edge by a pixel — the cut
 /// is the whole mechanism and it needs something to be cut into.
-pub fn paint_tabpane(p: &egui::Painter, th: &Theme, rect: Rect) {
-    let fill = pane_fill(th);
-    p.rect_filled(rect, Rounding::same(th.r_mod), fill);
+///
+/// `pane` IS THE HOST'S TO SAY — see [`paint_tab`]. [`pane_fill`] is the
+/// default for an app whose pane is just a panel.
+pub fn paint_tabpane(p: &egui::Painter, th: &Theme, rect: Rect, pane: Color32) {
+    p.rect_filled(rect, Rounding::same(th.r_mod), pane);
     p.rect_stroke(rect, Rounding::same(th.r_mod), Stroke::new(1.0, groove(th)));
     p.line_segment(
         [pos2(rect.left() + th.r_mod, rect.top() + 0.5), pos2(rect.right() - th.r_mod, rect.top() + 0.5)],
@@ -210,13 +212,19 @@ pub fn paint_tabpane(p: &egui::Painter, th: &Theme, rect: Rect) {
     );
 }
 
-/// `.tabpane` background — and in the LIGHT skin it is not `--plate`.
+/// THE DEFAULT PANE — `--plate` in the dark, `--card` in the light.
 ///
-/// `--case` and `--plate` BOTH alias to `--card` over there, so a closed
-/// folder painted in the pane's own fill is not a closed folder at all. The
-/// pane keeps `--card`; the step BACK is `--case-face`, which is what
-/// [`tab_face`] uses. Same inversion `module_card` already documents.
-fn pane_fill(th: &Theme) -> Color32 {
+/// PASS THIS WHEREVER A `pane` IS ASKED FOR AND YOUR PANE IS JUST A PANEL.
+/// It is the fill an app gets when it has not decided otherwise, which is why
+/// the parameter is not an `Option`: a caller with nothing special to say
+/// still says something, and one expression is not a decision.
+///
+/// IN THE LIGHT SKIN IT IS NOT `--plate`. `--case` and `--plate` BOTH alias to
+/// `--card` over there, so a closed folder painted in the pane's own fill is
+/// not a closed folder at all. The pane keeps `--card`; the step BACK is
+/// `--case-face`, which is what [`tab_face`] uses. Same inversion
+/// `module_card` already documents.
+pub fn pane_fill(th: &Theme) -> Color32 {
     match th.skin {
         crate::Skin::Dark => th.pal.plate,
         crate::Skin::Light => th.card,
@@ -250,23 +258,51 @@ fn tab_face(th: &Theme, hover: bool) -> (Color32, Color32, Color32) {
     }
 }
 
-/// `.tabbar` — THE LEDGE IS A WINDOW ONTO THE ROOM.
+/// `.tabbar` — THE LEDGE IS THE CHASSIS THE BAR IS CUT INTO.
 ///
-/// Not a strip of case with the tabs on it: a hole in the panel, with the
-/// room's own ruled ground at the bottom of it. The ruling is
-/// [`crate::grid_shapes`], the same 120px majors and 24px minors every other
-/// ruled surface in this crate uses, and its origin is the LEDGE'S OWN
-/// top-left so the phase matches whatever it is sitting in — the CSS gets
-/// this from `background-attachment:fixed` and this is that.
+/// IT WAS THE ROOM AND THAT WAS THE DOCS' STAGE LEAKING INTO THE PART. The
+/// first version filled it with `--room` and ruled it with `grid_shapes`, so
+/// it read as a hole in the panel with the desk showing through — which is
+/// exactly right on `skew-panels.html`, where there IS a desk behind the
+/// specimen and the ruling lines up with it. Inside an application window
+/// there is no room behind anything: the window IS the room. A strip of
+/// "outside" across the top of it is a window onto nothing, and the grid
+/// becomes a texture rather than a ruling, because there is no stage for it to
+/// share a phase with.
 ///
-/// An earlier pass had the ground in `--run`, a saturated semantic blue spent
-/// on a surface nobody is reading. The room is the room.
+/// THE RULE, AND IT IS THE ONE THAT MATTERS: THE LEDGE AND THE PANE MUST BE
+/// DIFFERENT SURFACES. Closed tabs stand against the ledge and the open one
+/// becomes the pane; if those two are the same value the bar flattens and the
+/// cut has nothing to cut. Everywhere else in this language a strip of chrome
+/// is the CASE and what you are looking at is what sits in it, so that is the
+/// pairing: `--case` behind the tabs, the pane's own fill in front.
+///
+/// AND IT FREES THE PANE TO BE THE ROOM, which is the stronger reading of a
+/// terminal anyway — the pane is the hole you look through at another machine,
+/// not a sheet lying on the desk. With the ledge on the case those two can
+/// both be true at once. With the ledge on the room they could not: an app
+/// that made its pane the room got room against room and lost its tab bar.
+///
+/// The near wall stays — it is still a cut, just into the chassis rather than
+/// through it — and so does the baseline the open tab interrupts.
 pub fn paint_tab_ledge(p: &egui::Painter, th: &Theme, rect: Rect) {
     let r = th.r_key;
     let round = Rounding { nw: r, ne: r, sw: 0.0, se: 0.0 };
-    p.rect_filled(rect, round, th.pal.room);
+    // `--case` in the dark, `--case-face` in the light — and in the light that
+    // distinction is the whole thing, because `--case` aliases to `--card`
+    // over there, which is the PANE's value. A ledge painted in the pane's own
+    // fill is not a ledge. `--case-face` is the step back, the same inversion
+    // `module_card` documents.
+    let ground = match th.skin {
+        crate::Skin::Dark => th.pal.case,
+        crate::Skin::Light => th.case_face,
+    };
+    p.rect_filled(rect, round, ground);
     let clip = p.with_clip_rect(rect);
-    clip.extend(crate::grid_shapes(th, rect, rect.min));
+    // NO GRID. `grid_shapes` is the ROOM's ruling — a drawing surface measured
+    // on. Ruling the chassis would be ruling the machine's own metal, which is
+    // not a thing that is measured on, and without a stage behind it to share
+    // a phase with it stops being a ruling and becomes a pattern.
     // `inset 0 2px 5px rgba(0,0,0,.28)` — the near wall of the cut
     for (i, a) in [(1.0_f32, 46u8), (2.0, 30), (3.5, 16)] {
         clip.line_segment(
@@ -295,19 +331,37 @@ pub fn paint_tab_ledge(p: &egui::Painter, th: &Theme, rect: Rect) {
 /// AND THE OPEN TAB'S FACE IS FLAT. A moulding running on into the pane would
 /// draw a seam exactly where the part exists to have none.
 ///
+/// `pane` IS THE HOST'S TO SAY, AND IT HAS TO BE. This part's whole claim is
+/// "the open tab IS that surface", and the crate cannot know what that surface
+/// is: an app's pane changes with the TAB — a settings page is a panel, a
+/// terminal is whatever the user's scheme put there — so a fill derived from
+/// the theme is a guess that is wrong the moment the app has an opinion. The
+/// open tab lays THIS back across the overlap and [`paint_tabpane`] fills with
+/// it, so the two agree by construction instead of by coincidence.
+///
+/// IT MAY BE A COLOUR THIS SYSTEM DOES NOT OWN, and that is correct rather
+/// than tolerated. `.pk-field` and the hue track settled the rule already: a
+/// skin may set the MATERIAL and never the DATA. Here the material is the
+/// moulding, the rim, the cut and the baseline, all of it this file's; the
+/// fill is data, the way `--sw` on a swatch is data. An iTerm scheme's
+/// background arriving here is the same shape of fact as a host's identity
+/// colour arriving at a chip, and a part that refused it would be a part
+/// claiming to BE a surface it had never seen.
+///
 /// THE KIND COLOURS THE WHOLE OPEN TAB OR NONE OF IT. One ink, and the mark
 /// and the close take it too — a tab is one object, and an orange mark beside
 /// orange text beside a grey × is three objects that happen to be touching.
 /// Closed tabs carry the mark in dim ink: the SHAPE already says the kind.
 pub fn paint_tab(
     p: &egui::Painter, th: &Theme, rect: Rect, tab: &Tab, on: bool, state: KeyState, x_hot: bool,
+    pane: Color32,
 ) {
     let r = th.r_key;
     let round = Rounding { nw: r, ne: r, sw: 0.0, se: 0.0 };
     let hover = state == KeyState::Hover;
 
     if on {
-        p.rect_filled(rect, round, pane_fill(th));
+        p.rect_filled(rect, round, pane);
     } else {
         let (top, mid, bot) = tab_face(th, hover);
         p.rect_filled(rect, round, mid);                      // the AA outline
@@ -328,7 +382,7 @@ pub fn paint_tab(
         p.rect_filled(
             Rect::from_min_max(pos2(rect.left() + 1.0, rect.bottom() - 1.5), pos2(rect.right() - 1.0, rect.bottom())),
             Rounding::ZERO,
-            pane_fill(th),
+            pane,
         );
     }
 
@@ -375,14 +429,18 @@ pub fn paint_tab(
 /// `.tabbar` live — the ledge, the tabs on it, and the pane under it.
 ///
 /// Returns `(clicked, closed)`: which tab was selected, and which was asked to
-/// go away. `pane` is the rect the pane will occupy; the bar overlaps its top
-/// edge by a pixel, which is what makes the cut possible.
+/// go away.
+///
+/// `pane` IS THE FILL OF THE SURFACE UNDER THE BAR, which the host knows and
+/// this crate cannot — see [`paint_tab`]. Pass [`pane_fill`] if your pane is
+/// just a panel. Paint the pane first with the SAME value and let the bar
+/// overlap its top edge by a pixel; that overlap is what makes the cut.
 ///
 /// THE × IS NOT THE TAB. A close mark inside a control that also selects is
 /// the one press on a tab bar you can make by accident, so the hit is tested
 /// against the mark's own box before the tab ever claims the click.
 pub fn tabbar(
-    ui: &mut Ui, th: &Theme, tabs: &[Tab], current: usize,
+    ui: &mut Ui, th: &Theme, tabs: &[Tab], current: usize, pane: Color32,
 ) -> (Option<usize>, Option<usize>) {
     let w = ui.available_width();
     let (bar, _) = ui.allocate_exact_size(vec2(w, TABBAR_H), Sense::hover());
@@ -431,7 +489,7 @@ pub fn tabbar(
         let over_x = t.kind.closable() && resp.hover_pos().map_or(false, |q| xr.contains(q));
         let state = if resp.hovered() { KeyState::Hover } else { KeyState::Raised };
         if ui.is_rect_visible(rect) {
-            paint_tab(ui.painter(), th, rect, t, on, state, over_x);
+            paint_tab(ui.painter(), th, rect, t, on, state, over_x, pane);
         }
         // middle-click closes a tab too — it is the one gesture every bar has,
         // and neither gesture reaches a page: there is nothing to close

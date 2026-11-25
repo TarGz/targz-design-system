@@ -284,7 +284,19 @@ pub fn knob(
         }
     }
     if ui.is_rect_visible(rect) {
-        paint_knob(ui.painter(), th, rect, v.round(), min, max, kind, &fmt(v.round()));
+        // THE VALUE IS PAINTED AS IT IS, AND IT USED TO BE PAINTED ROUNDED.
+        // `v.round()` went to BOTH the pointer angle and the readout, so a
+        // range narrower than a few whole units became a control with that
+        // many positions — 0.0..=1.0 gave exactly two, stuck at the top and
+        // refusing to move, and nothing in the signature or the doc said the
+        // range had to be in whole units.
+        //
+        // A POT IS AN ANALOGUE PART AND QUANTISATION IS A DISPLAY DECISION.
+        // The caller already owns `fmt`, so it can round there when it wants
+        // to and keep the travel continuous when it does not. The value this
+        // function writes back was never rounded; only the drawing was, which
+        // is the worst of both — a control that lies about what it holds.
+        paint_knob(ui.painter(), th, rect, *v, min, max, kind, &fmt(*v));
     }
     (commit, resp.dragged())
 }

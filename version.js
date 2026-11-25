@@ -1,6 +1,36 @@
-export const version = '1.130.0';
+export const version = '1.133.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.133.0',
+    date: '2026-11-25',
+    changes: [
+      "`knob` WAS PAINTING `v.round()` AND THAT MADE IT LIE ABOUT WHAT IT HELD. The rounded value went to BOTH the pointer angle and the readout, so a range narrower than a few whole units became a control with that many positions — 0.0..=1.0 gave exactly two, stuck at the top and refusing to move — while the value written back was the real one all along. That is the worst of both: a pot that shows one thing and holds another. Nothing in the signature or the doc said the range had to be in whole units, and nothing should have: A POT IS AN ANALOGUE PART AND QUANTISATION IS A DISPLAY DECISION. The caller already owns `fmt`, so it rounds there when it wants to and keeps the travel continuous when it does not.",
+      "`trim` — THE FADER LAID DOWN, AT FORM HEIGHT, AND IT IS NOT A NEW PART. `.fader` in `src/skew.css` is HORIZONTAL; `.fader.vert` is the modifier. The crate ported the upright bank first, so for three versions it has had the VARIANT and not the base. This is the base, arriving second: same track, same cap, same six-stop moulding, `cap_colour` and `hgrad` unchanged. What differs is what has to — the indicator crosses the travel instead of running along it, the fill comes from the left because laid down that is where the floor is, and the value reads at the RIGHT END, because under the cap is where the upright one puts its scale and in a row there is no under.",
+      "AND IT IS WHAT A SETTINGS ROW ACTUALLY WANTS. `fader` is 56 wide and 136 of travel under its own readout with its name beneath: a channel strip, a thing you reach for among others of its kind on a surface built for them. `knob` is 58×78 with its LCD. Either one in a form row makes that row twice the height of every other row on the page. `TRIM_H` is 26. NO RATCHET AND NO STEP: a setting someone touches twice is not a performance control, so the travel is continuous and there is no per-notch sound.",
+      "The gallery poses the bank and the trim together, because the comparison IS the point, and the trim's first row runs 0.0..=1.0 — the exact range the rounding broke, so the specimen is also the regression test.",
+    ],
+  },
+  {
+    version: '1.132.0',
+    date: '2026-11-25',
+    changes: [
+      "THE PANE'S FILL IS THE HOST'S TO SAY, AND THE PART WAS GUESSING IT. The cut's whole claim is that the open tab IS the surface below it: it lays the pane's own fill back across the 1px overlap, painting out the line that would close its bottom. That fill was derived from the theme — `--plate` dark, `--card` light — which is a guess, and it is wrong the moment the app has an opinion. An app's pane CHANGES WITH THE TAB: a settings page is a panel, a terminal is whatever the user's colour scheme put there, and three tabs in one bar can have three panes. So the one tab that is supposed to BE the pane was the one tab a different colour from it.",
+      "`--pane` ON THE SHEET, `pane: Color32` IN THE CRATE, AND `--plate` IS ONLY ITS DEFAULT. `tabbar`, `paint_tab` and `paint_tabpane` take the fill; an app sets `--pane` on the `.tabbar` and the `.tabpane` together, or passes one value to the three functions, and the bar and the pane agree BY CONSTRUCTION rather than by coincidence. `pane_fill(th)` is now public as the default any app with a plain panel passes — not an `Option`, because a caller with nothing special to say should still say it, and one expression is not a decision.",
+      "AND IT MAY BE A COLOUR THIS SYSTEM DOES NOT OWN, which is correct rather than tolerated. The rule was already written down twice — at `.pk-field`, at the hue track, and again at `.swatch`: A SKIN MAY SET THE MATERIAL AND NEVER THE DATA. The material here is the moulding, the rim, the cut and the baseline, all of it this file's. The fill is DATA, the way `--sw` on a swatch is data. An iTerm scheme's background arriving at a tab face is the same shape of fact as a host's identity colour arriving at a chip, and a part that refused it would be a part claiming to BE a surface it had never seen.",
+      "NOT DONE, AND BOTH DELIBERATELY: the ledge does not take it — the ledge is the case and v1.131.0 settled that — and there is no per-tab pane colour, because only the OPEN tab touches the pane and one value is the whole truth.",
+    ],
+  },
+  {
+    version: '1.131.0',
+    date: '2026-11-25',
+    changes: [
+      "THE TAB LEDGE IS THE CHASSIS NOW, NOT THE ROOM, AND THE OLD VERSION WAS THIS PAGE'S CONTEXT LEAKING INTO THE PART. It filled with `--room` and ruled itself with `--desk-grid` at `background-attachment:fixed`, so it showed the same continuous ruling the stage behind it shows, in the same phase, and read as a hole with the desk visible through it. On `skew-panels.html` that is exactly right, because there IS a desk behind the specimen. Inside an application window there is no room behind anything — the window IS the room — so a strip of \"outside\" across the top of it is a window onto nothing, and the grid stops being a ruling and becomes a texture, because there is no stage left for it to share a phase with.",
+      "THE RULE IT COMES DOWN TO: THE LEDGE AND THE PANE MUST BE DIFFERENT SURFACES. Closed folders stand against the ledge and the open one BECOMES the pane; if those two are the same value the bar flattens and the cut has nothing left to cut. Everywhere else in this language a strip of chrome is the CASE and what you are looking at is what sits in it, so that is the pairing — `--case` behind the tabs, the pane's own fill in front. In the light skin it has to be `--case-face` and not `--case`, because `--case` aliases to `--card` over there, which is the PANE's value: the same inversion `.tabbar .tab` already needs and for the same reason.",
+      "AND IT FREES THE PANE TO BE THE ROOM, which is the stronger reading of a terminal anyway — the pane is the hole you look through at another machine, not a sheet lying on the desk. With the ledge on the case both can be true at once. With the ledge on the room they could not: an app that made its pane the room got room against room and lost its tab bar, which is how this came up.",
+      "The near wall stays, because it is still a cut — into the chassis rather than through it — and the shadow under the top edge carries the depth the ruling was helping with. The room above the tabs stays too: a ledge that stops at the top of the tallest folder is a background, not a space.",
+    ],
+  },
   {
     version: '1.130.0',
     date: '2026-11-25',

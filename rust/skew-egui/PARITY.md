@@ -18,7 +18,8 @@ Status: **done** · **partial** — drawn, but a state or a skin is missing ·
 | toggle key | `.chip`, `toggle()` | `btn` | **done** |
 | action key | `.act`, `.act.halt` | `colored_btn` | **done** |
 | fader, vertical | `fader()` | `fader`, `paint_fader` | **done** — live value, commit on release |
-| fader, range | `rangeFader()` | — | **open** |
+| fader, horizontal | `.fader` (the BASE — `.fader.vert` is the modifier) | `trim`, `paint_trim`, `TRIM_H` | **done** — the upright bank was ported first, so the variant arrived before the base. Same track, same cap, same six-stop moulding; the indicator crosses the travel instead of running along it, the fill comes from the left because laid down that is where the floor is, and the value reads at the right end because in a row there is no "under". No ratchet and no step: a setting someone touches twice is not a performance control |
+| fader, range | `rangeFader()` | — | **open** — two caps on one track, which is a different part |
 | knob | `knob()` | — | **open** — the biggest single gap |
 | rotary | `rotary()` | — | **open** |
 | drum | `drum()` | — | **open** |

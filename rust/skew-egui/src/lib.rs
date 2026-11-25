@@ -65,12 +65,14 @@ pub use console::{
     ActStyle, Lens, ModuleHit, ModuleView, Part, PullHit, PullState, VerState, MODULE_MIN_W,
     APPWIN_BAR, SEL_CUT, SEL_PAD, SEL_ROW,
 };
-pub use fader::{fader, paint_fader, FaderState, FADER_SIZE};
+pub use fader::{
+    fader, paint_fader, paint_trim, trim, FaderState, FADER_SIZE, TRIM_H,
+};
 pub use frame::{grid_shapes, label, page_fill, paint_grid, panel_frame, section, stage, well_frame, well_shadow};
 pub use knob::{knob, paint_knob, KnobKind, KNOB_D, KNOB_SIZE};
 pub use icon::{paint_icon, paint_icon_lit, paint_icon_solid, Icon};
 pub use shell::{
-    entry, field, frow, frow_inline, hint, paint_entry, paint_rail_item, paint_swatch, paint_tab,
+    entry, field, frow, frow_inline, hint, pane_fill, paint_entry, paint_rail_item, paint_swatch, paint_tab,
     paint_tab_ledge, paint_tabpane, rail, slot_row, statline, swatches, tabbar, EntryView,
     RailItem, Tab, TabKind, Tone, ENTRY_H, FIELD_H, FIELD_SM_W, FROW_LAB_W, RAIL_ROW_H, SWATCH,
     TABBAR_H, TABBAR_PAD_T, TAB_H, TAB_H_OFF,

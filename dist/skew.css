@@ -2,7 +2,7 @@
    skew.css — GENERATED. DO NOT HAND-EDIT.
 
      source   ../src/skew.css
-     at       Skew v1.130.0
+     at       Skew v1.133.0
      rebuild  node tools/build-dist.mjs --write
 
    A patch applied here disappears at the next build, silently, and the way you
@@ -7054,9 +7054,32 @@ span.nav-link{ cursor:default; }
 
 /* The drawer front the tabs belong to. It carries the edge; the open tab's
    ::after is what cuts a hole in it. */
+/* ── `--pane` — THE ONE VALUE THE HOST HAS TO SAY ────────────────────────
+   THE CUT'S CLAIM IS "THE OPEN TAB IS THAT SURFACE", AND ONLY THE APP KNOWS
+   WHAT THAT SURFACE IS. The open tab lays the pane's own fill back across the
+   1px overlap; if that fill is derived here it is a GUESS, and it is wrong the
+   moment the app has an opinion — which it will, because a pane changes with
+   the TAB. A settings page is a panel. A terminal is whatever the user's
+   colour scheme put there. Three tabs in one bar can have three panes.
+
+   SO THE FILL IS A VARIABLE AND `--plate` IS ONLY ITS DEFAULT. An app sets
+   `--pane` on the `.tabbar` and the `.tabpane` together and the two agree by
+   construction instead of by coincidence; an app that sets nothing gets what
+   it got before.
+
+   AND IT MAY BE A COLOUR THIS SYSTEM DOES NOT OWN. That is correct rather
+   than tolerated, and the rule is already written down twice in this file —
+   at `.pk-field`, at the hue track, and again at `.swatch`: A SKIN MAY SET THE
+   MATERIAL AND NEVER THE DATA. The material here is the moulding, the rim, the
+   cut and the baseline, all of it ours. The fill is data, the way `--sw` on a
+   swatch is data. An iTerm scheme's background arriving here is the same shape
+   of fact as a host's identity colour arriving at a chip, and a part that
+   refused it would be a part claiming to BE a surface it had never seen. */
+.tabbar, .tabpane{ --pane:var(--plate); }
+[data-skin="light"] :is(.tabbar, .tabpane){ --pane:var(--card); }
 .tabpane{
   position:relative; border-radius:var(--r-mod);
-  background:var(--plate);
+  background:var(--pane);
   box-shadow:inset 0 1px 0 var(--rim), inset 0 0 0 1px var(--groove);
 }
 
@@ -7083,32 +7106,51 @@ span.nav-link{ cursor:default; }
    already carries this ruling. The ledge is not decorated with a grid; it is
    a hole through to the surface that has one.
 
-   THE RULING IS `--desk-grid`, WHICH IS THE WHOLE POINT OF IT BEING A TOKEN.
-   The first attempt built a grid by hand at `.grid`'s pitches — 3px sublines
-   and 15px majors in graphite — and on a 46px ledge that is not a ruled
-   surface, it is a crosshatch, dark enough to fight the names sitting on it.
-   `.grid` is the SHEET: a drawing surface you measure on, at drawing scale.
-   The room is not that. Its ruling is 120px majors at 8.5% and 24px minors at
-   3.5%, which at the size of a tab bar is two faint lines and a hint of a
-   third — felt, not read.
+   THE LEDGE IS THE CHASSIS THE BAR IS CUT INTO, AND IT USED TO BE THE ROOM.
+   The first version filled it with `--room` and ruled it with `--desk-grid` at
+   `background-attachment:fixed`, so it showed the same continuous ruling the
+   stage behind it shows, in the same phase, and read as a hole with the desk
+   visible through it. On THIS page that is exactly right, because there is a
+   desk behind the specimen for the ruling to line up with.
 
-   AND IT IS `background-attachment:fixed`, as every other ruled surface in
-   this sheet is. That is what makes it a WINDOW: the ledge is not decorated
-   with its own grid, it shows the same continuous ruling the stage behind it
-   shows, in the same phase, so the two line up and the bar reads as a hole
-   rather than as a patterned strip.
+   INSIDE AN APPLICATION WINDOW THERE IS NO ROOM BEHIND ANYTHING. The window
+   IS the room. A strip of "outside" across the top of it is a window onto
+   nothing, and the grid stops being a ruling and becomes a texture, because
+   there is no stage for it to share a phase with. That was this page's own
+   context leaking into the part.
 
-   AND THERE IS ROOM ABOVE THE TABS. A ledge that stops at the top of the
+   THE RULE, AND IT IS THE ONE THAT MATTERS: THE LEDGE AND THE PANE MUST BE
+   DIFFERENT SURFACES. Closed folders stand against the ledge and the open one
+   BECOMES the pane; if the two are the same value the bar flattens and the cut
+   has nothing left to cut. Everywhere else in this language a strip of chrome
+   is the CASE and what you are looking at is what sits in it, so that is the
+   pairing — `--case` behind the tabs, the pane's own fill in front.
+
+   AND IT FREES THE PANE TO BE THE ROOM, which is the stronger reading of a
+   terminal anyway: the pane is the hole you look through at another machine,
+   not a sheet lying on the desk. With the ledge on the case both can be true
+   at once. With the ledge on the room they could not — an app that made its
+   pane the room got room against room and lost its tab bar.
+
+   WHAT THE GRID WAS DOING IS NOT LOST. The near wall stays: it is still a cut,
+   into the chassis rather than through it, and the shadow under the top edge
+   is what carries the depth the ruling was helping with.
+
+   AND THERE IS STILL ROOM ABOVE THE TABS. A ledge that stops at the top of the
    tallest folder is a background, not a space: the gap over the open tab is
    what says the drawer is standing IN something rather than against it. */
 .tabbar{
   padding:12px 8px 0; margin-bottom:-1px; z-index:1;
   border-radius:var(--r-key) var(--r-key) 0 0;
-  background-color:var(--room);
-  background-image:var(--desk-grid);
-  background-attachment:fixed;
+  background-color:var(--case);
+  background-image:none;
   box-shadow:inset 0 2px 5px rgba(0,0,0,.28);
 }
+/* AND IN THE LIGHT SKIN `--case` IS THE PANE. It aliases to `--card` over
+   there, which is exactly the value the open tab takes, so a ledge painted in
+   it is not a ledge at all. `--case-face` is the step back — the same
+   inversion `.tabbar .tab` already needs, and for the same reason. */
+[data-skin="light"] .tabbar{ background-color:var(--case-face); }
 /* THE BASELINE RUNS THE WHOLE WIDTH, LEDGE INCLUDED, so the bar stands ON a
    line rather than floating above one. The open tab breaking it is the entire
    component. */
@@ -7147,7 +7189,7 @@ span.nav-link{ cursor:default; }
    on the ledge instead, which is how it says it is in FRONT. */
 .tabbar .tab.on{
   height:34px; z-index:2;
-  background:var(--plate);
+  background:var(--pane);
   box-shadow:
     inset 0 1px 0 var(--rim),
     inset 0 0 0 1px var(--groove),
@@ -7158,7 +7200,7 @@ span.nav-link{ cursor:default; }
 .tabbar .tab.on::after{
   content:''; position:absolute; z-index:3;
   left:1px; right:1px; bottom:-1px; height:2px;
-  background:var(--plate);
+  background:var(--pane);
 }
 
 /* ── WHAT THE LIGHT SKIN HAS TO SAY FOR ITSELF ─────────────────────────
@@ -7191,10 +7233,10 @@ span.nav-link{ cursor:default; }
   background:linear-gradient(180deg,#fff,var(--card-hover) 70%,var(--edge));
 }
 [data-skin="light"] .tabbar .tab.on{
-  background:var(--card);
+  background:var(--pane);
   box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px var(--edge), 0 -2px 6px rgba(0,0,0,.13);
 }
-[data-skin="light"] .tabbar .tab.on::after{ background:var(--card); }
+[data-skin="light"] .tabbar .tab.on::after{ background:var(--pane); }
 /* NO LIGHT OVERRIDE FOR THE RULING, and that is `.grid`'s finding, not an
    omission: graphite is the one ink that reads on both the dark desk and the
    lit one, which is the whole argument for it being graphite. */

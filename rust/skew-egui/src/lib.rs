@@ -58,6 +58,7 @@ mod switch;
 mod theme;
 
 pub use console::{
+    paint_jewel,
     act, appwin, con_say, console, dim_readout, empty_rack, module_card, paint_act, paint_lens, paint_sel,
     paint_sel_list, paint_stamp, paint_surround, paint_well, port_strip, pull_line, pull_step, sel,
     sel_list, sel_list_size, slot_field, split_act, surround, version_readout, version_readout_h,
@@ -69,9 +70,10 @@ pub use frame::{grid_shapes, label, page_fill, paint_grid, panel_frame, section,
 pub use knob::{knob, paint_knob, KnobKind, KNOB_D, KNOB_SIZE};
 pub use icon::{paint_icon, paint_icon_lit, paint_icon_solid, Icon};
 pub use shell::{
-    frow, hint, paint_rail_item, paint_tab, paint_tab_ledge, paint_tabpane, rail, slot_row,
-    statline, tabbar, RailItem, Tab, TabKind, Tone, FROW_LAB_W, RAIL_ROW_H, TABBAR_H,
-    TABBAR_PAD_T, TAB_H, TAB_H_OFF,
+    entry, field, frow, frow_inline, hint, paint_entry, paint_rail_item, paint_swatch, paint_tab,
+    paint_tab_ledge, paint_tabpane, rail, slot_row, statline, swatches, tabbar, EntryView,
+    RailItem, Tab, TabKind, Tone, ENTRY_H, FIELD_H, FIELD_SM_W, FROW_LAB_W, RAIL_ROW_H, SWATCH,
+    TABBAR_H, TABBAR_PAD_T, TAB_H, TAB_H_OFF,
 };
 pub use press::{
     backlit, chevron, icon_key, micro, paint_icon_key, sep, BACKLIT_SIZE, CHEV_SIZE, ICON_KEY_SIZE,
@@ -84,5 +86,5 @@ pub use machine::{
 pub use nav::{channel, nav_bar, Nav, NavHit, NAV_GAP, NAV_HEIGHT};
 pub use paint::{hex, mix, rgb, vgrad};
 pub use switch::{paint_slide, slide, SlideKind, SLIDE_SIZE};
-pub use theme::{mono, read_font, Skin, Theme};
+pub use theme::{id_color, mono, read_font, Skin, Theme, ID_RAMP_LEN};
 pub use tokens::{Palette, ShadowLayer};

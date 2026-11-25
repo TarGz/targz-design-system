@@ -1,6 +1,18 @@
-export const version = '1.127.0';
+export const version = '1.128.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.128.0',
+    date: '2026-11-25',
+    changes: [
+      "THE FIVE SHEET-ONLY PARTS REACH THE CRATE, AND `PARITY.md` HAS NO TERMINASS ROW LEFT OPEN. `.field`, `.act.quiet`, `.frow.inline`, `.swatches` and `.entry` were CSS and nothing else for three versions, which is the gap this crate exists to close: a part that lives on the sheet alone is a part the Rust apps have to redraw by eye, which is the drift the whole repo is arguing against. `field`, `ActStyle::Quiet`, `frow_inline`, `swatches` and `entry`, each with its painter beside it so the gallery can pose a state no pointer is producing.",
+      "`id_color(th, i)` IS THE PART NOBODY SEES AND THE ONE THAT MATTERS MOST. `Palette` is generated — one field per `:root` declaration — so the ramp arrives as twelve NAMED fields and no indexer, while every consumer of it holds an INDEX: `host.color` is a `usize`, a layer number is a `usize`, `LOCAL_TAB_COLORS[i]` is a `usize`. Without a lookup, each app writes its own twelve-arm match, which is not an invented value but is twelve lines of this crate's business living somewhere it cannot be fixed from. It wraps, because the ramp's entire claim is that it extends without a reshuffle and an app with thirteen hosts is not an error.",
+      "`paint_jewel`, BECAUSE `Lens`'s THREE VARIANTS ARE ALL SEMANTIC. Red because it stops, orange because it is running, dark because it is off — the colour FOLLOWS FROM THE STATE, which is the whole point of that enum. The sheet's `.jewel` is the other thing: it takes `--lyr` off the element and will wear any value, because what it says is \"this one, not that one\". A host's lamp off the identity ramp is that, and a fourth `Lens` variant would have put an arbitrary colour in the one place arbitrary colours do not belong. The construction is `paint_lens`'s own, unchanged, down to the seating rim that comes off in daylight.",
+      "`ActStyle::Quiet` DOES NOT TRAVEL, AND THAT NEEDED SAYING IN CODE. `act` allocates a cap plus a wall under it and `paint_act` drops the legend by that wall when the key is pressed; a ghost has no cap to push, so the press is the wash going one step deeper and nothing moving. `down` is held false for this style even at `KeyState::Pressed`, and the hairline is drawn in the cap's own area with the wall left as air. The wash is `--no-bg` and `--no-edge`, the family's own fill and edge, so there is no invented alpha in it in either skin.",
+      "`entry` IS `module_card`'s CHASSIS IN A ROW and the running rail is absent on purpose — it answers \"is this up\", and a saved host is not up or down, it is saved. The pencil is hit-tested before the row, so an edit is never a select (`host_card()`'s own `clicked && over`), and it only appears on hover or on the chosen row: a column of twenty rows each carrying an edit key is twenty invitations to change something on a page you are reading in order to CHOOSE something. The chosen row is ringed in one line, which is `.act.primed`'s precedent; Terminass's second stroke at alpha 50 is dropped, because there is nowhere clean to put it and one lit line is already the loudest thing on the row.",
+      "The gallery poses all five in § 07, the three entries live with the pencil working. Still for the eye and not a bug yet: the entry's letter is set in the host's own colour at 17px, and `--id-7` yellow or `--id-9` lime may not hold on `--paper`. If it fails, the ramp owes the light skin a darker variant, which is a decision and not a fix.",
+    ],
+  },
   {
     version: '1.127.0',
     date: '2026-11-25',

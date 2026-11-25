@@ -15,9 +15,9 @@
 //! which is why the fader's own hardware is the other exception PARITY.md
 //! already records.
 
-use crate::console::{paint_lens, paint_well, Lens};
+use crate::console::{paint_jewel, paint_lens, paint_well, Lens};
 use crate::icon::{paint_icon, Icon};
-use crate::key::{KeyState, KeyStyle};
+use crate::key::{paint_key, KeyState, KeyStyle};
 use crate::theme::{mono, Theme};
 use egui::{pos2, vec2, Align2, Color32, FontId, Rect, Rounding, Sense, Stroke, Ui, Vec2};
 
@@ -431,6 +431,261 @@ pub fn slot_row(
     (field.unwrap(), act.unwrap())
 }
 
+// ── the form field ──────────────────────────────────────────────────────────
+
+/// `.field` — `.slot`'s height, because a row is a row.
+pub const FIELD_H: f32 = 30.0;
+/// `.field.sm` — Terminass's own `desired_width(80.0)` on the port.
+pub const FIELD_SM_W: f32 = 80.0;
+
+/// A form field: a cut with ink on the floor of it.
+///
+/// A FORM FIELD IS NOT A FILTER, AND [`crate::slot_field`] IS THE FILTER.
+/// That one is lit glass with a magnifier in it and `--read` ink carrying a
+/// bloom, because a filter field is a READOUT — it narrows what is already on
+/// screen. What you type into this one is not a query, it is the record, so it
+/// is `--txt` with no shadow on the floor of a `--bay` well.
+///
+/// THE LABEL IS THE PLACEHOLDER, which is Terminass's own `field()`
+/// (`app.rs:3518`): it passes the name as hint text and draws no label at all.
+/// On a 404px panel a 150px gutter spends a third of the width repeating a
+/// word the empty field is already saying. [`frow`] is still there for the
+/// settings page, where there is room for it.
+pub fn field(ui: &mut Ui, th: &Theme, buf: &mut String, hint: &str, w: f32) -> egui::Response {
+    let (rect, _) = ui.allocate_exact_size(vec2(w, FIELD_H), Sense::hover());
+    if ui.is_rect_visible(rect) {
+        // `--bay` under `--recess`. In the light skin `--bay` already aliases
+        // to `--paper`, which is why the CSS for this part needs no override
+        // and why this is a match on two tokens rather than two recipes.
+        let fill = match th.skin {
+            crate::Skin::Dark => th.pal.bay,
+            crate::Skin::Light => th.paper,
+        };
+        paint_well(ui.painter(), rect, fill, th.edge);
+    }
+    // the line sits on the well's centre — see `slot_field` for why this is
+    // one row plus the edit's own 2px margin and not the well inset
+    let row = ui.fonts(|f| f.row_height(&FontId::monospace(11.5)));
+    let half = (row + 4.0) / 2.0;
+    let inner = Rect::from_min_max(
+        pos2(rect.left() + 11.0, rect.center().y - half),
+        pos2(rect.right() - 8.0, rect.center().y + half),
+    );
+    ui.put(
+        inner,
+        egui::TextEdit::singleline(buf)
+            .frame(false)
+            .hint_text(hint)
+            .font(FontId::monospace(11.5))
+            .text_color(th.pal.txt),
+    )
+}
+
+// ── the colour swatch row ───────────────────────────────────────────────────
+
+/// `.swatch` — 24px at a 6px round, which is `rect_filled(r, 6.0, c)`.
+pub const SWATCH: f32 = 24.0;
+
+/// Paint one chip off the ramp.
+///
+/// A FLAT CHIP AND NOT A JEWEL. The instinct is a disc with [`paint_lens`]'s
+/// rim and inner shade on it, and that is a LAMP — a thing that is lit. These
+/// are not lit; they are twelve pieces of coloured plastic you choose between.
+///
+/// THE COLOUR IS DATA AND THE SKIN NEVER TOUCHES IT. `src/skew.css` rules on
+/// that once, at `.pk-field` and the hue track: a skin may set the MATERIAL
+/// and never the DATA. A hue track that goes grey because the lamp came on is
+/// a broken instrument, and so is a host whose colour changes with the theme.
+/// What the light skin adds is the one thing it has to — an `--edge` hairline,
+/// because `--id-7` yellow and `--id-9` lime have no edge of their own on
+/// cream.
+///
+/// THE CHOSEN ONE IS RINGED, NOT TICKED. A tick inside a chip of arbitrary
+/// colour is a tick you cannot promise is readable on it. Two of gap then two
+/// of ring — Terminass's `rect_stroke(r.expand(2.0), 7.0, Stroke::new(2.0,
+/// TEXT))` — where the gap wears the case so the ring never touches the hue
+/// and no two chips read as one gradient, and the ring wears `--txt`, which is
+/// a value in both skins. Not the accent: the accent says "this is the
+/// action", and which of twelve colours a host wears is not an action.
+pub fn paint_swatch(p: &egui::Painter, th: &Theme, rect: Rect, col: Color32, on: bool) {
+    let r = Rounding::same(6.0);
+    p.rect_filled(rect, r, col);
+    if th.skin == crate::Skin::Light {
+        p.rect_stroke(rect, r, Stroke::new(1.0, th.edge));
+    }
+    if on {
+        let case = match th.skin {
+            crate::Skin::Dark => th.pal.case,
+            crate::Skin::Light => th.card,
+        };
+        p.rect_stroke(rect.expand(1.0), Rounding::same(7.0), Stroke::new(2.0, case));
+        p.rect_stroke(rect.expand(3.0), Rounding::same(9.0), Stroke::new(2.0, th.pal.txt));
+    }
+}
+
+/// `.swatches` — the whole ramp as a row of chips. `true` when one was taken.
+pub fn swatches(ui: &mut Ui, th: &Theme, sel: &mut usize) -> bool {
+    let gap = 7.0;
+    let n = crate::ID_RAMP_LEN;
+    let w = SWATCH * n as f32 + gap * (n - 1) as f32;
+    // the ring needs three pixels outside the chip on every side
+    let (row, _) = ui.allocate_exact_size(vec2(w + 10.0, SWATCH + 10.0), Sense::hover());
+    let mut hit = false;
+    for i in 0..n {
+        let rect = Rect::from_min_size(
+            pos2(row.left() + 5.0 + i as f32 * (SWATCH + gap), row.top() + 5.0),
+            Vec2::splat(SWATCH),
+        );
+        let resp = ui
+            .interact(rect, ui.id().with(("sw", i)), Sense::click())
+            .on_hover_cursor(egui::CursorIcon::PointingHand);
+        if resp.clicked() && *sel != i {
+            *sel = i;
+            hit = true;
+        }
+        if ui.is_rect_visible(rect) {
+            paint_swatch(ui.painter(), th, rect, crate::id_color(th, i), *sel == i);
+        }
+    }
+    hit
+}
+
+// ── the entry: a row of a list that stands for one thing ─────────────────────
+
+/// `.entry` — 60px, which is the height of a 40px bay with room round it.
+pub const ENTRY_H: f32 = 60.0;
+
+/// One row of a list: a mark you can tell from the others, a name, what it is
+/// underneath, and the one way to change it.
+#[derive(Clone, Copy, Debug)]
+pub struct EntryView<'a> {
+    /// The first letter of the name, which is the mark when there is no icon.
+    pub letter: char,
+    pub name: &'a str,
+    /// The etched caps line under the name — `.stat-cap`.
+    pub sub: &'a str,
+    /// Off the ramp. [`crate::id_color`] turns an index into this.
+    pub id: Color32,
+    pub on: bool,
+}
+
+/// Paint one entry.
+///
+/// IT IS `.module` IN A ROW, NOT A SECOND CARD. The chassis is the one
+/// [`crate::module_card`] documents at length — in the light skin `--case-face`
+/// inside an `--edge` hairline, in the dark `--paper` under the control edge,
+/// and that inversion is not an inconsistency but what the two rooms can carry.
+///
+/// THE RUNNING RAIL IS NOT HERE AND THAT IS NOT AN OMISSION. `.module::before`
+/// is a light pipe answering "is this up". A saved host is not up or down, it
+/// is SAVED, and a dead rail down the left of twenty rows is a lamp that is
+/// off for a reason nobody can name.
+///
+/// THE LETTER AND THE LAMP ARE ONE COLOUR. A host is one colour; a letter in
+/// one orange beside a lamp in another is two hosts.
+///
+/// THE CHOSEN ROW IS RINGED IN ONE LINE. Terminass draws a second stroke at
+/// alpha 50 round the first; `.act.primed` rings the chosen key with one line
+/// and nothing else, which is the sheet's own precedent, and one lit line on a
+/// dark row is already the loudest thing on the page.
+pub fn paint_entry(p: &egui::Painter, th: &Theme, rect: Rect, e: &EntryView, hover: bool, pen_hot: bool) {
+    let (fill, edge) = match th.skin {
+        crate::Skin::Light => (th.case_face, th.edge),
+        crate::Skin::Dark => (th.paper, th.edge_ctl),
+    };
+    let r = Rounding::same(th.r);
+    p.rect_filled(rect, r, fill);
+    // the hover wash is `.rail-item`'s own pair — an entry is the same object,
+    // a row in a list that you click. `--rim` is white on anodised metal and
+    // invisible as a FILL on cream, which is what `--card-hover` is for.
+    if hover {
+        p.rect_filled(rect, r, hover_fill(th));
+    }
+    p.rect_stroke(rect.shrink(0.5), Rounding::same(th.r - 0.5), Stroke::new(1.0, edge));
+
+    // ── the bay: a 40px cut with the letter at the bottom of it
+    let bay = Rect::from_min_size(rect.min + vec2(12.0, 10.0), Vec2::splat(40.0));
+    let well = match th.skin {
+        crate::Skin::Dark => th.pal.bay,
+        crate::Skin::Light => th.paper,
+    };
+    paint_well(p, bay, well, th.edge);
+    p.text(
+        bay.center() + vec2(0.0, 1.0),
+        Align2::CENTER_CENTER,
+        e.letter.to_uppercase().to_string(),
+        FontId::monospace(17.0),
+        e.id,
+    );
+    // the lamp, inside the bay's top-right corner — set into the plate the
+    // letter is cut into, which is where `card()` puts it
+    paint_jewel(p, th, bay.right_top() + vec2(-8.0, 8.0), 7.0, e.id);
+
+    // ── the name, and the etched line under it
+    let left = bay.right() + 14.0;
+    let right = rect.right() - if hover || e.on { 46.0 } else { 12.0 };
+    let clip = p.with_clip_rect(Rect::from_min_max(pos2(left, rect.top()), pos2(right, rect.bottom())));
+    // `.mod-name` is the card name in this language — 12.5/700. Terminass sets
+    // it at 14.5, which is that app's type scale and not this one's: a
+    // specimen is lifted, a SIZE is a rule, and the rule here is `.mod-name`.
+    let g = clip.layout_no_wrap(e.name.to_owned(), FontId::monospace(12.5), th.ink);
+    clip.galley(pos2(left, rect.top() + 15.0), g, th.ink);
+    let mut job = egui::text::LayoutJob::default();
+    job.append(
+        &e.sub.to_uppercase(),
+        0.0,
+        egui::TextFormat {
+            font_id: FontId::monospace(9.5),
+            color: th.ink_2,
+            extra_letter_spacing: 9.5 * 0.14,
+            ..Default::default()
+        },
+    );
+    let g = clip.layout_job(job);
+    clip.galley(pos2(left, rect.bottom() - 22.0), g, th.ink_2);
+
+    // ── the pencil, and it is not on every row. A column of twenty rows each
+    //    carrying an edit key is twenty invitations to change something, on a
+    //    page you are reading in order to CHOOSE something.
+    if hover || e.on {
+        let k = Rect::from_center_size(pos2(rect.right() - 24.0, rect.center().y), Vec2::splat(28.0));
+        let state = if pen_hot { KeyState::Hover } else { KeyState::Raised };
+        paint_key(p, th, k, "", &KeyStyle::new(th.card, th.ink), state);
+        paint_icon(
+            p, Icon::Pencil, k.center() - vec2(0.0, 1.0), 14.0, 1.8,
+            if pen_hot { th.primary } else { th.ink_2 }, 0.0,
+        );
+    }
+
+    // ── and the ring, in `outline`'s place: outside the face, no stack
+    if e.on {
+        let led = match th.skin {
+            crate::Skin::Dark => th.pal.led,
+            crate::Skin::Light => th.primary,
+        };
+        p.rect_stroke(rect, r, Stroke::new(1.0, led));
+    }
+}
+
+/// An entry. Returns the whole row's response and whether the pencil was it.
+///
+/// THE PENCIL IS NOT THE ROW. An edit key inside a row that also selects is the
+/// one press on this list you can make by accident, so the hit is tested
+/// against the key's own box before the row ever claims the click — which is
+/// what `host_card()` does with `clicked && over`.
+pub fn entry(ui: &mut Ui, th: &Theme, e: &EntryView) -> (egui::Response, bool) {
+    let w = ui.available_width();
+    let (rect, resp) = ui.allocate_exact_size(vec2(w, ENTRY_H), Sense::click());
+    let resp = resp.on_hover_cursor(egui::CursorIcon::PointingHand);
+    let pen = Rect::from_center_size(pos2(rect.right() - 24.0, rect.center().y), Vec2::splat(28.0));
+    let over = resp.hover_pos().map_or(false, |q| pen.contains(q));
+    if ui.is_rect_visible(rect) {
+        paint_entry(ui.painter(), th, rect, e, resp.hovered(), over);
+    }
+    let edit = resp.clicked() && over;
+    (resp, edit)
+}
+
 // ── the settings form row ───────────────────────────────────────────────────
 
 /// `.frow-lab` — Terminass's own `FORM_LABEL_W`, which is its longest name
@@ -465,6 +720,31 @@ pub fn frow<R>(ui: &mut Ui, th: &Theme, label: &str, add: impl FnOnce(&mut Ui) -
             add(ui)
         })
         .inner
+    })
+    .inner
+}
+
+/// [`frow`] with the gutter collapsed to the word.
+///
+/// `frow` IS THE SETTINGS PAGE'S ROW: a 150px right-aligned gutter against a
+/// column of controls, which is the right shape when the names are long and
+/// the page is wide. A drawer is four hundred pixels and one of its rows is
+/// the word "Port" against an eighty-pixel number — in a 150px gutter that is
+/// most of the panel spent putting four characters on the far side of nothing.
+///
+/// So the label takes its natural width and the body turns back into a row.
+/// The same part with the column rule switched off, which is why it is named
+/// after `frow` and is not its own thing.
+pub fn frow_inline<R>(ui: &mut Ui, th: &Theme, label: &str, add: impl FnOnce(&mut Ui) -> R) -> R {
+    ui.add_space(4.0);
+    ui.horizontal(|ui| {
+        ui.spacing_mut().item_spacing.x = 10.0;
+        ui.label(
+            egui::RichText::new(label)
+                .font(FontId::monospace(11.5))
+                .color(th.ink_2),
+        );
+        add(ui)
     })
     .inner
 }

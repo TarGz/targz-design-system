@@ -309,3 +309,33 @@ pub fn read_font(size: f32) -> FontId {
 pub fn mono(t: impl Into<String>, size: f32) -> RichText {
     RichText::new(t).font(FontId::monospace(size))
 }
+
+/// How many colours the identity ramp has.
+pub const ID_RAMP_LEN: usize = 12;
+
+/// `--id-1` … `--id-12` BY INDEX, which is the only way anyone actually wants
+/// them.
+///
+/// THE RAMP IS AN INDEX WEARING A HUE. `--ok` is green because the thing is
+/// running; these twelve mean nothing — a host is not blue because it is cold,
+/// it is blue because it is not the green one, and the next host is green
+/// because the blue is taken. So every consumer has an integer and not a name:
+/// `host.color` is a `usize`, `LOCAL_TAB_COLORS[i]` is a `usize`, a layer
+/// number is a `usize`.
+///
+/// `Palette` CANNOT GIVE THEM BACK THAT WAY. It is a generated struct with
+/// twelve named fields and no indexer, because `tokens.mjs` emits one field
+/// per `:root` declaration and knows nothing about ramps. Without this, every
+/// app that wants the third colour writes its own twelve-arm match — not an
+/// invented value, but twelve lines of this crate's business living somewhere
+/// it cannot be fixed from.
+///
+/// It wraps, because the ramp's whole claim is that it extends without a
+/// reshuffle and an app with thirteen hosts is not an error.
+pub fn id_color(th: &Theme, i: usize) -> egui::Color32 {
+    let p = &th.pal;
+    [
+        p.id_1, p.id_2, p.id_3, p.id_4, p.id_5, p.id_6,
+        p.id_7, p.id_8, p.id_9, p.id_10, p.id_11, p.id_12,
+    ][i % ID_RAMP_LEN]
+}

@@ -20,7 +20,8 @@
 use egui::{pos2, vec2, Align, Align2, Color32, FontId, Layout, Rect, Sense, Ui, Vec2};
 use skew_egui::{
     frow, hint, paint_rail_item, paint_tab, paint_tab_ledge, paint_tabpane, rail, slot_row,
-    statline, tabbar, RailItem, Tab, TabKind, Tone, RAIL_ROW_H, TABBAR_H, TAB_H, TAB_H_OFF,
+    statline, swatches, tabbar, entry, field, frow_inline, id_color, EntryView, RailItem, Tab,
+    TabKind, Tone, ENTRY_H, FIELD_SM_W, RAIL_ROW_H, TABBAR_H, TAB_H, TAB_H_OFF,
     btn, colored_btn, cut, dro, fader, jog_pad, key, knob, slide, KnobKind, SlideKind, backlit, chevron, icon_key, micro, sep, Icon, label, lcd, mono, nav_bar, paint_fader,
     appwin, stage, page_fill, paint_key, panel, panel_frame, pkey_bar, read_font, well_frame, well_shadow, FaderState,
     JogPress, KeyState, KeyStyle, Nav, NavHit, Skin, Theme,
@@ -214,6 +215,10 @@ struct Gallery {
     t_rail: usize,
     t_tab: usize,
     t_tabs: Vec<(String, TabKind)>,
+    t_entry: usize,
+    t_sw: usize,
+    t_label: String,
+    t_port: String,
     t_find: String,
     t_key: String,
     t_agent: usize,
@@ -280,6 +285,10 @@ impl Gallery {
                 ("Contabo".into(), TabKind::Remote),
                 ("NextDraw".into(), TabKind::Remote),
             ],
+            t_entry: 0,
+            t_sw: 0,
+            t_label: "hestia".into(),
+            t_port: String::new(),
             t_find: String::new(),
             t_key: String::new(),
             t_agent: 1,
@@ -1530,6 +1539,69 @@ impl Gallery {
                 }
             });
         });
+        ui.add_space(24.0);
+
+        // ── the entry ───────────────────────────────────────────────────────
+        label(ui, &th, "THE ENTRY \u{2014} THE PENCIL ONLY ON THE ROW YOU COULD MEAN");
+        ui.add_space(8.0);
+        {
+            let rows: [(char, &str, &str, usize); 3] = [
+                ('H', "hestia", "jterraz@192.168.1.24", 0),
+                ('C', "Contabo", "root@vmi1284.contabo.net", 2),
+                ('N', "NextDraw", "pi@nextdraw.local", 1),
+            ];
+            ui.allocate_ui(vec2(420.0, (ENTRY_H + 7.0) * rows.len() as f32), |ui| {
+                ui.spacing_mut().item_spacing.y = 7.0;
+                for (i, (letter, name, sub, id)) in rows.into_iter().enumerate() {
+                    let e = EntryView {
+                        letter,
+                        name,
+                        sub,
+                        id: id_color(&th, id),
+                        on: self.t_entry == i,
+                    };
+                    let (r, edit) = entry(ui, &th, &e);
+                    if edit {
+                        self.live = format!("EDIT {}", name.to_uppercase());
+                    } else if r.clicked() {
+                        self.t_entry = i;
+                        self.live = name.to_uppercase();
+                    }
+                }
+            });
+        }
+        ui.add_space(24.0);
+
+        // ── the form field, the inline row and the quiet key ────────────────
+        label(ui, &th, "THE FORM FIELD \u{2014} THE LABEL IS THE PLACEHOLDER, AND IT IS NOT THE FILTER SLOT");
+        ui.add_space(8.0);
+        panel_frame(&th, th.card).show(ui, |ui| {
+            ui.set_width(404.0);
+            ui.spacing_mut().item_spacing.y = 9.0;
+            field(ui, &th, &mut self.t_label, "Label", ui.available_width());
+            frow_inline(ui, &th, "Port", |ui| {
+                field(ui, &th, &mut self.t_port, "22", FIELD_SM_W);
+            });
+            ui.add_space(4.0);
+            // THE DANGER IS IN THE WORD. SAVE is the lit cap, CONNECT the
+            // plain one, and DELETE has no cap at all — see `ActStyle::Quiet`.
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 8.0;
+                act(ui, &th, &[Part::Text("SAVE")], ActStyle::Go, 32.0, true);
+                act(ui, &th, &[Part::Text("CONNECT")], ActStyle::Aux, 32.0, true);
+                if act(ui, &th, &[Part::Text("DELETE")], ActStyle::Quiet, 32.0, true).clicked() {
+                    self.live = "DELETE PRESSED".into();
+                }
+            });
+        });
+        ui.add_space(24.0);
+
+        // ── the ramp, and the control that picks out of it ──────────────────
+        label(ui, &th, "THE IDENTITY RAMP \u{2014} TWELVE, AND THE FIRST SIX ARE SIX FAMILIES");
+        ui.add_space(8.0);
+        if swatches(ui, &th, &mut self.t_sw) {
+            self.live = format!("COLOUR {}", self.t_sw + 1);
+        }
         ui.add_space(24.0);
 
         // ── the states, posed ───────────────────────────────────────────────

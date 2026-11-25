@@ -74,6 +74,30 @@ pub fn paint_lens(p: &egui::Painter, th: &Theme, c: Pos2, d: f32, lens: Lens) {
     }
 }
 
+/// `.jewel` — A LAMP IN A COLOUR NOBODY CHOSE FOR MEANING.
+///
+/// [`Lens`] has three variants and all three are SEMANTIC: stop is red
+/// because it stops, lit is orange because it is running, unlit is off. The
+/// sheet's `.jewel` is the other thing — it takes `--lyr` from the element and
+/// will wear any value, because what it says is "this one, not that one". A
+/// host's lamp off the identity ramp is that, and the crate had no way to ask
+/// for it; adding a fourth `Lens` variant would have put an arbitrary colour
+/// in an enum whose whole point is that the colour follows from the state.
+///
+/// The construction is `paint_lens`'s own, unchanged: one fill a third of the
+/// way from the rim to the lit value, a small soft highlight, and the seating
+/// rim `.jewel` draws at `rgba(0,0,0,.55)`. The rim goes in the light skin,
+/// where `:is(.jewel, .pilot){ box-shadow:none }` — on paper a black ring
+/// round a colour is dirt and not depth.
+pub fn paint_jewel(p: &egui::Painter, th: &Theme, c: Pos2, d: f32, col: Color32) {
+    let r = d / 2.0;
+    p.circle_filled(c, r, col);
+    p.circle_filled(c + vec2(-0.3 * r, -0.35 * r), r * 0.3, Color32::from_rgba_unmultiplied(255, 255, 255, 70));
+    if th.skin == crate::Skin::Dark {
+        p.circle_stroke(c, r - 0.4, Stroke::new(0.8, Color32::from_rgba_unmultiplied(0, 0, 0, 140)));
+    }
+}
+
 // ── the act key ─────────────────────────────────────────────────────────────
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -108,6 +132,22 @@ pub enum ActStyle {
     /// in the armed folder row. A second red key would make the first one a
     /// colour rather than a warning.
     Halt,
+    /// `.act.quiet` — THE DANGER IN THE WORD AND NOWHERE ELSE.
+    ///
+    /// [`ActStyle::Halt`] is an E-stop: a filled red cap with a lit lens and a
+    /// wall under it, right for the one control that stops a running machine.
+    /// At the foot of an edit form next to SAVE the same cap reads as the
+    /// panel's PRIMARY action, which is the exact opposite of true.
+    ///
+    /// So this one has no moulding at all, and that absence IS the state — the
+    /// thumb is not invited. `--no-ink` on the word, `--no-bg` as the hover
+    /// wash and `--no-edge` as the press, which is the family's own
+    /// fill/edge/word triple: deep burnt in the dark, a pale pink in the
+    /// light, and no invented alpha anywhere in it.
+    ///
+    /// AND IT DOES NOT TRAVEL. There is no cap to push. Pressing a word is the
+    /// wash going one step deeper and nothing moving.
+    Quiet,
 }
 
 const WALL: f32 = 3.0;
@@ -147,6 +187,7 @@ pub fn paint_act(p: &egui::Painter, th: &Theme, rect: Rect, parts: &[Part], styl
         ActStyle::Aux => if state == KeyState::Disabled { th.ink_2 } else { th.ink },
         ActStyle::Down | ActStyle::Held => th.primary_deep,
         ActStyle::Halt => Color32::WHITE,
+        ActStyle::Quiet => th.no_ink,
     };
     let mut down = false;
     match style {
@@ -159,8 +200,28 @@ pub fn paint_act(p: &egui::Painter, th: &Theme, rect: Rect, parts: &[Part], styl
         // held, not pressed: the legend stays on the line with its neighbours'
         ActStyle::Held => paint_pkey_held(p, th, rect, "", 11.0),
         ActStyle::Halt => paint_key(p, th, rect, "", &KeyStyle::new(th.no_ink, Color32::WHITE), state),
+        ActStyle::Quiet => {
+            // the cap area only: `act` allocates a wall under every key and
+            // this one has none, so the hairline is drawn where the face
+            // would have been and the wall is left as air
+            let wall = (rect.height() * 0.09).clamp(2.0, 3.0);
+            let cap = Rect::from_min_max(rect.min, pos2(rect.right(), rect.bottom() - wall));
+            let r = Rounding::same(th.r_key);
+            let hot = state == KeyState::Hover || state == KeyState::Pressed;
+            if hot {
+                let wash = if state == KeyState::Pressed { th.no_edge } else { th.no_bg };
+                p.rect_filled(cap, r, wash);
+            }
+            // `--groove` in the dark, `--edge` in the light: the same hairline
+            // in each room's own value for "a line that is not ink"
+            let rest = match th.skin {
+                crate::Skin::Dark => th.pal.groove,
+                crate::Skin::Light => th.edge,
+            };
+            p.rect_stroke(cap, r, Stroke::new(1.0, if hot { th.no_edge } else { rest }));
+        }
     }
-    down |= state == KeyState::Pressed;
+    down |= state == KeyState::Pressed && style != ActStyle::Quiet;
     let wall = (rect.height() * 0.09).clamp(2.0, 3.0);
     let cy = rect.center().y - wall / 2.0 + if down { wall } else { 0.0 };
     let total = legend_w(p, parts, text, icon, gap);
